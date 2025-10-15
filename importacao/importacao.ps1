@@ -576,7 +576,7 @@ function CheckLastRunResults {
 function RefreshInterfaceAfterRun {
     param(
         [string]$lastRunResults,
-        [string]$errors,
+        $errors,
         [string]$fleLogR,
         [string]$tbpToFocus
     )
