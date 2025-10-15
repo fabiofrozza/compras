@@ -1,0 +1,586 @@
+---
+title: "`r ifelse(importacao$validacao_manual, '[⚠ PRELIMINAR]{.vermelho} - ', '')`Relatório Gerencial - `r ifelse(importacao$pos_processos, ifelse(importacao$consolidado, 'Consolidado', sprintf('Processo %s', importacao$processo_para_relatorio)), 'início do processo')`"
+subtitle: |
+  | Grupo `r dados$info$grupo`
+  | Etapa `r dados$info$etapa` - `r dados$info$ano`
+author: "CAPL - Coordenadoria de Análise e Planejamento de Compras"
+output:
+  html_document:
+    theme:
+      version: 5
+---
+
+```{r configuracoes, include = FALSE, echo = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+<img class = "logo_ufsc" src = "`r file.path(pasta$superior, '_common', 'images', 'UFSC.png')`" />
+<img class = "logo_dcom" src = "`r file.path(pasta$superior, '_common', 'images', 'DCOM-logo.png')`" />
+
+------------------------------------------------------------------------
+
+#### Lista Final
+
+- [**Etapa `r dados$info$etapa` - `r dados$info$ano`**]{.azul}
+- [**`r dados$info$grupo` - `r dados$info$nome_grupo`**]{.azul}
+- **`r importacao$url_planilha`**
+
+------------------------------------------------------------------------
+
+:::: {.duas_colunas}
+
+::: {}
+
+#### Geral
+
+`r ifelse(importacao$pos_processos & importacao$consolidado, sprintf('- Quantidade de processos: %s', length(unique(dados$relatorio$processoFmt))), '')`
+- [^nota_solicitacoes]Total de solicitações: `r dados$info$n_solicitacoes`
+- [^nota_consolidacao]Total após consolidação: `r dados$info$n_itens`
+- [^nota_otimizacao][**Otimização: `r format((dados$info$n_solicitacoes - dados$info$n_itens) / dados$info$n_solicitacoes * 100, digits = 4, nsmall = 2, decimal.mark = ",")`%**]{.azul}
+
+:::
+
+::: {`r ifelse(importacao$pos_processos & !importacao$consolidado, '.invisivel', '')`}
+
+#### Itens
+
+- Quantidade de itens na Lista Final: `r dados$stats$itens_lista_final`
+- Quantidade de itens com demanda: `r dados$stats$itens_com_demanda` 
+
+:::
+
+::::
+
+------------------------------------------------------------------------
+
+#### Itens não encaminhados para licitação
+
+`r ifelse(importacao$consolidado, sprintf('* Quantidade de itens sem demanda: %s', dados$stats$itens_sem_demanda), '')`
+* Quantitativo mínimo: `r importacao$qtde_minima`
+  + Quantidade de itens abaixo do quantitativo mínimo: `r dados$stats$abaixo_qtde`
+```{r qtde_minimo, eval = dados$stats$abaixo_qtde > 0}
+names(dados$filtros$abaixo_qtde)[1] <- "Linha"
+dados$filtros$abaixo_qtde[ , c(1, 4:5)] %>%
+  kbl(align = "rcl") %>%
+  kable_paper(c("striped", "condensed")) %>%
+  kable_styling(htmltable_class = "tabela_esquerda")
+```
+
+* Valor mínimo: `r paste("R$", format(importacao$valor_minimo, digits = 2, nsmall = 2, decimal.mark = ","))`
+  + Quantidade de itens abaixo do valor mínimo: `r dados$stats$abaixo_valor`
+```{r valor_minimo, eval = dados$stats$abaixo_valor > 0}
+names(dados$filtros$abaixo_valor)[1] <- "Linha"
+dados$filtros$abaixo_valor[ , c(1:7, 9)] %>%
+  kbl(align = "rrrrlclr") %>%
+  kable_paper(c("striped", "condensed")) %>%
+  kable_styling(htmltable_class = "tabela_esquerda")
+```
+
+* Quantidade de itens excluídos manualmente: `r dados$stats$excluidos`
+```{r qtde_excl_manual, eval = dados$stats$excluidos > 0}
+names(dados$filtros$excluidos)[1] <- "Linha"
+dados$filtros$excluidos[ , c(1:8)] %>%
+  kbl(align = "rrrrlclr") %>%
+  kable_paper(c("striped", "condensed")) %>%
+  kable_styling(htmltable_class = "tabela_esquerda")
+```
+
+```{r ajustes, results = 'asis', eval = importacao$pos_processos}
+cat("------------------------------------------------------------------------\n\n")
+
+cat("#### Ajustes após a geração dos processos\n")
+
+cat("#### Ajustes por solicitação da Unidade ou por iniciativa do DCOM\n")
+
+cat(sprintf("- Quantidade de ajustes: %s\n", dados$stats$qtde_ajustes))
+cat(sprintf("- Quantidade de Unidades com ajustes: %s\n", dados$stats$unidades_com_ajustes))
+
+if (dados$stats$qtde_ajustes > 0) {
+  pt_ajustes <- PivotTable$new()
+    pt_ajustes$addData(dados$filtros$com_ajuste)
+    if (importacao$consolidado) {
+      pt_ajustes$addRowDataGroups("Processo",
+                                  outlineBefore = list(isEmpty = FALSE,
+                                                       mergeSpace = "dataGroupsOnly"),
+                                  outlineTotal = list(mergeSpace = "dataGroupsAndCellsAs1",
+                                                      caption = "Total de itens"))
+      pt_ajustes$addRowDataGroups("Unidade",
+                                  addTotal = FALSE)
+    } else {
+      pt_ajustes$addRowDataGroups("Unidade",
+                                  outlineBefore = list(isEmpty = FALSE,
+                                                       mergeSpace = "dataGroupsOnly"),
+                                  outlineTotal = list(mergeSpace = "dataGroupsAndCellsAs1",
+                                                      caption = "Total de itens"))
+    }
+    pt_ajustes$addRowDataGroups("linha_planilha",
+                                header = "Linha",
+                                addTotal = FALSE,
+                                styleDeclarations = list("text-align"="right"))
+    pt_ajustes$addRowDataGroups("Nº Item", 
+                                addTotal = FALSE,
+                                styleDeclarations = list("text-align"="right"))
+    pt_ajustes$addRowDataGroups("Código do item", 
+                                addTotal = FALSE,
+                                styleDeclarations = list("text-align"="center"))
+    pt_ajustes$addRowDataGroups("Descrição Resumida", 
+                                addTotal = FALSE)
+    pt_ajustes$defineCalculation(calculationName = "Qtde. Itens", 
+                                 summariseExpression = "sum(Quantidade_0)")
+    pt_ajustes$theme <- "standardtable"
+    pt_ajustes$sortRowDataGroups(levelNumber = 1, 
+                                 orderBy = 'calculation', 
+                                 sortOrder = 'desc')
+    
+  tryCatch({
+    pt_ajustes$renderPivot(showRowGroupHeaders = TRUE)
+  },
+  error = function(e) {
+    log_erro("Não foi possível gerar esta seção do relatório. Podem estar faltando informações. Continuando...",
+             e,
+             alerta = TRUE)
+  })
+
+}
+
+cat("\n#### Exclusões por desistência ou não envio da documentação por parte da Unidade requerente\n")
+
+cat(sprintf("- Quantidade de demandas excluídas: %s\n", dados$stats$qtde_demanda_excluida))
+cat(sprintf("- Quantidade de Unidades com demanda excluída: %s\n", dados$stats$unidades_com_demanda_excluida))
+
+if (dados$stats$qtde_demanda_excluida > 0) {
+  pt_demanda_excluida <- PivotTable$new()
+    pt_demanda_excluida$addData(dados$filtros$com_demanda_excluida)
+    if (importacao$consolidado) {
+      pt_demanda_excluida$addRowDataGroups('Processo', 
+                                           outlineBefore = list(isEmpty = FALSE,
+                                                                mergeSpace = 'dataGroupsOnly'),
+                                           outlineTotal = list(mergeSpace = 'dataGroupsAndCellsAs1',
+                                                               caption = 'Total de itens'))
+      pt_demanda_excluida$addRowDataGroups('Unidade', 
+                                           addTotal = FALSE)
+    
+    } else {
+      pt_demanda_excluida$addRowDataGroups('Unidade', 
+                                           outlineBefore = list(isEmpty = FALSE,
+                                                                mergeSpace = 'dataGroupsOnly'),
+                                           outlineTotal = list(mergeSpace = 'dataGroupsAndCellsAs1',
+                                                               caption = 'Total de itens'))
+    }
+    pt_demanda_excluida$addRowDataGroups('linha_planilha',
+                                         header = "Linha",
+                                         addTotal = FALSE,
+                                         styleDeclarations = list('text-align'='right'))
+    pt_demanda_excluida$addRowDataGroups('Nº Item', 
+                                         addTotal = FALSE,
+                                         styleDeclarations = list('text-align'='right'))
+    pt_demanda_excluida$addRowDataGroups('Código do item', 
+                                         addTotal = FALSE,
+                                         styleDeclarations = list('text-align'='center'))
+    pt_demanda_excluida$addRowDataGroups('Descrição Resumida', 
+                                         addTotal = FALSE)
+    pt_demanda_excluida$defineCalculation(calculationName = 'Qtde. Itens', 
+                                          summariseExpression = 'sum(Quantidade_X)')
+    pt_demanda_excluida$theme <- 'standardtable'
+    pt_demanda_excluida$sortRowDataGroups(levelNumber = 1, 
+                                          orderBy = 'calculation', 
+                                          sortOrder = 'desc')
+    
+  tryCatch({
+    pt_demanda_excluida$renderPivot(showRowGroupHeaders = TRUE)
+  },
+  error = function(e) {
+    log_erro("Não foi possível gerar esta seção do relatório. Podem estar faltando informações. Continuando...",
+             e,
+             alerta = TRUE)
+  })
+
+}
+```
+
+```{r orcamentos_nao_enviados, results = 'asis', eval = exists("unidades_nao_orcamentos", where = dados$stats) && dados$stats$unidades_nao_orcamentos > 0}
+cat("#### Exclusões por não envio da orçamentação por parte dos responsáveis pela pesquisa\n")
+
+cat(sprintf("- Quantidade de Unidades que não enviaram orçamentos: %s\n", dados$stats$unidades_nao_orcamentos))
+cat(sprintf("- Quantidade de itens excluídos: %s\n", dados$stats$qtde_itens_orcamentos_nao_enviados))
+cat(sprintf("- Quantidade de Unidades afetadas com as exclusões: %s\n", dados$stats$qtde_unidades_afetadas_orcamentos))
+
+pt_orcamentos <- PivotTable$new()
+  pt_orcamentos$addData(dados$filtros$orcamentos_nao_enviados)
+  if (importacao$consolidado) {
+    pt_orcamentos$addRowDataGroups('Processo',
+                                   outlineBefore = list(isEmpty = FALSE,
+                                                        mergeSpace = 'dataGroupsOnly'),
+                                   outlineTotal = list(mergeSpace = 'dataGroupsAndCellsAs1',
+                                                       caption = 'Quantidade de Unidades'))
+    pt_orcamentos$addRowDataGroups("Responsável pela Pesquisa",
+                                   addTotal = FALSE,
+                                   outlineBefore = list(isEmpty = FALSE,
+                                                        mergeSpace = 'dataGroupsOnly'))
+  } else {
+    pt_orcamentos$addRowDataGroups('Responsável pela Pesquisa',
+                                   outlineBefore = list(isEmpty = FALSE,
+                                                        mergeSpace = 'dataGroupsOnly'),
+                                   outlineTotal = list(mergeSpace = 'dataGroupsAndCellsAs1',
+                                                       caption = 'Quantidade de Unidades'))
+  }
+  pt_orcamentos$addRowDataGroups("pedido",
+                                 header = "Pedido",
+                                 addTotal = FALSE,
+                                 styleDeclarations = list("text-align"="right"))
+  pt_orcamentos$addRowDataGroups("linha_planilha",
+                                 header = "Linha",
+                                 addTotal = FALSE,
+                                 styleDeclarations = list("text-align"="right"))
+  pt_orcamentos$addRowDataGroups("Código do item", 
+                                 addTotal = FALSE,
+                                 styleDeclarations = list("text-align"="center"))
+  pt_orcamentos$addRowDataGroups("Descrição Resumida", 
+                                 addTotal = FALSE)
+  pt_orcamentos$addRowDataGroups("Unidade", 
+                                 addTotal = FALSE)
+  pt_orcamentos$defineCalculation(calculationName = 'Qtde. Unidades', 
+                                  summariseExpression = 'n_distinct(Unidade)')
+  pt_orcamentos$theme <- "standardtable"
+  
+  tryCatch({
+    pt_orcamentos$renderPivot(showRowGroupHeaders = TRUE)
+  },
+  error = function(e) {
+    log_erro("Não foi possível gerar esta seção do relatório. Podem estar faltando informações. Continuando...",
+             e,
+             alerta = TRUE)
+  })
+```
+
+------------------------------------------------------------------------
+
+#### Unidades com (`r dados$stats$unidades_com_demanda`) e sem demanda (`r dados$stats$unidades_sem_demanda`)
+```{r unidades_com_demanda, eval = dados$stats$unidades_com_demanda > 0}
+total <- dados$stats$unidades_com_demanda
+
+if (total <= 5) {
+  unidades_com_demanda_tabela <- dados$filtros$unidades_com_demanda
+} else {
+  divisor <- ceiling(total / 3)
+  unidades_com_demanda_tabela <- list(dados$filtros$unidades_com_demanda[1:divisor], 
+                                      dados$filtros$unidades_com_demanda[(divisor + 1):(divisor * 2)], 
+                                      dados$filtros$unidades_com_demanda[(divisor * 2 + 1):total])
+}
+
+unidades_com_demanda_tabela %>%
+  kbl(col.names = c("Unidade", "Qtde. itens demandados")) %>%
+  kable_paper(c("striped", "condensed")) %>%
+  kable_styling(htmltable_class = "tabela_75")
+```
+
+```{r unidades_sem_demanda, results = 'asis'}
+knitr::combine_words(names(dados$filtros$unidades_sem_demanda), and = " e ", oxford_comma = FALSE)
+```
+
+------------------------------------------------------------------------
+
+#### Distribuição dos itens por Unidade
+```{r distribuicao_itens, message = FALSE}
+pt <- PivotTable$new()
+  pt$addData(dados$relatorio)
+  pt$addColumnGroup('item_compartilhado', 
+                    caption = 'Item compartilhado')
+  pt$addColumnDataGroups('item_compartilhado')
+  
+  if (importacao$pos_processos & importacao$consolidado) {
+    pt$addRowDataGroups('processoFmt', 
+                        header = 'Processo SPA', 
+                        outlineBefore = list(isEmpty = FALSE,
+                                             mergeSpace = 'dataGroupsOnly'),
+                        outlineTotal = list(mergeSpace = 'dataGroupsAndCellsAs1',
+                                            caption = 'Total de itens'))
+    pt$addRowDataGroups('setorResponsavelPesquisa', 
+                        header = 'Responsável pela pesquisa', 
+                        addTotal = FALSE)
+  } else {
+    pt$addRowDataGroups('setorResponsavelPesquisa', 
+                        header = 'Responsável pela pesquisa', 
+                        outlineBefore = list(isEmpty = FALSE,
+                                             mergeSpace = 'dataGroupsOnly'), 
+                        outlineTotal = list(mergeSpace = 'dataGroupsAndCellsAs1',
+                                            caption = 'Total de itens'))
+  }
+  pt$addRowDataGroups('setorOrigem', 
+                      header = 'Unidade requerente', 
+                      addTotal = FALSE)
+  pt$defineCalculation(calculationName = 'qtdeItens', 
+                       summariseExpression = 'n_distinct(linha_planilha)')
+  pt$addRowCalculationGroups()
+  pt$theme <- 'standardtable'
+  
+  tryCatch({
+    pt$renderPivot(showRowGroupHeaders = TRUE)
+  },
+  error = function(e) {
+    log_erro("Não foi possível gerar esta seção do relatório. Podem estar faltando informações. Continuando...",
+             e,
+             alerta = TRUE)
+  })
+
+```
+
+------------------------------------------------------------------------
+
+```{r validacao_manual, results = 'asis', message = FALSE, eval = importacao$validacao_manual}
+cat("#### Itens para validação manual")
+
+dados_validacao_manual <- subset(dados$relatorio, setorResponsavelPesquisa == "VALIDAÇÃO MANUAL")
+
+pt_val_manual <- PivotTable$new()
+  pt_val_manual$addData(dados_validacao_manual)
+  pt_val_manual$addRowDataGroups('linha_planilha', 
+                        header = 'Linha original', 
+                        outlineBefore = list(isEmpty = FALSE,
+                                             mergeSpace = 'dataGroupsOnly'),
+                        outlineTotal = list(mergeSpace = 'dataGroupsAndCellsAs1',
+                                            caption = 'Quantidade total demandada'))
+  pt_val_manual$addRowDataGroups('descricaoResumida', 
+                        header = 'Descrição resumida',
+                        addTotal = FALSE)
+  pt_val_manual$addRowDataGroups('setorOrigem', 
+                        header = 'Unidade requerente',
+                        addTotal = FALSE)
+  pt_val_manual$defineCalculation(calculationName = 'Quantidade demandada', 
+                       summariseExpression = 'sum(qtd)')
+  pt_val_manual$addColumnCalculationGroups()
+  pt_val_manual$sortRowDataGroups(levelNumber = 3, 
+                                  orderBy = 'calculation', 
+                                  sortOrder = 'desc')
+  pt_val_manual$theme <- 'standardtable'
+  
+  tryCatch({
+    pt_val_manual$renderPivot(showRowGroupHeaders = TRUE)
+  },
+  error = function(e) {
+    log_erro("Não foi possível gerar esta seção do relatório. Podem estar faltando informações. Continuando...",
+             e,
+             alerta = TRUE)
+  })
+
+cat("------------------------------------------------------------------------")
+```
+
+:::: {.logo_e_data}
+<img src = "`r file.path(pasta$superior, '_common', 'images', 'DCOM.png')`" />
+
+::: {}
+`r format(Sys.Date(), '%d %B %Y')`
+:::
+::::
+
+[^nota_solicitacoes]: Quantidade de solicitações (inserções de quantitativos) na Lista Final, equivalente ao número de demandas de itens distintos por todas as Unidades. 
+[^nota_consolidacao]: Quantidade de itens após consolidação, concentrando demandas de várias Unidades em menos pedidos.
+[^nota_otimizacao]: Percentual de redução de necessidade de documentação, considerando o ganho de escala ao consolidar demandas de várias Unidades em menos pedidos. Quanto maior o índice, melhor. Fórmula: (número de solicitações - número de itens após consolidação) / número de solicitações x 100
+
+```{css formatacao, echo = FALSE}
+.azul {
+  color: #317eac;
+}
+
+.vermelho {
+  color: red;
+}
+
+.duas_colunas {
+  display: flex;
+}
+
+.duas_colunas div {
+  width: 50%;
+}
+
+.footnotes {
+  font-size: 80%;
+}
+
+.footnotes hr {
+  display: none;
+}
+
+.footnotes p {
+  margin-bottom: 0px;
+}
+
+.footnotes ol {
+  margin-top: 1rem;
+}
+
+.footnote-ref,
+.footnote-back {
+  text-decoration: none !important;
+}
+
+.footnote-back {
+  font-size: 80%;
+  padding-left: 5px;
+}
+
+#header {
+  width: 75%;
+  margin-inline: auto;
+  text-align: center;
+}
+
+body {
+  font-size: 12px;
+}
+
+.title {
+  font-size: 20px !important;
+  margin-bottom: 0.5em !important;
+  border-bottom: 1px solid #00000050;
+}
+
+.subtitle,
+h4 {
+  font-size: 18px !important;
+}
+
+.author {
+  font-size: 14px !important;
+  margin-bottom: 0.1em !important;
+}
+
+.date {
+  font-size: 10px !important;
+}
+
+hr {
+  margin: 1rem 0;
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  color: #317eac;
+}
+
+table {
+  break-inside: avoid;
+}
+
+.Table {
+  width: 75% !important;
+  break-inside: unset;
+}
+
+.Table,
+.tabela_50,
+.tabela_75 {
+  margin-inline: auto;
+}
+
+.tabela_50 {
+  width: 50% !important;
+}
+
+.tabela_75 {
+  width: 75% !important;
+}
+
+.tabela_esquerda {
+  width: 100% !important;
+  margin-left: unset !important;
+}
+
+.kable_wrapper table {
+  margin-inline: 1em;
+}
+
+th {
+  color: #317eac !important;
+}
+
+td {
+  vertical-align: top !important;
+}
+
+th,
+td {
+  padding: 2px !important;
+  line-height: 1.15em !important;
+}
+
+.LeftColumnHeader,
+.CentreColumnHeader,
+.OutlineLeftCell,
+.OutlineRightCell,
+.LeftCell,
+.RightCell,
+.Total {
+    border: none !important;
+    font-family: "Arial Narrow", arial, helvetica, sans-serif !important;
+    font-size: 12px !important;        
+}
+
+.LeftColumnHeader,
+.CentreColumnHeader {
+    background-color: transparent !important;
+    font-weight: 600 !important;
+}  
+
+.LeftColumnHeader,
+.CentreColumnHeader,
+.OutlineLeftCell,
+.OutlineRightCell,
+.LeftCell,
+.RightCell,
+.Total {
+    border-bottom: 1px solid #00000020 !important;
+}
+
+.OutlineLeftCell,
+.OutlineRightCell {
+    background-color: #00000005 !important;
+    font-weight: 600 !important;
+    color: #317eac !important;
+}
+
+.Total {
+    font-weight: 600 !important;
+}
+
+.logo_ufsc,
+.logo_dcom {
+  position: absolute; 
+  padding: 10px;
+  
+}
+
+.logo_ufsc {
+  width: 75px; 
+  top: 38px; 
+  left: 0; 
+}
+
+.logo_dcom {
+  width: 100px; 
+  top: 80px; 
+  right: 0; 
+}
+
+.logo_e_data {
+  width: 75px; 
+  display: block; 
+  float: right; 
+  text-align: right; 
+  transform: translateY(-75px);
+}
+
+.logo_e_data img {
+  width: 50px;
+}
+
+.logo_e_data div {
+  font-size: 8px; 
+  text-align: right;
+}
+
+.invisivel {
+  display: none;
+}
+```
