@@ -69,18 +69,6 @@ function RefreshBtnGerar {
     }
 
 }
-function ChecarCondicoesIniciais {
-
-    RefreshLstSettings
-    
-    RefreshLstConferencia
-
-    RefreshBtnGerar
-
-    CheckFiles
-
-    $lst_erros.Text = ConfigJSON -key "msg_erro" -option "get"
-}
 
 function IsSettingsValid {
 
@@ -551,13 +539,7 @@ function CheckLastRunResults {
 
     $lastRunResults = $config.resultado_geracao 
     $fleLogR        = $config.arquivo_log_R
-
-    $errors = $config.msg_erro
-    if ($config.msg_erro -is [array]) {
-        $lst_erros.Text = $errors -join "`r`n"
-    } else {
-        $lst_erros.Text = $errors
-    }
+    $errors         = $config.msg_erro
 
     switch ($lastRunResults) 
     {
@@ -588,12 +570,13 @@ function CheckLastRunResults {
 
     [System.Windows.Forms.MessageBox]::Show($this, $msgPostRun, $title, 0, $type)
 
-    RefreshInterfaceAfterRun $lastRunResults $fleLogR $tbpToFocus
+    RefreshInterfaceAfterRun $lastRunResults $errors $fleLogR $tbpToFocus
 }
 
 function RefreshInterfaceAfterRun {
     param(
         [string]$lastRunResults,
+        $errors,
         [string]$fleLogR,
         [string]$tbpToFocus
     )
@@ -604,7 +587,26 @@ function RefreshInterfaceAfterRun {
 
     RefreshLstConferencia
     RefreshBtnInfo $lastRunResults
+
+    RefreshLstErrors $errors
     RefreshBtnLog $lastRunResults $fleLogR
+}
+
+function RefreshLstErrors {
+    param (
+        $errors = $null
+    )
+    
+    if ($null -eq $errors) {
+        $errors = ConfigJSON -key "msg_erro" -option "get"
+    }
+
+    if ($errors -is [array]) {
+        $lst_erros.Text = $errors -join "`r`n"
+    } else {
+        $lst_erros.Text = $errors
+    }
+
 }
 
 function ContextMenuCampos {
@@ -1124,7 +1126,13 @@ $params = @{
     tag = "...";
     function = {
         InterfaceMinimize
-        try { Start-Process "$fldLog\$global:ArquivoLogErroR" } catch { Start-Process "$fldLog"}
+        $fleLogR = ConfigJSON -key "arquivo_log_R" -option "get"
+        try { 
+            Start-Process "$fldLog\$fleLogR" 
+        } 
+        catch { 
+            Start-Process "$fldLog"
+        }
     }
 }
 $btn_log = InterfaceButtonImage @params
@@ -1465,12 +1473,12 @@ InterfaceShowForm -title "IMPORTAÇÃO GOOGLE DRIVE/SOLAR - MANTER ABERTA" -star
     $txt_link_planilha.Text = $config.link_planilha
     CheckLink
 
-    RefreshBtnInfo "waiting"
-
     $lastRunResults = $config.resultado_geracao
     $fleLogR = $config.arquivo_log_R
-    RefreshBtnLog $lastRunResults $fleLogR 
     
+    RefreshBtnInfo "waiting"
+    RefreshBtnLog $lastRunResults $fleLogR
+    RefreshLstErrors
     RefreshLstSettings
     
     ConfigJSON -show
