@@ -129,8 +129,10 @@ function RefreshLstConferencia {
         [void]$lst_conferencia.Items.Add("Itens: $nItens", "ufsc")
         [void]$lst_conferencia.Items.Add("Solicitações: $nSolicitacoes", "ufsc")
 
+        InterfaceCustomProperty $lst_conferencia "Empty" $false
     } else {
         [void]$lst_conferencia.Items.Add("Informe o link, verifique as configurações, escolha a aba desejada e clique em Gerar...", "ufsc")
+        InterfaceCustomProperty $lst_conferencia "Empty" $true
     }
 
 }
@@ -683,6 +685,9 @@ function ContextMenuInfo {
         "Limpar" {
             switch ($ctr_) {
                 $lst_conferencia {
+                    if ($lst_conferencia.Empty) {
+                        return
+                    }
                     $msg = "da última importação"
                 }
                 $lst_erros {
