@@ -209,7 +209,7 @@ function CheckLink {
     }
 
     $lbl_info_grupo.Text = "Aguarde... Acessando o link informado..."
-    $aviso_aguarde.Show()
+    $lbl_wait.Show()
     
     try {
         $LinkAcesso = Invoke-WebRequest -Method Get -Uri $txt_link_planilha.Text
@@ -245,7 +245,7 @@ function RefreshLink {
 
     RefreshCmbProcessos
 
-    $aviso_aguarde.Hide()
+    $lbl_wait.Hide()
 
     RefreshBtnGerar
 }
@@ -489,7 +489,7 @@ Function ExecuteRScript {
     $btn_gerar.Text    = "Aguarde..."
     $btn_gerar.Enabled = $false
     $btn_exit.Enabled  = $false
-    $aviso_aguarde.Show()
+    $lbl_wait.Show()
 
     InterfaceMinimize -HideTaskBar
 
@@ -525,7 +525,7 @@ Function ExecuteRScript {
     $btn_gerar.Text    = "Gerar"
     $btn_gerar.Enabled = $true
     $btn_exit.Enabled  = $true
-    $aviso_aguarde.Hide()
+    $lbl_wait.Hide()
 
     ConfigJSON -show
 
@@ -797,18 +797,8 @@ $frm_main, $pic_banner, $tip_ = InterfaceMainForm "Importação Planilhas - Goog
 
 $lst_image = InterfaceImageList
 
-$aviso_aguarde             = New-Object System.Windows.Forms.Label
-$aviso_aguarde.Width       = 400
-$aviso_aguarde.Height      = 150
-$aviso_aguarde.Top         = ($frm_main.Height - $aviso_aguarde.Height) / 2 
-$aviso_aguarde.Left        = ($frm_main.Width - $aviso_aguarde.Width) / 2 
-$aviso_aguarde.BackColor   = "#0c5c94"
-$aviso_aguarde.ForeColor   = "White"
-$aviso_aguarde.BorderStyle = 'Fixed3D'
-$aviso_aguarde.TextAlign   = [System.Drawing.ContentAlignment]::MiddleCenter
-$aviso_aguarde.Font        = New-Object System.Drawing.Font('Segoe UI Light', 24)
-$aviso_aguarde.Text        = "⏳`nAguarde..."
-$aviso_aguarde.Hide()
+$lbl_wait = InterfaceSplashScreen -onlyLabel
+$lbl_wait.Hide()
 
 # CONTEXT MENUS
 
@@ -1433,7 +1423,7 @@ $controls = @(
     $btn_r,
     $btn_calendario,
     $btn_manual,
-    $aviso_aguarde,
+    $lbl_wait,
     $btn_refresh,
     $btn_gerar,
     $btn_exit,
@@ -1441,34 +1431,18 @@ $controls = @(
     )
 $frm_main.Controls.AddRange($controls)
 
-$aviso_aguarde.BringToFront()
+$lbl_wait.BringToFront()
 
 # SHOW FORM
 
 # SPLASH SCREEN
 
-$form_splash                 = New-Object System.Windows.Forms.Form
-$form_splash.Width           = 400
-$form_splash.Height          = 150
-$form_splash.StartPosition   = "CenterScreen"
-$form_splash.FormBorderStyle = 'None'
-$form_splash.ShowInTaskbar   = $false
-
-$label_splash             = New-Object System.Windows.Forms.Label
-$label_splash.Width       = $form_splash.Width
-$label_splash.Height      = $form_splash.Height
-$label_splash.BackColor   = "#0c5c94"
-$label_splash.ForeColor   = "White"
-$label_splash.BorderStyle = 'Fixed3D'
-$label_splash.TextAlign   = [System.Drawing.ContentAlignment]::MiddleCenter
-$label_splash.Font        = New-Object System.Drawing.Font('Segoe UI Light', 24)
-$label_splash.Text        = "⏳`nAguarde..."
-
-$form_splash.Controls.AddRange(@($label_splash))
+$frm_splash, $lbl_splash = InterfaceSplashScreen
+$frm_splash.Controls.AddRange(@($lbl_splash))
 
 InterfaceShowForm -title "IMPORTAÇÃO GOOGLE DRIVE/SOLAR - MANTER ABERTA" -start {
 
-    [void]$form_splash.Show()
+    [void]$frm_splash.Show()
     
     $txt_link_planilha.Text = (ConfigJSON -key "link_planilha" -option "get")
     CheckLink
@@ -1479,7 +1453,7 @@ InterfaceShowForm -title "IMPORTAÇÃO GOOGLE DRIVE/SOLAR - MANTER ABERTA" -star
     
     ConfigJSON -show
 
-    [void]$form_splash.Close()
+    [void]$frm_splash.Close()
 
 } -close {
 
