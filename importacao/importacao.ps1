@@ -611,62 +611,61 @@ function RefreshLstErrors {
 
 function ContextMenuCampos {
     param(
-        [System.Object]$Origem
+        [System.Object]$mnuContext
     )
 
-    $Menu  = $Origem.Text
-    $Campo = $Origem.GetCurrentParent().SourceControl
+    $mnu_ = $mnuContext.Text
+    $ctr_ = $mnuContext.GetCurrentParent().SourceControl
    
-    switch ($Menu) {
+    switch ($mnu_) {
         "Abrir link" {
-            CheckLink
-            if ($txt_link_text.validLink) { 
+            if ($txt_link_planilha.validLink) { 
                 InterfaceMinimize
                 Start-Process $txt_link_planilha.Text 
             }
         }
         "Copiar" {
-            Set-Clipboard -Value $Campo.Text
+            Set-Clipboard -Value $ctr_.Text
         }
         "Colar" {
-            $Campo.Text = Get-Clipboard -Raw
+            $ctr_.Text = Get-Clipboard -Raw
             CheckLink
         }
         "Recortar" {
-            Set-Clipboard -Value $Campo.Text
-            $Campo.Clear()
+            Set-Clipboard -Value $ctr_.Text
+            $ctr_.Clear()
             CheckLink
         }
         "Limpar" {
-            $Campo.Clear()
+            $ctr_.Clear()
             CheckLink
         }
     }
 }
 
-function ContextMenuConfig {
+function ContextMenuSettings {
     param(
-        [System.Object]$Origem
+        [System.Object]$mnuContext
     )
 
-    $Menu  = $Origem.Text
-    $Campo = $Origem.GetCurrentParent().SourceControl
+    $mnu_    = $mnuContext.Text
+    $setting = $mnuContext.GetCurrentParent().SourceControl
 
-    switch ($Menu) {
+    switch ($mnu_) {
         "Limpar" {
-            $Campo.CurrentRow.Cells["Valor"].Value = ""
+            $setting.CurrentRow.Cells["Valor"].Value = ""
             RefreshBtnGerar
         }
         "Copiar" {
-            Set-Clipboard -Value $Campo.CurrentRow.Cells["Valor"].Value
+            Set-Clipboard -Value $setting.CurrentRow.Cells["Valor"].Value
         }
         "Colar" {
-            $Campo.CurrentRow.Cells["Valor"].Value = Get-Clipboard -Raw
+            $setting.CurrentRow.Cells["Valor"].Value = Get-Clipboard -Raw
             RefreshBtnGerar
         }
         "Recortar" {
-            Set-Clipboard -Value $Campo.CurrentRow.Cells["Valor"].Value
-            $Campo.CurrentRow.Cells["Valor"].Value = ""
+            Set-Clipboard -Value $setting.CurrentRow.Cells["Valor"].Value
+            $setting.CurrentRow.Cells["Valor"].Value = ""
             RefreshBtnGerar
         }
     }
@@ -684,17 +683,17 @@ function ContextMenuInfo {
         "Limpar" {
             switch ($ctr_) {
                 $lst_conferencia {
-                    $msg = "limpar as informações da última importação"
+                    $msg = "da última importação"
                 }
                 $lst_erros {
                     if ($lst_erros.Text -eq "") {
                         return
                     }
-                    $msg = "limpar as informações de erros da última importação"
+                    $msg = "de erros da última importação"
                 }
             }
         
-            $result = [System.Windows.Forms.MessageBox]::Show("Deseja ${msg}?", "Confirmação de exclusão", 4, 48)
+            $result = [System.Windows.Forms.MessageBox]::Show("Deseja limpar as informações ${msg}?", "Confirmação de exclusão", 4, 48)
             
             if ($result -eq "No") {
                 return
@@ -718,10 +717,10 @@ function ContextMenuInfo {
         "Copiar" {
             if ($ctr_ -is [System.Windows.Forms.ListView]) {
                 $text = ($ctr_.Items | ForEach-Object { $_.Text }) -join "`r`n"
-                Set-Clipboard -Value $text
             } elseif ($ctr_ -is [System.Windows.Forms.TextBox]) {
-                Set-Clipboard -Value $ctr_.Text
+                $text = $ctr_.Text
             }
+            Set-Clipboard -Value $text
          }
     }
 }
@@ -817,30 +816,30 @@ $itens = @(
     @("-"),
     @("Limpar", "excluir", {ContextMenuCampos $this})
 )
-$mnu_contexto_campos = InterfaceContextMenu $itens
+$mnu_context_link = InterfaceContextMenu $itens
 
 $itens = @( 
     @("Abrir arquivo", "mover", {OpenFileFolder $this}), 
     @("Abrir pasta", "folder_bw", {OpenFileFolder $this}),
     @("Excluir arquivos", "excluir", {DeleteFiles $this})
 )
-$mnu_contexto_arquivos = InterfaceContextMenu $itens
+$mnu_context_files = InterfaceContextMenu $itens
 
 $itens = @( 
-    @("Copiar", "copiar", {ContextMenuConfig $this}),
-    @("Colar", "novo", {ContextMenuConfig $this}),
-    @("Recortar", "recortar", {ContextMenuConfig $this}),
+    @("Copiar", "copiar", {ContextMenuSettings $this}),
+    @("Colar", "novo", {ContextMenuSettings $this}),
+    @("Recortar", "recortar", {ContextMenuSettings $this}),
     @("-"),
-    @("Limpar", "excluir", {ContextMenuConfig $this})
+    @("Limpar", "excluir", {ContextMenuSettings $this})
 )
-$mnu_contexto_config = InterfaceContextMenu $itens
+$mnu_context_settings = InterfaceContextMenu $itens
 
 $itens = @( 
     @("Copiar", "copiar", {ContextMenuInfo $this}),
     @("-"),
     @("Limpar", "excluir", {ContextMenuInfo $this})
 )
-$mnu_contexto_info = InterfaceContextMenu $itens
+$mnu_context_info = InterfaceContextMenu $itens
 
 # PANEL LINK
 
@@ -893,7 +892,7 @@ $params = @{
     top = 25;
     left = $btn_google.Width + ($padding.inner * 2);
     width = $pnl_link.Width - 50 - 35;
-    mnuContext = $mnu_contexto_campos;
+    mnuContext = $mnu_context_link;
     events = @{
         Click = {$this.SelectAll()};
         GotFocus = {$this.SelectAll()};
@@ -1012,7 +1011,7 @@ $params = @{
     height = $tbc_info.Height - ($padding.outer * 3);
     top = $padding.inner;
     left = $btn_info.Width + ($padding.inner * 2);
-    mnuContext = $mnu_contexto_info;
+    mnuContext = $mnu_context_info;
     properties = @{
         HideSelection = $true;
         Scrollable = $false
@@ -1040,7 +1039,7 @@ $params = @{
     left = $lst_conferencia.Left;
     width = $lst_conferencia.Width;
     height = $lst_conferencia.Height;
-    mnuContext = $mnu_contexto_config;
+    mnuContext = $mnu_context_settings;
     properties = @{
         BorderStyle                 = 'FixedSingle';
         AllowUserToAddRows          = $false;
@@ -1144,7 +1143,7 @@ $params = @{
     left = $lst_conferencia.Left;
     width = $lst_conferencia.Width;
     height = $lst_conferencia.Height;
-    mnuContext = $mnu_contexto_info;
+    mnuContext = $mnu_context_info;
     properties = @{
         Text = $config.msg_erro;
         Multiline = $true;
@@ -1212,7 +1211,7 @@ $params = @{
     height = $tbc_files.Height - ($padding.outer * 3);
     top = $padding.inner;
     left = $padding.inner;
-    mnuContext = $mnu_contexto_arquivos;
+    mnuContext = $mnu_context_files;
     columns = [ordered]@{
         "Arquivos para importar" = -2
     };
@@ -1228,7 +1227,7 @@ $params = @{
     height = $lst_importar.Height;
     top = 10;
     left = InterfacePosition $lst_importar "right" $padding.outer;  
-    mnuContext = $mnu_contexto_arquivos;
+    mnuContext = $mnu_context_files;
     columns = [ordered]@{
         "Descrição de itens a ajustar" = -2
     };
@@ -1248,7 +1247,7 @@ $params = @{
     height = $lst_importar.Height;
     top = $lst_importar.Top;
     left = $lst_importar.Left;
-    mnuContext = $mnu_contexto_arquivos;
+    mnuContext = $mnu_context_files;
     columns = [ordered]@{
         "Prints da tela dos pedidos" = -2
     };
@@ -1264,7 +1263,7 @@ $params = @{
     height = $lst_descricao.Height;
     top = $lst_descricao.Top;
     left = $lst_descricao.Left;  
-    mnuContext = $mnu_contexto_arquivos;
+    mnuContext = $mnu_context_files;
     columns = [ordered]@{
         "Resumos gerados" = -2
     };
@@ -1294,7 +1293,7 @@ $params = @{
     height = $lst_importar.Height - ($cmb_processos.Top + $cmb_processos.Height + $padding.inner);
     top = InterfacePosition $cmb_processos "bottom" ($padding.outer + 4);
     left = $lst_importar.Left;  
-    mnuContext = $mnu_contexto_arquivos;
+    mnuContext = $mnu_context_files;
     columns = [ordered]@{
         "Planilha auxiliar para DFD" = -2
     };
@@ -1310,7 +1309,7 @@ $params = @{
     height = $lst_descricao.Height;
     top = $lst_descricao.Top; 
     left = $lst_descricao.Left;  
-    mnuContext = $mnu_contexto_arquivos;
+    mnuContext = $mnu_context_files;
     columns = [ordered]@{
         "Relatórios gerenciais" = -2
     };
