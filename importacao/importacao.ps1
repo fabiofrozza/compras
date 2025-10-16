@@ -36,7 +36,7 @@ function OpenFileFolder {
     }
 }
 
-function RefreshComboProcessos {
+function RefreshCmbProcessos {
 
     $cmb_processos.Items.Clear()
 
@@ -243,7 +243,7 @@ function RefreshLink {
     InterfaceCustomProperty $txt_link_planilha "currentLink" $txt_link_planilha.Text
     ConfigJSON -key "link_planilha" -value $txt_link_planilha.Text
 
-    RefreshComboProcessos
+    RefreshCmbProcessos
 
     $aviso_aguarde.Hide()
 
