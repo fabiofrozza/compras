@@ -184,7 +184,7 @@ function CheckLink {
 
     RefreshLstConferencia
     RefreshBtnInfo "waiting"
-    RefreshBtnLog "waiting" $config.arquivo_log_R
+    RefreshBtnLog $statusRScript $config.arquivo_log_R
 
     InterfaceCustomProperty $txt_link_planilha "processosSPA" $null
 
@@ -1470,18 +1470,10 @@ InterfaceShowForm -title "IMPORTAÇÃO GOOGLE DRIVE/SOLAR - MANTER ABERTA" -star
 
     [void]$form_splash.Show()
     
-    RefreshLstFiles
-
-    $config = ConfigJSON -option "all"
-
-    $txt_link_planilha.Text = $config.link_planilha
+    $txt_link_planilha.Text = (ConfigJSON -key "link_planilha" -option "get")
     CheckLink
-
-    $lastRunResults = $config.resultado_geracao
-    $fleLogR = $config.arquivo_log_R
     
-    RefreshBtnInfo "waiting"
-    RefreshBtnLog $lastRunResults $fleLogR
+    RefreshLstFiles
     RefreshLstErrors
     RefreshLstSettings
     
