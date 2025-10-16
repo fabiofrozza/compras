@@ -438,10 +438,10 @@ function DeleteFiles {
         [System.Windows.Forms.MessageBox]::Show($msgError, "Erro", 0, 16)
     }
 
-    ShowFiles
+    RefreshLstFiles
 }
 
-function ShowFiles {
+function RefreshLstFiles {
 
     $files = CheckFiles
 
@@ -478,7 +478,7 @@ Function ExecuteRScript {
         return
     }
 
-    ShowFiles
+    RefreshLstFiles
 
     if (-not (ReadyToRunRScript)) {
         return
@@ -583,7 +583,7 @@ function RefreshInterfaceAfterRun {
 
     $tbc_info.SelectedTab = $tbc_info.TabPages[$tbpToFocus]
 
-    ShowFiles
+    RefreshLstFiles
 
     RefreshLstConferencia
     RefreshBtnInfo $lastRunResults
@@ -1395,7 +1395,7 @@ $params = @{
     top = $frm_main.Height - 85;
     left = $margin.left;
     function = {
-        ShowFiles
+        RefreshLstFiles
     }
 }
 $btn_refresh = InterfaceButton @params
@@ -1465,7 +1465,7 @@ InterfaceShowForm -title "IMPORTAÇÃO GOOGLE DRIVE/SOLAR - MANTER ABERTA" -star
 
     [void]$form_splash.Show()
     
-    ShowFiles
+    RefreshLstFiles
 
     $config = ConfigJSON -option "all"
 
