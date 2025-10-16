@@ -597,4 +597,39 @@ function InterfaceCustomProperty {
     )
 
     $ctr_ | Add-Member -MemberType NoteProperty -Name $name -Value $value -Force
-} 
+}
+
+function InterfaceSplashScreen {
+    param (
+        [switch]$onlyLabel,
+        [int]$width = 400,
+        [int]$height = 150
+    )
+    
+    $lbl_             = New-Object System.Windows.Forms.Label
+    $lbl_.Width       = $width
+    $lbl_.Height      = $height
+    $lbl_.BackColor   = "#0c5c94"
+    $lbl_.ForeColor   = "White"
+    $lbl_.BorderStyle = 'Fixed3D'
+    $lbl_.TextAlign   = [System.Drawing.ContentAlignment]::MiddleCenter
+    $lbl_.Font        = New-Object System.Drawing.Font('Segoe UI Light', 24)
+    $lbl_.Text        = "⏳`nAguarde..."
+
+    if ($onlyLabel) {
+        $lbl_.Top         = ($frm_main.Height - $height) / 2 
+        $lbl_.Left        = ($frm_main.Width - $width) / 2 
+
+        return $lbl_
+    }
+
+    $frm_                 = New-Object System.Windows.Forms.Form
+    $frm_.Width           = $width
+    $frm_.Height          = $height
+    $frm_.StartPosition   = "CenterScreen"
+    $frm_.FormBorderStyle = 'None'
+    $frm_.ShowInTaskbar   = $false
+
+    return @($frm_, $lbl_)
+
+}
