@@ -8,15 +8,15 @@ function OpenFileFolder {
     InterfaceMinimize
 
     if ($ctr_ -is [System.Windows.Forms.ToolStripMenuItem]) {
-        $lst_      = $ctr_.GetCurrentParent().SourceControl
-        $selection = $ctr_.GetCurrentParent().SourceControl.SelectedItems[0]
+        $lst_ = $ctr_.GetCurrentParent().SourceControl
     } elseif ($ctr_ -is [System.Windows.Forms.ListView]) {
-        $lst_      = $ctr_
-        $selection = $ctr_.SelectedItems[0]
+        $lst_ = $ctr_
     } else {
         return
     }
-    
+
+    $selection = $lst_.SelectedItems[0]
+
     if ($ctr_.Text -eq "Abrir pasta" -or $lst_.Empty) { 
         $fle = "" 
     } else {
@@ -99,7 +99,7 @@ function IsSettingsValid {
         $backColor = ""
     } else {
         $image     = "settings_erro"
-        $backColor = $cores.erro
+        $backColor = $colors.error
     }
 
     $btn_settings.Image     = InterfaceGetImage $image
@@ -201,7 +201,7 @@ function CheckLink {
 
     if (-not [Uri]::IsWellFormedUriString($txt_link_planilha.Text, 'Absolute')) {
         $lbl_info_grupo.Text = "Link inválido"
-        $pnl_link.BackColor  = $cores.erro
+        $pnl_link.BackColor  = $colors.error
         InterfaceCustomProperty $txt_link_planilha "validLink" $false
 
         RefreshLink
@@ -212,27 +212,31 @@ function CheckLink {
     $lbl_wait.Show()
     
     try {
-        $LinkAcesso = Invoke-WebRequest -Method Get -Uri $txt_link_planilha.Text
+        $resultLinkAccess = Invoke-WebRequest -Method Get -Uri $txt_link_planilha.Text
     } catch {
         $lbl_info_grupo.Text = "Não foi possível acessar o link"
-        $pnl_link.BackColor  = $cores.erro
+        $pnl_link.BackColor  = $colors.error
         InterfaceCustomProperty $txt_link_planilha "validLink" $false
 
         RefreshLink
         return
     }                
 
-    $GrupoGoogle  = $LinkAcesso.InputFields.value
-    $processosSPA = Select-String "23080.\d\d\d\d\d\d/\d\d\d\d-\d\d" -InputObject $LinkAcesso.RawContent -AllMatches | ForEach-Object {$_.matches.Value} | Sort-Object -Unique
+    $grupoMateriais = $resultLinkAccess.InputFields.value
+    $processosSPA   = Select-String "23080.\d\d\d\d\d\d/\d\d\d\d-\d\d" -InputObject $resultLinkAccess.RawContent -AllMatches | ForEach-Object {$_.matches.Value} | Sort-Object -Unique
+
     InterfaceCustomProperty $txt_link_planilha "processosSPA" $processosSPA
 
-    if ($LinkAcesso.RawContent -match "LISTA FINAL") {
-        $lbl_info_grupo.Text = $GrupoGoogle
-        $pnl_link.BackColor  = $cores.ok
+    if ($resultLinkAccess.RawContent -match "LISTA FINAL") {
+        $text      = $grupoMateriais
+        $backColor = $colors.ok
     } else {
-        $lbl_info_grupo.Text = "Este não parece ser um link de planilha de inserção de demandas"
-        $pnl_link.BackColor  = $cores.alerta
+        $text      = "Este não parece ser um link de planilha de inserção de demandas"
+        $backColor = $colors.warning
     }
+
+    $lbl_info_grupo.Text = $text
+    $pnl_link.BackColor  = $backColor
 
     InterfaceCustomProperty $txt_link_planilha "validLink" $true
     RefreshLink
@@ -257,29 +261,29 @@ function RefreshBtnInfo {
 
     switch ($lastRunResults) {
         "sucesso" {
-            $infoImage = "ok"
-            $infoTag   = "A última geração foi bem sucedida. Verifique os arquivos abaixo."
+            $image = "ok"
+            $tag   = "A última geração foi bem sucedida. Verifique os arquivos abaixo."
         }
         "erro" {
-            $infoImage = "erro"
-            $infoTag   = "Ocorreram erros na última geração e não foram gerados arquivos. Verifique o log."
+            $image = "erro"
+            $tag   = "Ocorreram erros na última geração e não foram gerados arquivos. Verifique o log."
         }
         "ambos" {
-            $infoImage = "alerta"
-            $infoTag   = "Ocorreram problemas na última geração. Verifique os arquivos gerados e o log."    
+            $image = "alerta"
+            $tag   = "Ocorreram problemas na última geração. Verifique os arquivos gerados e o log."    
         }
         "waiting" {
-            $infoImage = "waiting"
-            $infoTag   = "Informe o link, verifique as configurações, escolha a aba desejada e clique em Gerar."
+            $image = "waiting"
+            $tag   = "Informe o link, verifique as configurações, escolha a aba desejada e clique em Gerar."
         }
         Default {
-            $infoImage = "erro"
-            $infoTag   = "Ocorreu algum erro não identificado. Verifique o último log."
+            $image = "erro"
+            $tag   = "Ocorreu algum erro não identificado. Verifique o último log."
         }
     }
 
-    $btn_info.Image = InterfaceGetImage $infoImage
-    $btn_info.Tag   = $infoTag
+    $btn_info.Image = InterfaceGetImage $image
+    $btn_info.Tag   = $tag
 }
 
 function RefreshBtnLog {
@@ -289,15 +293,15 @@ function RefreshBtnLog {
     )
     
     if ($null -eq $fleLogR -or $lastRunResults -eq "waiting" -or $lastRunResults -eq "sucesso") {
-        $logImage = "log"
-        $logTag   = "Abrir pasta de logs"
+        $image = "log"
+        $tag   = "Abrir pasta de logs"
     } else {
-        $logImage = "log_erro"
-        $logTag   = "Abrir último log com erros"
+        $image = "log_erro"
+        $tag   = "Abrir último log com erros"
     }
 
-    $btn_log.Image = InterfaceGetImage $logImage 
-    $btn_log.Tag   = $logTag
+    $btn_log.Image = InterfaceGetImage $image 
+    $btn_log.Tag   = $tag
 }
 
 Function ReadyToRunRScript {
@@ -611,7 +615,7 @@ function RefreshLstErrors {
 
 }
 
-function ContextMenuCampos {
+function ContextMenuPnlLink {
     param(
         [System.Object]$mnuContext
     )
@@ -645,7 +649,7 @@ function ContextMenuCampos {
     }
 }
 
-function ContextMenuSettings {
+function ContextMenuLstSettings {
     param(
         [System.Object]$mnuContext
     )
@@ -673,7 +677,7 @@ function ContextMenuSettings {
     }
 }
 
-function ContextMenuInfo {
+function ContextMenuPnlInfo {
     param(
         [System.Object]$mnuContext
     )
@@ -734,25 +738,59 @@ function RefreshLstSettings {
    
     $config = ConfigJSON -option "all"
 
-    $configuracoes = @(
-        @{Nome="Valor mínimo"; Chave="valor_minimo"; Valor=$config.valor_minimo; Descricao="Valor mínimo total do item para inclusão no processo"},
-        @{Nome="Quantidade mínima"; Chave="qtde_minima"; Valor=$config.qtde_minima; Descricao="Quantidade mínima demandada do item para inclusão no processo"},
-        @{Nome="Célula inicial (quantitativos)"; Chave="celula"; Valor=$config.celula; Descricao="Célula da LISTA FINAL onde inicia a área de inserção dos quantitativos pelas Unidades (ex: Q6)"},
-        @{Nome="Quantidade de Unidades requerentes"; Chave="unidades"; Valor=$config.unidades; Descricao="Quantidade de colunas de Unidades requerentes (incluindo ocultas e UFSC GERAL)"},
-        @{Nome="Aba Menu"; Chave="aba_menu"; Valor=$config.aba_menu; Descricao="Nome da aba Menu na planilha (apenas letras, números e espaços)"},
-        @{Nome="Aba LISTA FINAL"; Chave="aba_lista_final"; Valor=$config.aba_lista_final; Descricao="Nome da aba LISTA FINAL na planilha (apenas letras, números e espaços)"}
+    $settings = @(
+        @{
+            name = "Valor mínimo"; 
+            key = "valor_minimo"; 
+            value = $config.valor_minimo; 
+            tip = "Valor mínimo total do item para inclusão no processo"
+        },
+        @{
+            name = "Quantidade mínima";
+            key = "qtde_minima";
+            value = $config.qtde_minima;
+            tip = "Quantidade mínima demandada do item para inclusão no processo"
+        },
+        @{
+            name = "Célula inicial (quantitativos)";
+            key = "celula";
+            value = $config.celula;
+            tip = "Célula da LISTA FINAL onde inicia a área de inserção dos quantitativos pelas Unidades (ex: Q6)"
+        },
+        @{
+            name = "Quantidade de Unidades requerentes";
+            key = "unidades";
+            value = $config.unidades;
+            tip = "Quantidade de colunas de Unidades requerentes (incluindo ocultas e UFSC GERAL)"
+        },
+        @{
+            name = "Aba Menu";
+            key = "aba_menu";
+            value = $config.aba_menu;
+            tip = "Nome da aba Menu na planilha (apenas letras, números e espaços)"
+        },
+        @{
+            name = "Aba LISTA FINAL";
+            key = "aba_lista_final";
+            value = $config.aba_lista_final;
+            tip = "Nome da aba LISTA FINAL na planilha (apenas letras, números e espaços)"
+        }
     )
 
-    foreach ($configuracao in $configuracoes) {
+    $lst_settings.SuspendLayout()
+
+    foreach ($setting in $settings) {
         $row = New-Object System.Windows.Forms.DataGridViewRow
         $row.CreateCells($lst_settings)
         $row.Cells[0].Value = $lst_image.Images["config"]
-        $row.Cells[1].Value = $configuracao.Nome
-        $row.Cells[1].ToolTipText = $configuracao.Descricao
-        $row.Cells[2].Value = $configuracao.Valor
-        $row.Tag = $configuracao.Chave
+        $row.Cells[1].Value = $setting.name
+        $row.Cells[1].ToolTipText = $setting.tip
+        $row.Cells[2].Value = $setting.value
+        $row.Tag = $setting.key
         [void]$lst_settings.Rows.Add($row)
     }
+
+    $lst_settings.ResumeLayout()
 
     RefreshBtnGerar
 
@@ -779,10 +817,10 @@ if (Test-Path -Path "$fldCommon\$configMain") {
 
 main "IMPORTACAO"
 
-$cores = @{
-    ok     = "LightGreen";
-    alerta = "LightGoldenrodYellow";
-    erro   = "LightSalmon"
+$colors = @{
+    ok      = "LightGreen";
+    warning = "LightGoldenrodYellow";
+    error   = "LightSalmon"
 }
 
 CheckFolder @(
@@ -802,39 +840,39 @@ $lbl_wait.Hide()
 
 # CONTEXT MENUS
 
-$itens = @( 
-    @("Abrir link", "google", {ContextMenuCampos $this}), 
+$items = @( 
+    @("Abrir link", "google", {ContextMenuPnlLink $this}), 
     @("-"),
-    @("Copiar", "copiar", {ContextMenuCampos $this}),
-    @("Colar", "novo", {ContextMenuCampos $this}),
-    @("Recortar", "recortar", {ContextMenuCampos $this}),
+    @("Copiar", "copiar", {ContextMenuPnlLink $this}),
+    @("Colar", "novo", {ContextMenuPnlLink $this}),
+    @("Recortar", "recortar", {ContextMenuPnlLink $this}),
     @("-"),
-    @("Limpar", "excluir", {ContextMenuCampos $this})
+    @("Limpar", "excluir", {ContextMenuPnlLink $this})
 )
-$mnu_context_link = InterfaceContextMenu $itens
+$mnu_context_link = InterfaceContextMenu $items
 
-$itens = @( 
+$items = @( 
     @("Abrir arquivo", "mover", {OpenFileFolder $this}), 
     @("Abrir pasta", "folder_bw", {OpenFileFolder $this}),
     @("Excluir arquivos", "excluir", {DeleteFiles $this})
 )
-$mnu_context_files = InterfaceContextMenu $itens
+$mnu_context_files = InterfaceContextMenu $items
 
-$itens = @( 
-    @("Copiar", "copiar", {ContextMenuSettings $this}),
-    @("Colar", "novo", {ContextMenuSettings $this}),
-    @("Recortar", "recortar", {ContextMenuSettings $this}),
+$items = @( 
+    @("Copiar", "copiar", {ContextMenuLstSettings $this}),
+    @("Colar", "novo", {ContextMenuLstSettings $this}),
+    @("Recortar", "recortar", {ContextMenuLstSettings $this}),
     @("-"),
-    @("Limpar", "excluir", {ContextMenuSettings $this})
+    @("Limpar", "excluir", {ContextMenuLstSettings $this})
 )
-$mnu_context_settings = InterfaceContextMenu $itens
+$mnu_context_settings = InterfaceContextMenu $items
 
-$itens = @( 
-    @("Copiar", "copiar", {ContextMenuInfo $this}),
+$items = @( 
+    @("Copiar", "copiar", {ContextMenuPnlInfo $this}),
     @("-"),
-    @("Limpar", "excluir", {ContextMenuInfo $this})
+    @("Limpar", "excluir", {ContextMenuPnlInfo $this})
 )
-$mnu_context_info = InterfaceContextMenu $itens
+$mnu_context_info = InterfaceContextMenu $items
 
 # PANEL LINK
 
