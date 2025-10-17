@@ -156,6 +156,10 @@ function ConfigJSON {
         return $null 
     }
 
+    if ($key -and -not $value -and $option -ne "remove") {
+        $option = "get"
+    }
+
     if ($option -eq "all") {
         return $config.$scriptName
     } elseif ($option -eq "get") {

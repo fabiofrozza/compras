@@ -111,7 +111,7 @@ function IsSettingsValid {
 
 function RefreshLstConferencia {
     
-    $lastRunResults = ConfigJSON -key "conferencia" -option "get"
+    $lastRunResults = ConfigJSON "conferencia"
 
     $lst_conferencia.Items.Clear()
 
@@ -604,7 +604,7 @@ function RefreshLstErrors {
     )
     
     if ($null -eq $errors) {
-        $errors = ConfigJSON -key "msg_erro" -option "get"
+        $errors = ConfigJSON "msg_erro"
     }
 
     if ($errors -is [array]) {
@@ -1158,7 +1158,7 @@ $params = @{
     tag = "...";
     function = {
         InterfaceMinimize
-        $fleLogR = ConfigJSON -key "arquivo_log_R" -option "get"
+        $fleLogR = ConfigJSON "arquivo_log_R"
         try { 
             Start-Process "$fldLog\$fleLogR" 
         } 
@@ -1482,7 +1482,7 @@ InterfaceShowForm -title "IMPORTAÇÃO GOOGLE DRIVE/SOLAR - MANTER ABERTA" -star
 
     [void]$frm_splash.Show()
     
-    $txt_link_planilha.Text = (ConfigJSON -key "link_planilha" -option "get")
+    $txt_link_planilha.Text = ConfigJSON "link_planilha"
     CheckLink
     
     RefreshLstFiles
