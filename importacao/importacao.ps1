@@ -132,7 +132,7 @@ function RefreshBtnTbpSettings {
         $backColor = ""
     } else {
         $image     = "settings_erro"
-        $backColor = $colors.error
+        $backColor = $COLOR_ERROR
     }
 
     $btn_settings.Image     = InterfaceGetImage $image
@@ -233,7 +233,7 @@ function TestLink {
         return @{
             isValid = $false;
             msg = "Link inválido";
-            backColor = $colors.error;
+            backColor = $COLOR_ERROR;
         }
     }
     
@@ -246,7 +246,7 @@ function TestLink {
         return @{
             isValid = $false;
             msg = "Erro ao acessar o link informado. Veja erro no console.";
-            backColor = $colors.error;
+            backColor = $COLOR_ERROR;
             error = $_.Exception.Message;
         }
     }
@@ -260,20 +260,20 @@ function TestLinkResponse {
     
     if ($response.RawContent -match "LISTA FINAL") {
         $grupoMateriais = $response.InputFields.value
-        $processosSPA   = (Select-String "23080.\d\d\d\d\d\d/\d\d\d\d-\d\d" -InputObject $response.RawContent -AllMatches | 
+        $processosSPA   = (Select-String $REGEX_PROCESSOS_SPA -InputObject $response.RawContent -AllMatches | 
                            ForEach-Object {$_.matches.Value} | Sort-Object -Unique)
         
         return @{
             isValid = $true;
             msg = $grupoMateriais;
-            backColor = $colors.ok;
+            backColor = $COLOR_OK;
             processosSPA = $processosSPA;
         }
     } else {
         return @{
             isValid = $true;
             msg = "Este não parece ser um link de planilha de inserção de demandas";
-            backColor = $colors.warning;
+            backColor = $COLOR_WARNING;
         }
     }
 
@@ -885,10 +885,18 @@ if (Test-Path -Path "$fldCommon\$configMain") {
 
 main "IMPORTACAO"
 
-$colors = @{
-    ok      = "LightGreen";
-    warning = "LightGoldenrodYellow";
-    error   = "LightSalmon"
+SetAppConstants @{
+    # Regex Patterns
+    REGEX_PROCESSOS_SPA = "23080\.\d{6}/\d{4}-\d{2}"
+    
+    COLOR_OK      = "LightGreen"
+    COLOR_WARNING = "LightGoldenrodYellow"
+    COLOR_ERROR   = "LightSalmon"
+
+    # Tamanhos de UI
+    PADDING_INNER = 10
+    PADDING_OUTER = 15
+
 }
 
 CheckFolder @(
@@ -944,11 +952,6 @@ $mnu_context_info = InterfaceContextMenu $items
 
 # PANEL LINK
 
-$padding = @{
-    inner = 10;
-    outer = 15;
-}
-
 $margin = @{
     top = 15;
     bottom = $pic_banner.Height + 15;
@@ -958,7 +961,7 @@ $margin = @{
 
 $utilSpace = @{
     width  = $frm_main.Width - $margin.left - $margin.right;
-    height = $frm_main.Height - $margin.top - 75 - $margin.bottom - ($padding.outer * 2)
+    height = $frm_main.Height - $margin.top - 75 - $margin.bottom - ($PADDING_OUTER * 2)
 }
 
 $params = @{
@@ -972,7 +975,7 @@ $pnl_link = InterfacePanel @params
 $params = @{
     size = 30;
     top = ($pnl_link.Height - 30) / 2;
-    left = $padding.inner;
+    left = $PADDING_INNER;
     name = "drive";
     tag = "Abrir LISTA FINAL";
     function = {
@@ -991,7 +994,7 @@ $params = @{
     labelText = "Link da aba LISTA FINAL";
     tag = "Link da aba LISTA FINAL";
     top = 25;
-    left = $btn_google.Width + ($padding.inner * 2);
+    left = $btn_google.Width + ($PADDING_INNER * 2);
     width = $pnl_link.Width - 50 - 35;
     mnuContext = $mnu_context_link;
     events = @{
@@ -1054,7 +1057,7 @@ $params = @{
     type = "control";
     width = $pnl_link.Width;
     height = $utilSpace.height * 0.45;
-    top = InterfacePosition $pnl_link "bottom" $padding.outer;
+    top = InterfacePosition $pnl_link "bottom" $PADDING_OUTER;
     left = $pnl_link.Left;
     properties = @{
         drawMode = [System.Windows.Forms.TabDrawMode]::OwnerDrawFixed;
@@ -1099,8 +1102,8 @@ $tbc_info.Controls.AddRange(@($tbp_status, $tbp_settings, $tbp_erros))
 
 $params = @{
     size = 30;
-    top = $padding.outer;
-    left = $padding.inner;
+    top = $PADDING_OUTER;
+    left = $PADDING_INNER;
     name = "erro";
     tag = "..."
 } 
@@ -1108,10 +1111,10 @@ $btn_info = InterfaceButtonImage @params
 
 $params = @{
     name = "lst_conferencia"; 
-    width = $tbc_info.Width - ($btn_info.Width + ($padding.inner * 2)) - $padding.outer;
-    height = $tbc_info.Height - ($padding.outer * 3);
-    top = $padding.inner;
-    left = $btn_info.Width + ($padding.inner * 2);
+    width = $tbc_info.Width - ($btn_info.Width + ($PADDING_INNER * 2)) - $PADDING_OUTER;
+    height = $tbc_info.Height - ($PADDING_OUTER * 3);
+    top = $PADDING_INNER;
+    left = $btn_info.Width + ($PADDING_INNER * 2);
     mnuContext = $mnu_context_info;
     properties = @{
         HideSelection = $true;
@@ -1220,7 +1223,7 @@ $btn_erro = InterfaceButtonImage @params
 
 $params = @{
     size = $btn_info.Width;
-    top = InterfacePosition $lst_conferencia "bottom" (-$padding.outer * 2);
+    top = InterfacePosition $lst_conferencia "bottom" (-$PADDING_OUTER * 2);
     left = $btn_info.Left;
     name = "log";
     tag = "...";
@@ -1263,7 +1266,7 @@ $params = @{
     type = "control";
     width = $pnl_link.Width;
     height = $utilSpace.height * 0.55;
-    top = InterfacePosition $tbc_info "bottom" $padding.outer;
+    top = InterfacePosition $tbc_info "bottom" $PADDING_OUTER;
     left = $pnl_link.Left;
     properties = @{
         DrawMode = [System.Windows.Forms.TabDrawMode]::OwnerDrawFixed
@@ -1308,10 +1311,10 @@ $tbc_files.Controls.AddRange(@($tbp_importar, $tbp_resumo, $tbp_relatorio))
 
 $params = @{
     name = "lst_importar"; 
-    width = ($tbc_files.Width / 2) - ($padding.inner * 2);
-    height = $tbc_files.Height - ($padding.outer * 3);
-    top = $padding.inner;
-    left = $padding.inner;
+    width = ($tbc_files.Width / 2) - ($PADDING_INNER * 2);
+    height = $tbc_files.Height - ($PADDING_OUTER * 3);
+    top = $PADDING_INNER;
+    left = $PADDING_INNER;
     mnuContext = $mnu_context_files;
     columns = [ordered]@{
         "Arquivos para importar" = -2
@@ -1327,7 +1330,7 @@ $params = @{
     width = $lst_importar.Width;
     height = $lst_importar.Height;
     top = 10;
-    left = InterfacePosition $lst_importar "right" $padding.outer;  
+    left = InterfacePosition $lst_importar "right" $PADDING_OUTER;  
     mnuContext = $mnu_context_files;
     columns = [ordered]@{
         "Descrição de itens a ajustar" = -2
@@ -1381,7 +1384,7 @@ $tbp_resumo.Controls.AddRange(@($lst_prints, $lst_resumos))
 $params = @{
     type = "ComboBox";
     labelText = "Selecione o processo para o relatório";
-    top = $padding.outer * 2;
+    top = $PADDING_OUTER * 2;
     left = $lst_importar.Left;
     width = $lst_importar.Width - 70;
     tag = "Selecione um processo da lista.";
@@ -1391,8 +1394,8 @@ $cmb_processos, $lbl_cmb_processos = InterfaceControl @params
 $params = @{
     name = "lst_dfd"; 
     width = $lst_importar.Width;
-    height = $lst_importar.Height - ($cmb_processos.Top + $cmb_processos.Height + $padding.inner);
-    top = InterfacePosition $cmb_processos "bottom" ($padding.outer + 4);
+    height = $lst_importar.Height - ($cmb_processos.Top + $cmb_processos.Height + $PADDING_INNER);
+    top = InterfacePosition $cmb_processos "bottom" ($PADDING_OUTER + 4);
     left = $lst_importar.Left;  
     mnuContext = $mnu_context_files;
     columns = [ordered]@{
@@ -1427,7 +1430,7 @@ $tbp_relatorio.Controls.AddRange(@($lbl_cmb_processos, $cmb_processos, $lst_dfd,
 $params = @{
     size = 100;
     height = 50;
-    top = InterfacePosition $pic_banner "top" $padding.outer 50;
+    top = InterfacePosition $pic_banner "top" $PADDING_OUTER 50;
     left = ($margin.left / 2) - (100 / 2);
     name = "dcom.tif";
     tag = "Ir para a página do DCOM";
@@ -1440,7 +1443,7 @@ $btn_dcom = InterfaceButtonImage @params
 
 $params = @{
     size = 70;
-    top = InterfacePosition $btn_dcom "top" $padding.outer -targetHeight 70;
+    top = InterfacePosition $btn_dcom "top" $PADDING_OUTER -targetHeight 70;
     left = InterfacePosition $btn_dcom "centerHorizontal" -targetWidth 70;
     name = "ufsc";
     tag = "Ir para a página da UFSC";
@@ -1479,7 +1482,7 @@ $btn_calendario = InterfaceButtonImage @params
 
 $params = @{
     size = $btn_calendario.Width;
-    top = InterfacePosition $tbc_info "bottom" (-$padding.inner) $btn_calendario.Height;
+    top = InterfacePosition $tbc_info "bottom" (-$PADDING_INNER) $btn_calendario.Height;
     left = $btn_calendario.Left;
     name = "Logo-manual-icone";
     tag = "Ir para o Manual do DCOM";
@@ -1516,7 +1519,7 @@ $params = @{
     text = "Gerar";
     tag = "Gerar os arquivos conforme a aba selecionada";
     top = $btn_refresh.Top;
-    left = InterfacePosition $btn_exit "left" $padding.inner;
+    left = InterfacePosition $btn_exit "left" $PADDING_INNER;
     function = {
         ExecuteRScript
     }
