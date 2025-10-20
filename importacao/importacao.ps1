@@ -72,28 +72,60 @@ function RefreshBtnGerar {
 
 function IsSettingsValid {
 
-    $isAllSettingsValid = $true
-
-    foreach ($row in $lst_settings.Rows) {
-        $value = $row.Cells[2].Value
-
-        $pattern = switch ($row.Tag) {
-            "valor_minimo"    { "^[0-9]+$" }
-            "qtde_minima"     { "^[0-9]+$" }
-            "celula"          { "^[A-Z]+[0-9]+$" }
-            "unidades"        { "^[0-9]+$" }
-            "aba_menu"        { "^[\w\d\s]+$" }
-            "aba_lista_final" { "^[\w\d\s]+$" }
+    $validationRules = @{
+        "valor_minimo" = @{
+            pattern = "^[0-9]+$";
+            errorMsg = "Deve ser um número inteiro"
         }
+        "qtde_minima" = @{
+            pattern = "^[0-9]+$";
+            errorMsg = "Deve ser um número inteiro"
+        }
+        "celula" = @{
+            pattern = "^[A-Z]+[0-9]+$";
+            errorMsg = "Célula de planilha excel, com letra(s) + número (ex: Q6)"
+        }
+        "unidades" = @{
+            pattern = "^[0-9]+$";
+            errorMsg = "Deve ser um número inteiro"
+        }
+        "aba_menu" = @{
+            pattern = "^[\w\d\s]+$";
+            errorMsg = "Apenas letras, números e espaços"
+        }
+        "aba_lista_final" = @{
+            pattern = "^[\w\d\s]+$";
+            errorMsg = "Apenas letras, números e espaços"
+        }
+    }
+    
+    $isAllSettingsValid = $true
+    
+    foreach ($row in $lst_settings.Rows) {
+        $value = $row.Cells["Valor"].Value
+        $rule  = $validationRules[$row.Tag]
         
-        if ($value -match $pattern) {
-            $row.Cells[0].Value = $lst_image.Images["config"]
+        if ($value -match $rule.pattern) {
+            $row.Cells["Icone"].Value = $lst_image.Images["config"]
+            $row.Cells["Valor"].ToolTipText = ""
         } else {
-            $row.Cells[0].Value = $lst_image.Images["config_erro"]
+            $row.Cells["Icone"].Value = $lst_image.Images["config_erro"]
+            $row.Cells["Valor"].ToolTipText = $rule.errorMsg
             $isAllSettingsValid = $false
         }
     }
 
+    RefreshBtnTbpSettings $isAllSettingsValid
+
+    return $isAllSettingsValid
+
+}
+
+function RefreshBtnTbpSettings {
+    param (
+        [bool]$isAllSettingsValid
+    )
+    
     if ($isAllSettingsValid) {
         $image     = "settings"
         $backColor = ""
@@ -104,8 +136,6 @@ function IsSettingsValid {
 
     $btn_settings.Image     = InterfaceGetImage $image
     $tbp_settings.BackColor = $backColor
-
-    return $isAllSettingsValid
 
 }
 
@@ -779,16 +809,16 @@ function RefreshLstSettings {
 
     $lst_settings.SuspendLayout()
 
-    foreach ($setting in $settings) {
-        $row = New-Object System.Windows.Forms.DataGridViewRow
-        $row.CreateCells($lst_settings)
-        $row.Cells[0].Value = $lst_image.Images["config"]
-        $row.Cells[1].Value = $setting.name
-        $row.Cells[1].ToolTipText = $setting.tip
-        $row.Cells[2].Value = $setting.value
-        $row.Tag = $setting.key
-        [void]$lst_settings.Rows.Add($row)
-    }
+        foreach ($setting in $settings) {
+            $row = New-Object System.Windows.Forms.DataGridViewRow
+            $row.CreateCells($lst_settings)
+            $row.Cells[0].Value = $lst_image.Images["config"]
+            $row.Cells[1].Value = $setting.name
+            $row.Cells[1].ToolTipText = $setting.tip
+            $row.Cells[2].Value = $setting.value
+            $row.Tag = $setting.key
+            [void]$lst_settings.Rows.Add($row)
+        }
 
     $lst_settings.ResumeLayout()
 
