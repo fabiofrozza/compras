@@ -37,10 +37,11 @@ function OpenFileFolder {
 }
 
 function RefreshCmbProcessos {
+    param(
+        $processosSPA
+    )
 
     $cmb_processos.Items.Clear()
-
-    $processosSPA = $txt_link_planilha.processosSPA
 
     if ($processosSPA.Count -eq 0) {
 
@@ -198,11 +199,7 @@ function CheckFiles {
     return $files
 }
 
-function CheckLink {
-
-    if ($txt_link_planilha.currentLink -eq $txt_link_planilha.Text) {
-        return
-    }
+function ClearLinkStates {
 
     $config = ConfigJSON -option "all"
 
@@ -216,70 +213,111 @@ function CheckLink {
     RefreshBtnInfo "waiting"
     RefreshBtnLog $statusRScript $config.arquivo_log_R
 
-    InterfaceCustomProperty $txt_link_planilha "processosSPA" $null
+}
 
-    if ([string]::IsNullOrEmpty($txt_link_planilha.Text)) {
-        $lbl_info_grupo.Text = "Informe o link da aba LISTA FINAL e aguarde"
-        $pnl_link.BackColor  = ""
-        InterfaceCustomProperty $txt_link_planilha "validLink" $false
-
-        RefreshLink
-        return
-    } 
+function TestLink {
     
-    ShowMessage $txt_link_planilha.Text "Link acessado" 200
+    $url = $txt_link_planilha.Text
 
-    if (-not [Uri]::IsWellFormedUriString($txt_link_planilha.Text, 'Absolute')) {
-        $lbl_info_grupo.Text = "Link inválido"
-        $pnl_link.BackColor  = $colors.error
-        InterfaceCustomProperty $txt_link_planilha "validLink" $false
+    if ([string]::IsNullOrEmpty($url)) {
+        return @{
+            isValid = $false;
+            msg = "Informe o link da aba LISTA FINAL e aguarde";
+            backColor = "";
+        }
+    }
+    
+    ShowMessage $url "Link informado" 200
 
-        RefreshLink
+    if (-not [Uri]::IsWellFormedUriString($url, 'Absolute')) {
+        return @{
+            isValid = $false;
+            msg = "Link inválido";
+            backColor = $colors.error;
+        }
+    }
+    
+    try {
+        $response = Invoke-WebRequest -Method Get -Uri $url -TimeoutSec 5
+
+        $result = TestLinkResponse $response
+        return $result
+    } catch {
+        return @{
+            isValid = $false;
+            msg = "Erro ao acessar o link informado. Veja erro no console.";
+            backColor = $colors.error;
+            error = $_.Exception.Message;
+        }
+    }
+
+}
+
+function TestLinkResponse {
+    param (
+        $response
+    )
+    
+    if ($response.RawContent -match "LISTA FINAL") {
+        $grupoMateriais = $response.InputFields.value
+        $processosSPA   = (Select-String "23080.\d\d\d\d\d\d/\d\d\d\d-\d\d" -InputObject $response.RawContent -AllMatches | 
+                           ForEach-Object {$_.matches.Value} | Sort-Object -Unique)
+        
+        return @{
+            isValid = $true;
+            msg = $grupoMateriais;
+            backColor = $colors.ok;
+            processosSPA = $processosSPA;
+        }
+    } else {
+        return @{
+            isValid = $true;
+            msg = "Este não parece ser um link de planilha de inserção de demandas";
+            backColor = $colors.warning;
+        }
+    }
+
+}
+
+function CheckLink {
+
+    if ($txt_link_planilha.currentLink -eq $txt_link_planilha.Text) {
         return
     }
 
     $lbl_info_grupo.Text = "Aguarde... Acessando o link informado..."
+
     $lbl_wait.Show()
+
+        ClearLinkStates
+
+        $result = TestLink
+        
+        RefreshLink $result
     
-    try {
-        $resultLinkAccess = Invoke-WebRequest -Method Get -Uri $txt_link_planilha.Text
-    } catch {
-        $lbl_info_grupo.Text = "Não foi possível acessar o link"
-        $pnl_link.BackColor  = $colors.error
-        InterfaceCustomProperty $txt_link_planilha "validLink" $false
+    $lbl_wait.Hide()
 
-        RefreshLink
-        return
-    }                
-
-    $grupoMateriais = $resultLinkAccess.InputFields.value
-    $processosSPA   = Select-String "23080.\d\d\d\d\d\d/\d\d\d\d-\d\d" -InputObject $resultLinkAccess.RawContent -AllMatches | ForEach-Object {$_.matches.Value} | Sort-Object -Unique
-
-    InterfaceCustomProperty $txt_link_planilha "processosSPA" $processosSPA
-
-    if ($resultLinkAccess.RawContent -match "LISTA FINAL") {
-        $text      = $grupoMateriais
-        $backColor = $colors.ok
-    } else {
-        $text      = "Este não parece ser um link de planilha de inserção de demandas"
-        $backColor = $colors.warning
-    }
-
-    $lbl_info_grupo.Text = $text
-    $pnl_link.BackColor  = $backColor
-
-    InterfaceCustomProperty $txt_link_planilha "validLink" $true
-    RefreshLink
 }
 
 function RefreshLink {
+    param(
+        $result
+    ) 
 
+    if ($result.error) {
+        ShowMessage $result.error "Erro ao acessar link:" -bgColor "Red" -fgColor "Yellow"
+    }    
+
+    $lbl_info_grupo.Text = $result.msg
+    $pnl_link.BackColor  = $result.backColor
+    
+    InterfaceCustomProperty $txt_link_planilha "validLink" $result.isValid
+    
     InterfaceCustomProperty $txt_link_planilha "currentLink" $txt_link_planilha.Text
+
     ConfigJSON -key "link_planilha" -value $txt_link_planilha.Text
 
-    RefreshCmbProcessos
-
-    $lbl_wait.Hide()
+    RefreshCmbProcessos $result.processosSPA
 
     RefreshBtnGerar
 }
