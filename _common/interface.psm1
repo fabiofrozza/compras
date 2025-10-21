@@ -1,5 +1,5 @@
-# Functions Names:          # Variables
-#  PascalCase               #  camelCase
+# Functions Names:          # Variables:                # Constants and global values:
+#  PascalCase               #  camelCase                #  UPPER_SNAKE_CASE
 # Parameters:               # fld - Folder
 #  camelCase                # fle - File
 #
