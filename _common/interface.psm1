@@ -11,19 +11,61 @@
 # ctr_ - Control            # frm_ - Form               # tip_ - ToolTip
 # tbc_ - TabControl         # tbp_ - TabPage
 
+function InterfaceConstants {
+    param (
+        [int]$frmWidth,
+        [int]$frmHeight,
+        [int]$marginLeft,
+        [int]$marginRight,
+        [int]$marginTopBottom
+    )
+    
+    SetAppConstants @{
+        # UI control sizes
+        FRM_MAIN_WIDTH    = $frmWidth
+        FRM_MAIN_HEIGHT   = $frmHeight
+        PIC_BANNER_HEIGHT = 100
+
+        BTN_WIDTH  = 90
+        BTN_HEIGHT = 30
+    }
+
+    SetAppConstants @{
+        # UI colors
+        COLOR_OK      = "LightGreen"
+        COLOR_SUCCESS = "LightGreen"
+        COLOR_WARNING = "LightGoldenrodYellow"
+        COLOR_ERROR   = "LightSalmon"
+
+        # UI paddings
+        PADDING_INNER = 10
+        PADDING_OUTER = 15
+
+        # UI margins
+        MARGIN_TOP    = $marginTopBottom
+        MARGIN_BOTTOM = $PIC_BANNER_HEIGHT + $marginTopBottom
+        MARGIN_LEFT   = $marginLeft
+        MARGIN_RIGHT  = $marginRight
+    }
+
+    SetAppConstants @{
+        # UI util area
+        UTIL_AREA_WIDTH  = ($FRM_MAIN_WIDTH - $MARGIN_LEFT - $MARGIN_RIGHT)
+        UTIL_AREA_HEIGHT = ($FRM_MAIN_HEIGHT - $MARGIN_TOP - 75 - $MARGIN_BOTTOM - ($PADDING_OUTER * 2))
+    }
+}
+
 function InterfaceMainForm {
     param (
         [string]$title,
-        [int]$width,
-        [int]$height,
         [string]$icon
     )
 
     $frm_                 = New-Object System.Windows.Forms.Form
     $frm_.Text            = $title
 
-    $frm_.Width           = $width
-    $frm_.Height          = $height
+    $frm_.Width           = $FRM_MAIN_WIDTH
+    $frm_.Height          = $FRM_MAIN_HEIGHT
 
     $frm_.StartPosition   = "CenterScreen"
     $frm_.MaximizeBox     = $false
@@ -47,10 +89,10 @@ function InterfaceBanner {
 
     $pic_          = New-Object Windows.Forms.PictureBox
     $pic_.Image    = InterfaceGetImage "banner.jpg"
-    $pic_.Width    = $frm_.Width
-    $pic_.Height   = 100
+    $pic_.Width    = $FRM_MAIN_WIDTH
+    $pic_.Height   = $PIC_BANNER_HEIGHT
     $pic_.Left     = 0
-    $pic_.Top      = $frm_.Height - $pic_.Height
+    $pic_.Top      = $FRM_MAIN_HEIGHT - $pic_.Height
     $pic_.SizeMode = "StretchImage"
 
     return $pic_
@@ -63,12 +105,14 @@ function InterfaceButton {
         [string]$tag,
         [int]$top,
         [int]$left,
-        [scriptblock]$function
+        [scriptblock]$function,
+        [int]$width = $BTN_WIDTH,
+        [int]$height = $BTN_HEIGHT
     )
 
     $btn_        = New-Object System.Windows.Forms.Button
-    $btn_.Width  = 90
-    $btn_.Height = 30
+    $btn_.Width  = $width
+    $btn_.Height = $height
     $btn_.Top    = $top
     $btn_.Left   = $left
 
@@ -617,8 +661,8 @@ function InterfaceSplashScreen {
     $lbl_.Text        = "⏳`nAguarde..."
 
     if ($onlyLabel) {
-        $lbl_.Top         = ($frm_main.Height - $height) / 2 
-        $lbl_.Left        = ($frm_main.Width - $width) / 2 
+        $lbl_.Top         = ($FRM_MAIN_HEIGHT - $height) / 2 
+        $lbl_.Left        = ($FRM_MAIN_WIDTH - $width) / 2 
 
         return $lbl_
     }

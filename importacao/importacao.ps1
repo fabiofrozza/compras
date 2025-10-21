@@ -888,14 +888,6 @@ main "IMPORTACAO"
 SetAppConstants @{
     # Regex Patterns
     REGEX_PROCESSOS_SPA = "23080\.\d{6}/\d{4}-\d{2}"
-    
-    COLOR_OK      = "LightGreen"
-    COLOR_WARNING = "LightGoldenrodYellow"
-    COLOR_ERROR   = "LightSalmon"
-
-    # Tamanhos de UI
-    PADDING_INNER = 10
-    PADDING_OUTER = 15
 }
 
 CheckFolder @(
@@ -906,7 +898,9 @@ CheckFolder @(
 
 # MAIN FORM
 
-$frm_main, $pic_banner, $tip_ = InterfaceMainForm "Importação Planilhas - Google Drive/Solar" 900 620 "planilha"
+InterfaceConstants -frmWidth 900 -frmHeight 620 -marginLeft 130 -marginRight 110 -marginTopBottom 15
+
+$frm_main, $pic_banner, $tip_ = InterfaceMainForm -title "Importação Planilhas - Google Drive/Solar" -icon "planilha"
 
 $lst_image = InterfaceImageList
 
@@ -951,23 +945,11 @@ $mnu_context_info = InterfaceContextMenu $items
 
 # PANEL LINK
 
-$margin = @{
-    top = 15;
-    bottom = $pic_banner.Height + 15;
-    left = 130;
-    right = 110;
-}    
-
-$utilSpace = @{
-    width  = $frm_main.Width - $margin.left - $margin.right;
-    height = $frm_main.Height - $margin.top - 75 - $margin.bottom - ($PADDING_OUTER * 2)
-}
-
 $params = @{
-    width = $utilSpace.width;
+    width = $UTIL_AREA_WIDTH;
     height = 75;
-    top = $margin.top;
-    left = $margin.left;
+    top = $MARGIN_TOP;
+    left = $MARGIN_LEFT;
 }
 $pnl_link = InterfacePanel @params
 
@@ -1055,7 +1037,7 @@ $frm_main.Controls.AddRange(@($pnl_link))
 $params = @{
     type = "control";
     width = $pnl_link.Width;
-    height = $utilSpace.height * 0.45;
+    height = $UTIL_AREA_HEIGHT * 0.45;
     top = InterfacePosition $pnl_link "bottom" $PADDING_OUTER;
     left = $pnl_link.Left;
     properties = @{
@@ -1264,7 +1246,7 @@ $tbp_erros.Controls.AddRange(@($btn_erro, $btn_log, $lst_erros))
 $params = @{
     type = "control";
     width = $pnl_link.Width;
-    height = $utilSpace.height * 0.55;
+    height = $UTIL_AREA_HEIGHT * 0.55;
     top = InterfacePosition $tbc_info "bottom" $PADDING_OUTER;
     left = $pnl_link.Left;
     properties = @{
@@ -1430,7 +1412,7 @@ $params = @{
     size = 100;
     height = 50;
     top = InterfacePosition $pic_banner "top" $PADDING_OUTER 50;
-    left = ($margin.left / 2) - (100 / 2);
+    left = ($MARGIN_LEFT / 2) - (100 / 2);
     name = "dcom.tif";
     tag = "Ir para a página do DCOM";
     function = {
@@ -1455,7 +1437,7 @@ $btn_ufsc = InterfaceButtonImage @params
 
 $params = @{
     size = 50;
-    top = $margin.top;
+    top = $MARGIN_TOP;
     left = InterfacePosition $btn_dcom "centerHorizontal" -targetWidth 50;
     name = "r";
     tag = "O programa R não está instalado.`r`nClique aqui para ir para a página de download.";
@@ -1468,8 +1450,8 @@ $btn_r = InterfaceButtonImage @params
 
 $params = @{
     size = 70;
-    top = $margin.top;
-    left = $frm_main.Width - [math]::Round($margin.right / 2) - (70 / 2);
+    top = $MARGIN_TOP;
+    left = $FRM_MAIN_WIDTH - [math]::Round($MARGIN_RIGHT / 2) - (70 / 2);
     name = "calendario";
     tag = "Ir para a página do Calendário de Compras";
     function = {
@@ -1495,8 +1477,8 @@ $btn_manual = InterfaceButtonImage @params
 $params = @{
     text = "Atualizar";
     tag = "Atualizar arquivos";
-    top = $frm_main.Height - 85;
-    left = $margin.left;
+    top = $FRM_MAIN_HEIGHT - 85;
+    left = $MARGIN_LEFT;
     function = {
         RefreshLstFiles
     }
