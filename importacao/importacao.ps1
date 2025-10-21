@@ -896,7 +896,6 @@ SetAppConstants @{
     # Tamanhos de UI
     PADDING_INNER = 10
     PADDING_OUTER = 15
-
 }
 
 CheckFolder @(

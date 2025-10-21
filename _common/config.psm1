@@ -256,6 +256,48 @@ function IsUserRunningR {
 
 }
 
+function SetAppConstants {
+    <#
+    .SYNOPSIS
+        Defines global constant variables for the application
+    
+    .DESCRIPTION
+        Creates global variables with ReadOnly option from a hashtable
+    
+    .PARAMETER Constants
+        Hashtable containing the names and values of the constants
+    
+    .PARAMETER Option
+        Protection type: 'ReadOnly', 'Constant' or 'None' (default: ReadOnly)
+    
+    .EXAMPLE
+        SetAppConstants @{
+            REGEX_EMAIL = '^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$'
+            BTN_WIDTH = 120
+        }
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [hashtable]$constants,
+        
+        [Parameter(Mandatory = $false)]
+        [ValidateSet('ReadOnly', 'Constant')]
+        [string]$option = 'ReadOnly'
+    )
+    
+    foreach ($key in $constants.Keys) {
+        $params = @{
+            Name  = $key
+            Value = $constants[$key]
+            Scope = 'Global'
+            Force = $true
+        }
+        
+        New-Variable @params -ErrorAction Stop
+    }
+}
+
 function main {
     param(
         [string]$scriptName
