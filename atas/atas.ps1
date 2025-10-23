@@ -212,7 +212,6 @@ $params = @{
 }
 $pnl_pregao, $lbl_pregao = InterfacePanel @params
 
-$utilAreaPnlPregao = $pnl_pregao.Height - ($PADDING_OUTER * 2)
 $offsetY = 30
 $offsetX = 30
 

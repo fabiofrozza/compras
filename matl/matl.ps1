@@ -790,7 +790,7 @@ $frm_main.Controls.AddRange($controls)
 
 # SHOW FORM
 
-InterfaceShowForm -title "MATL - CADASTRO FORNECEDORES - MANTER ABERTA" -start {
+InterfaceShowForm -title "MATL - CADASTRO FORNECEDORES" -start {
     RefreshImportar
     RefreshPregoes
 

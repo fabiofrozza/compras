@@ -1534,7 +1534,7 @@ $lbl_wait.BringToFront()
 $frm_splash, $lbl_splash = InterfaceSplashScreen
 $frm_splash.Controls.AddRange(@($lbl_splash))
 
-InterfaceShowForm -title "IMPORTAÇÃO GOOGLE DRIVE/SOLAR - MANTER ABERTA" -start {
+InterfaceShowForm -title "IMPORTAÇÃO GOOGLE DRIVE/SOLAR" -start {
 
     [void]$frm_splash.Show()
     
