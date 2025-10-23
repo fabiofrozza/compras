@@ -256,7 +256,7 @@ function IsUserRunningR {
 
 }
 
-function SetAppConstants {
+function SetScriptConstants {
     <#
     .SYNOPSIS
         Defines global constant variables for the application
@@ -264,14 +264,14 @@ function SetAppConstants {
     .DESCRIPTION
         Creates global variables with ReadOnly option from a hashtable
     
-    .PARAMETER Constants
+    .PARAMETER constants
         Hashtable containing the names and values of the constants
     
-    .PARAMETER Option
-        Protection type: 'ReadOnly', 'Constant' or 'None' (default: ReadOnly)
+    .PARAMETER option
+        Protection type: 'ReadOnly' (default) or 'Constant'
     
     .EXAMPLE
-        SetAppConstants @{
+        SetScriptConstants @{
             REGEX_EMAIL = '^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$'
             BTN_WIDTH = 120
         }

@@ -17,10 +17,10 @@ function InterfaceConstants {
         [int]$frmHeight,
         [int]$marginLeft,
         [int]$marginRight,
-        [int]$marginTopBottom
+        [int]$marginTop
     )
     
-    SetAppConstants @{
+    SetScriptConstants @{
         # UI control sizes
         FRM_MAIN_WIDTH    = $frmWidth
         FRM_MAIN_HEIGHT   = $frmHeight
@@ -28,30 +28,35 @@ function InterfaceConstants {
 
         BTN_WIDTH  = 90
         BTN_HEIGHT = 30
-    }
 
-    SetAppConstants @{
+        BTN_IMAGE_SMALL_WIDTH  = 20
+        BTN_IMAGE_SMALL_HEIGHT = 20
+        BTN_IMAGE_BIG_WIDTH    = 70
+        BTN_IMAGE_BIT_HEIGHT   = 70
+
         # UI colors
         COLOR_OK      = "LightGreen"
         COLOR_SUCCESS = "LightGreen"
         COLOR_WARNING = "LightGoldenrodYellow"
         COLOR_ERROR   = "LightSalmon"
-
+    
         # UI paddings
         PADDING_INNER = 10
         PADDING_OUTER = 15
+    }    
 
+    SetScriptConstants @{
         # UI margins
-        MARGIN_TOP    = $marginTopBottom
-        MARGIN_BOTTOM = $PIC_BANNER_HEIGHT + $marginTopBottom
+        MARGIN_TOP    = $marginTop
+        MARGIN_BOTTOM = $PIC_BANNER_HEIGHT + $PADDING_OUTER
         MARGIN_LEFT   = $marginLeft
         MARGIN_RIGHT  = $marginRight
     }
 
-    SetAppConstants @{
+    SetScriptConstants @{
         # UI util area
-        UTIL_AREA_WIDTH  = ($FRM_MAIN_WIDTH - $MARGIN_LEFT - $MARGIN_RIGHT)
-        UTIL_AREA_HEIGHT = ($FRM_MAIN_HEIGHT - $MARGIN_TOP - 75 - $MARGIN_BOTTOM - ($PADDING_OUTER * 2))
+        UTIL_AREA_WIDTH  = $FRM_MAIN_WIDTH - $MARGIN_LEFT - $MARGIN_RIGHT
+        UTIL_AREA_HEIGHT = $FRM_MAIN_HEIGHT - $MARGIN_TOP - $MARGIN_BOTTOM
     }
 }
 
@@ -116,7 +121,7 @@ function InterfaceButton {
     $btn_.Top    = $top
     $btn_.Left   = $left
 
-    $btn_.Image             = (New-Object System.Drawing.Bitmap (InterfaceGetImage $image), 20, 20)
+    $btn_.Image             = (New-Object System.Drawing.Bitmap (InterfaceGetImage $image), $BTN_IMAGE_SMALL_WIDTH, $BTN_IMAGE_SMALL_HEIGHT)
     $btn_.TextImageRelation = "ImageBeforeText"
     $btn_.ImageAlign        = "TopLeft"
     $btn_.TextAlign         = "MiddleRight"
@@ -138,7 +143,7 @@ function InterfaceButtonImage {
         [string]$image = $name,
         [int]$top,
         [int]$left,
-        [int]$size = 20,
+        [int]$size = $BTN_IMAGE_SMALL_WIDTH,
         [int]$height = $size,
         [string]$tag,
         [scriptblock]$function
@@ -188,7 +193,7 @@ function InterfaceButtonImage {
 function InterfaceImageList {
     
     $lst_           = New-Object System.Windows.Forms.ImageList 
-    $lst_.ImageSize = "20,20" 
+    $lst_.ImageSize = "$BTN_IMAGE_SMALL_WIDTH,$BTN_IMAGE_SMALL_HEIGHT" 
     $images = @{
         "excel"       = "excel"
         "excel_erro"  = "excel_erro"
@@ -439,7 +444,7 @@ function InterfaceShowForm {
 
     $frm_main.Add_Load({
         ShowMessage "Iniciando interface"
-        (Get-Host).UI.RawUI.WindowTitle = $title
+        (Get-Host).UI.RawUI.WindowTitle = "$title - MANTER ESTA JANELA ABERTA"
         & $start
     })
 
@@ -661,8 +666,8 @@ function InterfaceSplashScreen {
     $lbl_.Text        = "⏳`nAguarde..."
 
     if ($onlyLabel) {
-        $lbl_.Top         = ($FRM_MAIN_HEIGHT - $height) / 2 
-        $lbl_.Left        = ($FRM_MAIN_WIDTH - $width) / 2 
+        $lbl_.Top  = ($FRM_MAIN_HEIGHT - $height) / 2 
+        $lbl_.Left = ($FRM_MAIN_WIDTH - $width) / 2 
 
         return $lbl_
     }

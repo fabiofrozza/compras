@@ -31,11 +31,11 @@ function ChecarDados {
     }
 
     if ($txt_objeto.Text -eq "") {
-        $txt_objeto.Width = 280
+        $txt_objeto.Width = (InterfacePosition $pnl_pregao "width" $PADDING_OUTER) - ($PADDING_OUTER * 2) - $btn_erro_objeto.Width
         $btn_erro_objeto.Show()
     } else {
         $btn_erro_objeto.Hide()
-        $txt_objeto.Width = 300
+        $txt_objeto.Width = (InterfacePosition $pnl_pregao "width" $PADDING_OUTER)
         $txt_objeto.Text = $txt_objeto.Text.Replace("`r`n", " ")
         $txt_objeto.Refresh()
     }
@@ -197,28 +197,38 @@ main "ATAS"
 
 # MAIN FORM
 
-$frm_main, $pic_banner, $tip_ = InterfaceMainForm "Atas" 800 500 "atas"
+InterfaceConstants -frmWidth 1000 -frmHeight 500 -marginTop 35 -marginLeft 120 -marginRight 85
 
-$padding = 15
+$frm_main, $pic_banner, $tip_ = InterfaceMainForm "Atas" "atas"
 
 # PANEL INFORMAÇÕES DO PREGÃO
 
-$pnl_pregao, $lbl_pregao = InterfacePanel -labelText "Informações do Pregão" -top 35 -left 120 -width 340 -height 350
+$params = @{
+    labelText = "Informações do Pregão";
+    top = $MARGIN_TOP;
+    left = $MARGIN_LEFT;
+    width = $UTIL_AREA_WIDTH * 0.55;
+    height = $UTIL_AREA_HEIGHT;
+}
+$pnl_pregao, $lbl_pregao = InterfacePanel @params
 
+$utilAreaPnlPregao = $pnl_pregao.Height - ($PADDING_OUTER * 2)
 $offsetY = 30
 $offsetX = 30
 
 $params = @{
     type = "NumericUpDown";
     labelText = "Número";
-    top = $padding + 20;
-    left = $padding;
+    top = $PADDING_OUTER + 20;
+    left = $PADDING_OUTER;
     width = 100;
     tag = "Informe o número do pregão";
     min = 1;
     max = 999999999;
     events = @{
-        LostFocus = {ChecarDados}
+        LostFocus = {
+            ChecarDados
+        }
     }
 }
 $txt_n_pregao, $lbl_n_pregao = InterfaceControl @params
@@ -233,7 +243,9 @@ $params = @{
     min = 2020;
     max = (Get-Date).Year + 1;
     events = @{
-        LostFocus = {ChecarDados}
+        LostFocus = {
+            ChecarDados
+        }
     }
 }
 $txt_ano_pregao, $lbl_ano_pregao = InterfaceControl @params
@@ -249,8 +261,12 @@ $params = @{
         Mask = "\2\3\0\8\0\.000000\/0000\-00"
     };
     events = @{
-        TextChanged = {ChecarDados}
-        LostFocus = {ChecarDados}
+        TextChanged = {
+            ChecarDados
+        }
+        LostFocus = {
+            ChecarDados
+        }
     }
 }
 $txt_processo, $lbl_processo = InterfaceControl @params
@@ -269,7 +285,7 @@ $params = @{
     labelText = "Objeto (após 'REGISTRAR PREÇO...')";
     top = InterfacePosition $txt_processo "bottom" $offsetY;
     left = $txt_n_pregao.Left;
-    width = 300;
+    width = InterfacePosition $pnl_pregao "width" $PADDING_OUTER;
     height = 65;
     tag = "Informe o objeto do pregão conforme o Edital.`nNa Ata, esta informação será incluída após o trecho `"REGISTRAR PREÇO...`".";
     properties = @{
@@ -277,7 +293,9 @@ $params = @{
         ScrollBars = "Vertical"
     };
     events = @{
-        LostFocus = {ChecarDados}
+        LostFocus = {
+            ChecarDados
+        }
     }
 }
 $txt_objeto, $lbl_objeto = InterfaceControl @params
@@ -286,7 +304,7 @@ $params = @{
     size = 20;
     name = "erro";
     top = InterfacePosition $txt_objeto "center" -targetWidth 20;
-    left = (InterfacePosition $pnl_pregao "innerCorner" -targetWidth 20 -offset $padding).left;
+    left = (InterfacePosition $pnl_pregao "innerCorner" -targetWidth 20 -offset $PADDING_OUTER).left;
     tag = "Objeto não preenchido.`nO campo deve conter o objeto do pregão conforme o Edital.`nNa Ata, esta informação será incluída após o trecho 'REGISTRAR PREÇO...'"
 }
 $btn_erro_objeto = InterfaceButtonImage @params
@@ -303,12 +321,23 @@ $params = @{
         CustomFormat = "dd/MMMM/yyyy"
     };
     events = @{
-        CloseUp = {DataPorExtenso};
-        TextChanged = {DataPorExtenso}
+        CloseUp = {
+            DataPorExtenso
+        };
+        TextChanged = {
+            DataPorExtenso
+        }
     }
 }
 $txt_data_seletor, $lbl_date = InterfaceControl @params
-$txt_data_extenso = InterfaceLabel -top ($txt_data_seletor.Top + 25) -left ($txt_n_pregao.Left) -width 300 -height 20
+
+$params = @{
+    top = $txt_data_seletor.Top + 25;
+    left = $txt_n_pregao.Left;
+    width = 300;
+    height = 20;
+}
+$txt_data_extenso = InterfaceLabel @params
 
 $params = @{
     type = "NumericUpDown";
@@ -320,7 +349,9 @@ $params = @{
     min = 1;
     max = 10000;
     events = @{
-        Click = {AtualizarFornecedores}
+        Click = {
+            AtualizarFornecedores
+        }
         LostFocus = {
             ChecarDados
             AtualizarFornecedores
@@ -339,12 +370,14 @@ $params = @{
     min = $txt_ano_pregao.Minimum;
     max = $txt_ano_pregao.Maximum;
     events = @{
-        LostFocus = {ChecarDados}
+        LostFocus = {
+            ChecarDados
+        }
     }
 }
 $txt_ano_ata, $lbl_ano_ata = InterfaceControl @params
 
-$position = InterfacePosition $pnl_pregao "innerCorner" -targetWidth 20 -targetHeight 20 -offset $padding;
+$position = InterfacePosition $pnl_pregao "innerCorner" -targetWidth 20 -targetHeight 20 -offset $PADDING_OUTER;
 $params = @{
     hover = $true;
     size = 20;
@@ -364,7 +397,8 @@ $controls = @(
     $lbl_date, $txt_data_seletor, $txt_data_extenso,
     $lbl_n_ata, $txt_n_ata,
     $lbl_ano_ata, $txt_ano_ata,
-    $btn_clear)
+    $btn_clear
+)
 $pnl_pregao.Controls.AddRange($controls)
 $frm_main.Controls.AddRange(@($pnl_pregao, $lbl_pregao))
 $lbl_pregao.BringToFront()
@@ -373,19 +407,19 @@ $lbl_pregao.BringToFront()
 
 $params = @{
     labelText = "Fornecedores";
-    top = $pnl_pregao.Top;
-    left = InterfacePosition $pnl_pregao "right" $padding;
-    width = 240;
-    height = 350
+    top = $MARGIN_TOP;
+    left = InterfacePosition $pnl_pregao "right" $PADDING_OUTER;
+    width = $UTIL_AREA_WIDTH * 0.45 - $PADDING_OUTER;
+    height = $UTIL_AREA_HEIGHT
 }
 $pnl_fornecedores, $lbl_fornecedores = InterfacePanel @params
 
 $params = @{
     type = "DataGridView";
     labelText = "Relatórios SICAF";
-    top = $padding + 20;
-    left = $padding;
-    width = InterfacePosition $pnl_fornecedores "width" -offset $padding;
+    top = $PADDING_OUTER + 20;
+    left = $PADDING_OUTER;
+    width = InterfacePosition $pnl_fornecedores "width" -offset $PADDING_OUTER;
     height = 260;
     properties = @{
         BorderStyle              = "Fixed3D";
@@ -400,13 +434,13 @@ $params = @{
         ScrollBars               = "Vertical"
     };
     columns = [ordered]@{
-        "Ata" = (InterfacePosition $pnl_fornecedores "width" -offset $padding) * .2;
-        "Fornecedor/Arquivo" = (InterfacePosition $pnl_fornecedores "width" -offset $padding) * .77
+        "Ata" = (InterfacePosition $pnl_fornecedores "width" -offset $PADDING_OUTER) * .2;
+        "Fornecedor/Arquivo" = (InterfacePosition $pnl_fornecedores "width" -offset $PADDING_OUTER) * .77
     }
 }
 $lst_sicaf, $lbl_sicaf = InterfaceList @params
 
-$position = InterfacePosition $pnl_fornecedores "innerCorner" -targetWidth 20 -targetHeight 20 -offset $padding
+$position = InterfacePosition $pnl_fornecedores "innerCorner" -targetWidth 20 -targetHeight 20 -offset $PADDING_OUTER
 $params = @{
     hover = $true;
     size = 20;
@@ -510,7 +544,7 @@ $btn_dcom = InterfaceButtonImage @params
 $params = @{
     size = 40;
     top = $pnl_fornecedores.Top;
-    left = InterfacePosition $pnl_fornecedores "right" $padding;
+    left = InterfacePosition $pnl_fornecedores "right" $PADDING_OUTER;
     name = "word";
     function = {
         InterfaceMinimize
@@ -600,10 +634,12 @@ $frm_main.Controls.AddRange($controls)
 
 # SHOW FORM
 
-InterfaceShowForm -title "ATAS - MANTER ABERTA" -start {
+InterfaceShowForm -title "ATAS" -start {
     AtualizarFornecedores
     ChecarDados
     DataPorExtenso
     ConfigJSON -show
     CheckRInstallation
-} -close {SalvarDados}
+} -close {
+    SalvarDados
+}

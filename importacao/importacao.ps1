@@ -885,7 +885,7 @@ if (Test-Path -Path "$fldCommon\$configMain") {
 
 main "IMPORTACAO"
 
-SetAppConstants @{
+SetScriptConstants @{
     # Regex Patterns
     REGEX_PROCESSOS_SPA = "23080\.\d{6}/\d{4}-\d{2}"
 }
@@ -898,7 +898,11 @@ CheckFolder @(
 
 # MAIN FORM
 
-InterfaceConstants -frmWidth 900 -frmHeight 620 -marginLeft 130 -marginRight 110 -marginTopBottom 15
+InterfaceConstants -frmWidth 900 -frmHeight 620 -marginLeft 130 -marginRight 110 -marginTop 15
+
+SetScriptConstants @{
+    UTIL_AREA_HEIGHT = $UTIL_AREA_HEIGHT - 75 - ($PADDING_OUTER * 2)
+}
 
 $frm_main, $pic_banner, $tip_ = InterfaceMainForm -title "Importação Planilhas - Google Drive/Solar" -icon "planilha"
 
