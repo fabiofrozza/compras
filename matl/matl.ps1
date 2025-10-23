@@ -497,28 +497,34 @@ main "MATL"
 
 # MAIN FORM
 
-$frm_main, $pic_banner, $tip_ = InterfaceMainForm "MATL - Cadastro Fornecedores" 800 500 "matl"
+InterfaceConstants -frmWidth 800 -frmHeight 500 -marginLeft 120 -marginTop 35
 
-$padding = 15
-$innerPadding = 10
+$frm_main, $pic_banner, $tip_ = InterfaceMainForm "MATL - Cadastro Fornecedores" "matl"
 
 $lst_image = InterfaceImageList
 
 # PANEL RESUMO
 
-$pnl_resumo, $lbl_pnl_resumo = InterfacePanel -top 35 -left 120 -width 260 -height 160 -labelText "Resumo   "
+$params = @{
+    top = $MARGIN_TOP;
+    left = $MARGIN_LEFT;
+    width = 260;
+    height = 160;
+    labelText = "Resumo   ";
+}
+$pnl_resumo, $lbl_pnl_resumo = InterfacePanel @params
 
 $params = @{
     name = "lst_resumo"; 
-    width = InterfacePosition $pnl_resumo "width" $padding;
-    height = 130;
-    top = $padding;
-    left = $padding;
+    width = InterfacePosition $pnl_resumo "width" $PADDING_OUTER;
+    height = $pnl_resumo.Height - ($PADDING_OUTER * 2);
+    top = $PADDING_OUTER;
+    left = $PADDING_OUTER;
     sorting = "None";
     columns = [ordered]@{
         'Status' = 120;
-        'Informação' = -2
-    }
+        'Informação' = -2;
+    };
 }
 $lst_resumo = InterfaceList @params
 
@@ -541,8 +547,8 @@ $params = @{
     name = "lst_importar"; 
     width = 250;
     height = $lst_resumo.Height;
-    top = $padding;
-    left = $padding;
+    top = $PADDING_OUTER;
+    left = $PADDING_OUTER;
     events = @{
         MouseUp = {
             RefreshResumo $this
@@ -564,7 +570,7 @@ $params = @{
     hover = $true;
     name = "excluir";
     top = InterfacePosition $lst_importar "bottom" -20;
-    left = InterfacePosition $lst_importar "right" $innerPadding;
+    left = InterfacePosition $lst_importar "right" $PADDING_INNER;
     function = {Excluir $lst_importar};
     tag = "Excluir arquivo"
 }
@@ -573,7 +579,7 @@ $btn_delete_importar = InterfaceButtonImage @params
 $params = @{
     hover = $true;
     name = "mover";
-    top = InterfacePosition $btn_delete_importar "top" $innerPadding;
+    top = InterfacePosition $btn_delete_importar "top" $PADDING_INNER;
     left = $btn_delete_importar.Left;
     function = {Mover};
     tag = "Mover o arquivo para a pasta Documentos"
@@ -583,7 +589,7 @@ $btn_move = InterfaceButtonImage @params
 $params = @{
     hover = $true;
     name = "check";
-    top = InterfacePosition $btn_move "top" $innerPadding
+    top = InterfacePosition $btn_move "top" $PADDING_INNER
     left = $btn_delete_importar.Left;
     function = {Conferir};
     tag = "Conferir informações do arquivo a importar"
@@ -598,9 +604,9 @@ $lbl_pnl_importar.BringToFront()
 
 $params = @{
     top = InterfacePosition $pnl_resumo "bottom" 30;
-    left = $pnl_resumo.Left;
+    left = $MARGIN_LEFT;
     width = $pnl_importar.Left + $pnl_importar.Width - $pnl_resumo.Left;
-    height = 160;
+    height = $pnl_resumo.Height;
     labelText = "Pregões"
 }
 $pnl_pregoes, $lbl_pnl_pregoes = InterfacePanel @params
@@ -608,9 +614,9 @@ $pnl_pregoes, $lbl_pnl_pregoes = InterfacePanel @params
 $params = @{
     name = "lst_pregoes"; 
     width = $lst_resumo.Width;
-    height = 130;
-    top = $padding;
-    left = $padding;
+    height = $lst_resumo.Height;
+    top = $PADDING_OUTER;
+    left = $PADDING_OUTER;
     view = "LargeIcon";
     events = @{
         MouseUp = {
@@ -630,7 +636,7 @@ $params = @{
     hover = $true;
     name = "excluir";
     top = InterfacePosition $lst_pregoes "bottom" -20;
-    left = InterfacePosition $lst_pregoes "right" $innerPadding;
+    left = InterfacePosition $lst_pregoes "right" $PADDING_INNER;
     function = {Excluir $lst_pregoes};
     tag = "Excluir pasta"
 }
@@ -641,7 +647,7 @@ $params = @{
     name = "lst_atas"; 
     width = $lst_importar.Width;
     height = $lst_pregoes.Height - 15;
-    top = $padding + 15;
+    top = $PADDING_OUTER + 15;
     left = $pnl_importar.Left + $lst_importar.Left - $pnl_pregoes.Left;
     columns = [ordered]@{
         "Atas" = 180;
@@ -654,7 +660,7 @@ $params = @{
     hover = $true;
     name = "excluir";
     top = InterfacePosition $lst_atas "bottom" -20;
-    left = InterfacePosition $lst_atas "right" $innerPadding;
+    left = InterfacePosition $lst_atas "right" $PADDING_INNER;
     function = {Excluir $lst_atas};
     tag = "Excluir arquivo"
 }
@@ -663,7 +669,7 @@ $btn_delete_ata = InterfaceButtonImage @params
 $params = @{
     hover = $true;
     name = "excel_bw";
-    top = InterfacePosition $btn_delete_ata "top" $innerPadding;
+    top = InterfacePosition $btn_delete_ata "top" $PADDING_INNER;
     left = $btn_delete_ata.Left;
     function = {Abrir};
     tag = "Abrir a planilha com os dados do fornecedor"
@@ -714,7 +720,7 @@ $btn_dcom = InterfaceButtonImage @params
 $params = @{
     size = 40;
     top = InterfacePosition $pnl_pregoes "bottom" -40;
-    left = InterfacePosition $pnl_pregoes "right" $padding;
+    left = InterfacePosition $pnl_pregoes "right" $PADDING_OUTER;
     name = "folder";
     function = {
         InterfaceMinimize
@@ -750,7 +756,7 @@ $params = @{
     text = "Novo";
     image = "Gerar"
     top = $btn_exit.Top;
-    left = InterfacePosition $btn_exit "left" $padding;
+    left = InterfacePosition $btn_exit "left" $PADDING_OUTER;
     function = {Gerar};
     tag = "Gerar novo arquivo para importar"    
 }
