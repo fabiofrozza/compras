@@ -2,20 +2,20 @@
 #SingleInstance, Force
 SetWorkingDir %A_ScriptDir%
 #Include, ../_common/config.ahk
-Menu, Tray, Icon, ..\_common\images\ufsc_ico.png
+Menu, Tray, Icon, ..\_common\images\company.png
 
 if (A_Args.Length() > 0 && A_Args[1] = "silent") {
     rpath := LocalizarRPath()
-    TrayTip, Observatório UFSC, A geração dos arquivos de dados está ocorrendo em segundo plano., 15
+    TrayTip, Power BI, A geração dos arquivos de dados está ocorrendo em segundo plano., 15
     RunWait, %rpath%\bin\Rscript.exe --vanilla powerbi.R todos silent, , Hide
-    TrayTip, Observatório UFSC, Script finalizado. Verifique os arquivos e o log., 30
+    TrayTip, Power BI, Script finalizado. Verifique os arquivos e o log., 30
     ExitApp
 }
 
 ; --- Interface Gráfica ---
-nomeJanela := "Geração de Dados para Observatório UFSC - Power BI"
-Gui, Add, Picture, x20 y70 w120 h120, ..\_common\images\DCOM.png
-Gui, Add, GroupBox, x150 y10 w660 h200, Observatório UFSC - Geração de Dados para Power BI
+nomeJanela := "Geração de Dados para Power BI"
+Gui, Add, Picture, x20 y70 w120 h120, ..\_common\images\department.png
+Gui, Add, GroupBox, x150 y10 w660 h200, Geração de Dados para Power BI
 Gui, Add, Text, xp+20 yp+25 w470, Selecione o painel para gerar os dados para o Power BI (ou as opções de manutenção) e clique em Executar para mais informações.
 
 ; Grupos
@@ -38,8 +38,7 @@ GuiControl, Font, OutputLog
 Gui, Font
 
 ; Botões principais
-Gui, Add, Button, x+-235 y+15 w110 gManual, Manual DCOM
-Gui, Add, Button, x+10 w110 gCancelar, Sair
+Gui, Add, Button, x+-110 y+15 w110 gCancelar, Sair
 Gui, Add, Button, x690 y80 w105 h110 gExecutarRelatorio vBtnExecutar HwndBtnExecutar, Executar
 
 Gui, Show, w820 h540, %nomeJanela%
@@ -56,7 +55,7 @@ ExecutarRelatorio:
     ; Determina qual script R será executado
     if (TipoRelatorio = 1) {
         R_script := "planejamento"
-        mensagem := "Painel Visão Planejamento`n`nSerá acessada a planilha de Controle de Processos do DCOM para recuperar os dados dos processos, Unidades requerentes e situação do envio da documentação."
+        mensagem := "Painel Visão Planejamento`n`nSerá acessada a planilha de controle para recuperar os dados dos processos, Unidades requerentes e situação do envio da documentação."
     } else if (TipoRelatorio = 2) {
         R_script := "licitacao"
         mensagem := "Painel Visão Licitação`n`nSerão obtidos os dados dos Mapas de Licitação da pasta POWERBI/Mapa de licitações."
@@ -65,7 +64,7 @@ ExecutarRelatorio:
         mensagem := "Painel Visão Execução`n`nSerão obtidos os dados dos relatórios de execução das AFs/Empenhos da pasta POWERBI/Execucao AF Empenho."
     } else if (TipoRelatorio = 4) {
         R_script := "paalteracoes"
-        mensagem := "Painel Processos Administrativos e Alterações Contratuais`n`nSerá acessada a planilha Processos SAA/DCOM para recuperar os dados dos processos administrativos, trocas de marca, cancelamentos e reequilíbrios."
+        mensagem := "Painel Processos Administrativos e Alterações Contratuais`n`nSerá acessada a planilha de controle para recuperar os dados dos processos administrativos, trocas de marca, cancelamentos e reequilíbrios."
     } else if (TipoRelatorio = 5) {
         R_script := "renomear"
         mensagem := "Os arquivos das pastas Mapa de licitações e Execucao AF Empenho serão renomeados conforme o padrão TIPO - ANO - ETAPA - PROCESSO - PREGÃO."
@@ -158,10 +157,6 @@ ExecutarRelatorio:
     ; Inicia o monitoramento da saída do R
     SetTimer, MonitorarSaidaR, 500
 
-return
-
-Manual:
-    Run, https://dcom.wiki.ufsc.br/index.php/Observatório_UFSC_-_Gestão_de_Compras
 return
 
 Cancelar:

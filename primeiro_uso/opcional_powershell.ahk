@@ -3,8 +3,8 @@
 SetWorkingDir %A_ScriptDir%
 
 ; --- Configuração da interface gráfica ---
-Menu, Tray, Icon, ..\_common\images\ufsc_ico.png
-Gui, Add, Picture, y20 w120 h120, ..\_common\images\DCOM.png
+Menu, Tray, Icon, ..\_common\images\company.png
+Gui, Add, Picture, y20 w120 h120, ..\_common\images\department.png
 Gui, Add, GroupBox, x150 y10 w330 h150, Atualização do PowerShell
 Gui, Add, Text, x170 y40 w300, Esta é uma etapa opcional para atualizar o PowerShell no seu computador.`n`nO Windows já possui a versão 5 que é compatível com o script para importação das planilhas.`n`nDeseja instalar a nova versão do PowerShell 7.5.1 no seu computador?
 Gui, Add, Button, xp+130 y+35 w80 gInstalar, Instalar

@@ -52,7 +52,7 @@ function CheckRInstallation {
             foreach ($inst in $instalacoes) {
                 try {
                     $RFolder = Get-ItemPropertyValue -Path $inst.PSPath -name InstallPath -ErrorAction Stop
-                    $possivelExe = Join-Path -Path $RFolder -ChildPath "bin\Rscript.exe"
+                    $possivelExe = Join-Path $RFolder "bin\Rscript.exe"
                     if (Test-Path $possivelExe) {
                         $fleExeR = $possivelExe
                         break
@@ -68,7 +68,7 @@ function CheckRInstallation {
             if (Test-Path $folder) {
                 $possiveis = Get-ChildItem -Path $folder -Directory | Sort-Object Name -Descending
                 foreach ($dir in $possiveis) {
-                    $possivelExe = Join-Path -Path $dir.FullName -ChildPath "bin\Rscript.exe"
+                    $possivelExe = Join-Path $dir.FullName "bin\Rscript.exe"
                     if (Test-Path $possivelExe) {
                         $fleExeR = $possivelExe
                         break
@@ -298,16 +298,77 @@ function SetScriptConstants {
     }
 }
 
+function GetEnvConfig {
+    <#
+    .SYNOPSIS
+        Obtém configurações do arquivo .env
+    
+    .DESCRIPTION
+        Lê as configurações do arquivo .env localizado na pasta _common.
+        Pode retornar todas as configurações ou uma configuração específica.
+    
+    .PARAMETER ConfigName
+        Nome da configuração específica a ser retornada.
+        Se não for fornecido, retorna todas as configurações.
+    
+    .EXAMPLE
+        Get-EnvConfig
+        Retorna todas as configurações do arquivo .env
+    
+    .EXAMPLE
+        GetEnvConfig -ConfigName "DATABASE_URL"
+        Retorna o valor da configuração DATABASE_URL
+    #>
+    param(
+        [Parameter(Mandatory = $false)]
+        [string]$configName
+    )
+
+    $envPath = Join-Path $PSScriptRoot ".env"
+    
+    if (-not (Test-Path $envPath)) {
+        Write-Error "Arquivo .env não encontrado em: $envPath"
+        return $null
+    }
+
+    try {
+        $configs = @{}
+        Get-Content $envPath | ForEach-Object {
+            if ($_ -match '^\s*([^#][^=]+)=(.*)$') {
+                $key = $matches[1].Trim()
+                $value = $matches[2].Trim()
+                $configs[$key] = $value
+            }
+        }
+
+        if ([string]::IsNullOrEmpty($configName)) {
+            return $configs
+        }
+        
+        if ($configs.ContainsKey($configName)) {
+            return $configs[$configName]
+        }
+        else {
+            Write-Warning "Configuração '$configName' não encontrada no arquivo .env"
+            return $null
+        }
+    }
+    catch {
+        Write-Error "Erro ao ler o arquivo .env: $_"
+        return $null
+    }
+}
+
 function main {
     param(
         [string]$scriptName
     )
 
-    Set-Variable -Name fldSource -Scope Global -Value "${fldRoot}\_fontes"
-    Set-Variable -Name fldImages -Scope Global -Value "${fldCommon}\images"
-    Set-Variable -Name fldLog -Scope Global -Value "${fldCommon}\log"
+    Set-Variable -Name fldSource -Scope Global -Value (Join-Path $fldRoot "_fontes")
+    Set-Variable -Name fldImages -Scope Global -Value (Join-Path $fldCommon "images")
+    Set-Variable -Name fldLog -Scope Global -Value (Join-Path $fldCommon "log")
 
-    Set-Variable -Name fleConfig -Scope Global -Value "${fldCommon}\config.json"
+    Set-Variable -Name fleConfig -Scope Global -Value (Join-Path $fldCommon "config.json")
     $global:imageCache = @{}
 
     Set-Variable -Name scriptName -Scope Global -Value $scriptName.ToUpper()
@@ -316,7 +377,7 @@ function main {
     $date       = Get-Date -f "yyyy-MM-dd"
     $time       = Get-Date -f "HH-mm-ss"
     $fleLog     = ("Log_${scriptName}_${date}_${time}_${userName}-${hostName}_pwsh.log").Replace(" ", "")
-    $Transcript = Join-Path -Path "${fldLog}" -ChildPath "$fleLog" 
+    $Transcript = Join-Path -Path $fldLog "$fleLog" 
 
     $DebugPreference       = "Continue"
     $InformationPreference = "Continue"
@@ -329,7 +390,7 @@ function main {
     
     Start-Transcript -Path $Transcript
     
-    Import-Module "$fldCommon\interface.psm1" -Global
+    Import-Module (Join-Path $fldCommon "interface.psm1") -Global
 
     ShowMessage "Log iniciado - $fleLog" -fgColor "Black"
     

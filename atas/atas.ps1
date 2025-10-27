@@ -1,7 +1,7 @@
 ﻿# FUNCTIONS
 
 function AtualizarFornecedores {
-    $sicafs = Get-ChildItem -Path "$fldRoot\SICAF\*.pdf" -Name | Sort-Object
+    $sicafs = Get-ChildItem -Path "$fldSicaf\*.pdf" -Name | Sort-Object
     
     $lst_sicaf.SuspendLayout()
         $lst_sicaf.Rows.Clear()
@@ -64,7 +64,7 @@ function DeleteFiles {
     $result = [System.Windows.Forms.MessageBox]::Show("Deseja excluir todos os relatórios SICAF?", "Confirmação de exclusão", 4, 48)
 
     if ($result -eq "Yes") {
-        Get-ChildItem -Path "$fldRoot\SICAF\*.pdf" -File | Remove-Item -Force 
+        Get-ChildItem -Path "$fldSicaf\*.pdf" -File | Remove-Item -Force 
         AtualizarFornecedores
     }
 }
@@ -179,15 +179,16 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 $fldRoot   = $PSScriptRoot
-$fldParent = Join-Path -Path $PSScriptRoot -ChildPath .. -Resolve
-$fldCommon = "$fldParent\_common"
-$fldAtas   = "$fldRoot\ATAS"
-$fldSicaf  = "$fldRoot\SICAF"
+$fldParent = Join-Path $PSScriptRoot .. -Resolve
+$fldCommon = Join-Path $fldParent "_common"
+$fldAtas   = Join-Path $fldRoot "ATAS"
+$fldSicaf  = Join-Path $fldRoot "SICAF"
 
-$configMain = "config.psm1"
-if (Test-Path -Path "$fldCommon\$configMain") {
-    Unblock-File -Path "$fldCommon\$configMain"
-    Import-Module "$fldCommon\$configMain"
+$configMain     = "config.psm1"
+$configFullPath = Join-Path $fldCommon $configMain
+if (Test-Path -Path $configFullPath) {
+    Unblock-File -Path $configFullPath
+    Import-Module $configFullPath
 } else {
     [System.Windows.Forms.MessageBox]::Show("Não foi localizado o arquivo '${configMain}'.`n`nNão é possível executar o script.", "Erro", 0, 16)
     [Environment]::Exit(1)
@@ -513,91 +514,53 @@ catch {
 
 # FORM ICONS AND BUTTONS
 
-$params = @{
-    size = 70;
-    top = 260;
-    left = 25;
-    name = "ufsc";
-    function = {
-        InterfaceMinimize
-        Start-Process "https://www.ufsc.br"
-    };
-    tag = "Ir para a página da UFSC."
-}
-$btn_ufsc = InterfaceButtonImage @params
+$btn_company, $btn_department = InterfaceCompanyButtons
 
 $params = @{
-    size = 100;
-    height = 50;
-    top = InterfacePosition $btn_ufsc "bottom";
-    left = 10;
-    name = "dcom.tif";
-    function = {
-        InterfaceMinimize
-        Start-Process "https://dcom.ufsc.br"
-    };
-    tag = "Ir para a página do DCOM."
-}
-$btn_dcom = InterfaceButtonImage @params
-
-$params = @{
-    size = 40;
+    size = $BTN_IMAGE_BIG_WIDTH;
     top = $pnl_fornecedores.Top;
-    left = InterfacePosition $pnl_fornecedores "right" $PADDING_OUTER;
+    left = $FRM_MAIN_WIDTH - ($MARGIN_RIGHT + $BTN_IMAGE_BIG_WIDTH) / 2;
     name = "word";
     function = {
         InterfaceMinimize
-        Get-ChildItem "$fldRoot/ATAS/MODELO SCRIPT*" | ForEach-Object { Start-Process $_ }
+        Get-ChildItem "$fldAtas/MODELO SCRIPT*" | ForEach-Object { Start-Process $_ }
     };
     tag = "Clique aqui para abrir o modelo do Word para geração das Atas."
 }
 $btn_word = InterfaceButtonImage @params
 
-$offsetY = 10
-
 $params = @{
-    size = 40;
-    top = InterfacePosition $btn_word "bottom" $offsetY;
+    size = $BTN_IMAGE_BIG_WIDTH;
+    top = InterfacePosition $btn_word "bottom" $PADDING_INNER;
     left = $btn_word.Left;
     name = "excel";
     function = {
         InterfaceMinimize
-        Start-Process "$fldRoot/ATAS/dados_atas.xlsx"
+        Start-Process "$fldAtas/dados_atas.xlsx"
     };
     tag = "Clique aqui para abrir a planilha com os dados obtidos (se existir)." 
 }
 $btn_excel = InterfaceButtonImage @params
 
 $params = @{
-    size = 40;
-    top = InterfacePosition $btn_excel "bottom" $offsetY;
+    size = $BTN_IMAGE_BIG_WIDTH;
+    top = InterfacePosition $btn_excel "bottom" $PADDING_INNER;
     left = $btn_word.Left;
     name = "folder";
     function = {
         InterfaceMinimize
-        Invoke-Item "$fldRoot/ATAS/"
+        Invoke-Item "$fldAtas/"
     };
     tag = "Clique aqui para abrir a pasta onde são salvos a planilha com os dados e as Atas geradas." 
 }
 $btn_folder_atas = InterfaceButtonImage @params
 
-$params = @{
-    size = 40;
-    top = InterfacePosition $pnl_fornecedores "bottom" -targetWidth 40;
-    left = $btn_word.Left;
-    name = "r";
-    function = {
-        InterfaceMinimize
-        Start-Process "https://cran.r-project.org/bin/windows/base/"
-    };
-    tag = "O programa R não está instalado.`r`nClique aqui para ir para a página de download.";
-}
-$btn_r = InterfaceButtonImage @params
+$btn_r = InterfaceRButton "BottomRight"
 
 $params = @{
     text = "Sair";
-    top = InterfacePosition $pnl_fornecedores "bottom" 30;
-    left = InterfacePosition $pnl_fornecedores "right" -targetWidth 90;
+    top = InterfacePosition $pic_banner "center" -targetHeight $BTN_HEIGHT;
+    left = InterfacePosition $pnl_fornecedores "right" -targetWidth $BTN_WIDTH;
     function = {
         SalvarDados
         InterfaceClose
@@ -609,7 +572,7 @@ $btn_exit = InterfaceButton @params
 $params = @{
     text = "Gerar";
     top = $btn_exit.Top;
-    left = InterfacePosition $btn_exit "left" 20;
+    left = InterfacePosition $btn_exit "left" $PADDING_OUTER;
     function = { 
         SalvarDados
         Gerar
@@ -619,8 +582,8 @@ $params = @{
 $btn_gerar = InterfaceButton @params 
 
 $controls = @(
-    $btn_ufsc, 
-    $btn_dcom, 
+    $btn_company, 
+    $btn_department, 
     $btn_r, 
     $btn_word, 
     $btn_excel, 

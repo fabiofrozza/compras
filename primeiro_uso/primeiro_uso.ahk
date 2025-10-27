@@ -2,10 +2,10 @@
 #SingleInstance, force
 SetWorkingDir %A_ScriptDir%
 #Include, ..\_common\config.ahk
-Menu, Tray, Icon, ..\_common\images\ufsc_ico.png
+Menu, Tray, Icon, ..\_common\images\company.png
 
 ; --- Configuração da interface gráfica ---
-Gui, Add, Picture, y10 w120 h120, ..\_common\images\DCOM.png
+Gui, Add, Picture, y10 w120 h120, ..\_common\images\department.png
 Gui, Add, GroupBox, x150 y10 w330 h120, Configuração Inicial - R
 Gui, Add, Text, x170 y40 w300, Este assistente irá auxiliar na instalação do aplicativo R (caso já não instalado) e na instalação e configuração dos pacotes necessários para o funcionamento dos scripts.`n`nEscolha abaixo a opção desejada:
 
