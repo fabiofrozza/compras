@@ -154,15 +154,15 @@ function RefreshLstConferencia {
         $nItens        = $lastRunResults.n_itens
         $nSolicitacoes = $lastRunResults.n_solicitacoes
 
-        [void]$lst_conferencia.Items.Add("Etapa: $etapa - $ano", "ufsc")
-        [void]$lst_conferencia.Items.Add("Grupo: $grupo", "ufsc") 
-        [void]$lst_conferencia.Items.Add("Material: $nomeGrupo", "ufsc")
-        [void]$lst_conferencia.Items.Add("Itens: $nItens", "ufsc")
-        [void]$lst_conferencia.Items.Add("Solicitações: $nSolicitacoes", "ufsc")
+        [void]$lst_conferencia.Items.Add("Etapa: $etapa - $ano", "company")
+        [void]$lst_conferencia.Items.Add("Grupo: $grupo", "company") 
+        [void]$lst_conferencia.Items.Add("Material: $nomeGrupo", "company")
+        [void]$lst_conferencia.Items.Add("Itens: $nItens", "company")
+        [void]$lst_conferencia.Items.Add("Solicitações: $nSolicitacoes", "company")
 
         InterfaceCustomProperty $lst_conferencia "Empty" $false
     } else {
-        [void]$lst_conferencia.Items.Add("Informe o link, verifique as configurações, escolha a aba desejada e clique em Gerar...", "ufsc")
+        [void]$lst_conferencia.Items.Add("Informe o link, verifique as configurações, escolha a aba desejada e clique em Gerar...", "company")
         InterfaceCustomProperty $lst_conferencia "Empty" $true
     }
 
@@ -829,7 +829,7 @@ function RefreshLstSettings {
             name = "Quantidade de Unidades requerentes";
             key = "unidades";
             value = $config.unidades;
-            tip = "Quantidade de colunas de Unidades requerentes (incluindo ocultas e UFSC GERAL)"
+            tip = "Quantidade de colunas de Unidades requerentes (incluindo ocultas)"
         },
         @{
             name = "Aba Menu";
@@ -864,20 +864,18 @@ function RefreshLstSettings {
 
 }
 
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
-
 $fldRoot      = $PSScriptRoot
-$fldParent    = Join-Path -Path $PSScriptRoot -ChildPath .. -Resolve
-$fldCommon    = "$fldParent\_common"
-$fldToImport  = "$fldRoot\ARQUIVOS A IMPORTAR"
-$fldRelatorio = "$fldRoot\RELATORIOS"
-$fldResumo    = "$fldRoot\RESUMO PEDIDOS" 
+$fldParent    = Join-Path $PSScriptRoot .. -Resolve
+$fldCommon    = Join-Path $fldParent "_common"
+$fldToImport  = Join-Path $fldRoot "ARQUIVOS A IMPORTAR"
+$fldRelatorio = Join-Path $fldRoot "RELATORIOS"
+$fldResumo    = Join-Path $fldRoot "RESUMO PEDIDOS" 
 
-$configMain = "config.psm1"
-if (Test-Path -Path "$fldCommon\$configMain") {
-    Unblock-File -Path "$fldCommon\$configMain"
-    Import-Module "$fldCommon\$configMain"
+$configMain     = "config.psm1"
+$configFullPath = Join-Path $fldCommon $configMain
+if (Test-Path -Path $configFullPath) {
+    Unblock-File -Path $configFullPath
+    Import-Module $configFullPath
 } else {
     [System.Windows.Forms.MessageBox]::Show("Não foi localizado o arquivo '${configMain}'.`n`nNão é possível executar o script.", "Erro", 0, 16)
     [Environment]::Exit(1)
@@ -898,7 +896,7 @@ CheckFolder @(
 
 # MAIN FORM
 
-InterfaceConstants -frmWidth 900 -frmHeight 620 -marginLeft 130 -marginRight 110 -marginTop 15
+InterfaceConstants -frmWidth 900 -frmHeight 650 -marginLeft 120 -marginRight 90 -marginTop 15
 
 SetScriptConstants @{
     UTIL_AREA_HEIGHT = $UTIL_AREA_HEIGHT - 75 - ($PADDING_OUTER * 2)
@@ -1412,68 +1410,32 @@ $tbp_relatorio.Controls.AddRange(@($lbl_cmb_processos, $cmb_processos, $lst_dfd,
 
 # FORM ICONS AND IMAGES
 
-$params = @{
-    size = 100;
-    height = 50;
-    top = InterfacePosition $pic_banner "top" $PADDING_OUTER 50;
-    left = ($MARGIN_LEFT / 2) - (100 / 2);
-    name = "dcom.tif";
-    tag = "Ir para a página do DCOM";
-    function = {
-        InterfaceMinimize
-        Start-Process "https://dcom.ufsc.br"
-    }
-}
-$btn_dcom = InterfaceButtonImage @params
+$btn_company, $btn_department = InterfaceCompanyButtons
+
+$btn_r = InterfaceRButton -position "BottomRight"
 
 $params = @{
-    size = 70;
-    top = InterfacePosition $btn_dcom "top" $PADDING_OUTER -targetHeight 70;
-    left = InterfacePosition $btn_dcom "centerHorizontal" -targetWidth 70;
-    name = "ufsc";
-    tag = "Ir para a página da UFSC";
-    function = {
-        InterfaceMinimize
-        Start-Process "https://www.ufsc.br"
-    }
-}
-$btn_ufsc = InterfaceButtonImage @params
-
-$params = @{
-    size = 50;
+    size = $BTN_IMAGE_BIG_WIDTH;
     top = $MARGIN_TOP;
-    left = InterfacePosition $btn_dcom "centerHorizontal" -targetWidth 50;
-    name = "r";
-    tag = "O programa R não está instalado.`r`nClique aqui para ir para a página de download.";
+    left = $FRM_MAIN_WIDTH - ($MARGIN_RIGHT + $BTN_IMAGE_BIG_WIDTH) / 2;
+    name = "lists_page";
+    tag = "Ir para a página das listas";
     function = {
         InterfaceMinimize
-        Start-Process "https://cran.r-project.org/bin/windows/base/"
+        Start-Process $LISTS_PAGE_SITE
     }
 }
-$btn_r = InterfaceButtonImage @params
+$btn_lists = InterfaceButtonImage @params
 
 $params = @{
-    size = 70;
-    top = $MARGIN_TOP;
-    left = $FRM_MAIN_WIDTH - [math]::Round($MARGIN_RIGHT / 2) - (70 / 2);
-    name = "calendario";
-    tag = "Ir para a página do Calendário de Compras";
+    size = $btn_lists.Width;
+    top = InterfacePosition $tbc_info "bottom" (-$PADDING_INNER) $btn_lists.Height;
+    left = $btn_lists.Left;
+    name = "manual";
+    tag = "Ir para o manual";
     function = {
         InterfaceMinimize
-        Start-Process "http://compras.ufsc.br/calendario-de-compras"
-    }
-}
-$btn_calendario = InterfaceButtonImage @params
-
-$params = @{
-    size = $btn_calendario.Width;
-    top = InterfacePosition $tbc_info "bottom" (-$PADDING_INNER) $btn_calendario.Height;
-    left = $btn_calendario.Left;
-    name = "Logo-manual-icone";
-    tag = "Ir para o Manual do DCOM";
-    function = {
-        InterfaceMinimize
-        Start-Process "https://dcom.wiki.ufsc.br/index.php/METODOLOGIA_DAS_LISTAS#Importa%C3%A7%C3%A3o_das_listas"
+        Start-Process $MANUAL_SITE
     }
 }
 $btn_manual = InterfaceButtonImage @params
@@ -1481,7 +1443,7 @@ $btn_manual = InterfaceButtonImage @params
 $params = @{
     text = "Atualizar";
     tag = "Atualizar arquivos";
-    top = $FRM_MAIN_HEIGHT - 85;
+    top = InterfacePosition $pic_banner "center" -targetHeight $BTN_HEIGHT;
     left = $MARGIN_LEFT;
     function = {
         RefreshLstFiles
@@ -1493,7 +1455,7 @@ $params = @{
     text = "Sair";
     tag = "Sair do script";
     top = $btn_refresh.Top;
-    left = InterfacePosition $tbc_files "right" -90;
+    left = InterfacePosition $tbc_files "right" -$BTN_WIDTH;
     function = {
         InterfaceClose
     }
@@ -1512,10 +1474,11 @@ $params = @{
 $btn_gerar = InterfaceButton @params
 
 $controls = @(
-    $btn_ufsc,
-    $btn_dcom,
+    $teste,
+    $btn_company,
+    $btn_department,
     $btn_r,
-    $btn_calendario,
+    $btn_lists,
     $btn_manual,
     $lbl_wait,
     $btn_refresh,

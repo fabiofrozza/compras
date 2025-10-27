@@ -2,11 +2,11 @@
 #SingleInstance, force
 SetWorkingDir %A_ScriptDir%
 #Include, ..\_common\config.ahk
-Menu, Tray, Icon, ..\_common\images\ufsc_ico.png
+Menu, Tray, Icon, ..\_common\images\company.png
 
 ; --- Interface Gráfica ---
 nomeJanela := "Mapas - Listas Prévias"
-Gui, Add, Picture, y10 w120 h120, ..\_common\images\DCOM.png
+Gui, Add, Picture, y10 w120 h120, ..\_common\images\department.png
 Gui, Add, GroupBox, x150 y10 w420 h130, Listas Prévias - MAPAS
 Gui, Add, Text, x170 y40 w360, Escolha a forma de geração da(s) lista(s) prévia(s):`n`n- Por Processo: gera uma lista prévia para cada processo`n- Combinada dos Grupos: gera uma única lista prévia de todos os Mapas ; +50 na largura
 Gui, Add, Button, x170 y105 w175 gSeparar, Por Processo

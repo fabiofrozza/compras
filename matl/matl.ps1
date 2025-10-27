@@ -475,19 +475,17 @@ function Mover {
     RefreshResumo
 }
 
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
-
 $fldRoot   = $PSScriptRoot
-$fldParent = Join-Path -Path $PSScriptRoot -ChildPath .. -Resolve
-$fldCommon = "$fldParent\_common"
-$fldData   = "${fldRoot}\DADOS"
-$fldImport = "${fldRoot}\PARA IMPORTAR"
+$fldParent = Join-Path $PSScriptRoot .. -Resolve
+$fldCommon = Join-Path $fldParent "_common"
+$fldData   = Join-Path $fldRoot "DADOS"
+$fldImport = Join-Path $fldRoot "PARA IMPORTAR"
 
-$configMain = "config.psm1"
-if (Test-Path -Path "$fldCommon\$configMain") {
-    Unblock-File -Path "$fldCommon\$configMain"
-    Import-Module "$fldCommon\$configMain" -Global
+$configMain     = "config.psm1"
+$configFullPath = Join-Path $fldCommon $configMain
+if (Test-Path -Path $configFullPath) {
+    Unblock-File -Path $configFullPath
+    Import-Module $configFullPath
 } else {
     [System.Windows.Forms.MessageBox]::Show("Não foi localizado o arquivo '${configMain}'.`n`nNão é possível executar o script.", "Erro", 0, 16)
     [Environment]::Exit(1)
@@ -497,9 +495,9 @@ main "MATL"
 
 # MAIN FORM
 
-InterfaceConstants -frmWidth 800 -frmHeight 500 -marginLeft 120 -marginTop 35
+InterfaceConstants -frmWidth 800 -frmHeight 500 -marginLeft 120 -marginRight 80 -marginTop 35
 
-$frm_main, $pic_banner, $tip_ = InterfaceMainForm "MATL - Cadastro Fornecedores" "matl"
+$frm_main, $pic_banner, $tip_ = InterfaceMainForm "Cadastro Fornecedores" "matl"
 
 $lst_image = InterfaceImageList
 
@@ -508,8 +506,8 @@ $lst_image = InterfaceImageList
 $params = @{
     top = $MARGIN_TOP;
     left = $MARGIN_LEFT;
-    width = 260;
-    height = 160;
+    width = $UTIL_AREA_WIDTH * 0.45;
+    height = $UTIL_AREA_HEIGHT / 2 - $PADDING_OUTER;
     labelText = "Resumo   ";
 }
 $pnl_resumo, $lbl_pnl_resumo = InterfacePanel @params
@@ -536,8 +534,8 @@ $lbl_pnl_resumo.BringToFront()
 
 $params = @{
     top = $pnl_resumo.Top;
-    left = InterfacePosition $pnl_resumo "right" 25;
-    width = 310;
+    left = InterfacePosition $pnl_resumo "right" ($UTIL_AREA_WIDTH * 0.05);
+    width = $UTIL_AREA_WIDTH * 0.5;
     height = $pnl_resumo.Height;
     labelText = "Arquivos a importar"
 }
@@ -545,7 +543,7 @@ $pnl_importar, $lbl_pnl_importar = InterfacePanel @params
 
 $params = @{
     name = "lst_importar"; 
-    width = 250;
+    width = (InterfacePosition $pnl_importar "width" $PADDING_OUTER) - $PADDING_INNER - $BTN_IMAGE_SMALL_WIDTH;
     height = $lst_resumo.Height;
     top = $PADDING_OUTER;
     left = $PADDING_OUTER;
@@ -560,7 +558,7 @@ $params = @{
         }
     };
     columns = [ordered]@{
-        "MATL - Importar" = 180;
+        "Importar" = 180;
         "Erros" = 40
     }
 }
@@ -603,9 +601,9 @@ $lbl_pnl_importar.BringToFront()
 # PANEL PREGÕES
 
 $params = @{
-    top = InterfacePosition $pnl_resumo "bottom" 30;
+    top = InterfacePosition $pnl_resumo "bottom" ($PADDING_OUTER * 2);
     left = $MARGIN_LEFT;
-    width = $pnl_importar.Left + $pnl_importar.Width - $pnl_resumo.Left;
+    width = $UTIL_AREA_WIDTH;
     height = $pnl_resumo.Height;
     labelText = "Pregões"
 }
@@ -690,65 +688,31 @@ $lbl_pnl_pregoes.BringToFront()
 
 # FORM ICONS AND IMAGES
 
-$params = @{
-    size = 70;
-    top = 260;
-    left = 25;
-    name = "ufsc";
-    function = {
-        InterfaceMinimize
-        Start-Process "https://www.ufsc.br"
-    };
-    tag = "Ir para a página da UFSC."
-}
-$btn_ufsc = InterfaceButtonImage @params
+$btn_company, $btn_department = InterfaceCompanyButtons
+
+$btn_r = InterfaceRButton "TopLeft"
 
 $params = @{
-    size = 100;
-    height = 50;
-    top = InterfacePosition $btn_ufsc "bottom";
-    left = 10;
-    name = "dcom.tif";
-    function = {
-        InterfaceMinimize
-        Start-Process "https://dcom.ufsc.br"
-    };
-    tag = "Ir para a página do DCOM."
-}
-$btn_dcom = InterfaceButtonImage @params
-
-$params = @{
-    size = 40;
-    top = InterfacePosition $pnl_pregoes "bottom" -40;
-    left = InterfacePosition $pnl_pregoes "right" $PADDING_OUTER;
+    size = $BTN_IMAGE_BIG_WIDTH;
+    top = InterfacePosition $pnl_pregoes "bottom" (-$BTN_IMAGE_BIG_WIDTH);
+    left = $FRM_MAIN_WIDTH - ($MARGIN_RIGHT + $BTN_IMAGE_BIG_WIDTH) / 2;
     name = "folder";
     function = {
         InterfaceMinimize
         Start-Process "$fldData"
-    };
+    };    
     tag = "Abrir a pasta com os dados dos fornecedores."
-}
+}    
 $btn_folder = InterfaceButtonImage @params
 
 $params = @{
-    size = 40;
-    top = $pnl_importar.Top;
-    left = $btn_folder.Left;
-    name = "r";
-    function = {
-        InterfaceMinimize
-        Start-Process "https://cran.r-project.org/bin/windows/base/"
-    };
-    tag = "O programa R não está instalado.`r`nClique aqui para ir para a página de download."
-}
-$btn_r = InterfaceButtonImage @params
-
-$params = @{
     text = "Sair";
-    top = 415;
-    left = InterfacePosition $pnl_pregoes "right" -targetWidth 90;
-    function = {InterfaceClose};
-    tag = "Sair do script" 
+    top = InterfacePosition $pic_banner "center" -targetHeight $BTN_HEIGHT;
+    left = InterfacePosition $pnl_pregoes "right" -targetWidth $BTN_WIDTH;
+    function = {
+        InterfaceClose
+    };
+    tag = "Sair do script"
 }
 $btn_exit = InterfaceButton @params
 
@@ -757,7 +721,9 @@ $params = @{
     image = "Gerar"
     top = $btn_exit.Top;
     left = InterfacePosition $btn_exit "left" $PADDING_OUTER;
-    function = {Gerar};
+    function = {
+        Gerar
+    };
     tag = "Gerar novo arquivo para importar"    
 }
 $btn_new = InterfaceButton @params 
@@ -777,8 +743,8 @@ $params = @{
 $btn_refresh = InterfaceButton @params
 
 $controls = @(
-    $btn_ufsc,
-    $btn_dcom,
+    $btn_company,
+    $btn_department,
     $btn_r,
     $btn_folder,
     $btn_refresh,
@@ -790,9 +756,9 @@ $frm_main.Controls.AddRange($controls)
 
 # SHOW FORM
 
-InterfaceShowForm -title "MATL - CADASTRO FORNECEDORES" -start {
+InterfaceShowForm -title "CADASTRO FORNECEDORES" -start {
     RefreshImportar
     RefreshPregoes
 
-    CheckRInstallation
+    #CheckRInstallation
 } 

@@ -20,19 +20,30 @@ function InterfaceConstants {
         [int]$marginTop
     )
     
+    $config = GetEnvConfig
+    $msgNotPersonalized = "(Para personalizar os dados da empresa, leia o arquivo README)"
+
     SetScriptConstants @{
+        # Company info (for icons)
+        COMPANY_NAME    = if ([string]::IsNullOrEmpty($config.COMPANY_NAME))    { "empresa $msgNotPersonalized" }      else { $config.COMPANY_NAME }
+        COMPANY_SITE    = if ([string]::IsNullOrEmpty($config.COMPANY_SITE))    { "www.empresa.com.br" }               else { $config.COMPANY_SITE }
+        DEPARTMENT_NAME = if ([string]::IsNullOrEmpty($config.DEPARTMENT_NAME)) { "departamento $msgNotPersonalized" } else { $config.DEPARTMENT_NAME }
+        DEPARTMENT_SITE = if ([string]::IsNullOrEmpty($config.DEPARTMENT_SITE)) { "www.departamento.com.br" }          else { $config.DEPARTMENT_SITE }
+        MANUAL_SITE     = if ([string]::IsNullOrEmpty($config.MANUAL_SITE))     { "www.departamento.com.br/manual" }   else { $config.MANUAL_SITE }
+        LISTS_PAGE_SITE = if ([string]::IsNullOrEmpty($config.LISTS_PAGE_SITE)) { "www.departamento.com.br/lists" }    else { $config.LISTS_PAGE_SITE }
+
         # UI control sizes
         FRM_MAIN_WIDTH    = $frmWidth
         FRM_MAIN_HEIGHT   = $frmHeight
-        PIC_BANNER_HEIGHT = 100
+        PIC_BANNER_HEIGHT = 75
 
         BTN_WIDTH  = 90
         BTN_HEIGHT = 30
 
         BTN_IMAGE_SMALL_WIDTH  = 20
         BTN_IMAGE_SMALL_HEIGHT = 20
-        BTN_IMAGE_BIG_WIDTH    = 70
-        BTN_IMAGE_BIT_HEIGHT   = 70
+        BTN_IMAGE_BIG_WIDTH    = 50
+        BTN_IMAGE_BIG_HEIGHT   = 50
 
         # UI colors
         COLOR_OK      = "LightGreen"
@@ -66,12 +77,13 @@ function InterfaceMainForm {
         [string]$icon
     )
 
+    Add-Type -AssemblyName System.Windows.Forms
+    Add-Type -AssemblyName System.Drawing
+    #[System.Windows.Forms.Application]::EnableVisualStyles()
+
     $frm_                 = New-Object System.Windows.Forms.Form
     $frm_.Text            = $title
-
-    $frm_.Width           = $FRM_MAIN_WIDTH
-    $frm_.Height          = $FRM_MAIN_HEIGHT
-
+    $frm_.ClientSize      = New-Object System.Drawing.Size($FRM_MAIN_WIDTH, $FRM_MAIN_HEIGHT)  
     $frm_.StartPosition   = "CenterScreen"
     $frm_.MaximizeBox     = $false
     $frm_.KeyPreview      = $true
@@ -93,7 +105,7 @@ function InterfaceTip {
 function InterfaceBanner {
 
     $pic_          = New-Object Windows.Forms.PictureBox
-    $pic_.Image    = InterfaceGetImage "banner.jpg"
+    $pic_.Image    = InterfaceGetImage "banner"
     $pic_.Width    = $FRM_MAIN_WIDTH
     $pic_.Height   = $PIC_BANNER_HEIGHT
     $pic_.Left     = 0
@@ -200,7 +212,7 @@ function InterfaceImageList {
         "csv"         = "csv"
         "csv_erro"    = "csv_erro"
         "pdf"         = "pdf"
-        "ufsc"        = "ufsc"
+        "company"     = "company"
         "config"      = "settings"
         "config_erro" = "erro"
         "folder"      = "folder"
@@ -571,7 +583,7 @@ function InterfacePosition {
             $position = $ctr_.Right + $offset - $targetWidth
         }
         "center" {
-            $position = $ctr_.Top + ($ctr_.Height / 2) - ($targetWidth / 2)
+            $position = $ctr_.Top + ($ctr_.Height - $targetHeight) / 2
         }
         "centerHorizontal" {
             $position = $ctr_.Left + ($ctr_.Width / 2) - ($targetWidth / 2)
@@ -680,5 +692,74 @@ function InterfaceSplashScreen {
     $frm_.ShowInTaskbar   = $false
 
     return @($frm_, $lbl_)
+
+}
+
+function InterfaceCompanyButtons {
+
+    $params = @{
+        size = $BTN_IMAGE_BIG_WIDTH * 0.75;
+        top = $FRM_MAIN_HEIGHT - $MARGIN_BOTTOM - ($BTN_IMAGE_BIG_WIDTH * 0.75);
+        left = ($MARGIN_LEFT - ($BTN_IMAGE_BIG_WIDTH * 0.75)) / 2;
+        name = "department";
+        function = {
+            InterfaceMinimize
+            Start-Process $DEPARTMENT_SITE
+        };
+        tag = "Ir para a página de $DEPARTMENT_NAME"
+    }
+    $btn_department = InterfaceButtonImage @params
+
+    $params = @{
+        size = $BTN_IMAGE_BIG_WIDTH;
+        top = InterfacePosition $btn_department "top" $PADDING_OUTER $BTN_IMAGE_BIG_WIDTH;
+        left = ($MARGIN_LEFT - $BTN_IMAGE_BIG_WIDTH) / 2;
+        name = "company";
+        function = {
+            InterfaceMinimize
+            Start-Process $COMPANY_SITE
+        };
+        tag = "Ir para a página de $COMPANY_NAME"
+    }
+    $btn_company = InterfaceButtonImage @params
+
+    return @($btn_company, $btn_department)
+
+}
+
+function InterfaceRButton {
+    param(
+        [Parameter(Mandatory = $false)]
+        [ValidateSet('TopLeft', 'BottomRight')]
+        [string]$position = 'TopLeft',
+
+        [int]$size = $BTN_IMAGE_BIG_WIDTH
+    )
+
+    switch ($position) {
+        "TopLeft" {
+            $top  = $MARGIN_TOP;
+            $left = ($MARGIN_LEFT - $BTN_IMAGE_BIG_WIDTH) / 2;
+        }
+        "BottomRight" {
+            $top  = $FRM_MAIN_HEIGHT - $MARGIN_BOTTOM - $size;
+            $left = $FRM_MAIN_WIDTH - ($MARGIN_RIGHT + $size) / 2;
+        }
+    }
+    $params = @{
+        size = $size;
+        top = $top;
+        left = $left;
+        name = "r";
+        tag = "O programa R não está instalado.`r`nClique aqui para ir para a página de download.";
+        function = {
+            InterfaceMinimize
+            Start-Process "https://cran.r-project.org/bin/windows/base/"
+        }
+    }
+
+    $btn_r = InterfaceButtonImage @params
+
+    return $btn_r
 
 }

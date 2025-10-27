@@ -2,13 +2,13 @@
 #SingleInstance, Force
 SetWorkingDir %A_ScriptDir%
 #Include, ..\_common\config.ahk
-Menu, Tray, Icon, ..\_common\images\ufsc_ico.png
+Menu, Tray, Icon, ..\_common\images\company.png
 
 ; --- Interface Gráfica ---
 nomeJanela := "Consulta de CATMAT"
-Gui, Add, Picture, y40 w120 h120, ..\_common\images\DCOM.png
+Gui, Add, Picture, y40 w120 h120, ..\_common\images\department.png
 Gui, Add, GroupBox, x150 y10 w420 h190, Consulta de CATMAT
-Gui, Add, Text, x170 y40 w360, Cole a lista de itens baixada do Solar na pasta TR.`n`nSelecione o arquivo (TR), o método de consulta e clique em Executar.
+Gui, Add, Text, x170 y40 w360, Cole o arquivo com a lista de itens do pregão na pasta TR.`n`nSelecione o arquivo (TR), o método de consulta e clique em Executar.
 
 ; --- Opções de Consulta ---
 Gui, Add, GroupBox, x170 y100 w250 h80, Método de Consulta
