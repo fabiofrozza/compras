@@ -478,8 +478,6 @@ function Mover {
 $fldRoot   = $PSScriptRoot
 $fldParent = Join-Path $PSScriptRoot .. -Resolve
 $fldCommon = Join-Path $fldParent "_common"
-$fldData   = Join-Path $fldRoot GetEnvConfig "FORNECEDORES_DADOS"
-$fldImport = Join-Path $fldRoot GetEnvConfig "FORNECEDORES_PARA IMPORTAR"
 
 $configMain     = "config.psm1"
 $configFullPath = Join-Path $fldCommon $configMain
@@ -490,6 +488,9 @@ if (Test-Path -Path $configFullPath) {
     [System.Windows.Forms.MessageBox]::Show("Não foi localizado o arquivo '${configMain}'.`n`nNão é possível executar o script.", "Erro", 0, 16)
     [Environment]::Exit(1)
 }    
+
+$fldData   = Join-Path $fldRoot (GetEnvConfig "FORNECEDORES_DADOS")
+$fldImport = Join-Path $fldRoot (GetEnvConfig "FORNECEDORES_PARA_IMPORTAR")
 
 main "FORNECEDORES"
 

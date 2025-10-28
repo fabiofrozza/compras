@@ -113,16 +113,8 @@ function CheckFolder {
     }
 }
 
-function ConfigJSON {
-    param (
-        [string]$key,
-        $value,
-        [string]$option = "set",
-        [switch]$append,
-        [switch]$show
-    )
+function GetConfigJSON {
 
-    # Verifica se a variável scriptName está definida
     if (-not (Get-Variable -Name scriptName -ErrorAction SilentlyContinue)) {
         throw "A variável scriptName não está definida. Execute a função main primeiro."
     }
@@ -131,7 +123,6 @@ function ConfigJSON {
         throw "A variável scriptName está vazia. Execute a função main primeiro."
     }
 
-    # Carrega ou cria o arquivo de configuração
     try {
         if (Test-Path $fleConfig) {
             $config = Get-Content $fleConfig -Raw -Encoding UTF8 -ErrorAction Stop | ConvertFrom-Json
@@ -146,68 +137,94 @@ function ConfigJSON {
         $config = [pscustomobject]@{}
     }
 
-    # Garante que existe um objeto para o script atual
     if (-not ($config.PSObject.Properties.Name -contains $scriptName)) {
         $config | Add-Member -NotePropertyName $scriptName -NotePropertyValue ([pscustomobject]@{}) -Force
     }
+
+    return $config
+}
+
+function ConfigJSON {
+    param (
+        [string]$key = $null,
+        $value = $null,
+
+        [Parameter(Mandatory = $false)]
+        [ValidateSet("all", "remove", "get", "set")]
+        [string]$option,
+
+        [switch]$append,
+        [switch]$show
+    )
+
+    $config = GetConfigJSON
 
     if ($show) { 
         ShowMessage ($config.$scriptName | ConvertTo-Json) "Configurações do Script $scriptName"
         return $null 
     }
 
-    if ($key -and -not $value -and $option -ne "remove") {
-        $option = "get"
-    }
-
     if ($option -eq "all") {
         return $config.$scriptName
-    } elseif ($option -eq "get") {
-        # Opção para apenas ler um valor
-        if ($config.$scriptName.PSObject.Properties.Name -contains $key) {
+    } 
+    
+    $containsKey = $config.$scriptName.PSObject.Properties.Name -contains $key
+
+    if ($option -eq "remove") {
+        if ($containsKey) {
+            $config.$scriptName.PSObject.Properties.Remove($key)
+            SaveConfigJSON $config
+            return
+        } else {
+            return $null
+        }
+    } 
+    
+    # If $value is null, consider option as "get"
+    if ([string]::IsNullOrEmpty($option) -and $null -eq $value) {
+
+        if ($containsKey) {
             $valueReturn = $config.$scriptName.$key
-            # Se for um array, junta com quebras de linha
+    
             if ($valueReturn -is [array]) {
                 return $valueReturn -join "`r`n"
             }
             return $valueReturn
         }
         return $null
-    } elseif ($option -eq "remove") {
-        # Remove a chave se existir
-        if ($config.$scriptName.PSObject.Properties.Name -contains $key) {
-            $config.$scriptName.PSObject.Properties.Remove($key)
-        } else {
-            return $null
-        }
-    } elseif ($option -eq "set") {
-        # Lógica principal de atualização
-        if ($append -and ($config.$scriptName.PSObject.Properties.Name -contains $key)) {
-            # Modo append - adiciona ao valor existente
-            $valueExistent = $config.$scriptName.$key
-            
-            if ($valueExistent -is [array] -and $value -is [array]) {
-                # Ambos são arrays - concatena
-                $config.$scriptName | Add-Member -NotePropertyName $key -NotePropertyValue (@($valueExistent) + @($value)) -Force
-            }
-            elseif ($valueExistent -is [hashtable] -and $value -is [hashtable]) {
-                # Ambos são hashtables - mescla
-                foreach ($key in $value.Keys) {
-                    $valueExistent[$key] = $value[$key]
-                }
-                $config.$scriptName | Add-Member -NotePropertyName $key -NotePropertyValue $valueExistent -Force
-            }
-            else {
-                # Outros tipos - converte para array e adiciona
-                $config.$scriptName | Add-Member -NotePropertyName $key -NotePropertyValue @($valueExistent, $value) -Force
-            }
-        } else {
-            # Modo padrão - substitui o valor
-            $config.$scriptName | Add-Member -NotePropertyName $key -NotePropertyValue $value -Force
-        }
     }
     
-    # Salva o arquivo com formatação indentada
+    # If has $key and $value, option is "set"
+    if ($append -and $containsKey) {
+        
+        $valueExistent = $config.$scriptName.$key
+        
+        if ($valueExistent -is [array] -and $value -is [array]) {
+            $config.$scriptName | Add-Member -NotePropertyName $key -NotePropertyValue (@($valueExistent) + @($value)) -Force
+        }
+        elseif ($valueExistent -is [hashtable] -and $value -is [hashtable]) {
+            foreach ($key in $value.Keys) {
+                $valueExistent[$key] = $value[$key]
+            }
+            $config.$scriptName | Add-Member -NotePropertyName $key -NotePropertyValue $valueExistent -Force
+        }
+        else {
+            $config.$scriptName | Add-Member -NotePropertyName $key -NotePropertyValue @($valueExistent, $value) -Force
+        }
+    } else {
+        $config.$scriptName | Add-Member -NotePropertyName $key -NotePropertyValue $value -Force
+    }
+
+    SaveConfigJSON $config
+    return
+    
+}
+
+function SaveConfigJSON {
+    param (
+        [pscustomobject]$config
+    )
+    
     try {
         $json = $config | ConvertTo-Json -Depth 10
         $utf8NoBom = New-Object System.Text.UTF8Encoding $False
@@ -259,16 +276,13 @@ function IsUserRunningR {
 function SetScriptConstants {
     <#
     .SYNOPSIS
-        Defines global constant variables for the application
+        Defines global variables for the application
     
     .DESCRIPTION
-        Creates global variables with ReadOnly option from a hashtable
+        Creates global variables from a hashtable
     
     .PARAMETER constants
         Hashtable containing the names and values of the constants
-    
-    .PARAMETER option
-        Protection type: 'ReadOnly' (default) or 'Constant'
     
     .EXAMPLE
         SetScriptConstants @{
@@ -279,11 +293,7 @@ function SetScriptConstants {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
-        [hashtable]$constants,
-        
-        [Parameter(Mandatory = $false)]
-        [ValidateSet('ReadOnly', 'Constant')]
-        [string]$option = 'ReadOnly'
+        [hashtable]$constants
     )
     
     foreach ($key in $constants.Keys) {
@@ -312,7 +322,7 @@ function GetEnvConfig {
         Se não for fornecido, retorna todas as configurações.
     
     .EXAMPLE
-        Get-EnvConfig
+        GetEnvConfig
         Retorna todas as configurações do arquivo .Renviron
     
     .EXAMPLE

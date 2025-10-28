@@ -104,7 +104,7 @@ function Gerar {
 
         InterfaceRestore
 
-        switch (ConfigJSON -key "resultado_geracao" -option "get") 
+        switch (ConfigJSON "resultado_geracao") 
         {
             "sucesso" {
                 $msg   = "Script finalizado.`n`nConfira a planilha e gere as Atas no Word."
@@ -112,12 +112,12 @@ function Gerar {
                 $type  = 64
             }
             "erro" {
-                $msg   = "Não foram salvos os dados, pois foram verificados os seguintes erros:`n======", (ConfigJSON -key "msg_erro" -option "get") -join "`n"
+                $msg   = "Não foram salvos os dados, pois foram verificados os seguintes erros:`n======", (ConfigJSON "msg_erro") -join "`n"
                 $title = "Erro"
                 $type  = 16
             }
             "ambos" {
-                $msg   = "Os dados foram salvos, mas foram verificados os seguintes problemas:`n======", (ConfigJSON -key "msg_erro" -option "get") -join "`n"
+                $msg   = "Os dados foram salvos, mas foram verificados os seguintes problemas:`n======", (ConfigJSON "msg_erro") -join "`n"
                 $title = "Alerta"
                 $type  = 48
             }
@@ -192,8 +192,8 @@ if (Test-Path -Path $configFullPath) {
     [Environment]::Exit(1)
 }
 
-$fldAtas   = Join-Path $fldRoot GetEnvConfig "ATAS_ATAS"
-$fldSicaf  = Join-Path $fldRoot GetEnvConfig "ATAS_SICAF"
+$fldAtas   = Join-Path $fldRoot (GetEnvConfig "ATAS_ATAS")
+$fldSicaf  = Join-Path $fldRoot (GetEnvConfig "ATAS_SICAF")
 
 main "ATAS"
 
@@ -499,15 +499,15 @@ $pnl_fornecedores.Controls.AddRange($controls)
 $frm_main.Controls.AddRange(@($pnl_fornecedores, $lbl_fornecedores))
 $lbl_fornecedores.BringToFront()
 
-$txt_n_pregao.Text     = ConfigJSON -key "n_pregao" -option "get"
-$txt_ano_pregao.Text   = ConfigJSON -key "ano_pregao" -option "get"
-$txt_processo.Text     = ConfigJSON -key "processo" -option "get"
-$txt_objeto.Text       = ConfigJSON -key "objeto" -option "get"
-$txt_data_extenso.Text = ConfigJSON -key "data" -option "get"
-$txt_n_ata.Text        = ConfigJSON -key "n_ata" -option "get"
-$txt_ano_ata.Text      = ConfigJSON -key "ano_ata" -option "get"
+$txt_n_pregao.Text     = ConfigJSON "n_pregao"
+$txt_ano_pregao.Text   = ConfigJSON "ano_pregao"
+$txt_processo.Text     = ConfigJSON "processo"
+$txt_objeto.Text       = ConfigJSON "objeto"
+$txt_data_extenso.Text = ConfigJSON "data"
+$txt_n_ata.Text        = ConfigJSON "n_ata"
+$txt_ano_ata.Text      = ConfigJSON "ano_ata"
 try {
-    $txt_data_seletor.Value = ConfigJSON -key "data_seletor" -option "get"
+    $txt_data_seletor.Value = ConfigJSON "data_seletor"
 }
 catch {
     $txt_ano_ata = Get-Date

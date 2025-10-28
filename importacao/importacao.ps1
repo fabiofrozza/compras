@@ -986,17 +986,14 @@ $params = @{
         GotFocus = {$this.SelectAll()};
         LostFocus = {
             CheckLink
-            ConfigJSON "link_planilha" $this.Text
         };
         KeyUp = {
             param($sender, $e)
             if ($e.Control -and $e.KeyCode -eq [System.Windows.Forms.Keys]::V) {
                 CheckLink
-                ConfigJSON "link_planilha" $this.Text
             }
             elseif ($e.KeyCode -eq [System.Windows.Forms.Keys]::Delete) {
                 CheckLink
-                ConfigJSON "link_planilha" $this.Text
             }
         }
     }

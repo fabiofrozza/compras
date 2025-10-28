@@ -408,7 +408,7 @@ fornecedores_main <- function() {
   pasta$fontes   = file.path(pasta$atual, "_fontes")
   pasta$dados    = file.path(pasta$atual, Sys.getenv("FORNECEDORES_DADOS"))
   pasta$importar = file.path(pasta$atual, 
-                             Sys.getenv("FORNECEDORES_PARA IMPORTAR"))
+                             Sys.getenv("FORNECEDORES_PARA_IMPORTAR"))
   pasta$criar    = c(pasta$dados, pasta$importar)
   
   pacotes = c("openxlsx", "readxl", "stringi", "stringr")
