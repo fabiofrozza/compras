@@ -867,9 +867,6 @@ function RefreshLstSettings {
 $fldRoot      = $PSScriptRoot
 $fldParent    = Join-Path $PSScriptRoot .. -Resolve
 $fldCommon    = Join-Path $fldParent "_common"
-$fldToImport  = Join-Path $fldRoot "ARQUIVOS A IMPORTAR"
-$fldRelatorio = Join-Path $fldRoot "RELATORIOS"
-$fldResumo    = Join-Path $fldRoot "RESUMO PEDIDOS" 
 
 $configMain     = "config.psm1"
 $configFullPath = Join-Path $fldCommon $configMain
@@ -880,6 +877,10 @@ if (Test-Path -Path $configFullPath) {
     [System.Windows.Forms.MessageBox]::Show("Não foi localizado o arquivo '${configMain}'.`n`nNão é possível executar o script.", "Erro", 0, 16)
     [Environment]::Exit(1)
 }
+
+$fldToImport  = Join-Path $fldRoot (GetEnvConfig "IMPORTACAO_ARQUIVOS_A_IMPORTAR")
+$fldRelatorio = Join-Path $fldRoot (GetEnvConfig "IMPORTACAO_RELATORIOS")
+$fldResumo    = Join-Path $fldRoot (GetEnvConfig "IMPORTACAO_RESUMO_PEDIDOS" )
 
 main "IMPORTACAO"
 

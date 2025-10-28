@@ -77,15 +77,11 @@ power_bi_utils <- function() {
   
   catalogo <- utils_catalogo()
   
-  # Definir aqui o ano inicial do painel Visão Planejamento
-  ano_inicial   <- 2021
+  ano_inicial   <- Sys.getenv("PLANEJAMENTO_ANO_INICIAL")
   ano_corrente  <- format(Sys.Date(), "%Y")
   ano_licitacao <- seq(ano_inicial, ano_corrente)
 
-  # Definir aqui o ano inicial do painel 
-  # Visão Processos Administrativos e Alterações Contratuais
-  # ANA CORINA, edite apenas o ano da linha a seguir :)
-  ano_inicial_processos_administrativos <- 2020
+  ano_inicial_processos_administrativos <- Sys.getenv("PROCESSOS_ADM_ANO_INICIAL")
   
   return(list(unidades      = unidades,
               catalogo      = catalogo,

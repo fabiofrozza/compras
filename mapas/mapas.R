@@ -214,8 +214,8 @@ mapas_main <- function() {
   
   pasta        = list()
   pasta$atual  = getwd()
-  pasta$mapas  = file.path(pasta$atual, "MAPAS")
-  pasta$listas = file.path(pasta$atual, "LISTAS")
+  pasta$mapas  = file.path(pasta$atual, Sys.getenv("MAPAS_MAPAS"))
+  pasta$listas = file.path(pasta$atual, Sys.getenv("MAPAS_LISTAS"))
   pasta$criar  = c(pasta$mapas, pasta$listas)
   
   pacotes     = c("openxlsx", "dplyr", "stringr")

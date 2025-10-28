@@ -245,8 +245,8 @@ atas_main <- function() {
   
   pasta       = list()
   pasta$atual = getwd()
-  pasta$atas  = file.path(pasta$atual, "ATAS")
-  pasta$sicaf = file.path(pasta$atual, "SICAF")
+  pasta$atas  = file.path(pasta$atual, Sys.getenv("ATAS_ATAS"))
+  pasta$sicaf = file.path(pasta$atual, Sys.getenv("ATAS_SICAF"))
   pasta$criar = c(pasta$atas, pasta$sicaf)
   
   pacotes     = c("openxlsx", "dplyr", "pdftools", "stringr")

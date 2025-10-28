@@ -1,6 +1,6 @@
 primeiro_uso_main <- function() {
   
-  cat("=== INICIANDO SCRIPT. AGUARDE... ===\n")
+  cat("►►► INICIANDO SCRIPT R. AGUARDE...\n")
   
   source(file.path("..", "_common", "config.R"), chdir = TRUE)
   

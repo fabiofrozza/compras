@@ -374,8 +374,9 @@ catmat_main <- function() {
   source(file.path("..", "_common", "config.R"), chdir = TRUE)
   
   pasta                  = list(atual = getwd())
-  pasta$tr               = file.path(pasta$atual, "TR")
-  pasta$arquivos_gerados = file.path(pasta$atual, "ARQUIVOS GERADOS")
+  pasta$tr               = file.path(pasta$atual, Sys.getenv("CATMAT_TR"))
+  pasta$arquivos_gerados = file.path(pasta$atual, 
+                                     Sys.getenv("CATMAT_ARQUIVOS_GERADOS"))
   pasta$fontes           = file.path(pasta$atual, "_fontes")
   pasta$criar            = c(pasta$tr, pasta$arquivos_gerados)
   

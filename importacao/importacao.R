@@ -1374,9 +1374,12 @@ main_inicializar <- function(pacotes, script_a_executar) {
   # Complementa com as pastas necessárias aos scripts vinculados às listas finais
   pasta <- list()
   pasta$atual             = getwd()
-  pasta$arquivos_importar = file.path(pasta$atual, "ARQUIVOS A IMPORTAR")
-  pasta$resumo_pedidos    = file.path(pasta$atual, "RESUMO PEDIDOS")
-  pasta$relatorios        = file.path(pasta$atual, "RELATORIOS")
+  pasta$arquivos_importar = file.path(pasta$atual,
+                                      Sys.getenv("IMPORTACAO_ARQUIVOS_A_IMPORTAR"))
+  pasta$resumo_pedidos    = file.path(pasta$atual,
+                                      Sys.getenv("IMPORTACAO_RESUMO_PEDIDOS"))
+  pasta$relatorios        = file.path(pasta$atual,
+                                      Sys.getenv("IMPORTACAO_RELATORIOS"))
   pasta$criar             = c(pasta$relatorios, 
                               pasta$arquivos_importar, 
                               pasta$resumo_pedidos)

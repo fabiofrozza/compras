@@ -351,7 +351,7 @@ function Gerar {
 
     InterfaceMinimize -hideTaskBar
 
-    RunR -script "matl.R" -arguments @($pregao)
+    RunR -script "fornecedores.R" -arguments @($pregao)
 
     InterfaceRestore
 
@@ -422,7 +422,7 @@ function Mover {
     $fleConferencia = "${fldImport}\${fleBaseName}_CONFERENCIA.xlsx"
     $hasFleErrors   = Test-Path -Path $fleErrors
 
-    $fldDocuments   = [Environment]::GetFolderPath("MyDocuments").ToLower().Replace("\onedrive", "") + "\MATL_Cadastro"
+    $fldDocuments   = [Environment]::GetFolderPath("MyDocuments").ToLower().Replace("\onedrive", "") + "\FORNECEDORES_Cadastro"
     $fldDocOriginal = [Environment]::GetFolderPath("MyDocuments").ToLower().Replace("\onedrive", "")
 
     if ([string]::IsNullOrEmpty($fleSelected)) {
@@ -478,8 +478,8 @@ function Mover {
 $fldRoot   = $PSScriptRoot
 $fldParent = Join-Path $PSScriptRoot .. -Resolve
 $fldCommon = Join-Path $fldParent "_common"
-$fldData   = Join-Path $fldRoot "DADOS"
-$fldImport = Join-Path $fldRoot "PARA IMPORTAR"
+$fldData   = Join-Path $fldRoot GetEnvConfig "FORNECEDORES_DADOS"
+$fldImport = Join-Path $fldRoot GetEnvConfig "FORNECEDORES_PARA IMPORTAR"
 
 $configMain     = "config.psm1"
 $configFullPath = Join-Path $fldCommon $configMain
@@ -491,13 +491,13 @@ if (Test-Path -Path $configFullPath) {
     [Environment]::Exit(1)
 }    
 
-main "MATL"
+main "FORNECEDORES"
 
 # MAIN FORM
 
 InterfaceConstants -frmWidth 800 -frmHeight 500 -marginLeft 120 -marginRight 80 -marginTop 35
 
-$frm_main, $pic_banner, $tip_ = InterfaceMainForm "Cadastro Fornecedores" "matl"
+$frm_main, $pic_banner, $tip_ = InterfaceMainForm "Cadastro Fornecedores" "fornecedores"
 
 $lst_image = InterfaceImageList
 

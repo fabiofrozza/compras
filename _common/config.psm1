@@ -301,10 +301,10 @@ function SetScriptConstants {
 function GetEnvConfig {
     <#
     .SYNOPSIS
-        Obtém configurações do arquivo .env
+        Obtém configurações do arquivo .Renviron
     
     .DESCRIPTION
-        Lê as configurações do arquivo .env localizado na pasta _common.
+        Lê as configurações do arquivo .Renviron localizado na pasta _common.
         Pode retornar todas as configurações ou uma configuração específica.
     
     .PARAMETER ConfigName
@@ -313,7 +313,7 @@ function GetEnvConfig {
     
     .EXAMPLE
         Get-EnvConfig
-        Retorna todas as configurações do arquivo .env
+        Retorna todas as configurações do arquivo .Renviron
     
     .EXAMPLE
         GetEnvConfig -ConfigName "DATABASE_URL"
@@ -324,10 +324,11 @@ function GetEnvConfig {
         [string]$configName
     )
 
-    $envPath = Join-Path $PSScriptRoot ".env"
+    $envFile = ".Renviron"
+    $envPath = Join-Path $fldCommon $envFile
     
     if (-not (Test-Path $envPath)) {
-        Write-Error "Arquivo .env não encontrado em: $envPath"
+        Write-Error "Arquivo não encontrado em: $envPath"
         return $null
     }
 
@@ -349,12 +350,12 @@ function GetEnvConfig {
             return $configs[$configName]
         }
         else {
-            Write-Warning "Configuração '$configName' não encontrada no arquivo .env"
+            Write-Warning "Configuração '$configName' não encontrada no arquivo $envFile"
             return $null
         }
     }
     catch {
-        Write-Error "Erro ao ler o arquivo .env: $_"
+        Write-Error "Erro ao ler o arquivo ${envFile}: $_"
         return $null
     }
 }

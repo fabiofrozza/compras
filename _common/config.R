@@ -95,6 +95,9 @@ config_main <- function() {
     
     set_config(.config = list(status = list(inicio = TRUE)))
     
+    # Lê arquivo com definições exclusivas da empresa
+    readRenviron(".Renviron")
+    
     # Chama demais scripts compartilhados
     source("logging.R")
     source("utils.R")
@@ -528,9 +531,6 @@ config_ambiente <- function (pasta = NULL) {
       tamanho_mensagens   = 100,
       config_centralizado = file.path(pasta$common, "config.json")
     )
-  
-  # Lê arquivo .Renviron na pasta _common para urls salvas em arquivo separado
-  readRenviron(file.path(pasta$common, ".Renviron"))
   
   url <- 
     list(

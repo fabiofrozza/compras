@@ -1,4 +1,4 @@
-matl_arquivo_a_importar_montar <- function(dados, municipios) {
+fornecedores_arquivo_a_importar_montar <- function(dados, municipios) {
   
   #vincular código município na coluna cod_mun
   tryCatch({
@@ -19,7 +19,7 @@ matl_arquivo_a_importar_montar <- function(dados, municipios) {
   })
 }
 
-matl_arquivo_a_importar_salvar <- function(dados_a_importar, pregao) {
+fornecedores_arquivo_a_importar_salvar <- function(dados_a_importar, pregao) {
   
   pasta <- get_config("pasta")
   
@@ -39,7 +39,7 @@ matl_arquivo_a_importar_salvar <- function(dados_a_importar, pregao) {
   }
 }
 
-matl_arquivo_comparacao_salvar <- function(dados, dados_a_importar, pregao) {
+fornecedores_arquivo_comparacao_salvar <- function(dados, dados_a_importar, pregao) {
 
   pasta <- get_config("pasta")
   
@@ -139,7 +139,7 @@ matl_arquivo_comparacao_salvar <- function(dados, dados_a_importar, pregao) {
   })
 }
 
-matl_excel_fornecedores_ler <- function(excel_fornecedores) {
+fornecedores_excel_fornecedores_ler <- function(excel_fornecedores) {
   excel_conteudo <- NULL
   excel_dados    <- NULL
   
@@ -164,7 +164,7 @@ matl_excel_fornecedores_ler <- function(excel_fornecedores) {
   return(excel_dados)
 }
 
-matl_excel_fornecedores_obter <- function(pregao) {
+fornecedores_excel_fornecedores_obter <- function(pregao) {
   
   pasta <- get_config("pasta")
   
@@ -187,7 +187,7 @@ matl_excel_fornecedores_obter <- function(pregao) {
   })
 }
 
-matl_cnpj_verificar <- function(dados, arquivo_alerta) {
+fornecedores_cnpj_verificar <- function(dados, arquivo_alerta) {
   #elimina linhas sem CNPJ, verifica dígitos do CNPJ e cria arquivo de alerta
   dados$fornecedores$CNPJ_OK <- sapply(dados$fornecedores$cnpj, utils_verificar_cnpj)
   dados$para_comparacao      <- dados$fornecedores
@@ -241,7 +241,7 @@ matl_cnpj_verificar <- function(dados, arquivo_alerta) {
   return(dados)  
 }
 
-matl_dados_limpar <- function(dados) {
+fornecedores_dados_limpar <- function(dados) {
   #substitui NA por - em complemento e bairro e "não informado" em razao social, endereço, município e contato
   dados$fornecedores$razao_social <- replace(dados$fornecedores$razao_social, is.na(dados$fornecedores$razao_social), "NAO INFORMADO")
   dados$fornecedores$complemento  <- replace(dados$fornecedores$complemento,  is.na(dados$fornecedores$complemento),  "-")
@@ -305,7 +305,7 @@ matl_dados_limpar <- function(dados) {
   return(dados)
 }
 
-matl_dados_obter <- function(excel_dados, excel_fornecedores) {
+fornecedores_dados_obter <- function(excel_dados, excel_fornecedores) {
   #cria variáveis
   cnpj         <- NULL
   razao_social <- NULL
@@ -375,7 +375,7 @@ matl_dados_obter <- function(excel_dados, excel_fornecedores) {
   })
 }
 
-matl_municipios_obter <- function() {  
+fornecedores_municipios_obter <- function() {  
   
   pasta <- get_config("pasta")
   
@@ -399,15 +399,16 @@ matl_municipios_obter <- function() {
   })
 }
 
-matl_main <- function() {
+fornecedores_main <- function() {
   
   source(file.path("..", "_common", "config.R"), chdir = TRUE)
   
   pasta          = list()
   pasta$atual    = getwd()
   pasta$fontes   = file.path(pasta$atual, "_fontes")
-  pasta$dados    = file.path(pasta$atual, "DADOS")
-  pasta$importar = file.path(pasta$atual, "PARA IMPORTAR")
+  pasta$dados    = file.path(pasta$atual, Sys.getenv("FORNECEDORES_DADOS"))
+  pasta$importar = file.path(pasta$atual, 
+                             Sys.getenv("FORNECEDORES_PARA IMPORTAR"))
   pasta$criar    = c(pasta$dados, pasta$importar)
   
   pacotes = c("openxlsx", "readxl", "stringi", "stringr")
@@ -422,38 +423,38 @@ matl_main <- function() {
 
   log_secao("OBTENDO LISTA DE ARQUIVOS")
 
-  excel_fornecedores <- matl_excel_fornecedores_obter(pregao)
+  excel_fornecedores <- fornecedores_excel_fornecedores_obter(pregao)
   
   log_secao("OBTENDO CONTEÚDO DOS ARQUIVOS")
   
-  excel_dados <- matl_excel_fornecedores_ler(excel_fornecedores)
+  excel_dados <- fornecedores_excel_fornecedores_ler(excel_fornecedores)
   
   log_secao("LENDO DADOS DOS FORNECEDORES")
   
-  dados <- matl_dados_obter(excel_dados, excel_fornecedores)
+  dados <- fornecedores_dados_obter(excel_dados, excel_fornecedores)
 
   log_secao("ANALISANDO E LIMPANDO INFORMAÇÕES")
   
-  dados <- matl_dados_limpar(dados)
+  dados <- fornecedores_dados_limpar(dados)
   
   log_secao("OBTENDO INFORMAÇÕES DE MUNICÍPIOS")
   
-  municipios <- matl_municipios_obter()
+  municipios <- fornecedores_municipios_obter()
   
   log_secao("VERIFICANDO CNPJs")
   
-  dados <- matl_cnpj_verificar(dados, arquivo_alerta)
+  dados <- fornecedores_cnpj_verificar(dados, arquivo_alerta)
 
   log_secao("MONTANDO ARQUIVO")
 
-  dados_a_importar <- matl_arquivo_a_importar_montar(dados, municipios)
+  dados_a_importar <- fornecedores_arquivo_a_importar_montar(dados, municipios)
   
   log_secao("SALVANDO ARQUIVOS")
 
-  matl_arquivo_a_importar_salvar(dados_a_importar, pregao)  
-  matl_arquivo_comparacao_salvar(dados, dados_a_importar, pregao)
+  fornecedores_arquivo_a_importar_salvar(dados_a_importar, pregao)  
+  fornecedores_arquivo_comparacao_salvar(dados, dados_a_importar, pregao)
   
   config_finalizar()
 }
 
-matl_main()
+fornecedores_main()

@@ -181,8 +181,6 @@ Add-Type -AssemblyName System.Drawing
 $fldRoot   = $PSScriptRoot
 $fldParent = Join-Path $PSScriptRoot .. -Resolve
 $fldCommon = Join-Path $fldParent "_common"
-$fldAtas   = Join-Path $fldRoot "ATAS"
-$fldSicaf  = Join-Path $fldRoot "SICAF"
 
 $configMain     = "config.psm1"
 $configFullPath = Join-Path $fldCommon $configMain
@@ -193,6 +191,9 @@ if (Test-Path -Path $configFullPath) {
     [System.Windows.Forms.MessageBox]::Show("Não foi localizado o arquivo '${configMain}'.`n`nNão é possível executar o script.", "Erro", 0, 16)
     [Environment]::Exit(1)
 }
+
+$fldAtas   = Join-Path $fldRoot GetEnvConfig "ATAS_ATAS"
+$fldSicaf  = Join-Path $fldRoot GetEnvConfig "ATAS_SICAF"
 
 main "ATAS"
 

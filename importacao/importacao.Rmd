@@ -3,7 +3,7 @@ title: "`r ifelse(importacao$validacao_manual, '[⚠ PRELIMINAR]{.vermelho} - ',
 subtitle: |
   | Grupo `r dados$info$grupo`
   | Etapa `r dados$info$etapa` - `r dados$info$ano`
-author: "CAPL - Coordenadoria de Análise e Planejamento de Compras"
+author: "`r Sys.getenv('DEPARTMENT_NAME')`"
 output:
   html_document:
     theme:
@@ -14,8 +14,8 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-<img class = "logo_ufsc" src = "`r file.path(pasta$superior, '_common', 'images', 'UFSC.png')`" />
-<img class = "logo_dcom" src = "`r file.path(pasta$superior, '_common', 'images', 'DCOM-logo.png')`" />
+<img class = "logo_company" src = "`r file.path(pasta$superior, '_common', 'images', 'company.png')`" />
+<img class = "logo_department" src = "`r file.path(pasta$superior, '_common', 'images', 'department.png')`" />
 
 ------------------------------------------------------------------------
 
@@ -90,7 +90,7 @@ cat("------------------------------------------------------------------------\n\
 
 cat("#### Ajustes após a geração dos processos\n")
 
-cat("#### Ajustes por solicitação da Unidade ou por iniciativa do DCOM\n")
+cat("#### Ajustes por solicitação da Unidade ou por iniciativa do Departamento\n")
 
 cat(sprintf("- Quantidade de ajustes: %s\n", dados$stats$qtde_ajustes))
 cat(sprintf("- Quantidade de Unidades com ajustes: %s\n", dados$stats$unidades_com_ajustes))
@@ -367,7 +367,7 @@ cat("------------------------------------------------------------------------")
 ```
 
 :::: {.logo_e_data}
-<img src = "`r file.path(pasta$superior, '_common', 'images', 'DCOM.png')`" />
+<img src = "`r file.path(pasta$superior, '_common', 'images', 'department.png')`" />
 
 ::: {}
 `r format(Sys.Date(), '%d %B %Y')`
@@ -544,22 +544,22 @@ td {
     font-weight: 600 !important;
 }
 
-.logo_ufsc,
-.logo_dcom {
+.logo_company,
+.logo_department {
   position: absolute; 
   padding: 10px;
   
 }
 
-.logo_ufsc {
+.logo_company {
   width: 75px; 
-  top: 38px; 
+  top: 25px; 
   left: 0; 
 }
 
-.logo_dcom {
-  width: 100px; 
-  top: 80px; 
+.logo_department {
+  width: 75px; 
+  top: 25px; 
   right: 0; 
 }
 
