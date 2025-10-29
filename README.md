@@ -6,13 +6,13 @@ Alguns scripts para auxiliar meus colegas nas atividades relacionadas a compras 
 
 ## Conteúdo
 
-* [`importacao`](https://github.com/fabiofrozza/compras/tree/main/importacao): geração de arquivos para importação e criação dos pedidos de compras, resumo das importações para controle dos processos e produção de relatórios gerenciais.
-* [`mapas`](https://github.com/fabiofrozza/compras/tree/main/mapas): geração de listas de itens para licitação com base nos mapas de licitação de processos anteriores.
-* [`catmat`](https://github.com/fabiofrozza/compras/tree/main/catmat): verificação dos CATMATs e das respectivas margens de preferência (se houver) com base na lista de itens do Termo de Referência.
-* [`atas`](https://github.com/fabiofrozza/compras/tree/main/atas): geração de Atas de Registro de Preços com base nos relatórios de cadastramento dos fornecedores (obtidos no SICAF).
-* [`fornecedores`](https://github.com/fabiofrozza/compras/tree/main/fornecedores): geração de arquivo para atualização dos dados bancários dos fornecedores.
-* [`powerbi`](https://github.com/fabiofrozza/compras/tree/main/powerbi): geração de arquivo de dados para atualização dos painéis do Power BI.
-* [`primeiro_uso`](https://github.com/fabiofrozza/compras/tree/main/primeiro_uso): instalação do programa R e (opcionalmente) atualização  do PowerShell, utilizados pelos scripts.
+* [`importacao`](./importacao): geração de arquivos para importação e criação dos pedidos de compras, resumo das importações para controle dos processos e produção de relatórios gerenciais.
+* [`mapas`](./mapas): geração de listas de itens para licitação com base nos mapas de licitação de processos anteriores.
+* [`catmat`](./catmat): verificação dos CATMATs e das respectivas margens de preferência (se houver) com base na lista de itens do Termo de Referência.
+* [`atas`](./atas): geração de Atas de Registro de Preços com base nos relatórios de cadastramento dos fornecedores (obtidos no SICAF).
+* [`fornecedores`](./fornecedores): geração de arquivo para atualização dos dados bancários dos fornecedores.
+* [`powerbi`](./powerbi): geração de arquivo de dados para atualização dos painéis do Power BI.
+* [`primeiro_uso`](./primeiro_uso): instalação do programa R e (opcionalmente) atualização  do PowerShell, utilizados pelos scripts.
 
 ## Iniciando
 
@@ -37,7 +37,7 @@ Pronto! Os scripts estão prontos para serem usados!
 
 Estes scripts são parte de um projeto pessoal que me rendeu muitas alegrias. 
 
-Partindo de um conhecimento básico de R, iniciei, por necessidade, a criação do [`importacao`](https://github.com/fabiofrozza/compras/tree/main/importacao) para agilizar a geração dos pedidos. Aos poucos, conforme o script funcionava, foram surgindo novas ideias e novos scripts. 
+Partindo de um conhecimento básico de R, iniciei, por necessidade, a criação do [`importacao`](./importacao) para agilizar a geração dos pedidos. Aos poucos, conforme o script funcionava, foram surgindo novas ideias e novos scripts. 
 
 Assim, busquei alternativas já disponíveis aos meus colegas (como o PowerShell, pré-instalado no Windows, e, obviamente, os batches do CMD), facilitando ao máximo a utilização dos scripts por quem não tem nenhum conhecimento prévio de programação. Por este motivo, a estrutura é um pouco diferente do que seria um projeto padrão ou um pacote R. Contudo, os benefícios justificam esta decisão.
 

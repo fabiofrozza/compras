@@ -1,16 +1,3 @@
-# Functions Names:          # Variables:                # Constants and global values:
-#  PascalCase               #  camelCase                #  UPPER_SNAKE_CASE
-# Parameters:               # fld - Folder
-#  camelCase                # fle - File
-#
-# Controls:
-#  snake_case
-# btn_ - Buttons            # lbl_ - Labels             # txt_ - TextBox
-# cmb_ - ComboBox           # lst_ - ListView           # dgv_ - DataGridView
-# pnl_ - Panel              # mnu_ - Menu               # pic_ - PictureBox
-# ctr_ - Control            # frm_ - Form               # tip_ - ToolTip
-# tbc_ - TabControl         # tbp_ - TabPage
-
 function InterfaceConstants {
     param (
         [int]$frmWidth,
