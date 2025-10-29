@@ -1,0 +1,36 @@
+# Links necessários aos scripts
+url_unidades = Preencha com o link da planilha de unidades requerentes (Google Drive)
+url_catalogo = Preencha com o link da planilha do catálogo de materiais (Google Drive)
+url_controle = Preencha com o link da planilha de controle de processos (Google Drive)
+url_saa = Preencha com o link da planilha de controle de processos administrativos e alterações contratuais (Google Drive)
+url_api_catmat = 'https://dadosabertos.compras.gov.br/modulo-material/4_consultarItemMaterial?pagina=1&codigoItem='
+url_lista_catmat = Preencha com o link da lista de CATMATs (Google Drive)
+
+# Dados da empresa
+COMPANY_NAME = Preencha com o nome da empresa
+COMPANY_SITE = Preencha com o site da empresa
+DEPARTMENT_NAME = Preencha com o nome do departamento
+DEPARTMENT_SITE = Preencha com o site do departamento
+MANUAL_SITE = Preencha com o site do manual
+LISTS_PAGE_SITE = Preencha com o link da página das listas
+
+# Folders
+IMPORTACAO_ARQUIVOS_A_IMPORTAR = ARQUIVOS A IMPORTAR
+IMPORTACAO_RESUMO_PEDIDOS = RESUMO PEDIDOS
+IMPORTACAO_RELATORIOS = RELATORIOS
+
+ATAS_ATAS = ATAS
+ATAS_SICAF = SICAF
+
+CATMAT_TR = TR
+CATMAT_ARQUIVOS_GERADOS = ARQUIVOS GERADOS
+
+MAPAS_MAPAS = MAPAS
+MAPAS_LISTAS = LISTAS
+
+FORNECEDORES_DADOS = DADOS
+FORNECEDORES_PARA_IMPORTAR = PARA IMPORTAR
+
+# Informações para Power BI
+PLANEJAMENTO_ANO_INICIAL = 2021
+PROCESSOS_ADM_ANO_INICIAL = 2020
