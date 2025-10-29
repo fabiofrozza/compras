@@ -1,29 +1,29 @@
-# Compras [![pt-br](https://img.shields.io/badge/lang-pt--br-green.svg)](https://github.com/fabiofrozza/compras/tree/main/README.md)
+# Compras [![pt-br](https://img.shields.io/badge/lang-pt--br-yellow?style=plastic)](https://github.com/fabiofrozza/compras/tree/main/README.md)
 
-[![en-us](https://img.shields.io/badge/lang-en--us-red.svg)](https://github.com/fabiofrozza/compras/tree/main/README.en-US.md)
+[![en-us](https://img.shields.io/badge/lang-en--us-blue?style=plastic)](https://github.com/fabiofrozza/compras/tree/main/README.en-us.md)
 
 Alguns scripts para auxiliar meus colegas nas atividades relacionadas a compras públicas.
 
 ## Conteúdo
 
-* `importacao:` geração de arquivos para importação e criação dos pedidos de compras, resumo das importações para controle dos processos e produção de relatórios gerenciais.
-* `mapas:` geração de listas de itens para licitação com base nos mapas de licitação de processos anteriores.
-* `catmat:` verificação dos CATMATs e das respectivas margens de preferência (se houver) com base na lista de itens do Termo de Referência.
-* `atas:` geração de Atas de Registro de Preços com base nos relatórios de cadastramento dos fornecedores (obtidos no SICAF).
-* `fornecedores:` geração de arquivo para atualização dos dados dos fornecedores.
-* `powerbi:` geração de arquivo de dados para atualização dos painéis do Power BI.
-* `primeiro_uso:` instalação do programa R e (opcionalmente) atualização  do PowerShell, utilizados pelos scripts.
+* [`importacao`](https://github.com/fabiofrozza/compras/tree/main/importacao): geração de arquivos para importação e criação dos pedidos de compras, resumo das importações para controle dos processos e produção de relatórios gerenciais.
+* [`mapas`](https://github.com/fabiofrozza/compras/tree/main/mapas): geração de listas de itens para licitação com base nos mapas de licitação de processos anteriores.
+* [`catmat`](https://github.com/fabiofrozza/compras/tree/main/catmat): verificação dos CATMATs e das respectivas margens de preferência (se houver) com base na lista de itens do Termo de Referência.
+* [`atas`](https://github.com/fabiofrozza/compras/tree/main/atas): geração de Atas de Registro de Preços com base nos relatórios de cadastramento dos fornecedores (obtidos no SICAF).
+* [`fornecedores`](https://github.com/fabiofrozza/compras/tree/main/fornecedores): geração de arquivo para atualização dos dados bancários dos fornecedores.
+* [`powerbi`](https://github.com/fabiofrozza/compras/tree/main/powerbi): geração de arquivo de dados para atualização dos painéis do Power BI.
+* [`primeiro_uso`](https://github.com/fabiofrozza/compras/tree/main/primeiro_uso): instalação do programa R e (opcionalmente) atualização  do PowerShell, utilizados pelos scripts.
 
 ## Iniciando
 
 ### Instalação
 
-* Baixe o conteúdo deste repositório na pasta desejada.
+* [Baixe o conteúdo deste repositório](https://github.com/fabiofrozza/compras/archive/refs/heads/main.zip) na pasta desejada.
 * Mantenha a mesma estrutura de pastas.
 * Baixe a última versão do [R](https://cran.r-project.org/bin/windows/base/) e salve o arquivo na pasta `primeiro_uso`.
 * Execute o script `primeiro_uso/primeiro_uso.exe`.
-* (Opcional, mas altamente recomendável) Baixe a última versão do [PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.5#installing-the-zip-package) (arquivo .zip) e salve o arquivo na pasta `primeiro_uso`.
-* Execute o script `primeiro_uso/opcional-powershell.exe`.
+* _(Opcional, mas altamente recomendável)_ Baixe a última versão do [PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.5#installing-the-zip-package) (arquivo .zip) e salve o arquivo na pasta `primeiro_uso`.
+* Execute o script `primeiro_uso/opcional_powershell.exe`.
 
 ### Personalização
 
@@ -37,13 +37,13 @@ Pronto! Os scripts estão prontos para serem usados!
 
 Estes scripts são parte de um projeto pessoal que me rendeu muitas alegrias. 
 
-Partindo de um conhecimento básico de R, iniciei por necessidade a criação do `importacao` para agilizar a geração dos pedidos. Aos poucos, conforme o script funcionava, foram surgindo novas ideias e novos scripts. 
+Partindo de um conhecimento básico de R, iniciei, por necessidade, a criação do [`importacao`](https://github.com/fabiofrozza/compras/tree/main/importacao) para agilizar a geração dos pedidos. Aos poucos, conforme o script funcionava, foram surgindo novas ideias e novos scripts. 
 
 Assim, busquei alternativas já disponíveis aos meus colegas (como o PowerShell, pré-instalado no Windows, e, obviamente, os batches do CMD), facilitando ao máximo a utilização dos scripts por quem não tem nenhum conhecimento prévio de programação. Por este motivo, a estrutura é um pouco diferente do que seria um projeto padrão ou um pacote R. Contudo, os benefícios justificam esta decisão.
 
 ## Reconhecimento
 
-Agradeço aos meus colegas pela paciência em serem meus "testadores" e às suas ideias e sugestões. É para vocês tudo isto, o que fiz com muito carinho (como podem ver pelas mensagens engraçadinhas pra fechar as janelas...)
+Agradeço aos meus colegas pela paciência em serem meus _"testadores"_ e às suas ideias e sugestões. É para vocês tudo isto, o que fiz com muito carinho (como podem ver pelas mensagens engraçadinhas pra fechar as janelas 😄).
 
 Obrigado a https://ascii.co.uk/ e https://www.asciiart.eu/ pelas artes em ASCII.
 
