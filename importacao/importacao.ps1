@@ -23,17 +23,19 @@ function OpenFileFolder {
         $fle = $selection.Text
     }
 
-    switch ($lst_) {
+    $fld = switch ($lst_) {
         {@($lst_importar, $lst_descricao) -contains $_} {
-            Start-Process "$fldToImport\$fle"
+            $fldToImport
         }
         {@($lst_prints, $lst_resumos) -contains $_} {
-            Start-Process "$fldResumo\$fle"
+            $fldResumo
         }
         {@($lst_dfd, $lst_relatorio) -contains $_} {
-            Start-Process "$fldRelatorio\$fle"
+            $fldRelatorio
         }
     }
+
+    Start-Process (Join-Path $fld $fle)
 }
 
 function RefreshCmbProcessos {
@@ -171,12 +173,12 @@ function RefreshLstConferencia {
 function GetFiles {
 
     $files = @{
-        lst_importar  = Get-ChildItem -Path $fldToImport\*.csv -Name;
-        lst_descricao = Get-ChildItem -Path $fldToImport\Descrição*.xls* -Name;
-        lst_prints    = Get-ChildItem -Path $fldResumo\*.pdf -Name;
-        lst_resumos   = Get-ChildItem -Path $fldResumo\*.xls* -Name;
-        lst_dfd       = Get-ChildItem -Path $fldRelatorio\*.xls* -Name;
-        lst_relatorio = Get-ChildItem -Path $fldRelatorio\*.pdf -Name;
+        lst_importar  = Get-ChildItem -Path (Join-Path $fldToImport *.csv) -Name;
+        lst_descricao = Get-ChildItem -Path (Join-Path $fldToImport Descrição*.xls*) -Name;
+        lst_prints    = Get-ChildItem -Path (Join-Path $fldResumo *.pdf) -Name;
+        lst_resumos   = Get-ChildItem -Path (Join-Path $fldResumo *.xls*) -Name;
+        lst_dfd       = Get-ChildItem -Path (Join-Path $fldRelatorio *.xls*) -Name;
+        lst_relatorio = Get-ChildItem -Path (Join-Path $fldRelatorio *.pdf) -Name;
     }
     
     return $files
@@ -211,7 +213,7 @@ function ClearLinkStates {
 
     RefreshLstConferencia
     RefreshBtnInfo "waiting"
-    RefreshBtnLog $statusRScript $config.arquivo_log_R
+    RefreshBtnLog
 
 }
 
@@ -355,12 +357,8 @@ function RefreshBtnInfo {
 }
 
 function RefreshBtnLog {
-    param (
-        [string]$lastRunResults,
-        [string]$fleLogR
-    )
     
-    if ($null -eq $fleLogR -or $lastRunResults -eq "waiting" -or $lastRunResults -eq "sucesso") {
+    if ([string]::IsNullOrEmpty($lst_erros.Text)) {
         $image = "log"
         $tag   = "Abrir pasta de logs"
     } else {
@@ -378,13 +376,13 @@ Function ReadyToRunRScript {
     $errors   = New-Object System.Collections.ArrayList
 
     foreach ($script in $RScripts) {
-        if (-not (Test-Path -Path "$fldRoot\$script")) {
+        if (-not (Test-Path -Path (Join-Path $fldRoot $script))) {
             $errors.Add("Não foi localizado o script $script. Verifique a pasta.")
         }
     }
 
     if ($errors.Count -gt 0) {
-        [void](ShowErrors $errors)
+        [void](MsgBoxErrors $errors)
         return $false
     }
 
@@ -393,7 +391,7 @@ Function ReadyToRunRScript {
 
         $result = [System.Windows.Forms.MessageBox]::Show("Este não parece ser um link de planilha de inserção de demandas.`n`nGostaria de continuar mesmo assim?", "Alerta", 4, 48)
         if ($result -eq "No") {
-            [void](ShowErrors "Verifique o link informado antes de continuar.")
+            [void](MsgBoxErrors "Verifique o link informado antes de continuar.")
             return $false
         }
     } else {
@@ -405,13 +403,13 @@ Function ReadyToRunRScript {
     if (($selectedTab -eq "tbp_importar" -or $selectedTab -eq "tbp_resumo") -and $cmb_processos.SelectedItem -eq "Nenhum processo disponível") {
         $result = [System.Windows.Forms.MessageBox]::Show("Parece que ainda não foram gerados os processos deste grupo.`n`nDeseja continuar mesmo assim?", "Processos não gerados", 4, 48)
         if ($result -eq "No") {
-            [void](ShowErrors "Gere os processos e informe-os na Lista Final antes de tentar novamente.")
+            [void](MsgBoxErrors "Gere os processos e informe-os na Lista Final antes de tentar novamente.")
             return $false
         }
     }
 
     if ($selectedTab -eq "tbp_resumo" -and $lst_prints.Empty) {
-        [void](ShowErrors "Não é possível gerar o resumo.`nSalve os PDFs dos pedidos gerados na pasta e tente novamente.")
+        [void](MsgBoxErrors "Não é possível gerar o resumo.`nSalve os PDFs dos pedidos gerados na pasta e tente novamente.")
         return $false
     } 
 
@@ -439,7 +437,7 @@ Function ReadyToRunRScript {
     if (-not $lst_.Empty) {
         $result = [System.Windows.Forms.MessageBox]::Show($msgNotEmpty, "Alerta", 4, 48)
         if ($result -eq "No") {
-            [void](ShowErrors $msgError)
+            [void](MsgBoxErrors $msgError)
             return $false   
         }
     }
@@ -452,7 +450,7 @@ Function ReadyToRunRScript {
     }
 }
 
-function ShowErrors {
+function MsgBoxErrors {
     param (
         [string]$errors
     )
@@ -476,27 +474,27 @@ function DeleteFiles {
     switch ($lst_) {
         $lst_importar {
             $msg = "todos os arquivos a importar (.csv)"
-            $fleToDelete = "$fldToImport\*.csv"
+            $fleToDelete = Join-Path $fldToImport *.csv
         }
         $lst_descricao {
             $msg = "todos os arquivos com descrição a ajustar"
-            $fleToDelete = "$fldToImport\Descrição*.xlsx"
+            $fleToDelete = Join-Path $fldToImport Descrição*.xlsx
         }
         $lst_prints {
             $msg = "todas as listas dos pedidos gerados (.pdf)"
-            $fleToDelete = "$fldResumo\*.pdf"
+            $fleToDelete = Join-Path $fldResumo *.pdf
         }
         $lst_resumos {
             $msg = "todos os resumos gerados (.xls)"
-            $fleToDelete = "$fldResumo\*.xls*"
+            $fleToDelete = Join-Path $fldResumo *.xls*
         }
         $lst_dfd {
             $msg = "todos os DFDs gerados (.xls)"
-            $fleToDelete = "$fldRelatorio\*.xls*"
+            $fleToDelete = Join-Path $fldRelatorio *.xls*
         }
         $lst_relatorio {
             $msg = "todos os relatórios gerados (.pdf)"
-            $fleToDelete = "$fldRelatorio\*.pdf"
+            $fleToDelete = Join-Path $fldRelatorio *.pdf
         }
     }
 
@@ -663,7 +661,7 @@ function RefreshInterfaceAfterRun {
     RefreshBtnInfo $lastRunResults
 
     RefreshLstErrors $errors
-    RefreshBtnLog $lastRunResults $fleLogR
+    RefreshBtnLog
 }
 
 function RefreshLstErrors {
@@ -779,15 +777,15 @@ function ContextMenuPnlInfo {
             switch ($ctr_) {
                 $lst_conferencia {
                     ConfigJSON -key "conferencia" -option "remove"
-                    ConfigJSON -key "resultado_geracao" -value "waiting"
+                    ConfigJSON "resultado_geracao" "waiting"
                     RefreshLstConferencia
                     RefreshBtnInfo "waiting"
                 }
                 $lst_erros {
-                    ConfigJSON -key "arquivo_log_R" -value $null
+                    ConfigJSON "arquivo_log_R" $null
                     ConfigJSON -key "msg_erro" -option "remove"
                     $lst_erros.Clear()
-                    RefreshBtnLog $null $null
+                    RefreshBtnLog
                 }
             }
         }
@@ -864,6 +862,19 @@ function RefreshLstSettings {
 
 }
 
+function OpenLogFile {
+    
+        InterfaceMinimize
+
+        if ([string]::IsNullOrEmpty($lst_erros.Text)) { 
+            Start-Process "$fldLog"
+        } else {
+            $fleLogR = ($lst_erros.Text -split "`r`n")[0]
+            Start-Process (Join-Path $fldLog $fleLogR)
+        }
+
+}
+
 $fldRoot      = $PSScriptRoot
 $fldParent    = Join-Path $PSScriptRoot .. -Resolve
 $fldCommon    = Join-Path $fldParent "_common"
@@ -903,7 +914,7 @@ SetScriptConstants @{
     UTIL_AREA_HEIGHT = $UTIL_AREA_HEIGHT - 75 - ($PADDING_OUTER * 2)
 }
 
-$frm_main, $pic_banner, $tip_ = InterfaceMainForm -title "Importação Planilhas - Google Drive/Solar" -icon "planilha"
+$frm_main, $pic_banner, $tip_ = InterfaceMainForm -title "Importação Planilhas - Google Drive" -icon "planilha"
 
 $lst_image = InterfaceImageList
 
@@ -1209,14 +1220,7 @@ $params = @{
     name = "log";
     tag = "...";
     function = {
-        InterfaceMinimize
-        $fleLogR = ConfigJSON "arquivo_log_R"
-        try { 
-            Start-Process "$fldLog\$fleLogR" 
-        } 
-        catch { 
-            Start-Process "$fldLog"
-        }
+        OpenLogFile
     }
 }
 $btn_log = InterfaceButtonImage @params
@@ -1301,7 +1305,9 @@ $params = @{
         "Arquivos para importar" = -2
     };
     events = @{
-        "ItemActivate" = {OpenFileFolder $lst_importar}
+        "ItemActivate" = {
+            OpenFileFolder $lst_importar
+        }
     }
 }
 $lst_importar = InterfaceList @params
@@ -1317,7 +1323,9 @@ $params = @{
         "Descrição de itens a ajustar" = -2
     };
     events = @{
-        "ItemActivate" = {OpenFileFolder $lst_descricao}
+        "ItemActivate" = {
+            OpenFileFolder $lst_descricao
+        }
     }
 }
 $lst_descricao = InterfaceList @params
@@ -1337,7 +1345,9 @@ $params = @{
         "Prints da tela dos pedidos" = -2
     };
     events = @{
-        "ItemActivate" = {OpenFileFolder $lst_prints}
+        "ItemActivate" = {
+            OpenFileFolder $lst_prints
+        }
     }
 }
 $lst_prints = InterfaceList @params
@@ -1353,7 +1363,9 @@ $params = @{
         "Resumos gerados" = -2
     };
     events = @{
-        "ItemActivate" = {OpenFileFolder $lst_resumos}
+        "ItemActivate" = {
+            OpenFileFolder $lst_resumos
+        }
     }
 }
 $lst_resumos = InterfaceList @params
@@ -1383,7 +1395,9 @@ $params = @{
         "Planilha auxiliar para DFD" = -2
     };
     events = @{
-        "ItemActivate" = {OpenFileFolder $lst_dfd}
+        "ItemActivate" = {
+            OpenFileFolder $lst_dfd
+        }
     }
 }
 $lst_dfd = InterfaceList @params
@@ -1399,7 +1413,9 @@ $params = @{
         "Relatórios gerenciais" = -2
     };
     events = @{
-        "ItemActivate" = {OpenFileFolder $lst_relatorio}
+        "ItemActivate" = {
+            OpenFileFolder $lst_relatorio
+        }
     }
 }
 $lst_relatorio = InterfaceList @params
@@ -1495,7 +1511,7 @@ $lbl_wait.BringToFront()
 $frm_splash, $lbl_splash = InterfaceSplashScreen
 $frm_splash.Controls.AddRange(@($lbl_splash))
 
-InterfaceShowForm -title "IMPORTAÇÃO GOOGLE DRIVE/SOLAR" -start {
+InterfaceShowForm -title "IMPORTAÇÃO GOOGLE DRIVE" -start {
 
     [void]$frm_splash.Show()
     
@@ -1504,6 +1520,7 @@ InterfaceShowForm -title "IMPORTAÇÃO GOOGLE DRIVE/SOLAR" -start {
     
     RefreshLstFiles
     RefreshLstErrors
+    RefreshBtnLog
     RefreshLstSettings
     
     ConfigJSON -show

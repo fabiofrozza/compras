@@ -1,10 +1,11 @@
-_common/images
 _common/log
 _common/.Renviron
 _common/config.json
+primeiro_uso/*.exe
 **/*.csv
-**/*.exe
-**/*.pdf
+!fornecedores/_fontes/*.csv
 **/*.xls*
+!catmat/_fontes/*.xls*
+**/*.pdf
 **/*.zip
 **/*.txt

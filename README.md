@@ -41,9 +41,15 @@ Partindo de um conhecimento básico de R, iniciei, por necessidade, a criação 
 
 Assim, busquei alternativas já disponíveis aos meus colegas (como o PowerShell, pré-instalado no Windows, e, obviamente, os batches do CMD), facilitando ao máximo a utilização dos scripts por quem não tem nenhum conhecimento prévio de programação. Por este motivo, a estrutura é um pouco diferente do que seria um projeto padrão ou um pacote R. Contudo, os benefícios justificam esta decisão.
 
+## Desenvolvimento
+
+[Aqui](./_common/README.md) estão algumas informações sobre o desenvolvimento do código.
+
 ## Reconhecimento
 
 Agradeço aos meus colegas pela paciência em serem meus _"testadores"_ e às suas ideias e sugestões. É para vocês tudo isto, o que fiz com muito carinho (como podem ver pelas mensagens engraçadinhas pra fechar as janelas 😄).
+
+Obrigado a https://www.flaticon.com pelos ícones e imagens.
 
 Obrigado a https://ascii.co.uk/ e https://www.asciiart.eu/ pelas artes em ASCII.
 
