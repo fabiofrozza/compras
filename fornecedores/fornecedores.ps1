@@ -362,7 +362,7 @@ function Gerar {
     $hasFleErrors = Test-Path -Path $fleErrors
 
     $errors          = New-Object System.Collections.ArrayList
-    $msgErrorScriptR = ConfigJSON -key "msg_erro" -option "get"
+    $msgErrorScriptR = ConfigJSON "msg_erro"
     
     if ($hasFleErrors) {
         foreach ($lineError in Get-Content -Path $fleErrors -Encoding UTF8) {
