@@ -1,7 +1,7 @@
 ﻿# FUNCTIONS
 
 function AtualizarFornecedores {
-    $sicafs = Get-ChildItem -Path "$fldSicaf\*.pdf" -Name | Sort-Object
+    $sicafs = Get-ChildItem -Path (Join-Path $fldSicaf *.pdf) -Name | Sort-Object
     
     $lst_sicaf.SuspendLayout()
         $lst_sicaf.Rows.Clear()
@@ -64,7 +64,7 @@ function DeleteFiles {
     $result = [System.Windows.Forms.MessageBox]::Show("Deseja excluir todos os relatórios SICAF?", "Confirmação de exclusão", 4, 48)
 
     if ($result -eq "Yes") {
-        Get-ChildItem -Path "$fldSicaf\*.pdf" -File | Remove-Item -Force 
+        Get-ChildItem -Path (Join-Path $fldSicaf *.pdf) -File | Remove-Item -Force 
         AtualizarFornecedores
     }
 }
@@ -164,14 +164,14 @@ function CleanPregao {
 
 function SalvarDados {
 
-    ConfigJSON -key "n_pregao" -value ([int]$txt_n_pregao.Value)
-    ConfigJSON -key "ano_pregao" -value ([int]$txt_ano_pregao.Value)
-    ConfigJSON -key "processo" -value $txt_processo.Text
-    ConfigJSON -key "objeto" -value $txt_objeto.Text
-    ConfigJSON -key "data" -value $txt_data_extenso.Text
-    ConfigJSON -key "n_ata" -value ([int]$txt_n_ata.Value)
-    ConfigJSON -key "ano_ata" -value ([int]$txt_ano_ata.Value)
-    ConfigJSON -key "data_seletor" -value $txt_data_seletor.Value
+    ConfigJSON "n_pregao" ([int]$txt_n_pregao.Value)
+    ConfigJSON "ano_pregao" ([int]$txt_ano_pregao.Value)
+    ConfigJSON "processo" $txt_processo.Text
+    ConfigJSON "objeto" $txt_objeto.Text
+    ConfigJSON "data" $txt_data_extenso.Text
+    ConfigJSON "n_ata" ([int]$txt_n_ata.Value)
+    ConfigJSON "ano_ata" ([int]$txt_ano_ata.Value)
+    ConfigJSON "data_seletor" $txt_data_seletor.Value
 
 }
 
@@ -385,7 +385,9 @@ $params = @{
     name = "excluir";
     top = $position.top;
     left = $position.left;
-    function = {CleanPregao};
+    function = {
+        CleanPregao
+    };
     tag = "Clique aqui para limpar as informações."
 }
 $btn_clear = InterfaceButtonImage @params
@@ -448,7 +450,9 @@ $params = @{
     name = "excluir";
     top = $position.top;
     left = $position.left;
-    function = {DeleteFiles};
+    function = {
+        DeleteFiles
+    };
     tag = "Clique aqui para excluir todos os relatórios exibidos acima."
 }
 $btn_delete = InterfaceButtonImage @params
@@ -461,7 +465,7 @@ $params = @{
     left = InterfacePosition $btn_delete "left" 20;
     function = {
         InterfaceMinimize
-        Start-Process "$fldRoot/SICAF"
+        Start-Process (Join-Path $fldRoot SICAF)
     };
     tag = "Clique aqui para abrir a pasta onde devem ser salvos os relatórios de credenciamento do SICAF."
 }
@@ -473,7 +477,9 @@ $params = @{
     name = "atualizar_bw";
     top = $btn_delete.Top;
     left = InterfacePosition $btn_folder_sicaf "left" 20;
-    function = {AtualizarFornecedores};
+    function = {
+        AtualizarFornecedores
+    };
     tag = "Clique aqui para atualizar a lista de relatórios de credenciamento do SICAF."
 }
 $btn_refresh_sicaf = InterfaceButtonImage @params
@@ -524,7 +530,7 @@ $params = @{
     name = "word";
     function = {
         InterfaceMinimize
-        Get-ChildItem "$fldAtas/MODELO SCRIPT*" | ForEach-Object { Start-Process $_ }
+        Get-ChildItem (Join-Path $fldAtas "MODELO SCRIPT*") | ForEach-Object { Start-Process $_ }
     };
     tag = "Clique aqui para abrir o modelo do Word para geração das Atas."
 }
@@ -537,7 +543,7 @@ $params = @{
     name = "excel";
     function = {
         InterfaceMinimize
-        Start-Process "$fldAtas/dados_atas.xlsx"
+        Start-Process (Join-Path $fldAtas dados_atas.xlsx)
     };
     tag = "Clique aqui para abrir a planilha com os dados obtidos (se existir)." 
 }
