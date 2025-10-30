@@ -94,10 +94,10 @@ function CheckRInstallation {
     Set-Variable -Name installedR -Scope Global -Value $installedR
     Set-Variable -Name fleExeR -Scope Global -Value $fleExeR
 
-    if (-not $installedR) {
-        $btn_r.Show()
-    } else {
+    if ($installedR) {
         $btn_r.Hide()
+    } else {
+        $btn_r.Show()
     }
 } 
 
@@ -410,7 +410,5 @@ function main {
     ShowMessage (Get-ExecutionPolicy -List | Format-Table | Out-String) "Permissões"
     
     ShowMessage (Get-ChildItem -Recurse -Path $fldRoot | Format-Table | Out-String) "Arquivos"
-    
-    CheckRInstallation
     
 }
