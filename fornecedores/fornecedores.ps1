@@ -24,9 +24,9 @@ function RefreshAtas {
         return
     }
 
-    $fleToImport = "${fldImport}\PE_${pregao}.csv"
-    $fleErrors   = "${fldImport}\PE_${pregao}_ERRO.txt"
-    $atas        = Get-ChildItem -Path "${fldData}\$pregao" -File -Filter "*.xls*" -ErrorAction Stop | Where-Object { -not $_.Name.StartsWith('~') } | Select-Object -ExpandProperty Name | Sort-Object
+    $fleToImport = Join-Path $fldImport "PE_${pregao}.csv"
+    $fleErrors   = Join-Path $fldImport "PE_${pregao}_ERRO.txt"
+    $atas        = Get-ChildItem -Path (Join-Path $fldData $pregao) -File -Filter "*.xls*" -ErrorAction Stop | Where-Object { -not $_.Name.StartsWith('~') } | Select-Object -ExpandProperty Name | Sort-Object
     
     $lst_atas.SuspendLayout()
         $lst_atas.Items.Clear()
@@ -149,7 +149,7 @@ function RefreshResumo {
             $pregao = $lst_importar.SelectedItems[0].Text
             $pregao = $pregao.substring(3) -replace ".{4}$"
 
-            if (-not(Test-Path -Path "$fldData\$pregao")) {
+            if (-not(Test-Path -Path (Join-Path $fldData $pregao))) {
                 $lst_resumo.Items.Clear()
                 return
             }
@@ -175,7 +175,7 @@ function RefreshResumo {
         [void]$item.SubItems.Add($pregao)
 
         try {
-            $qtyAtas = (Get-ChildItem "$fldData\$pregao" -File -Filter "*.xls*" -ErrorAction Stop | Where-Object { -not $_.Name.StartsWith('~') } | Measure-Object).Count
+            $qtyAtas = (Get-ChildItem (Join-Path $fldData $pregao) -File -Filter "*.xls*" -ErrorAction Stop | Where-Object { -not $_.Name.StartsWith('~') } | Measure-Object).Count
         }
         catch {
             $qtyAtas = "-"
@@ -216,7 +216,7 @@ function Conferir {
 
     $fleSelected = $itemSelected.Text
     $fleBaseName = ([System.IO.Path]::GetFileNameWithoutExtension($fleSelected))
-    $fleToCheck  = "${fldImport}\${fleBaseName}"
+    $fleToCheck  = Join-Path $fldImport $fleBaseName
     $hasError    = $lst_importar.SelectedItems[0].SubItems[1].Text
 
     InterfaceMinimize
@@ -260,7 +260,7 @@ function Excluir {
 
     switch ($lst_.Name) {
         "lst_pregoes"  { 
-            $toDelete = "$fldData\${selection}"
+            $toDelete = Join-Path $fldData $selection
 
             try {
                 Remove-Item -Path "$toDelete" -Force -Recurse -ErrorAction Stop
@@ -276,7 +276,7 @@ function Excluir {
         "lst_atas"     { 
             $pregao    = $lst_atas.Columns[0].Text
             $fldPregao = $pregao.substring(14)
-            $toDelete  = "$fldData\$fldPregao\$selection"
+            $toDelete  = Join-Path $fldData $fldPregao $selection
 
             try {
                 Get-ChildItem -Path "$toDelete" -File | Remove-Item -Force -ErrorAction Stop                    
@@ -289,10 +289,10 @@ function Excluir {
             RefreshResumo
         }
         "lst_importar" { 
-            $toDelete            = "${fldImport}\$selection" 
+            $toDelete            = Join-Path $fldImport $selection 
             $toDeleteBasename    = ([System.IO.Path]::GetFileNameWithoutExtension($toDelete))
-            $toDeleteConferencia = "${fldImport}\${toDeleteBasename}_CONFERENCIA.xlsx"
-            $toDeleteError       = "${fldImport}\${toDeleteBaseName}_ERRO.txt"
+            $toDeleteConferencia = Join-Path $fldImport "${toDeleteBasename}_CONFERENCIA.xlsx"
+            $toDeleteError       = Join-Path $fldImport "${toDeleteBaseName}_ERRO.txt"
 
             try {
                 Get-ChildItem -Path "$toDelete" -File | Remove-Item -Force -ErrorAction Stop  
@@ -355,10 +355,10 @@ function Gerar {
 
     InterfaceRestore
 
-    $fleToImport    = "${fldImport}\PE_${pregao}.csv"
+    $fleToImport    = Join-Path $fldImport "PE_${pregao}.csv"
     $hasFleToImport = Test-Path -Path $fleToImport
 
-    $fleErrors    = "${fldImport}\PE_${pregao}_ERRO.txt"
+    $fleErrors    = Join-Path $fldImport "PE_${pregao}_ERRO.txt"
     $hasFleErrors = Test-Path -Path $fleErrors
 
     $errors          = New-Object System.Collections.ArrayList
@@ -417,9 +417,9 @@ function Gerar {
 function Mover {
     $fleSelected    = $lst_importar.SelectedItems[0].Text
     $fleBaseName    = ([System.IO.Path]::GetFileNameWithoutExtension($fleSelected))
-    $fleToImport    = "${fldImport}\${fleSelected}"
-    $fleErrors      = "${fldImport}\${fleBaseName}_ERRO.txt"
-    $fleConferencia = "${fldImport}\${fleBaseName}_CONFERENCIA.xlsx"
+    $fleToImport    = Join-Path $fldImport $fleSelected
+    $fleErrors      = Join-Path $fldImport "${fleBaseName}_ERRO.txt"
+    $fleConferencia = Join-Path $fldImport "${fleBaseName}_CONFERENCIA.xlsx"
     $hasFleErrors   = Test-Path -Path $fleErrors
 
     $fldDocuments   = [Environment]::GetFolderPath("MyDocuments").ToLower().Replace("\onedrive", "") + "\FORNECEDORES_Cadastro"
@@ -761,5 +761,5 @@ InterfaceShowForm -title "CADASTRO FORNECEDORES" -start {
     RefreshImportar
     RefreshPregoes
 
-    #CheckRInstallation
+    CheckRInstallation
 } 

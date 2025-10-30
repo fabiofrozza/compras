@@ -254,7 +254,8 @@ function InterfaceList {
             }
         }
         "DataGridView" {
-            $lst_ = New-Object System.Windows.Forms.DataGridView
+            $lst_                             = New-Object System.Windows.Forms.DataGridView
+            $lst_.ColumnHeadersHeightSizeMode = 'DisableResizing'
 
             foreach($column in $columns.Keys) {
                 $addColumn            = New-Object System.Windows.Forms.DataGridViewTextBoxColumn
@@ -520,7 +521,7 @@ function InterfaceGetImage {
     
     $extension = if ($image -like "*.*") { "" } else { ".png" }
 
-    $fullPath = "$fldImages\$image$extension"
+    $fullPath = Join-Path $fldImages "$image$extension"
     $key = $fullPath.ToLower()
     
     if ($global:imageCache.ContainsKey($key)) {
