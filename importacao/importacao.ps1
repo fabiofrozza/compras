@@ -1514,6 +1514,8 @@ $frm_splash.Controls.AddRange(@($lbl_splash))
 InterfaceShowForm -title "IMPORTAÇÃO GOOGLE DRIVE" -start {
 
     [void]$frm_splash.Show()
+
+    CheckRInstallation
     
     $txt_link_planilha.Text = ConfigJSON "link_planilha"
     CheckLink
