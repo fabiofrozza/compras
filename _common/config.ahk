@@ -1,4 +1,15 @@
-﻿VerificarDependencias(itens*) {
+﻿GetFileName(pattern) {
+
+    Loop, Files, %pattern%
+    {
+        fileName := A_LoopFileName
+        break
+    }
+
+    return %fileName%
+}
+
+VerificarDependencias(itens*) {
     for index, item in itens {
         if !FileExist(item) {
             MsgBox, 16, Erro, O arquivo ou pasta '%item%' não foi localizado.
