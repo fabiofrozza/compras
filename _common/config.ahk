@@ -1,11 +1,54 @@
-﻿GetFileName(pattern) {
+﻿GetLatest(url, pattern) {
 
-    Loop, Files, %pattern%
-    {
-        fileName := A_LoopFileName
-        break
+    try {
+        http := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+        http.Open("GET", url, false)
+        http.Send()
+
+        html := http.ResponseText
+
+        if RegExMatch(html, pattern, fileName) {
+            return fileName
+        }
+    } catch e {
+        return ""
     }
 
+}
+
+GetLatestPwsh() {
+    url := "https://github.com/PowerShell/PowerShell/releases/latest"
+    pattern := "PowerShell-[\d.]+-win-x64\.zip"
+
+    return GetLatest(url, pattern)
+
+}
+
+GetLatestR() {
+    url := "https://cran.r-project.org/bin/windows/base/release.html"
+    pattern := "R-[\d.]+-win\.exe"
+
+    return GetLatest(url, pattern)
+
+}
+
+GetFileName(pattern, description) {
+    fileCount := 0
+    fileName := ""
+    
+    Loop, Files, %pattern%
+    {
+        fileCount++
+        fileName := A_LoopFileName
+    }
+    
+    if (fileCount > 1)
+    {
+        MsgBox, 16, Múltiplos arquivos encontrados, Foram encontrados %fileCount% arquivos de %description%.`n`nMantenha na pasta apenas o arquivo mais recente.`n`nApague os demais e tente novamente.
+        
+        ExitApp
+    }
+    
     return %fileName%
 }
 

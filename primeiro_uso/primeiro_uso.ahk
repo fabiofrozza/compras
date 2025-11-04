@@ -21,71 +21,16 @@ Executar:
         return
     }
 
-    ;rpath := LocalizarRPath()
-    rpath := ""
-    if (rpath = "") {
-        
-        arquivoR := GetFileName("R*.exe")
-            
-        if (FileExist(arquivoR)) {
-            MsgBox, 52, R não instalado, O programa R não está instalado.`n`nDeseja executar o instalador?
-            IfMsgBox, No
-                ExitApp
+    rpath := LocalizarRPath()
 
-            MsgBox, 48, R será instalado em breve, O R será instalado em breve.`n`nAceite todas as opções exibidas.
+    ; If R is installed
+    if (rpath != "") {
 
-            Gui, +Disabled
-            GuiControl, , BtnExecutar, Aguarde...
-            GuiControl, , BtnCancelar, Aguarde...
+        MsgBox, 52, Configuração inicial, R localizado em: "%rpath%"`n`nSerá executado o script "primeiro_uso.R".`n`nIsto aqui pode demorar bastante, então vá tomar um café e volte daqui a meia hora 😁`n`nDeseja continuar?
 
-            RunWait, %arquivoR%, , Max
+        IfMsgBox, No
+            return
 
-            Gui, -Disabled
-            GuiControl, , BtnExecutar, Iniciar
-            GuiControl, , BtnCancelar, Cancelar
-
-            MsgBox, 48, R instalado, Aplicativo R instalado com sucesso.`n`nO assistente será reiniciado.
-            Gosub, Executar
-        } else {
-            arquivoR := "R-4.5.0-win.exe"
-            MsgBox, 36, R não instalado, O programa R não está instalado e não há arquivo de instalação na pasta do script.`n`nDeseja tentar baixar automaticamente agora?
-            IfMsgBox, Yes
-            {
-                url := "https://cran.r-project.org/bin/windows/base/old/4.5.0/R-4.5.0-win.exe"
-
-                TrayTip, Download do instalador do R, Baixando o instalador do R do endereço "https://cran.r-project.org/bin/windows/base/old/4.5.0/"`nAguarde..., 30, 1
-
-                Gui, +Disabled
-                GuiControl, , BtnExecutar, Aguarde...
-                GuiControl, , BtnCancelar, Aguarde...
-
-                UrlDownloadToFile, %url%, %arquivoR%
-
-                Gui, -Disabled
-                GuiControl, , BtnExecutar, Iniciar
-                GuiControl, , BtnCancelar, Cancelar
-
-                TrayTip
-
-                if ErrorLevel {
-                    MsgBox, 16, Erro, Falha ao baixar o instalador.`n`nVerifique sua conexão com a internet e tente novamente.
-                } else {
-                    MsgBox, 48, Download concluído, O instalador foi baixado com sucesso!`n`nO assistente continuará normalmente.
-                    Gosub, Executar
-                }
-            }
-            else
-            {
-                MsgBox, 48, Atenção, Procure pelo arquivo %arquivoR% na internet, baixe manualmente e coloque-o na mesma pasta deste script.
-            }
-        }
-        return
-    }
-
-    MsgBox, 52, Configuração inicial, R localizado em: "%rpath%"`nSerá executado o script "primeiro_uso.R".`n`nIsto aqui pode demorar bastante, então vá tomar um café e volte daqui a meia hora 😁`n`nDeseja continuar?
-
-    IfMsgBox, Yes
-    {
         Gui, +Disabled
         GuiControl, , BtnExecutar, Aguarde...
         GuiControl, , BtnCancelar, Aguarde...
@@ -97,12 +42,77 @@ Executar:
         ExitApp
     }
 
-return
+    ; If R isn´t installed
+    arquivoR := GetFileName("R*.exe", "instalação do programa R")
+        
+    ; If there is installation file
+    if (FileExist(arquivoR)) {
+        MsgBox, 52, R não instalado, O programa R não está instalado.`n`nDeseja executar o instalador?
+        IfMsgBox, No
+            ExitApp
+
+        MsgBox, 48, R será instalado em breve, Aguarde a execução do instalador do R.`n`nIsto pode levar alguns segundos... Tenha paciência...`n`nDurante a instalação, aceite todas as opções exibidas clicando em OK/Continuar/Próximo ou equivalente.
+
+        Gui, +Disabled
+        GuiControl, , BtnExecutar, Aguarde...
+        GuiControl, , BtnCancelar, Aguarde...
+
+        RunWait, %arquivoR%, , Max
+
+        Gui, -Disabled
+        GuiControl, , BtnExecutar, Iniciar
+        GuiControl, , BtnCancelar, Cancelar
+
+        MsgBox, 48, R instalado, Aplicativo R instalado com sucesso.`n`nO assistente será reiniciado.
+        Gosub, Executar
+    } 
+    
+    ; If there isn´t installation file
+    MsgBox, 36, R não instalado, O programa R não está instalado e não há arquivo de instalação na pasta do script.`n`nDeseja tentar baixar automaticamente agora?
+    IfMsgBox, No
+        {
+            MsgBox, 48, Atenção, Procure por "CRAN download R" na internet, baixe manualmente o arquivo de instalação e coloque-o na mesma pasta deste script.
+            return
+        }
+    
+    arquivoR := GetLatestR()
+    if (arquivoR = "") {
+        MsgBox, 16, Erro, Não foi possível localizar a última versão do aplicativo R para download.`n`nVerifique sua conexão e tente novamente.
+        ExitApp
+    }
+    version := 
+    RegExMatch(arquivoR, "[\d.]+", version)
+    url := "https://cran.r-project.org/bin/windows/base/old/" . version . "/" . arquivoR
+
+    TrayTip, Download do instalador do R, Baixando o instalador do R. Aguarde..., 60, 1
+
+    Gui, +Disabled
+    GuiControl, , BtnExecutar, Aguarde...
+    GuiControl, , BtnCancelar, Aguarde...
+
+    try {
+        UrlDownloadToFile, %url%, %arquivoR%
+    } catch e {
+        TrayTip
+        MsgBox, 16, Erro, Falha ao baixar o instalador.`n`nVerifique sua conexão com a internet e tente novamente.
+        ExitApp
+    }
+
+    TrayTip
+    
+    MsgBox, 48, Download concluído, O instalador foi baixado com sucesso!`n`nO assistente continuará normalmente.
+    Gosub, Executar
+
+    Gui, -Disabled
+    GuiControl, , BtnExecutar, Iniciar
+    GuiControl, , BtnCancelar, Cancelar
+
+    return
 
 Cancelar:
     ExitApp
-return
+    return
 
 GuiClose:
     ExitApp
-return
+    return
