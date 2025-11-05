@@ -985,19 +985,19 @@ power_bi_paalteracoes_main <- function(utils, script_a_executar) {
   
   planilha_obter <- function(ano_inicial_processos_administrativos) {
     
-    url_planilha <- get_config("url")$saa
+    url_planilha <- get_config("url")$pa
     
-    log_info("Planilha: Processos SAA/DCOM",
+    log_info("Planilha: Processos Administrativos",
              paste0("Link: ", url_planilha),
              cores = "verde")
     
     abas <- c("Processos Administrativos", "Troca de Marca", "Cancelamento", "Reequilíbrio")
     
-    pb <- log_barra_progresso("Lendo planilha de Processos SAA/DCOM", length(abas))
+    pb <- log_barra_progresso("Lendo planilha de Processos Administrativos", length(abas))
     
     planilha_original <- lapply(abas, function(aba) {
       
-      log_barra_progresso(sprintf("Lendo planilha de Processos SAA/DCOM - Aba %s", aba), pb = pb)
+      log_barra_progresso(sprintf("Lendo planilha de Processos Administrativos - Aba %s", aba), pb = pb)
       
       if (aba == "Processos Administrativos") {
         colunas <- "A:L"
@@ -1017,7 +1017,7 @@ power_bi_paalteracoes_main <- function(utils, script_a_executar) {
           )
       },
       error = function(e) {
-        log_erro(sprintf("Erro ao acessar aba %s de Processos SAA/DCOM. Verifique se há permissão para leitura e se o link %s está correto. ", aba, url_planilha), 
+        log_erro(sprintf("Erro ao acessar aba %s de Processos Administrativos. Verifique se há permissão para leitura e se o link %s está correto. ", aba, url_planilha), 
                  e)
         return(NULL)
       })
@@ -1079,12 +1079,12 @@ power_bi_paalteracoes_main <- function(utils, script_a_executar) {
   ano_inicial_processos_administrativos <- utils$ano_inicial_processos_administrativos
   unidades                              <- utils$unidades
   
-  log_secao("OBTENDO DADOS DA PLANILHA DE PROCESSOS SAA")
+  log_secao("OBTENDO DADOS DA PLANILHA DE PROCESSOS ADMINISTRATIVOS")
   
   planilha_original <- planilha_obter(ano_inicial_processos_administrativos)
   
   if (is.null(planilha_original)) {
-    log_erro("Não foi possível obter os dados da planilha de Processos SAA/DCOM.",
+    log_erro("Não foi possível obter os dados da planilha de Processos Administrativos.",
              finalizar = script_a_executar != "todos")
     return(NULL)
   }

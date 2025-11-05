@@ -104,7 +104,7 @@ config_main <- function() {
     
   },
   error = function(e) {
-    if (.Platform$OS.type == "windows" && !(utils_silent())) shell("@COLOR 4F")
+    shell("@COLOR 4F")
     cat("=== OCORREU ALGUM ERRO NA INSTALAÇÃO DO PACOTE JSONLITE. 
         SEM ELE NÃO É POSSÍVEL CONTINUAR A EXECUÇÃO. ===\n")
     print(e)
@@ -482,8 +482,8 @@ config_ambiente <- function (pasta = NULL) {
   #'     \itemize{
   #'       \item{url_unidades: Planilha de unidades requerentes}
   #'       \item{url_catalogo: Planilha de grupos do Catálogo de Materiais}
-  #'       \item{url_controle: Planilha de Controle de Processos DCOM}
-  #'       \item{url_saa: Planilha de Processos SAA/DCOM}
+  #'       \item{url_controle: Planilha de Controle de Processos}
+  #'       \item{url_pa: Planilha de Processos Administrativos}
   #'       \item{url_api_catmat: API dos Dados Abertos do Compras.gov.br}
   #'     }
   #'   }
@@ -538,10 +538,10 @@ config_ambiente <- function (pasta = NULL) {
       unidades   = Sys.getenv("url_unidades"),
       # planilha de grupos do Catálogo de Materiais
       catalogo   = Sys.getenv("url_catalogo"),
-      # planilha de Controle de Processos DCOM
+      # planilha de Controle de Processos
       controle   = Sys.getenv("url_controle"),
-      # planilha de Processos SAA/DCOM
-      saa        = Sys.getenv("url_saa"),
+      # planilha de Processos Administrativos
+      pa         = Sys.getenv("url_pa"),
       # API dos Dados Abertos do Compras.gov.br para consulta aos Catmat e NCM
       api_catmat = Sys.getenv("url_api_catmat"),
       # Lista de CATMATs do Google Drive
@@ -555,10 +555,19 @@ config_ambiente <- function (pasta = NULL) {
       alerta = FALSE
     )
   
-  set_config(geral  = geral,
-             url    = url,
-             status = status,
-             pasta  = pasta)
+  skin <- 
+    utils_skin(
+      style  = Sys.getenv("SKIN_STYLE"),
+      border = Sys.getenv("SKIN_BORDER")
+    )
+  
+  set_config(
+    geral  = geral,
+    url    = url,
+    status = status,
+    pasta  = pasta,
+    skin   = skin
+  )
   
 }
 
@@ -640,13 +649,14 @@ config_finalizar <- function(sucesso = FALSE) {
 
   config_json("resultado_geracao", resultado_geracao)
   
-  sink(type="message")
-  sink()
-  close(logR$con)
-
-  log_secao("SCRIPT FINALIZADO", "CONFIG")
+  log_secao("LOG FINALIZADO", "CONFIG")
   
-  if (!interactive() || Sys.getenv("RSTUDIO") != "1") {
+  if (!utils_is_interactive()) {
+    sink(type="message")
+    sink()
+  
+    close(logR$con)
+  
     quit(status = codigo_saida)
   }
   
@@ -693,11 +703,11 @@ config_inicializar <- function(pacotes, pasta = NULL) {
   #' @seealso \code{\link{config_ambiente}}, \code{\link{config_pastas}},
   #' \code{\link{config_pacotes}}
 
-  # Define a cor do console
-  utils_color("inicial")
-  
   # Define variáveis de ambiente
   config_ambiente(pasta)
+  
+  # Define a cor do console
+  utils_color("inicial")
   
   # Verifica pastas de dependência obrigatoria
   pasta <- get_config("pasta")

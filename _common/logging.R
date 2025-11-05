@@ -69,7 +69,8 @@ log_barra_progresso <- function(label = NULL, steps = NULL, pb = NULL) {
   #' @seealso \code{\link{config_ambiente}}, \code{\link{config_opcoes}},
   #' \code{\link{config_inicializar}}
   
-  if (utils_silent()) {
+  # If silent mode or not Windows, use text version
+  if (!utils_is_windows() | utils_silent()) {
     if (is.null(pb)) { #se não informa pb (progress_bar) existente, cria
       tamanho <- get_config("geral")$tamanho_mensagens
       
@@ -91,38 +92,39 @@ log_barra_progresso <- function(label = NULL, steps = NULL, pb = NULL) {
       close(pb)
     }
     
-  } else {
-    
-    if (is.null(pb)) { #se não informa pb (progress_bar) existente, cria
-      
-      titulo <- get_config("geral")$script_nome
-      
-      pb <- winProgressBar(
-        title = titulo, 
-        label = label, 
-        min = 0, 
-        max = steps, 
-        width = 500)
-      
-      return(pb)
-    }
-    
-    if (!is.null(label)) { #se informa label, atualiza
-      valor_atual <- getWinProgressBar(pb)
-      
-      setWinProgressBar(
-        pb, 
-        value = valor_atual + 1, 
-        label = label)
-      
-    } else { #fecha barra se não fornecido label
-      
-      close(pb)
-      
-    }
+    return(invisible(NULL))
   }
   
-  invisible(NULL)
+  # If is Windows or not silent, use Windows version
+  if (is.null(pb)) { #se não informa pb (progress_bar) existente, cria
+    
+    titulo <- get_config("geral")$script_nome
+    
+    pb <- winProgressBar(
+      title = titulo, 
+      label = label, 
+      min = 0, 
+      max = steps, 
+      width = 500)
+    
+    return(pb)
+  }
+  
+  if (!is.null(label)) { #se informa label, atualiza
+    valor_atual <- getWinProgressBar(pb)
+    
+    setWinProgressBar(
+      pb, 
+      value = valor_atual + 1, 
+      label = label)
+    
+  } else { #fecha barra se não fornecido label
+    
+    close(pb)
+    
+  }
+  
+  return(invisible(NULL))
 }
 
 log_erro <- function(msg_erro = NULL, dados = NULL, 
@@ -349,7 +351,7 @@ log_gravacao <- function() {
     
     config_json("arquivo_log_R", logR$nome)
     
-    if (!"RStudio" %in% commandArgs()) {
+    if (!utils_is_interactive()) {
       sink(logR$con, append = TRUE, split = TRUE)
       sink(logR$con, append = TRUE, type = "message")
     }
@@ -452,26 +454,60 @@ log_info <- function(..., estilo = "completo", cores = NULL) {
   desenhar_borda_superior <- estilo %in% c("completo", "inicio")
   desenhar_borda_inferior <- estilo %in% c("completo", "fim")
   
+  borders <- get_config("skin")$border
+  
   if (desenhar_borda_superior) {
     utils_color(cores)
-    cat("╭", strrep("─", tamanho_mensagens - 2), "╮\n", sep = "")
+    
+    cat(
+      borders$corner_upper_left,
+      strrep(borders$bar_horizontal_upper, tamanho_mensagens - 2),
+      borders$corner_upper_right,
+      "\n",
+      sep = ""
+    )
   }
   
   tryCatch({  
     for (i in list(...)) {
       if (is.list(i) & !is.data.frame(i)) i <- as.vector(unlist(i))
+      
       if (is.data.frame(i)) {
         print.data.frame(i, right = FALSE, row.names = FALSE)
+        
       } else if (length(i) != 1) {
-        cat(paste0("│ → ", i, strrep(" ", ifelse(
-          tamanho_mensagens - nchar(i) - 5 < 0, 0, 
-          tamanho_mensagens - nchar(i) - 5)), "│\n"), sep = "")
+        cat(paste0(
+          borders$bar_vertical,
+          " → ",
+          i,
+          strrep(" ", ifelse(
+            tamanho_mensagens - nchar(i) - 5 < 0, 0, 
+            tamanho_mensagens - nchar(i) - 5)),
+          borders$bar_vertical, 
+          "\n"),
+          sep = ""
+        )
+        
       } else if (i == "-") {
-        cat("├", strrep("─", tamanho_mensagens - 2), "┤\n", sep = "")
+        cat(
+          borders$separator_left,
+          strrep(borders$bar_horizontal_upper, tamanho_mensagens - 2),
+          borders$separator_right,
+          "\n",
+          sep = ""
+        )
+        
       } else {
-        cat(paste0("│ ", i, strrep(" ", ifelse(
-          tamanho_mensagens - nchar(i) - 3 < 0, 0, 
-          tamanho_mensagens - nchar(i) - 3)), "│\n"))
+        cat(paste0(
+          borders$bar_vertical, 
+          " ", 
+          i, 
+          strrep(" ", ifelse(
+            tamanho_mensagens - nchar(i) - 3 < 0, 0, 
+            tamanho_mensagens - nchar(i) - 3)), 
+          borders$bar_vertical,
+          "\n")
+        )
       }
     }
   },
@@ -481,8 +517,15 @@ log_info <- function(..., estilo = "completo", cores = NULL) {
   })
   
   if (desenhar_borda_inferior) {
-    cat("╰", strrep("─", tamanho_mensagens - 2), "╯", 
-        log_tempo_decorrido(), "\n", sep = "")
+    cat(
+      borders$corner_lower_left,
+      strrep(borders$bar_horizontal_lower, tamanho_mensagens - 2),
+      borders$corner_lower_right, 
+      log_tempo_decorrido(),
+      "\n",
+      sep = ""
+    )
+    
     utils_color()
   }
   
@@ -542,24 +585,61 @@ log_secao <- function(subtitulo, titulo = NULL) {
   tamanho_secao <- max(geral$tamanho_mensagens, 
                        nchar(titulo) + nchar(subtitulo) + 7)
   
-  linha_1_1 <- paste0("╭", strrep("─", nchar(titulo) + 2), "┬")
-  linha_1_2 <- paste0(strrep("─", tamanho_secao - nchar(linha_1_1) - 1), "╮")
+  borders <- get_config("skin")$border
   
-  linha_2_1 <- paste0("│ ", titulo, " │")
+  linha_1_1 <- 
+    paste0(
+      borders$corner_upper_left,
+      strrep(borders$bar_horizontal_upper, nchar(titulo) + 2),
+      borders$separator_upper
+    )
+  linha_1_2 <- 
+    paste0(
+      strrep(borders$bar_horizontal_upper, tamanho_secao - nchar(linha_1_1) - 1),
+      borders$corner_upper_right
+    )
+  
+  linha_2_1 <- 
+    paste0(
+      borders$bar_vertical,
+      " ", 
+      titulo, 
+      " ",
+      borders$bar_vertical
+    )
+  
   espacamento <- (tamanho_secao - nchar(titulo) - 4 - nchar(subtitulo) - 1) / 2
   if (espacamento %% 1 != 0) subtitulo <- paste0(subtitulo, " ")
   espacamento <- strrep(" ", espacamento)
-  linha_2_2 <- paste0(espacamento, subtitulo, espacamento, "│")
   
-  linha_3_1 <- paste0("╰", strrep("─", nchar(titulo) + 2), "┴")
-  linha_3_2 <- paste0(strrep("─", tamanho_secao - nchar(linha_1_1) - 1), "╯", 
-                      log_tempo_decorrido())
+  linha_2_2 <- 
+    paste0(
+      espacamento, 
+      subtitulo, 
+      espacamento, 
+      borders$bar_vertical
+    )
   
-  cat("\n",
-      linha_1_1, linha_1_2, "\n",
-      linha_2_1, linha_2_2, "\n",
-      linha_3_1, linha_3_2, "\n",
-      sep = "")
+  linha_3_1 <- 
+    paste0(
+      borders$corner_lower_left,
+      strrep(borders$bar_horizontal_lower, nchar(titulo) + 2),
+      borders$separator_lower
+    )
+  linha_3_2 <- 
+    paste0(
+      strrep(borders$bar_horizontal_lower, tamanho_secao - nchar(linha_1_1) - 1),
+      borders$corner_lower_right,
+      log_tempo_decorrido()
+    )
+  
+  cat(
+    "\n",
+    linha_1_1, linha_1_2, "\n",
+    linha_2_1, linha_2_2, "\n",
+    linha_3_1, linha_3_2, "\n",
+    sep = ""
+  )
 }
 
 log_tempo_decorrido <- function() {

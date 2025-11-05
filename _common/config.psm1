@@ -149,12 +149,10 @@ function ConfigJSON {
         [string]$key = $null,
         $value = $null,
 
-        [Parameter(Mandatory = $false)]
-        [ValidateSet("all", "remove", "get", "set")]
-        [string]$option,
-
         [switch]$append,
-        [switch]$show
+        [switch]$show,
+        [switch]$remove,
+        [switch]$all
     )
 
     $config = GetConfigJSON
@@ -164,13 +162,13 @@ function ConfigJSON {
         return $null 
     }
 
-    if ($option -eq "all") {
+    if ($all) {
         return $config.$scriptName
     } 
     
     $containsKey = $config.$scriptName.PSObject.Properties.Name -contains $key
 
-    if ($option -eq "remove") {
+    if ($remove) {
         if ($containsKey) {
             $config.$scriptName.PSObject.Properties.Remove($key)
             SaveConfigJSON $config
@@ -254,13 +252,13 @@ function RunR {
 
 function IsUserRunningR {
 
-    $statusScriptR = ConfigJSON -key "resultado_geracao" -option "get"
+    $statusScriptR = ConfigJSON "resultado_geracao"
 
     if ($statusScriptR -ne "running") {
         return $false
     }
 
-    $fleLogR     = ConfigJSON -key "arquivo_log_R" -option "get"
+    $fleLogR     = ConfigJSON "arquivo_log_R"
     $currentUser = ($fleLogR -split "_")[4]
 
     $msg = "O usuário $currentUser está executando o script.`n`nÉ recomendado aguardar o fim da execução.`n`nDeseja continuar mesmo assim?"

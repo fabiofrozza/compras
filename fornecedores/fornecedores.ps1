@@ -351,6 +351,8 @@ function Gerar {
 
     InterfaceMinimize -hideTaskBar
 
+    ConfigJSON "msg_erro" -remove
+
     RunR -script "fornecedores.R" -arguments @($pregao)
 
     InterfaceRestore
@@ -762,4 +764,8 @@ InterfaceShowForm -title "CADASTRO FORNECEDORES" -start {
     RefreshPregoes
 
     CheckRInstallation
-} 
+
+    ConfigJSON -show
+} -close {
+    ConfigJSON -show
+}

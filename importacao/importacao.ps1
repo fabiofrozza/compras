@@ -203,13 +203,13 @@ function CheckFiles {
 
 function ClearLinkStates {
 
-    $config = ConfigJSON -option "all"
+    $config = ConfigJSON -all
 
     $statusRScript = $config.resultado_geracao
     if ($statusRScript -ne "running") {
         ConfigJSON -key "resultado_geracao" -value "waiting"
     }
-    ConfigJSON -key "conferencia" -option "remove"
+    ConfigJSON -key "conferencia" -remove
 
     RefreshLstConferencia
     RefreshBtnInfo "waiting"
@@ -607,7 +607,7 @@ function CheckLastRunResults {
         [string]$msgPostRun
     )
 
-    $config = ConfigJSON -option "all"
+    $config = ConfigJSON -all
 
     $lastRunResults = $config.resultado_geracao 
     $fleLogR        = $config.arquivo_log_R
@@ -776,14 +776,14 @@ function ContextMenuPnlInfo {
 
             switch ($ctr_) {
                 $lst_conferencia {
-                    ConfigJSON -key "conferencia" -option "remove"
+                    ConfigJSON -key "conferencia" -remove
                     ConfigJSON "resultado_geracao" "waiting"
                     RefreshLstConferencia
                     RefreshBtnInfo "waiting"
                 }
                 $lst_erros {
                     ConfigJSON "arquivo_log_R" $null
-                    ConfigJSON -key "msg_erro" -option "remove"
+                    ConfigJSON -key "msg_erro" -remove
                     $lst_erros.Clear()
                     RefreshBtnLog
                 }
@@ -802,7 +802,7 @@ function ContextMenuPnlInfo {
 
 function RefreshLstSettings {
    
-    $config = ConfigJSON -option "all"
+    $config = ConfigJSON -all
 
     $settings = @(
         @{

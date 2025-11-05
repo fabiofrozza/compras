@@ -2,6 +2,73 @@
 # Funções utilitárias gerais para uso pelos scripts que não sejam
 # de configuração ou logging
 
+utils_ansi <- function(fg = "", bg = "") {
+  
+  ansi <- list(
+    dark = list(
+      black   = c("30", "40"),
+      red     = c("31", "41"),
+      green   = c("32", "42"),
+      yellow  = c("33", "43"),
+      blue    = c("34", "44"),
+      magenta = c("35", "45"),
+      cyan    = c("36", "46"),
+      white   = c("37", "47")
+    ),
+    light = list(
+      black   = c("90", "100"),
+      red     = c("91", "101"),
+      green   = c("92", "102"),
+      yellow  = c("93", "103"),
+      blue    = c("94", "104"),
+      magenta = c("95", "105"),
+      cyan    = c("96", "106"),
+      white   = c("97", "107")
+    )
+  )
+  
+  if (fg != "") {
+    style <- strsplit(fg, "_")[[1]][1]
+    color <- strsplit(fg, "_")[[1]][2]
+    fg <- paste0("\033[", ansi[[style]][[color]][1], "m")
+  }
+  
+  if (bg != "") {
+    style <- strsplit(bg, "_")[[1]][1]
+    color <- strsplit(bg, "_")[[1]][2]
+    bg <- paste0("\033[", ansi[[style]][[color]][2], "m")
+  }
+  
+  return(paste0("@ECHO ", fg, bg))
+}
+
+utils_border <- function(border) {
+  
+  borders <- list(
+    bars    = c("█", "█", "█", "█", "█", "█", "█", "█", "▀", "▄", "█"),
+    default = c("+", "+", "+", "+", "+", "+", "+", "+", "-", "-", "|"),
+    double  = c("╔", "╗", "╚", "╝", "╦", "╩", "╠", "╣", "═", "═", "║"),
+    heavy   = c("┏", "┓", "┗", "┛", "┳", "┻", "┣", "┫", "━", "━", "┃"),
+    round   = c("╭", "╮", "╰", "╯", "┬", "┴", "├", "┤", "─", "─", "│"),
+    square  = c("┌", "┐", "└", "┘", "┬", "┴", "├", "┤", "─", "─", "│")
+  )
+  
+  border <- list(
+    corner_upper_left    = borders[[border]][1],
+    corner_upper_right   = borders[[border]][2],
+    corner_lower_left    = borders[[border]][3],
+    corner_lower_right   = borders[[border]][4],
+    separator_upper      = borders[[border]][5],
+    separator_lower      = borders[[border]][6],
+    separator_left       = borders[[border]][7],
+    separator_right      = borders[[border]][8],
+    bar_horizontal_upper = borders[[border]][9],
+    bar_horizontal_lower = borders[[border]][10],
+    bar_vertical         = borders[[border]][11]
+  )
+  
+  return(border)
+}
 utils_catalogo <- function() {
   #' Obtém dados do Catálogo de Materiais
   #'
@@ -116,22 +183,16 @@ utils_color <- function(color = "azul") {
   #' \href{https://ss64.com/nt/syntax-ansi.html}{How-to: Use ANSI colours 
   #' in the terminal}
   
-  if (.Platform$OS.type == "windows" && !(utils_silent())) {
-    colors <- list(
-      "inicial"         = "@ECHO \033[103m\033[34m", #fundo amarelo texto azul
-      "verde"           = "@ECHO \033[32m", 
-      "vermelho"        = "@ECHO \033[31m",
-      "azul"            = "@ECHO \033[34m", #padrão
-      "cinza_fundo"     = "@ECHO \033[47m", #fundo cinza texto padrão
-      "encerrar_erro"   = "@ECHO \033[41m\033[93m", #fundo vermelho txt amarelo
-      "encerrar_alerta" = "@ECHO \033[47m\033[34m", #fundo cinza texto azul
-      "encerrar_ok"     = "ECHO \033[42m\033[93m" #fundo verde texto amarelo
-    )
-    if (!is.null(color) && color %in% names(colors)) {
-      shell(colors[[color]])
-    } else {
-      shell(colors[["azul"]])
-    }
+  if (!utils_is_windows() | utils_silent()) {
+    return(invisible(NULL))
+  }
+  
+  colors <- get_config("skin")$style
+  
+  if (!is.null(color) && color %in% names(colors)) {
+    shell(colors[[color]])
+  } else {
+    shell(colors[["azul"]])
   }
 }
 
@@ -156,6 +217,14 @@ utils_corrigir_valor <- function(valor) {
   
   as.numeric(gsub(",", ".", gsub("\\.", "", valor)))
   
+}
+
+utils_is_interactive <- function() {
+  interactive() || Sys.getenv("RSTUDIO") == "1"
+}
+
+utils_is_windows <- function() {
+  .Platform$OS.type == "windows"
 }
 
 utils_silent <- function() {
@@ -215,6 +284,54 @@ utils_silent <- function() {
   #' \code{\link{commandArgs}}
   
   "silent" %in% commandArgs(trailingOnly = TRUE)
+  
+}
+
+utils_skin <- function(style = "default", border = "default") {
+
+  list(
+    style  = utils_style(style),
+    border = utils_border(border)
+  )
+  
+}
+
+utils_style <- function(style) {
+  
+  styles <- list(
+    default = list(
+      "inicial"         = utils_ansi("dark_blue", "light_yellow"),
+      "verde"           = utils_ansi("light_green"), 
+      "vermelho"        = utils_ansi("light_red"),
+      "azul"            = utils_ansi("dark_blue"),
+      "cinza_fundo"     = utils_ansi(bg = "light_white"),
+      "encerrar_erro"   = utils_ansi("dark_yellow", "dark_red"),
+      "encerrar_alerta" = utils_ansi("dark_blue", "dark_white"),
+      "encerrar_ok"     = utils_ansi("light_yellow", "dark_green")
+    ),
+    mono = list(
+      "inicial"         = utils_ansi("light_white", "dark_black"),
+      "verde"           = utils_ansi("light_white"), 
+      "vermelho"        = utils_ansi("light_white"),
+      "azul"            = utils_ansi("light_white"),
+      "cinza_fundo"     = utils_ansi("dark_black", "light_white"),
+      "encerrar_erro"   = utils_ansi("dark_black", "light_white"),
+      "encerrar_alerta" = utils_ansi("dark_black", "light_white"),
+      "encerrar_ok"     = utils_ansi("dark_black", "light_white")
+    ),
+    invert = list(
+      "inicial"         = utils_ansi("dark_black", "light_white"),
+      "verde"           = utils_ansi("dark_black"), 
+      "vermelho"        = utils_ansi("dark_black"),
+      "azul"            = utils_ansi("dark_black"),
+      "cinza_fundo"     = utils_ansi("light_white", "dark_black"),
+      "encerrar_erro"   = utils_ansi("light_white", "dark_black"),
+      "encerrar_alerta" = utils_ansi("light_white", "dark_black"),
+      "encerrar_ok"     = utils_ansi("light_white", "dark_black")
+    )
+  )
+  
+  return(styles[[style]])
   
 }
 
