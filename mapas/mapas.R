@@ -150,7 +150,7 @@ mapas_salvar <- function(mapas, script_a_executar) {
       saveWorkbook(wb, file.path(pasta$listas, nome_arquivo), overwrite = TRUE)
       
       log_info(sprintf("Arquivo salvo: %s", nome_arquivo),
-               cores = "verde")
+               cores = "highlight1")
       
       return(TRUE)
     }, 

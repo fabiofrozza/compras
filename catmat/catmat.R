@@ -233,7 +233,7 @@ catmat_resultados_api <- function(catmat_tr) {
   codigos <- catmat_tr$CATMAT
   
   log_info(sprintf("Consultando %s código(s) CATMAT...", length(codigos)), 
-           cores = "verde")
+           cores = "highlight1")
   
   pb <- log_barra_progresso("Consultando CATMAT...", length(codigos))
   
@@ -269,7 +269,7 @@ catmat_consultar_lista <- function(origem = "local") {
   pasta <- get_config("pasta")
   
   log_info("Aguarde a leitura da lista de CATMATs....", 
-           cores = "vermelho")
+           cores = "highlight2")
   
   tryCatch({
     lista_catmat <- read_excel(file.path(pasta$fontes, "Lista CATMAT.xlsx"), 
@@ -357,13 +357,13 @@ catmat_salvar <- function(resultado_final, processo, script_a_executar) {
   
   log_info("Arquivo salvo com sucesso:", 
            arquivo_saida, 
-           cores = "verde")
+           cores = "highlight1")
   
   log_info("Consulta concluída!",
            "-",
            "Resultados salvos em", 
            arquivo_saida, 
-           cores = "vermelho")
+           cores = "highlight2")
   
 }
 

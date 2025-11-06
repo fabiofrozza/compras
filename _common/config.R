@@ -611,7 +611,7 @@ config_finalizar <- function(sucesso = FALSE) {
 
   if (status$erros || status$alerta) {
     msg_aviso <- if (status$erros) "ERROS  " else "ALERTAS"
-    cor_aviso <- if (status$erros) "encerrar_erro" else "encerrar_alerta"
+    cor_aviso <- if (status$erros) "error" else "alert"
     utils_color(cor_aviso)
   
     log_secao(sprintf("ENCERRANDO SCRIPT !!! COM %s", msg_aviso), "CONFIG")
@@ -630,7 +630,7 @@ config_finalizar <- function(sucesso = FALSE) {
 
   } else {
     
-    utils_color("encerrar_ok")
+    utils_color("ok")
 
     log_secao("ENCERRANDO SCRIPT SEM ERROS", "CONFIG")
     
@@ -707,7 +707,7 @@ config_inicializar <- function(pacotes, pasta = NULL) {
   config_ambiente(pasta)
   
   # Define a cor do console
-  utils_color("inicial")
+  utils_color("default")
   
   # Verifica pastas de dependência obrigatoria
   pasta <- get_config("pasta")
@@ -744,14 +744,14 @@ config_inicializar <- function(pacotes, pasta = NULL) {
            "Informações da rede", config_rede(),
            "-",
            "Sessão R", R.version,
-           cores = "verde")
+           cores = "highlight1")
 
   log_secao("CONFIGURAÇÕES INICIAIS", "CONFIG")
   
   log_info("PASTAS UTILIZADAS", pasta,
            "-",
            "LINHA DE COMANDO", commandArgs(),
-           cores = "verde")
+           cores = "highlight1")
   
   # Carrega (ou instala) os pacotes necessários
   config_pacotes(pacotes)

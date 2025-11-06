@@ -50,7 +50,7 @@ main_dados_filtrar <- function(lista_final) {
     
     log_info("Planilha: Controle de Processos DCOM",
              paste0("Link: ", url_planilha),
-             cores = "verde")
+             cores = "highlight1")
     
     # Definido o ano corrente para posteriormente ler a aba Licitação deste ano
     ano_corrente  <- format(Sys.Date(), "%Y")
@@ -774,7 +774,7 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
            sprintf("Pós geração dos processos : %s", ifelse(importacao$pos_processos, "Sim", "Não")),
            sprintf("Validação manual          : %s", ifelse(importacao$validacao_manual, "Sim", "Não")),
            sprintf("Relatório consolidado     : %s", ifelse(importacao$consolidado, "Sim", "Não")),
-           cores = "verde")
+           cores = "highlight1")
   
   return(dados_finais)
 }
@@ -880,7 +880,7 @@ main_lista_final_info <- function(importacao) {
                paste0("ETAPA    : ", etapa),
                paste0("GRUPO    : ", grupo),
                paste0("MATERIAL : ", nome_grupo)),
-             cores = "verde")
+             cores = "highlight1")
 
     info <- list(ano        = ano, 
                  etapa      = etapa, 
@@ -1006,7 +1006,7 @@ gerar_salvar_arquivos_a_importar <- function(dados) {
     
     log_info("ARQUIVOS GERADOS PARA IMPORTAÇÃO NO SOLAR", 
              arquivos_gerados,
-             cores = "verde")
+             cores = "highlight1")
   }, 
   error = function(e) {
     log_erro("Não foi possível gravar os arquivos a importar. Encerrando...", 
@@ -1064,7 +1064,7 @@ relatorio_gerar_temporario <- function(dados) {
                       clean = TRUE)
     
     log_info("Arquivo temporário html salvo:", relatorio_arquivo,
-             cores = "verde")
+             cores = "highlight1")
     
     # Retorna o nome do arquivo à função principal
     return(relatorio_arquivo)
@@ -1290,7 +1290,7 @@ resumo_obter_pdf <- function() {
     pdf_arquivos <- Sys.glob(file.path(pasta$resumo_pedidos, "*.pdf*"))
     
     log_info(pdf_arquivos,
-             cores = "verde")
+             cores = "highlight1")
     
     #captura o conteúdo dos PDFs dos pedidos
     pdf_dados <- lapply(pdf_arquivos, pdf_text)
@@ -1452,7 +1452,7 @@ main_ambiente <- function(script_a_executar) {
        sprintf("Aba LISTA FINAL        : %s", importacao$aba_lista_final),
        sprintf("Processo - Relatório   : %s", importacao$processo_para_relatorio),
        sprintf("Script a executar      : %s", script_a_executar)),
-      cores = "verde")
+      cores = "highlight1")
 
     # Grava as configurações recuperadas do arquivo no ambiente atual
     set_config(importacao = importacao)

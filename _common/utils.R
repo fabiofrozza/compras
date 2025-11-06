@@ -53,6 +53,10 @@ utils_border <- function(border) {
     square  = c("┌", "┐", "└", "┘", "┬", "┴", "├", "┤", "─", "─", "│")
   )
   
+  if (!(border %in% names(borders))) {
+    border <- "default"
+  }
+  
   border <- list(
     corner_upper_left    = borders[[border]][1],
     corner_upper_right   = borders[[border]][2],
@@ -93,7 +97,7 @@ utils_catalogo <- function() {
   
   log_info("Planilha: Catálogo de Materiais",
            paste0("Link: ", url_catalogo),
-           cores = "verde")
+           cores = "highlight1")
   
   gs4_deauth()
   
@@ -117,7 +121,7 @@ utils_catalogo <- function() {
   
 }
 
-utils_color <- function(color = "azul") {
+utils_color <- function(color = NULL) {
   #' Define cores do console (somente Windows)
   #' 
   #' @description
@@ -163,18 +167,18 @@ utils_color <- function(color = "azul") {
   #'
   #' @examples
   #' # Aplica cor verde ao texto
-  #' utils_color("verde")
+  #' utils_color("highlight1")
   #' cat("Este texto aparecerá em verde")
   #' 
   #' # Volta à cor padrão
-  #' utils_color("azul")
+  #' utils_color("default")
   #' 
   #' # Aplica estilo de erro (fundo vermelho, texto amarelo)
-  #' utils_color("erro_final")
+  #' utils_color("error")
   #' cat("ERRO: Mensagem importante")
   #' 
   #' # Restaura padrão do sistema
-  #' utils_color("inicial")
+  #' utils_color("default")
   #'
   #' @seealso \code{\link{utils_silent}}, \code{\link{log_erro}}, 
   #' \code{\link{log_info}}
@@ -183,17 +187,18 @@ utils_color <- function(color = "azul") {
   #' \href{https://ss64.com/nt/syntax-ansi.html}{How-to: Use ANSI colours 
   #' in the terminal}
   
-  if (!utils_is_windows() | utils_silent()) {
+  if (!utils_is_windows() || utils_silent() || is.null(color)) {
     return(invisible(NULL))
   }
   
   colors <- get_config("skin")$style
   
-  if (!is.null(color) && color %in% names(colors)) {
-    shell(colors[[color]])
-  } else {
-    shell(colors[["azul"]])
+  if (!(color %in% names(colors))) {
+    return()
   }
+    
+  shell(colors[[color]])
+  
 }
 
 utils_corrigir_valor <- function(valor) {
@@ -274,7 +279,7 @@ utils_silent <- function() {
   #' # Uso típico em outras funções
   #' if (!utils_silent()) {
   #'   # Aplica cores ou mostra interface visual
-  #'   utils_color("verde")
+  #'   utils_color("highlight1")
   #' }
   #' 
   #' # Exemplo de chamada na linha de comando que ativaria o modo:
@@ -300,36 +305,37 @@ utils_style <- function(style) {
   
   styles <- list(
     default = list(
-      "inicial"         = utils_ansi("dark_blue", "light_yellow"),
-      "verde"           = utils_ansi("light_green"), 
-      "vermelho"        = utils_ansi("light_red"),
-      "azul"            = utils_ansi("dark_blue"),
-      "cinza_fundo"     = utils_ansi(bg = "light_white"),
-      "encerrar_erro"   = utils_ansi("dark_yellow", "dark_red"),
-      "encerrar_alerta" = utils_ansi("dark_blue", "dark_white"),
-      "encerrar_ok"     = utils_ansi("light_yellow", "dark_green")
+      "default"    = utils_ansi("dark_blue", "light_yellow"),
+      "highlight1" = utils_ansi("light_green"), 
+      "highlight2" = utils_ansi("dark_red"),
+      "highlight3" = utils_ansi("dark_blue"),
+      "alert"      = utils_ansi("dark_blue", "light_white"),
+      "error"      = utils_ansi("light_yellow", "dark_red"),
+      "ok"         = utils_ansi("light_yellow", "dark_green")
     ),
     mono = list(
-      "inicial"         = utils_ansi("light_white", "dark_black"),
-      "verde"           = utils_ansi("light_white"), 
-      "vermelho"        = utils_ansi("light_white"),
-      "azul"            = utils_ansi("light_white"),
-      "cinza_fundo"     = utils_ansi("dark_black", "light_white"),
-      "encerrar_erro"   = utils_ansi("dark_black", "light_white"),
-      "encerrar_alerta" = utils_ansi("dark_black", "light_white"),
-      "encerrar_ok"     = utils_ansi("dark_black", "light_white")
+      "default"    = utils_ansi("light_white", "dark_black"),
+      "highlight1" = utils_ansi("light_white"), 
+      "highlight2" = utils_ansi("light_white"),
+      "highlight3" = utils_ansi("light_white"),
+      "alert"      = utils_ansi("dark_black", "light_white"),
+      "error"      = utils_ansi("dark_black", "light_white"),
+      "ok"         = utils_ansi("dark_black", "light_white")
     ),
     invert = list(
-      "inicial"         = utils_ansi("dark_black", "light_white"),
-      "verde"           = utils_ansi("dark_black"), 
-      "vermelho"        = utils_ansi("dark_black"),
-      "azul"            = utils_ansi("dark_black"),
-      "cinza_fundo"     = utils_ansi("light_white", "dark_black"),
-      "encerrar_erro"   = utils_ansi("light_white", "dark_black"),
-      "encerrar_alerta" = utils_ansi("light_white", "dark_black"),
-      "encerrar_ok"     = utils_ansi("light_white", "dark_black")
+      "default"    = utils_ansi("dark_black", "light_white"),
+      "highlight1" = utils_ansi("dark_black"), 
+      "highlight2" = utils_ansi("dark_black"),
+      "highlight3" = utils_ansi("dark_black"),
+      "alert"      = utils_ansi("light_white", "dark_black"),
+      "error"      = utils_ansi("light_white", "dark_black"),
+      "ok"         = utils_ansi("light_white", "dark_black")
     )
   )
+  
+  if (!(style %in% names(styles))) {
+    style <- "default"
+  }
   
   return(styles[[style]])
   
@@ -369,7 +375,7 @@ utils_unidades_requerentes_obter <- function(origem = "importacao") {
            paste0("Aba : ", ifelse(origem == "importacao", 
                                    "Script Importação", 
                                    "Power BI")),
-           cores = "verde")
+           cores = "highlight1")
   
   gs4_deauth()
   

@@ -176,7 +176,7 @@ fornecedores_excel_fornecedores_obter <- function(pregao) {
     log_info("PREGÃO", pregao,
              "-",
              "RELATÓRIOS SICAF", excel_fornecedores,
-             cores = "verde")
+             cores = "highlight1")
     
     return(excel_fornecedores)
   },
@@ -202,7 +202,7 @@ fornecedores_cnpj_verificar <- function(dados, arquivo_alerta) {
                              as.character(unlist(as.vector(t(sem_cnpj)))), 
                              "=======================================", 
                              "---> OS DEMAIS ARQUIVOS FORAM IMPORTADOS CORRETAMENTE.")
-      log_info(mensagem_sem_cnpj, cores = "vermelho")
+      log_info(mensagem_sem_cnpj, cores = "highlight2")
     } else { 
       mensagem_sem_cnpj <- NULL
     }
@@ -213,7 +213,7 @@ fornecedores_cnpj_verificar <- function(dados, arquivo_alerta) {
                                 as.character(unlist(as.vector(t(cnpj_errado)))),
                                 "=======================================", 
                                 "---> VERIFIQUE OS ARQUIVOS E TENTE NOVAMENTE.")
-      log_info(mensagem_cnpj_errado, cores = "vermelho")
+      log_info(mensagem_cnpj_errado, cores = "highlight2")
     } else {
       mensagem_cnpj_errado <- NULL
     }

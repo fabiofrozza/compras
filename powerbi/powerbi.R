@@ -127,7 +127,7 @@ power_bi_salvar <- function(nome_arquivo, dados, abas, vazios) {
     log_barra_progresso(pb = pb)
     
     log_info(sprintf("Arquivo %s salvo com sucesso", arquivo_a_salvar),
-             cores = "verde")
+             cores = "highlight1")
   },
   error = function(e) { 
     log_erro("Erro ao salvar o arquivo para o Power BI. Encerrando...", 
@@ -221,7 +221,7 @@ power_bi_renomear <- function(script_a_executar) {
                finalizar = TRUE)
     } else {
       log_info(sprintf("Foram encontrados %d arquivos de %s válidos.", length(arquivos_dados), opcao),
-               cores = "verde")
+               cores = "highlight1")
     }
     
     arquivos_dados <- bind_rows(arquivos_dados)
@@ -245,7 +245,7 @@ power_bi_renomear <- function(script_a_executar) {
       return(TRUE)
     } else {
       log_info("Nenhum arquivo duplicado.",
-               cores = "verde")
+               cores = "highlight1")
       return(FALSE)
     }
     
@@ -339,7 +339,7 @@ power_bi_renomear <- function(script_a_executar) {
     } else {
       
       log_info(sprintf("Nenhum %s para ser renomeado.", tipo_arquivo), 
-               cores = "vermelho")
+               cores = "highlight2")
       
     }
 
@@ -427,7 +427,7 @@ power_bi_planejamento_main <- function(utils, script_a_executar) {
     log_info("Planilha: Controle de Processos DCOM",
              paste0("Link: ", url_planilha),
              paste0("Anos: ", paste(ano_licitacao, collapse = ", ")),
-             cores = "verde")
+             cores = "highlight1")
     
     pb <- log_barra_progresso("Lendo planilha de Controle de Processos", length(ano_licitacao))
   
@@ -944,7 +944,7 @@ power_bi_execucao_main <- function(utils, resultado_renomear, script_a_executar)
   log_info("QUANTIDADE DE MAPAS DE LICITAÇÕES", length(unique(mapas_dados$Processo)),
            "-",
            "QUANTIDADE DE PREGOES FINALIZADOS", length(unique(relatorios_dados$pregao_relatorio)),
-           cores = "verde")
+           cores = "highlight1")
   
   log_secao("SALVANDO ARQUIVO PARA O POWER BI")
   
@@ -989,7 +989,7 @@ power_bi_paalteracoes_main <- function(utils, script_a_executar) {
     
     log_info("Planilha: Processos Administrativos",
              paste0("Link: ", url_planilha),
-             cores = "verde")
+             cores = "highlight1")
     
     abas <- c("Processos Administrativos", "Troca de Marca", "Cancelamento", "Reequilíbrio")
     

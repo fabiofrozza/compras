@@ -256,9 +256,7 @@ log_erro <- function(msg_erro = NULL, dados = NULL,
     titulo <- paste0(titulo, "░")
   }
   
-  if (!utils_silent()) { 
-    if (alerta) utils_color("cinza_fundo") else utils_color("vermelho") 
-  }
+  if (alerta) utils_color("alert") else utils_color("error") 
   
   cat("\n", strrep("▄", tamanho_erro),
       "\n█▓▒", strrep("░", espacamento), 
@@ -294,7 +292,7 @@ log_erro <- function(msg_erro = NULL, dados = NULL,
   cat("█", strrep("▄", tamanho_erro - 2), "█", 
       log_tempo_decorrido(), "\n", sep = "")
   
-  utils_color("inicial")
+  utils_color("default")
   
   if (finalizar) config_finalizar()
   
@@ -360,7 +358,7 @@ log_gravacao <- function() {
     
     log_info("Log iniciado em", 
              logR$nome, 
-             cores = "vermelho")
+             cores = "highlight2")
   },
   error = function(e) {
     log_erro("Não foi possível iniciar a gravação do log. Encerrando...", 
@@ -417,7 +415,7 @@ log_info <- function(..., estilo = "completo", cores = NULL) {
   #' #Box com separador e cor diferenciada
   #' log_info("Pacotes necessários", 
   #'          c("openxlsx", "dplyr"),
-  #'          cores = "verde")
+  #'          cores = "highlight1")
   #'          
   #' #Iniciar um box com algumas informações e um separador, 
   #' #executar uma função e fechá-lo
@@ -526,7 +524,7 @@ log_info <- function(..., estilo = "completo", cores = NULL) {
       sep = ""
     )
     
-    utils_color()
+    utils_color("default")
   }
   
 }

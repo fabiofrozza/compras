@@ -12,7 +12,7 @@ atas_configuracoes_iniciais <- function() {
     dados_pregao$ano_ata    <- config_json("ano_ata", opcao = "get")
     
     log_info("DADOS DO PREGÃO", dados_pregao,
-             cores = "verde")
+             cores = "highlight1")
     
     return(dados_pregao)
   },
@@ -36,7 +36,7 @@ atas_salvar <- function(dados_atas) {
     log_info("INFORMAÇÕES IMPORTADAS",
              "-",
              dados_atas[ , c(6, 8, 9)],
-             cores = "verde")
+             cores = "highlight1")
   },
   error = function(e) {
     log_erro("Não foi possível salvar o arquivo. Verifique o log.",
@@ -212,7 +212,7 @@ atas_sicaf_obter <- function() {
     sicaf_arquivos <- Sys.glob(file.path(pasta$sicaf, "*.pdf*"))
     
     log_info("RELATÓRIOS SICAF", sicaf_arquivos,
-             cores = "verde")
+             cores = "highlight1")
 
     return(sicaf_arquivos)
   }, 
