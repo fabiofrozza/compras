@@ -36,7 +36,9 @@ PLANEJAMENTO_ANO_INICIAL  = 2021
 PROCESSOS_ADM_ANO_INICIAL = 2020
 
 # Interface
-# default, mono, invert
+# default, mono, invert, matrix, ocean, peach
 SKIN_STYLE = default
-# bars, default, double, heavy, round, square  
-SKIN_BORDER = heavy
+# double, heavy, round, square, dotted, bars, default, ascii, minimal, dashed, wavy   
+SKIN_BORDER = wavy
+TAMANHO_MENSAGENS = 100
+MARGEM = 2
