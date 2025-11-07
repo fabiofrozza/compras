@@ -72,7 +72,7 @@ log_barra_progresso <- function(label = NULL, steps = NULL, pb = NULL) {
   # If silent mode or not Windows, use text version
   if (!utils_is_windows() | utils_silent()) {
     if (is.null(pb)) { #se não informa pb (progress_bar) existente, cria
-      tamanho <- get_config("geral")$tamanho_mensagens
+      tamanho <- get_config("skin")$tamanho_mensagens
       
       pb <- txtProgressBar(
         label = label, 
@@ -221,14 +221,14 @@ log_erro <- function(msg_erro = NULL, dados = NULL,
   #' \code{config_finalizar()} para encerrar o script. 
   #' 
   #' @seealso \code{\link{config_ambiente}}, \code{\link{get_config}}, 
-  #' \code{\link{config_json}}, \code{\link{log_tempo_decorrido}}
+  #' \code{\link{config_json}}}
   
   # Define mensagem padrão se msg_erro for omitido, vazio ou nulo
   if (is.null(msg_erro) || nchar(trimws(msg_erro)) == 0) {
     msg_erro <- "OCORREU UM ERRO E A CAUSA NÃO FOI INFORMADA (msg_erro VAZIA)"
   }
   
-  tamanho_mensagens <- get_config("geral")$tamanho_mensagens
+  tamanho_mensagens <- get_config("skin")$tamanho_mensagens
   tamanho_erro      <- max(tamanho_mensagens, nchar(msg_erro) + 4)
   
   if (alerta & titulo == "ERRO") titulo <- "ALERTA"
@@ -290,7 +290,7 @@ log_erro <- function(msg_erro = NULL, dados = NULL,
     }
   }
   cat("█", strrep("▄", tamanho_erro - 2), "█", 
-      log_tempo_decorrido(), "\n", sep = "")
+      .log_tempo_decorrido(), "\n", sep = "")
   
   utils_color("default")
   
@@ -355,19 +355,19 @@ log_gravacao <- function() {
     }
     
     set_config(logR = logR)
-    
-    log_info("Log iniciado em", 
-             logR$nome, 
-             cores = "highlight2")
   },
   error = function(e) {
     log_erro("Não foi possível iniciar a gravação do log. Encerrando...", 
              e,
              finalizar = TRUE)
   })
+  
+  log_info("Log iniciado em", 
+           logR$nome, 
+           cores = "highlight2")
 }
 
-log_info <- function(..., estilo = "completo", cores = NULL) {
+log_info <- function(..., estilo = "completo", cores = NULL, timestamp = TRUE) {
   #' Exibe uma caixa de informações formatada
   #' 
   #' @description No feedback visual ao usuário ou no registro do log,
@@ -428,7 +428,7 @@ log_info <- function(..., estilo = "completo", cores = NULL) {
   #' log_info(estilo = "fim")
   #'  
   #' @return Será exibida uma caixa com as informações fornecidas, além do 
-  #' carimbo de tempo, fornecido pela função \code{log_tempo_decorrido()}, 
+  #' carimbo de tempo, fornecido pela função \code{.log_tempo_decorrido()}, 
   #' conforme a seguir:
   #' 
   #' \preformatted{
@@ -439,94 +439,30 @@ log_info <- function(..., estilo = "completo", cores = NULL) {
   #' │ Pacotes carregados em ... │
   #' ╰───────────────────────────╯ ‹12:12 | 3.9 secs›}
   #' 
-  #' @seealso \code{\link{config_ambiente}}, \code{\link{config_opcoes}}, 
-  #' \code{\link{log_tempo_decorrido}}
+  #' @seealso \code{\link{config_ambiente}}, \code{\link{config_opcoes}}}
   
-  tamanho_mensagens <- get_config("geral")$tamanho_mensagens
-  
+  # Validação de estilo
   estilos_validos <- c("completo", "inicio", "meio", "fim")
-  if (!(estilo %in% estilos_validos)) {
-    estilo <- "completo"
-  }
+  if (!(estilo %in% estilos_validos)) estilo <- "completo"
   
-  desenhar_borda_superior <- estilo %in% c("completo", "inicio")
-  desenhar_borda_inferior <- estilo %in% c("completo", "fim")
-  
-  borders <- get_config("skin")$border
-  
-  if (desenhar_borda_superior) {
-    utils_color(cores)
-    
-    cat(
-      borders$corner_upper_left,
-      strrep(borders$bar_horizontal_upper, tamanho_mensagens - 2),
-      borders$corner_upper_right,
-      "\n",
-      sep = ""
-    )
-  }
-  
-  tryCatch({  
-    for (i in list(...)) {
-      if (is.list(i) & !is.data.frame(i)) i <- as.vector(unlist(i))
-      
-      if (is.data.frame(i)) {
-        print.data.frame(i, right = FALSE, row.names = FALSE)
-        
-      } else if (length(i) != 1) {
-        cat(paste0(
-          borders$bar_vertical,
-          " → ",
-          i,
-          strrep(" ", ifelse(
-            tamanho_mensagens - nchar(i) - 5 < 0, 0, 
-            tamanho_mensagens - nchar(i) - 5)),
-          borders$bar_vertical, 
-          "\n"),
-          sep = ""
-        )
-        
-      } else if (i == "-") {
-        cat(
-          borders$separator_left,
-          strrep(borders$bar_horizontal_upper, tamanho_mensagens - 2),
-          borders$separator_right,
-          "\n",
-          sep = ""
-        )
-        
-      } else {
-        cat(paste0(
-          borders$bar_vertical, 
-          " ", 
-          i, 
-          strrep(" ", ifelse(
-            tamanho_mensagens - nchar(i) - 3 < 0, 0, 
-            tamanho_mensagens - nchar(i) - 3)), 
-          borders$bar_vertical,
-          "\n")
-        )
-      }
+  # Processa conteúdo
+  linhas <- tryCatch(
+    .log_processar_conteudo(...),
+    error = function(e) {
+      log_erro("Alguma informação solicitada está indisponível.", e)
+      list()
     }
-  },
-  error = function(e) { 
-    log_erro("Alguma informação solicitada está indisponível.", 
-             e) 
-  })
+  )
   
-  if (desenhar_borda_inferior) {
-    cat(
-      borders$corner_lower_left,
-      strrep(borders$bar_horizontal_lower, tamanho_mensagens - 2),
-      borders$corner_lower_right, 
-      log_tempo_decorrido(),
-      "\n",
-      sep = ""
-    )
-    
-    utils_color("default")
-  }
-  
+  # Configura renderização
+  .log_renderizar_box(
+    tipo = "info",
+    cores = cores,
+    timestamp = timestamp,
+    borda_superior = estilo %in% c("completo", "inicio"),
+    borda_inferior = estilo %in% c("completo", "fim"),
+    linhas = linhas
+  )
 }
 
 log_secao <- function(subtitulo, titulo = NULL) {
@@ -560,7 +496,7 @@ log_secao <- function(subtitulo, titulo = NULL) {
   #' log_secao("Configurações iniciais", "LOG")
   #' 
   #' @return Será exibida uma caixa com o título e o subtítulo, além do 
-  #' carimbo de tempo, fornecido pela função \code{log_tempo_decorrido()}, 
+  #' carimbo de tempo, fornecido pela função \code{.log_tempo_decorrido()}, 
   #' conforme a seguir:
   #' 
   #' \preformatted{
@@ -568,79 +504,26 @@ log_secao <- function(subtitulo, titulo = NULL) {
   #' │ LOG │ CONFIGURAÇÕES INICIAIS │
   #' ╰─────┴────────────────────────╯ ‹08:08 | 1.1 secs›}
   #' 
-  #' @seealso \code{\link{config_ambiente}}, \code{\link{config_opcoes}}, 
-  #' \code{\link{log_tempo_decorrido}}
+  #' @seealso \code{\link{config_ambiente}}, \code{\link{config_opcoes}}}
   
   geral <- get_config("geral")
+  skin  <- get_config("skin")
   
-  titulo <- if (is.null(titulo)) {
-    toupper(trimws(geral$script_nome))
-  } else {
-    toupper(trimws(titulo)) 
-  }
+  titulo <- 
+    toupper(trimws(ifelse(is.null(titulo), geral$script_nome, titulo)))
   subtitulo <- toupper(trimws(subtitulo))
   
-  tamanho_secao <- max(geral$tamanho_mensagens, 
-                       nchar(titulo) + nchar(subtitulo) + 7)
-  
-  borders <- get_config("skin")$border
-  
-  linha_1_1 <- 
-    paste0(
-      borders$corner_upper_left,
-      strrep(borders$bar_horizontal_upper, nchar(titulo) + 2),
-      borders$separator_upper
-    )
-  linha_1_2 <- 
-    paste0(
-      strrep(borders$bar_horizontal_upper, tamanho_secao - nchar(linha_1_1) - 1),
-      borders$corner_upper_right
-    )
-  
-  linha_2_1 <- 
-    paste0(
-      borders$bar_vertical,
-      " ", 
-      titulo, 
-      " ",
-      borders$bar_vertical
-    )
-  
-  espacamento <- (tamanho_secao - nchar(titulo) - 4 - nchar(subtitulo) - 1) / 2
-  if (espacamento %% 1 != 0) subtitulo <- paste0(subtitulo, " ")
-  espacamento <- strrep(" ", espacamento)
-  
-  linha_2_2 <- 
-    paste0(
-      espacamento, 
-      subtitulo, 
-      espacamento, 
-      borders$bar_vertical
-    )
-  
-  linha_3_1 <- 
-    paste0(
-      borders$corner_lower_left,
-      strrep(borders$bar_horizontal_lower, nchar(titulo) + 2),
-      borders$separator_lower
-    )
-  linha_3_2 <- 
-    paste0(
-      strrep(borders$bar_horizontal_lower, tamanho_secao - nchar(linha_1_1) - 1),
-      borders$corner_lower_right,
-      log_tempo_decorrido()
-    )
-  
-  cat(
-    "\n",
-    linha_1_1, linha_1_2, "\n",
-    linha_2_1, linha_2_2, "\n",
-    linha_3_1, linha_3_2, "\n",
-    sep = ""
+  .log_renderizar_box(
+    tipo      = "secao",
+    titulo    = titulo,
+    subtitulo = subtitulo
   )
+  
 }
 
-log_tempo_decorrido <- function() {
+# ---- FUNÇÕES AUXILIARES INTERNAS ----
+
+.log_tempo_decorrido <- function() {
   #' Gera um marcador de tempo decorrido de execução
   #' 
   #' @description Informa o horário atual e o tempo decorrido desde o início 
@@ -660,14 +543,395 @@ log_tempo_decorrido <- function() {
   #' 
   #' \code{‹12:00 | 5.2 mins›}
   #' 
-  #' @usage log_tempo_decorrido()
+  #' @usage .log_tempo_decorrido()
   #'
-  #' @examples log_tempo_decorrido()
+  #' @examples .log_tempo_decorrido()
   #' 
   #' @seealso \code{\link{config_ambiente}}, \code{\link{config_opcoes}}
   
   agora <- Sys.time()
-  decorrido <- format(agora - get_config("geral")$tempo_inicio_script, 
-                      digits = 2)
+  decorrido <- 
+    format(agora - get_config("geral")$tempo_inicio_script, 
+           digits = 2)
   return(paste0(" ‹", format(agora, "%H:%M"), " ◌ ", decorrido, "›"))
 }
+
+.log_calcular_espacamento <- function(tamanho_total, tamanho_conteudo) {
+  #' Calcula espaçamento centralizado
+  espacamento_base <- (tamanho_total - tamanho_conteudo) / 2
+  ajuste_direita <- if (espacamento_base %% 1 != 0) 1 else 0
+  
+  list(
+    esquerda = floor(espacamento_base),
+    direita = floor(espacamento_base) + ajuste_direita
+  )
+}
+
+.log_montar_linha <- function(
+    tipo = c("borda", "conteudo", "separador", "secao"), 
+    conteudo = NULL, 
+    borders, 
+    tamanho,
+    margem,
+    posicao = c("superior", "meio", "inferior"), 
+    largura_coluna1 = NULL
+) {
+  #' Monta uma linha do box
+  #' 
+  #' @param tipo "borda", "conteudo", "separador", "secao"
+  #' @param conteudo Texto ou lista de textos
+  #' @param borders Configuração de bordas
+  #' @param tamanho Largura total
+  #' @param posicao "superior", "meio", "inferior"
+  #' @param largura_coluna1 Para tipo "secao", largura da primeira coluna
+  
+  # Bordas horizontais
+  if (tipo == "borda") {
+    if (posicao == "superior") {
+      return(sprintf(
+        "%s%s%s\n",
+        borders$corner_upper_left,
+        strtrim(strrep(borders$bar_horizontal_upper, tamanho - 2), tamanho - 2),
+        borders$corner_upper_right
+      ))
+    } else {
+      return(sprintf(
+        "%s%s%s",
+        borders$corner_lower_left,
+        strtrim(strrep(borders$bar_horizontal_lower, tamanho - 2), tamanho - 2),
+        borders$corner_lower_right
+      ))
+    }
+  }
+  
+  # Separador horizontal
+  if (tipo == "separador") {
+    return(sprintf(
+      "%s%s%s\n",
+      borders$separator_left,
+      strtrim(strrep(borders$bar_horizontal_upper, tamanho - 2), tamanho - 2),
+      borders$separator_right
+    ))
+  }
+  
+  # Linha de conteúdo normal
+  if (tipo == "conteudo") {
+    margem_espacamento <- strrep(" ", margem)
+    prefixo <- if (!is.null(conteudo$arrow) && conteudo$arrow) {
+      paste0(margem_espacamento, " → ")
+    } else {
+      margem_espacamento
+    }
+    texto <- conteudo$texto
+    espacamento <- 
+      max(
+        0,
+        tamanho - nchar(texto) - nchar(prefixo) - nchar(margem_espacamento) - 2
+      )
+    
+    return(sprintf(
+      "%s%s%s%s%s%s\n",
+      borders$bar_vertical_left,
+      prefixo,
+      texto,
+      strrep(" ", espacamento),
+      margem_espacamento,
+      borders$bar_vertical_right
+    ))
+  }
+  
+  # Linha de seção (duas colunas)
+  if (tipo == "secao") {
+    largura_coluna2 <- tamanho - largura_coluna1 - 3
+    
+    # Margem
+    margem_espacamento <- sprintf(
+      "%s%s%s%s%s\n",
+      borders$bar_vertical_left,
+      strrep(" ", largura_coluna1),
+      borders$bar_vertical_left,
+      strrep(" ", largura_coluna2),
+      borders$bar_vertical_right
+    )
+    
+    if (posicao == "superior") {
+      return(sprintf(
+        "%s%s%s%s%s\n",
+        borders$corner_upper_left,
+        strtrim(strrep(borders$bar_horizontal_upper, largura_coluna1), largura_coluna1),
+        borders$separator_upper,
+        strtrim(strrep(borders$bar_horizontal_upper, largura_coluna2), largura_coluna2),
+        borders$corner_upper_right
+      ))
+    }
+    
+    if (posicao == "meio") {
+      espacamento <-
+        .log_calcular_espacamento(largura_coluna2, nchar(conteudo$subtitulo))
+      
+      return(
+        c(
+          rep(margem_espacamento, if (margem > 1) floor(margem / 2) else 0),
+          sprintf(
+            "%s%s%s%s%s%s%s%s%s\n",
+            borders$bar_vertical_left,
+            strrep(" ", margem),
+            conteudo$titulo,
+            strrep(" ", margem),
+            borders$bar_vertical_right,
+            strrep(" ", espacamento$esquerda),
+            conteudo$subtitulo,
+            strrep(" ", espacamento$direita),
+            borders$bar_vertical_right
+          ),
+          rep(margem_espacamento, if (margem > 1) floor(margem / 2) else 0)
+        ))
+    }
+    
+    if (posicao == "inferior") {
+      return(sprintf(
+        "%s%s%s%s%s",
+        borders$corner_lower_left,
+        strtrim(strrep(borders$bar_horizontal_lower, largura_coluna1), largura_coluna1),
+        borders$separator_lower,
+        strtrim(strrep(borders$bar_horizontal_lower, largura_coluna2), largura_coluna2),
+        borders$corner_lower_right
+      ))
+    }
+  }
+  
+  return(invisible(NULL))
+}
+
+.log_processar_conteudo <- function(...) {
+  #' Processa conteúdo variável e retorna lista de linhas formatadas
+  #' 
+  #' @param ... Conteúdo a ser processado
+  #' @return Lista com elementos do tipo list(texto = "...", arrow = FALSE)
+  
+  linhas <- list()
+  
+  if (...length() == 0) return(linhas)
+  
+  margem <- get_config("skin")$margem
+  
+  if (margem > 1) {
+    for (i in 1:floor(margem / 2)) {
+      linhas[[length(linhas) + 1]] <- list(
+        tipo = "conteudo", 
+        texto = "", 
+        arrow = FALSE)
+    }
+  }
+  
+  for (item in list(...)) {
+    # Pula NULLs
+    if (is.null(item)) next
+    
+    # Dataframes são processados externamente
+    if (is.data.frame(item)) {
+      linhas[[length(linhas) + 1]] <- list(
+        tipo = "dataframe",
+        conteudo = item
+      )
+      next
+    }
+    
+    # Converte listas para vetor
+    if (is.list(item)) {
+      item <- as.vector(unlist(item))
+    }
+    
+    # Múltiplos itens (com seta)
+    if (length(item) > 1) {
+      for (sub_item in item) {
+        linhas[[length(linhas) + 1]] <- list(
+          tipo = "conteudo",
+          texto = paste0(sub_item, strrep(" ", margem)),
+          arrow = TRUE
+        )
+      }
+      next
+    }
+    
+    # Separador
+    if (item == "-") {
+      if (margem > 1) {
+        for (i in 1:floor(margem / 2)) {
+          linhas[[length(linhas) + 1]] <- list(
+            tipo = "conteudo", 
+            texto = "", 
+            arrow = FALSE)
+        }
+      }
+      
+      linhas[[length(linhas) + 1]] <- list(tipo = "separador")
+      
+      if (margem > 1) {
+        for (i in 1:floor(margem / 2)) {
+          linhas[[length(linhas) + 1]] <- list(
+            tipo = "conteudo", 
+            texto = "", 
+            arrow = FALSE)
+        }
+      }
+      
+      next
+    }
+    
+    # Item único
+    linhas[[length(linhas) + 1]] <- list(
+      tipo = "conteudo",
+      texto = paste0(item, strrep(" ", margem)),
+      arrow = FALSE
+    )
+  }
+  
+  if (margem > 1) {
+    for (i in 1:floor(margem / 2)) {
+      linhas[[length(linhas) + 1]] <- list(
+        tipo = "conteudo", 
+        texto = "", 
+        arrow = FALSE)
+    }
+  }
+  
+  return(linhas)
+}
+
+.log_renderizar_box <- function(
+    tipo, 
+    titulo = NULL, 
+    subtitulo = NULL, 
+    cores = NULL, 
+    timestamp = TRUE,
+    borda_superior = TRUE,
+    borda_inferior = TRUE,
+    linhas = NULL
+) {
+  #' Sistema unificado de renderização de boxes
+  #' 
+  #' @param tipo "info" ou "secao"
+  #' @param titulo Texto do título (obrigatório para tipo "secao")
+  #' @param subtitulo Texto do subtítulo (obrigatório para tipo "secao")
+  #' @param cores Esquema de cores (opcional)
+  #' @param timestamp Incluir timestamp (default TRUE)
+  #' @param borda_superior Desenhar borda superior (default TRUE)
+  #' @param borda_inferior Desenhar borda inferior (default TRUE)
+  #' @param linhas Conteúdo processado (obrigatório para tipo "info")
+  #' @param tamanho Largura do box (opcional, usa padrão se NULL)
+  
+  # Validações
+  if (tipo == "info" && is.null(linhas)) {
+    stop("Tipo 'info' requer o parâmetro 'linhas'")
+  }
+  if (tipo == "secao" && (is.null(titulo) || is.null(subtitulo))) {
+    stop("Tipo 'secao' requer os parâmetros 'titulo' e 'subtitulo'")
+  }
+  
+  skin <- get_config("skin")
+  borders <- skin$border
+  tamanho <- skin$tamanho_mensagens
+  margem  <- skin$margem
+  
+  if (!is.null(cores)) utils_color(cores)
+  
+  if (tipo == "info") {
+    # Borda superior
+    if (borda_superior) {
+      cat(
+        .log_montar_linha(
+          "borda",
+          borders = borders, 
+          tamanho = tamanho,
+          posicao = "superior"
+        )
+      )
+    }
+    
+    # Conteúdo
+    for (linha in linhas) {
+      if (linha$tipo == "dataframe") {
+        print.data.frame(linha$conteudo, right = FALSE, row.names = FALSE)
+      } else {
+        cat(
+          .log_montar_linha(
+            linha$tipo,
+            conteudo = linha, 
+            borders = borders, 
+            tamanho = tamanho,
+            margem = margem
+          )
+        )
+      }
+    }
+    
+    # Borda inferior
+    if (borda_inferior) {
+      cat(
+        .log_montar_linha(
+          "borda", 
+          borders = borders, 
+          tamanho = tamanho, 
+          posicao = "inferior"
+        )
+      )
+      if (timestamp) cat(.log_tempo_decorrido())
+      cat("\n")
+      if (!is.null(cores)) utils_color("default")
+    }
+  }
+  
+  if (tipo == "secao") {
+    # + 3 = left and right borders and separator
+    tamanho_minimo <- nchar(titulo) + nchar(subtitulo) + (margem * 4) + 3
+    tamanho <- max(tamanho, tamanho_minimo)
+    
+    largura_coluna1 <- nchar(titulo) + (margem * 2)
+    
+    # Borda superior
+    cat("\n")
+    cat(
+      .log_montar_linha(
+        "secao",
+        borders = borders,
+        tamanho = tamanho,
+        posicao = "superior",
+        largura_coluna1 = largura_coluna1
+      )
+    )
+    
+    # Conteúdo (linha do meio)
+    cat(
+      .log_montar_linha(
+        "secao", 
+        conteudo = list(
+          titulo = titulo, 
+          subtitulo = subtitulo
+        ),
+        borders = borders, 
+        tamanho = tamanho,
+        margem = margem,
+        posicao = "meio", 
+        largura_coluna1 = largura_coluna1
+      ),
+      sep = ""
+    )
+    
+    # Borda inferior
+    cat(
+      .log_montar_linha(
+        "secao", 
+        borders = borders, 
+        tamanho = tamanho,
+        posicao = "inferior", 
+        largura_coluna1 = largura_coluna1
+      )
+    )
+    if (timestamp) cat(.log_tempo_decorrido())
+    cat("\n")
+    if (!is.null(cores)) utils_color("default")
+  }
+  
+}
+

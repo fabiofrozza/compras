@@ -45,14 +45,19 @@ utils_ansi <- function(fg = "", bg = "") {
 utils_border <- function(border) {
   
   borders <- list(
-    bars    = c("█", "█", "█", "█", "█", "█", "█", "█", "▀", "▄", "█"),
-    default = c("+", "+", "+", "+", "+", "+", "+", "+", "-", "-", "|"),
-    double  = c("╔", "╗", "╚", "╝", "╦", "╩", "╠", "╣", "═", "═", "║"),
-    heavy   = c("┏", "┓", "┗", "┛", "┳", "┻", "┣", "┫", "━", "━", "┃"),
-    round   = c("╭", "╮", "╰", "╯", "┬", "┴", "├", "┤", "─", "─", "│"),
-    square  = c("┌", "┐", "└", "┘", "┬", "┴", "├", "┤", "─", "─", "│")
+    double  = c("╔", "╗", "╚", "╝", "╦", "╩", "╠", "╣", "═", "═", "║", "║"),
+    heavy   = c("┏", "┓", "┗", "┛", "┳", "┻", "┣", "┫", "━", "━", "┃", "┃"),
+    round   = c("╭", "╮", "╰", "╯", "┬", "┴", "├", "┤", "─", "─", "│", "│"),
+    square  = c("┌", "┐", "└", "┘", "┬", "┴", "├", "┤", "─", "─", "│", "│"),
+    dotted  = c(".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ":", ":"),
+    bars    = c("█", "█", "█", "█", "█", "█", "█", "█", "▀", "▄", "█", "█"),
+    default = c("+", "+", "+", "+", "+", "+", "+", "+", "-", "-", "|", "|"),
+    ascii   = c("/", "\\", "\\", "/", "^", "v", "<", ">", "-", "-", "|", "|"),
+    minimal = c("", "", "", "", "", "", "", "", "", "", "", ""),
+    dashed  = c("+", "+", "+", "+", "+", "+", "+", "+", "- ", "- ", "¦", "¦"),
+    wavy    = c("«", "»", "«", "»", "^", "v", "»", "«", "_,.-'~'-.,", "~'-.,_,.-'", "{", "}")
   )
-  
+
   if (!(border %in% names(borders))) {
     border <- "default"
   }
@@ -68,7 +73,8 @@ utils_border <- function(border) {
     separator_right      = borders[[border]][8],
     bar_horizontal_upper = borders[[border]][9],
     bar_horizontal_lower = borders[[border]][10],
-    bar_vertical         = borders[[border]][11]
+    bar_vertical_left    = borders[[border]][11],
+    bar_vertical_right   = borders[[border]][12]
   )
   
   return(border)
@@ -330,6 +336,33 @@ utils_style <- function(style) {
       "alert"      = utils_ansi("light_white", "dark_black"),
       "error"      = utils_ansi("light_white", "dark_black"),
       "ok"         = utils_ansi("light_white", "dark_black")
+    ),
+    matrix = list(
+      "default"    = utils_ansi("light_green", "dark_black"),
+      "highlight1" = utils_ansi("dark_green"), 
+      "highlight2" = utils_ansi("dark_green"),
+      "highlight3" = utils_ansi("light_white"),
+      "alert"      = utils_ansi("dark_black", "light_green"),
+      "error"      = utils_ansi("light_red", "dark_black"),
+      "ok"         = utils_ansi("dark_black", "light_green")
+    ),
+    ocean = list(
+      "default"    = utils_ansi("light_cyan", "dark_blue"),
+      "highlight1" = utils_ansi("light_white"), 
+      "highlight2" = utils_ansi("light_blue"),
+      "highlight3" = utils_ansi("dark_cyan"),
+      "alert"      = utils_ansi("dark_blue", "light_cyan"),
+      "error"      = utils_ansi("light_yellow", "dark_red"),
+      "ok"         = utils_ansi("dark_blue", "light_green")
+    ),
+    peach = list(
+      "default"    = utils_ansi("light_yellow", "light_red"),
+      "highlight1" = utils_ansi("dark_red"), 
+      "highlight2" = utils_ansi("dark_magenta"),
+      "highlight3" = utils_ansi("dark_yellow"),
+      "alert"      = utils_ansi("dark_magenta", "dark_yellow"),
+      "error"      = utils_ansi("light_white", "dark_red"),
+      "ok"         = utils_ansi("dark_magenta", "light_yellow")
     )
   )
   

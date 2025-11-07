@@ -527,8 +527,6 @@ config_ambiente <- function (pasta = NULL) {
         strsplit(as.character(sys.call(1)), "_")[[1]][1]),
       # registra a hora de início do script
       tempo_inicio_script = Sys.time(),
-      # define o tamanho do box dos logs/infos/erros
-      tamanho_mensagens   = 100,
       config_centralizado = file.path(pasta$common, "config.json")
     )
   
@@ -560,6 +558,8 @@ config_ambiente <- function (pasta = NULL) {
       style  = Sys.getenv("SKIN_STYLE"),
       border = Sys.getenv("SKIN_BORDER")
     )
+  skin$tamanho_mensagens = as.numeric(Sys.getenv("TAMANHO_MENSAGENS"))
+  skin$margem            = as.numeric(Sys.getenv("MARGEM"))
   
   set_config(
     geral  = geral,
@@ -606,7 +606,7 @@ config_finalizar <- function(sucesso = FALSE) {
 
   config            <- get_config()
   logR              <- config$logR
-  tamanho_mensagens <- config$geral$tamanho_mensagens
+  tamanho_mensagens <- config$skin$tamanho_mensagens
   status            <- config$status
 
   if (status$erros || status$alerta) {
@@ -965,7 +965,8 @@ config_rede <- function() {
   #' @seealso \code{\link{config_inicializar}}
   
   tryCatch({
-    rede_info <- system("ipconfig", intern = TRUE, timeout = 5)
+    rede_info <- 
+      system2("ipconfig", stdout = TRUE, stderr = TRUE, timeout = 5)
     
     linhas_dns <- grep("DNS", rede_info, useBytes = TRUE)
     redes      <- c()
