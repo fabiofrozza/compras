@@ -200,7 +200,7 @@ utils_color <- function(color = NULL) {
   colors <- get_config("skin")$style
   
   if (!(color %in% names(colors))) {
-    return()
+    return(invisible(NULL))
   }
     
   shell(colors[[color]])
@@ -295,15 +295,6 @@ utils_silent <- function() {
   #' \code{\link{commandArgs}}
   
   "silent" %in% commandArgs(trailingOnly = TRUE)
-  
-}
-
-utils_skin <- function(style = "default", border = "default") {
-
-  list(
-    style  = utils_style(style),
-    border = utils_border(border)
-  )
   
 }
 

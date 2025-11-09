@@ -554,12 +554,12 @@ config_ambiente <- function (pasta = NULL) {
     )
   
   skin <- 
-    utils_skin(
-      style  = Sys.getenv("SKIN_STYLE"),
-      border = Sys.getenv("SKIN_BORDER")
+    list(
+      style = utils_style(Sys.getenv("SKIN_STYLE")),
+      border = utils_border(Sys.getenv("SKIN_BORDER")),
+      tamanho_mensagens = as.numeric(Sys.getenv("TAMANHO_MENSAGENS")),
+      margem = as.numeric(Sys.getenv("MARGEM"))
     )
-  skin$tamanho_mensagens = as.numeric(Sys.getenv("TAMANHO_MENSAGENS"))
-  skin$margem            = as.numeric(Sys.getenv("MARGEM"))
   
   set_config(
     geral  = geral,

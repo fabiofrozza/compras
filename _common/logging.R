@@ -506,17 +506,12 @@ log_secao <- function(subtitulo, titulo = NULL) {
   #' 
   #' @seealso \code{\link{config_ambiente}}, \code{\link{config_opcoes}}}
   
-  geral <- get_config("geral")
-  skin  <- get_config("skin")
-  
-  titulo <- 
-    toupper(trimws(ifelse(is.null(titulo), geral$script_nome, titulo)))
-  subtitulo <- toupper(trimws(subtitulo))
+  script_nome <- get_config("geral")$script_nome
   
   .log_renderizar_box(
-    tipo      = "secao",
-    titulo    = titulo,
-    subtitulo = subtitulo
+    tipo = "secao",
+    titulo = toupper(trimws(ifelse(is.null(titulo), script_nome, titulo))),
+    subtitulo = toupper(trimws(subtitulo))
   )
   
 }
@@ -568,49 +563,46 @@ log_secao <- function(subtitulo, titulo = NULL) {
 }
 
 .log_montar_linha <- function(
-    tipo = c("borda", "conteudo", "separador", "secao"), 
+    tipo = c("borda", "conteudo", "secao"), 
     conteudo = NULL, 
     borders, 
     tamanho,
     margem,
-    posicao = c("superior", "meio", "inferior"), 
-    largura_coluna1 = NULL
+    posicao = c("superior", "separador", "meio", "inferior"), 
+    largura_coluna1 = NULL,
+    timestamp = TRUE
 ) {
   #' Monta uma linha do box
   #' 
-  #' @param tipo "borda", "conteudo", "separador", "secao"
+  #' @param tipo "borda", "conteudo", "secao"
   #' @param conteudo Texto ou lista de textos
   #' @param borders Configuração de bordas
   #' @param tamanho Largura total
-  #' @param posicao "superior", "meio", "inferior"
+  #' @param posicao "superior", "separador", "meio", "inferior"
   #' @param largura_coluna1 Para tipo "secao", largura da primeira coluna
   
   # Bordas horizontais
   if (tipo == "borda") {
     if (posicao == "superior") {
-      return(sprintf(
-        "%s%s%s\n",
-        borders$corner_upper_left,
-        strtrim(strrep(borders$bar_horizontal_upper, tamanho - 2), tamanho - 2),
-        borders$corner_upper_right
-      ))
-    } else {
-      return(sprintf(
-        "%s%s%s",
-        borders$corner_lower_left,
-        strtrim(strrep(borders$bar_horizontal_lower, tamanho - 2), tamanho - 2),
-        borders$corner_lower_right
-      ))
+      left  <- borders$corner_upper_left
+      right <- borders$corner_upper_right 
+      bar   <- borders$bar_horizontal_upper
+    } else if (posicao == "inferior") {
+      left  <- borders$corner_lower_left
+      right <- borders$corner_lower_right
+      bar   <- borders$bar_horizontal_lower
+    } else if (posicao == "separador") {
+      left  <- borders$separator_left
+      right <- borders$separator_right
+      bar   <- borders$bar_horizontal_upper
     }
-  }
-  
-  # Separador horizontal
-  if (tipo == "separador") {
-    return(sprintf(
-      "%s%s%s\n",
-      borders$separator_left,
-      strtrim(strrep(borders$bar_horizontal_upper, tamanho - 2), tamanho - 2),
-      borders$separator_right
+    
+    return(paste0(
+      left,
+      strtrim(strrep(bar, tamanho - 2), tamanho - 2),
+      right,
+      if (timestamp && posicao == "inferior") .log_tempo_decorrido(),
+      "\n"
     ))
   }
   
@@ -629,14 +621,14 @@ log_secao <- function(subtitulo, titulo = NULL) {
         tamanho - nchar(texto) - nchar(prefixo) - nchar(margem_espacamento) - 2
       )
     
-    return(sprintf(
-      "%s%s%s%s%s%s\n",
+    return(paste0(
       borders$bar_vertical_left,
       prefixo,
       texto,
       strrep(" ", espacamento),
       margem_espacamento,
-      borders$bar_vertical_right
+      borders$bar_vertical_right,
+      "\n"
     ))
   }
   
@@ -645,23 +637,24 @@ log_secao <- function(subtitulo, titulo = NULL) {
     largura_coluna2 <- tamanho - largura_coluna1 - 3
     
     # Margem
-    margem_espacamento <- sprintf(
-      "%s%s%s%s%s\n",
+    margem_espacamento <- paste0(
       borders$bar_vertical_left,
       strrep(" ", largura_coluna1),
       borders$bar_vertical_left,
       strrep(" ", largura_coluna2),
-      borders$bar_vertical_right
+      borders$bar_vertical_right,
+      "\n"
     )
     
     if (posicao == "superior") {
-      return(sprintf(
-        "%s%s%s%s%s\n",
+      return(paste0(
+        "\n",
         borders$corner_upper_left,
         strtrim(strrep(borders$bar_horizontal_upper, largura_coluna1), largura_coluna1),
         borders$separator_upper,
         strtrim(strrep(borders$bar_horizontal_upper, largura_coluna2), largura_coluna2),
-        borders$corner_upper_right
+        borders$corner_upper_right,
+        "\n"
       ))
     }
     
@@ -672,8 +665,7 @@ log_secao <- function(subtitulo, titulo = NULL) {
       return(
         c(
           rep(margem_espacamento, if (margem > 1) floor(margem / 2) else 0),
-          sprintf(
-            "%s%s%s%s%s%s%s%s%s\n",
+          paste0(
             borders$bar_vertical_left,
             strrep(" ", margem),
             conteudo$titulo,
@@ -682,20 +674,22 @@ log_secao <- function(subtitulo, titulo = NULL) {
             strrep(" ", espacamento$esquerda),
             conteudo$subtitulo,
             strrep(" ", espacamento$direita),
-            borders$bar_vertical_right
+            borders$bar_vertical_right,
+            "\n"
           ),
           rep(margem_espacamento, if (margem > 1) floor(margem / 2) else 0)
         ))
     }
     
     if (posicao == "inferior") {
-      return(sprintf(
-        "%s%s%s%s%s",
+      return(paste0(
         borders$corner_lower_left,
         strtrim(strrep(borders$bar_horizontal_lower, largura_coluna1), largura_coluna1),
         borders$separator_lower,
         strtrim(strrep(borders$bar_horizontal_lower, largura_coluna2), largura_coluna2),
-        borders$corner_lower_right
+        borders$corner_lower_right,
+        if (timestamp) .log_tempo_decorrido(),
+        "\n"
       ))
     }
   }
@@ -759,13 +753,15 @@ log_secao <- function(subtitulo, titulo = NULL) {
       if (margem > 1) {
         for (i in 1:floor(margem / 2)) {
           linhas[[length(linhas) + 1]] <- list(
-            tipo = "conteudo", 
+            tipo = "conteudo",
             texto = "", 
             arrow = FALSE)
         }
       }
       
-      linhas[[length(linhas) + 1]] <- list(tipo = "separador")
+      linhas[[length(linhas) + 1]] <- list(
+        tipo = "borda",
+        posicao = "separador")
       
       if (margem > 1) {
         for (i in 1:floor(margem / 2)) {
@@ -837,7 +833,6 @@ log_secao <- function(subtitulo, titulo = NULL) {
   if (!is.null(cores)) utils_color(cores)
   
   if (tipo == "info") {
-    # Borda superior
     if (borda_superior) {
       cat(
         .log_montar_linha(
@@ -849,48 +844,48 @@ log_secao <- function(subtitulo, titulo = NULL) {
       )
     }
     
-    # Conteúdo
     for (linha in linhas) {
       if (linha$tipo == "dataframe") {
         print.data.frame(linha$conteudo, right = FALSE, row.names = FALSE)
-      } else {
-        cat(
-          .log_montar_linha(
-            linha$tipo,
-            conteudo = linha, 
-            borders = borders, 
-            tamanho = tamanho,
-            margem = margem
-          )
+        next
+      } 
+      
+      cat(
+        .log_montar_linha(
+          linha$tipo,
+          conteudo = linha, 
+          borders = borders, 
+          tamanho = tamanho,
+          margem = margem,
+          posicao = linha$posicao
         )
-      }
+      )
     }
     
-    # Borda inferior
     if (borda_inferior) {
       cat(
         .log_montar_linha(
           "borda", 
           borders = borders, 
           tamanho = tamanho, 
-          posicao = "inferior"
+          posicao = "inferior",
+          timestamp = timestamp
         )
       )
-      if (timestamp) cat(.log_tempo_decorrido())
-      cat("\n")
       if (!is.null(cores)) utils_color("default")
     }
   }
   
   if (tipo == "secao") {
     # + 3 = left and right borders and separator
-    tamanho_minimo <- nchar(titulo) + nchar(subtitulo) + (margem * 4) + 3
-    tamanho <- max(tamanho, tamanho_minimo)
-    
+    tamanho <- 
+      max(
+        tamanho, 
+        nchar(titulo) + nchar(subtitulo) + (margem * 4) + 3
+      )
     largura_coluna1 <- nchar(titulo) + (margem * 2)
     
     # Borda superior
-    cat("\n")
     cat(
       .log_montar_linha(
         "secao",
@@ -925,11 +920,10 @@ log_secao <- function(subtitulo, titulo = NULL) {
         borders = borders, 
         tamanho = tamanho,
         posicao = "inferior", 
-        largura_coluna1 = largura_coluna1
+        largura_coluna1 = largura_coluna1,
+        timestamp = timestamp
       )
     )
-    if (timestamp) cat(.log_tempo_decorrido())
-    cat("\n")
     if (!is.null(cores)) utils_color("default")
   }
   
