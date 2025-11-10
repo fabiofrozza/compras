@@ -455,7 +455,7 @@ log_info <- function(..., estilo = "completo", cores = NULL, timestamp = TRUE) {
   )
   
   # Configura renderização
-  .log_renderizar_box(
+  .log_exibir_box(
     tipo = "info",
     cores = cores,
     timestamp = timestamp,
@@ -508,7 +508,7 @@ log_secao <- function(subtitulo, titulo = NULL) {
   
   script_nome <- get_config("geral")$script_nome
   
-  .log_renderizar_box(
+  .log_exibir_box(
     tipo = "secao",
     titulo = toupper(trimws(ifelse(is.null(titulo), script_nome, titulo))),
     subtitulo = toupper(trimws(subtitulo))
@@ -564,24 +564,22 @@ log_secao <- function(subtitulo, titulo = NULL) {
 
 .log_montar_linha <- function(
     tipo = c("borda", "conteudo", "secao"), 
-    conteudo = NULL, 
-    borders, 
-    tamanho,
-    margem = NULL,
     posicao = c("superior", "separador", "meio", "inferior"), 
-    largura_coluna1 = NULL,
+    conteudo = NULL, 
     timestamp = TRUE
 ) {
   #' Monta uma linha do box
   #' 
   #' @param tipo "borda", "conteudo", "secao"
-  #' @param conteudo Texto ou lista de textos
-  #' @param borders Configuração de bordas
-  #' @param tamanho Largura total
   #' @param posicao "superior", "separador", "meio", "inferior"
-  #' @param largura_coluna1 Para tipo "secao", largura da primeira coluna
+  #' @param conteudo Texto ou lista de textos
+  #' @param timestamp Se exibe ou não a marcação de tempo decorrido
   
-  # Bordas horizontais
+  skin <- get_config("skin")
+  borders <- skin$border
+  tamanho <- skin$tamanho_mensagens
+  margem  <- skin$margem
+  
   if (tipo == "borda") {
     if (posicao == "superior") {
       left  <- borders$corner_upper_left
@@ -606,7 +604,6 @@ log_secao <- function(subtitulo, titulo = NULL) {
     ))
   }
   
-  # Linha de conteúdo normal
   if (tipo == "conteudo") {
     margem_espacamento <- strrep(" ", margem)
     prefixo <- if (!is.null(conteudo$arrow) && conteudo$arrow) {
@@ -621,20 +618,29 @@ log_secao <- function(subtitulo, titulo = NULL) {
         tamanho - nchar(texto) - nchar(prefixo) - nchar(margem_espacamento) - 2
       )
     
-    return(paste0(
-      borders$bar_vertical_left,
-      prefixo,
-      texto,
-      strrep(" ", espacamento),
-      margem_espacamento,
-      borders$bar_vertical_right,
-      "\n"
-    ))
+    return(
+      paste0(
+        borders$bar_vertical_left,
+        prefixo,
+        texto,
+        strrep(" ", espacamento),
+        margem_espacamento,
+        borders$bar_vertical_right,
+        "\n"
+      )
+    )
   }
   
-  # Linha de seção (duas colunas)
   if (tipo == "secao") {
+    # + 3 = left and right borders and separator
+    tamanho <- 
+      max(
+        tamanho, 
+        nchar(conteudo$titulo) + nchar(conteudo$subtitulo) + (margem * 4) + 3
+      )
+    largura_coluna1 <- nchar(conteudo$titulo) + (margem * 2)
     largura_coluna2 <- tamanho - largura_coluna1 - 3
+    
     margem_espacamento <- ""
     bar <- ""
     conteudo_1 <- ""
@@ -646,19 +652,6 @@ log_secao <- function(subtitulo, titulo = NULL) {
     if (posicao == "meio") {
       espacamento <-
         .log_calcular_espacamento(largura_coluna2, nchar(conteudo$subtitulo))
-      
-      margem_espacamento <- 
-        rep(
-          paste0(
-            borders$bar_vertical_left,
-            strrep(" ", largura_coluna1),
-            borders$bar_vertical_left,
-            strrep(" ", largura_coluna2),
-            borders$bar_vertical_right,
-            "\n"
-          ),
-          if (margem > 1) floor(margem / 2) else 0
-      )
     
       left       <- borders$bar_vertical_left
       conteudo_1 <- paste0(strrep(" ", margem), conteudo$titulo, strrep(" ", margem))
@@ -666,6 +659,19 @@ log_secao <- function(subtitulo, titulo = NULL) {
       conteudo_2 <- paste0(strrep(" ", espacamento$esquerda), conteudo$subtitulo, strrep(" ", espacamento$direita))
       right      <- borders$bar_vertical_right
       quebra_de_linha_inferior <- "\n"
+      
+      margem_espacamento <- 
+        rep(
+          paste0(
+            left,
+            strrep(" ", largura_coluna1),
+            separador,
+            strrep(" ", largura_coluna2),
+            right,
+            "\n"
+          ),
+          if (margem > 1) floor(margem / 2) else 0
+      )
     }
     
     if (posicao == "superior") {
@@ -722,7 +728,7 @@ log_secao <- function(subtitulo, titulo = NULL) {
     for (i in 1:floor(margem / 2)) {
       linhas[[length(linhas) + 1]] <- list(
         tipo = "conteudo", 
-        texto = "", 
+        texto = "margem inicial", 
         arrow = FALSE)
     }
   }
@@ -763,7 +769,7 @@ log_secao <- function(subtitulo, titulo = NULL) {
         for (i in 1:floor(margem / 2)) {
           linhas[[length(linhas) + 1]] <- list(
             tipo = "conteudo",
-            texto = "", 
+            texto = "margem superior", 
             arrow = FALSE)
         }
       }
@@ -776,7 +782,7 @@ log_secao <- function(subtitulo, titulo = NULL) {
         for (i in 1:floor(margem / 2)) {
           linhas[[length(linhas) + 1]] <- list(
             tipo = "conteudo", 
-            texto = "", 
+            texto = "margem inferior", 
             arrow = FALSE)
         }
       }
@@ -796,7 +802,7 @@ log_secao <- function(subtitulo, titulo = NULL) {
     for (i in 1:floor(margem / 2)) {
       linhas[[length(linhas) + 1]] <- list(
         tipo = "conteudo", 
-        texto = "", 
+        texto = "margem", 
         arrow = FALSE)
     }
   }
@@ -804,7 +810,7 @@ log_secao <- function(subtitulo, titulo = NULL) {
   return(linhas)
 }
 
-.log_renderizar_box <- function(
+.log_exibir_box <- function(
     tipo, 
     titulo = NULL, 
     subtitulo = NULL, 
@@ -824,7 +830,6 @@ log_secao <- function(subtitulo, titulo = NULL) {
   #' @param borda_superior Desenhar borda superior (default TRUE)
   #' @param borda_inferior Desenhar borda inferior (default TRUE)
   #' @param linhas Conteúdo processado (obrigatório para tipo "info")
-  #' @param tamanho Largura do box (opcional, usa padrão se NULL)
   
   if (tipo == "info" && is.null(linhas)) {
     stop("Tipo 'info' requer o parâmetro 'linhas'")
@@ -833,109 +838,41 @@ log_secao <- function(subtitulo, titulo = NULL) {
     stop("Tipo 'secao' requer os parâmetros 'titulo' e 'subtitulo'")
   }
   
-  skin <- get_config("skin")
-  borders <- skin$border
-  tamanho <- skin$tamanho_mensagens
-  margem  <- skin$margem
-  
   if (!is.null(cores)) utils_color(cores)
   
   if (tipo == "info") {
     if (borda_superior) {
-      cat(
-        .log_montar_linha(
-          "borda",
-          borders = borders, 
-          tamanho = tamanho,
-          posicao = "superior"
-        )
-      )
+      cat(.log_montar_linha("borda", "superior"))
     }
     
-    for (linha in linhas) {
-      if (linha$tipo == "dataframe") {
-        print.data.frame(linha$conteudo, right = FALSE, row.names = FALSE)
-        next
-      } 
-      
-      cat(
-        .log_montar_linha(
-          linha$tipo,
-          conteudo = linha, 
-          borders = borders, 
-          tamanho = tamanho,
-          margem = margem,
-          posicao = linha$posicao
-        )
-      )
+    if (!is.null(linhas) && length(linhas) > 0) {
+      for (linha in linhas) {
+        if (linha$tipo == "dataframe") {
+          print.data.frame(linha$conteudo, right = FALSE, row.names = FALSE)
+          next
+        }
+        
+        cat(.log_montar_linha(linha$tipo, linha$posicao, linha))
+      }
     }
     
     if (borda_inferior) {
-      cat(
-        .log_montar_linha(
-          "borda", 
-          borders = borders, 
-          tamanho = tamanho, 
-          posicao = "inferior",
-          timestamp = timestamp
-        )
-      )
-      if (!is.null(cores)) utils_color("default")
+      cat(.log_montar_linha("borda", "inferior", timestamp = timestamp))
     }
   }
   
   if (tipo == "secao") {
-    # + 3 = left and right borders and separator
-    tamanho <- 
-      max(
-        tamanho, 
-        nchar(titulo) + nchar(subtitulo) + (margem * 4) + 3
-      )
-    largura_coluna1 <- nchar(titulo) + (margem * 2)
-    
-    # Borda superior
-    cat(
-      .log_montar_linha(
-        "secao",
-        borders = borders,
-        tamanho = tamanho,
-        posicao = "superior",
-        largura_coluna1 = largura_coluna1
-      ), 
-      sep = ""
+    conteudo = list(
+      titulo = titulo, 
+      subtitulo = subtitulo
     )
     
-    # Conteúdo (linha do meio)
-    cat(
-      .log_montar_linha(
-        "secao", 
-        conteudo = list(
-          titulo = titulo, 
-          subtitulo = subtitulo
-        ),
-        borders = borders, 
-        tamanho = tamanho,
-        margem = margem,
-        posicao = "meio", 
-        largura_coluna1 = largura_coluna1
-      ),
-      sep = ""
-    )
+    cat(.log_montar_linha("secao", "superior", conteudo), sep = "")
     
-    # Borda inferior
-    cat(
-      .log_montar_linha(
-        "secao", 
-        borders = borders, 
-        tamanho = tamanho,
-        posicao = "inferior", 
-        largura_coluna1 = largura_coluna1,
-        timestamp = timestamp
-      ),
-      sep = ""
-    )
-    if (!is.null(cores)) utils_color("default")
+    cat(.log_montar_linha("secao", "meio", conteudo), sep = "")
+    
+    cat(.log_montar_linha("secao", "inferior", conteudo, timestamp), sep = "")
   }
   
+  if (!is.null(cores)) utils_color("default")
 }
-
