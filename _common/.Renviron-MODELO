@@ -39,6 +39,6 @@ PROCESSOS_ADM_ANO_INICIAL = 2020
 # default, mono, invert, matrix, ocean, peach
 SKIN_STYLE = default
 # double, heavy, round, square, dotted, bars, default, ascii, minimal, dashed, wavy   
-SKIN_BORDER = wavy
+SKIN_BORDER = round
 TAMANHO_MENSAGENS = 100
-MARGEM = 2
+MARGEM = 1
