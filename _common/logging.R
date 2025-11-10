@@ -567,7 +567,7 @@ log_secao <- function(subtitulo, titulo = NULL) {
     conteudo = NULL, 
     borders, 
     tamanho,
-    margem,
+    margem = NULL,
     posicao = c("superior", "separador", "meio", "inferior"), 
     largura_coluna1 = NULL,
     timestamp = TRUE
@@ -635,66 +635,75 @@ log_secao <- function(subtitulo, titulo = NULL) {
   # Linha de seção (duas colunas)
   if (tipo == "secao") {
     largura_coluna2 <- tamanho - largura_coluna1 - 3
-    
-    # Margem
-    margem_espacamento <- paste0(
-      borders$bar_vertical_left,
-      strrep(" ", largura_coluna1),
-      borders$bar_vertical_left,
-      strrep(" ", largura_coluna2),
-      borders$bar_vertical_right,
-      "\n"
-    )
-    
-    if (posicao == "superior") {
-      return(paste0(
-        "\n",
-        borders$corner_upper_left,
-        strtrim(strrep(borders$bar_horizontal_upper, largura_coluna1), largura_coluna1),
-        borders$separator_upper,
-        strtrim(strrep(borders$bar_horizontal_upper, largura_coluna2), largura_coluna2),
-        borders$corner_upper_right,
-        "\n"
-      ))
-    }
+    margem_espacamento <- ""
+    bar <- ""
+    conteudo_1 <- ""
+    conteudo_2 <- ""
+    quebra_de_linha_superior <- ""
+    quebra_de_linha_inferior <- ""
+    stamp <- ""
     
     if (posicao == "meio") {
       espacamento <-
         .log_calcular_espacamento(largura_coluna2, nchar(conteudo$subtitulo))
       
-      return(
-        c(
-          rep(margem_espacamento, if (margem > 1) floor(margem / 2) else 0),
+      margem_espacamento <- 
+        rep(
           paste0(
             borders$bar_vertical_left,
-            strrep(" ", margem),
-            conteudo$titulo,
-            strrep(" ", margem),
-            borders$bar_vertical_right,
-            strrep(" ", espacamento$esquerda),
-            conteudo$subtitulo,
-            strrep(" ", espacamento$direita),
+            strrep(" ", largura_coluna1),
+            borders$bar_vertical_left,
+            strrep(" ", largura_coluna2),
             borders$bar_vertical_right,
             "\n"
           ),
-          rep(margem_espacamento, if (margem > 1) floor(margem / 2) else 0)
-        ))
+          if (margem > 1) floor(margem / 2) else 0
+      )
+    
+      left       <- borders$bar_vertical_left
+      conteudo_1 <- paste0(strrep(" ", margem), conteudo$titulo, strrep(" ", margem))
+      separador  <- borders$bar_vertical_right
+      conteudo_2 <- paste0(strrep(" ", espacamento$esquerda), conteudo$subtitulo, strrep(" ", espacamento$direita))
+      right      <- borders$bar_vertical_right
+      quebra_de_linha_inferior <- "\n"
     }
     
-    if (posicao == "inferior") {
-      return(paste0(
-        borders$corner_lower_left,
-        strtrim(strrep(borders$bar_horizontal_lower, largura_coluna1), largura_coluna1),
-        borders$separator_lower,
-        strtrim(strrep(borders$bar_horizontal_lower, largura_coluna2), largura_coluna2),
-        borders$corner_lower_right,
-        if (timestamp) .log_tempo_decorrido(),
-        "\n"
-      ))
+    if (posicao == "superior") {
+      quebra_de_linha_superior <- "\n"
+      left       <- borders$corner_upper_left
+      bar        <- borders$bar_horizontal_upper
+      separador  <- borders$separator_upper
+      right      <- borders$corner_upper_right
+      quebra_de_linha_inferior <- "\n"
     }
+    if (posicao == "inferior") {
+      left       <- borders$corner_lower_left
+      bar        <- borders$bar_horizontal_lower
+      separador  <- borders$separator_lower
+      right      <- borders$corner_lower_right
+      stamp      <- if (timestamp) .log_tempo_decorrido()
+      quebra_de_linha_inferior <- "\n"
+    }
+    
+    return(
+      c(
+        margem_espacamento,
+        paste0(
+          quebra_de_linha_superior,
+          left,
+          strtrim(strrep(bar, largura_coluna1), largura_coluna1),
+          conteudo_1,
+          separador,
+          strtrim(strrep(bar, largura_coluna2), largura_coluna2),
+          conteudo_2,
+          right,
+          stamp,
+          quebra_de_linha_inferior
+        ),
+        margem_espacamento
+      )
+    )
   }
-  
-  return(invisible(NULL))
 }
 
 .log_processar_conteudo <- function(...) {
@@ -817,7 +826,6 @@ log_secao <- function(subtitulo, titulo = NULL) {
   #' @param linhas Conteúdo processado (obrigatório para tipo "info")
   #' @param tamanho Largura do box (opcional, usa padrão se NULL)
   
-  # Validações
   if (tipo == "info" && is.null(linhas)) {
     stop("Tipo 'info' requer o parâmetro 'linhas'")
   }
@@ -893,7 +901,8 @@ log_secao <- function(subtitulo, titulo = NULL) {
         tamanho = tamanho,
         posicao = "superior",
         largura_coluna1 = largura_coluna1
-      )
+      ), 
+      sep = ""
     )
     
     # Conteúdo (linha do meio)
@@ -922,7 +931,8 @@ log_secao <- function(subtitulo, titulo = NULL) {
         posicao = "inferior", 
         largura_coluna1 = largura_coluna1,
         timestamp = timestamp
-      )
+      ),
+      sep = ""
     )
     if (!is.null(cores)) utils_color("default")
   }
