@@ -69,66 +69,56 @@ log_barra_progresso <- function(label = NULL, steps = NULL, pb = NULL) {
   #' @seealso \code{\link{config_ambiente}}, \code{\link{config_opcoes}},
   #' \code{\link{config_inicializar}}
 
-  # If silent mode or not Windows, use text version
-  if (!utils_is_windows() || utils_silent()) {
-    if (is.null(pb)) { #se não informa pb (progress_bar) existente, cria
-      tamanho <- get_config("skin")$tamanho_mensagens
+  versao_texto <- !utils_is_windows() || utils_silent()
 
-      pb <- txtProgressBar(
-        label = label,
-        min = 0,
-        max = steps,
-        width = tamanho,
-        char = "■")
-      return(pb)
+  # Criar nova barra
+  if (is.null(pb)) {
+    if (versao_texto) {
+      return(
+        txtProgressBar(
+          label = label,
+          min = 0,
+          max = steps,
+          width = get_config("skin")$tamanho_mensagens,
+          char = "■"
+        )
+      )
+    } else {
+      return(
+        winProgressBar(
+          title = get_config("geral")$script_nome,
+          label = label,
+          min = 0,
+          max = steps,
+          width = 500
+        )
+      )
     }
-    if (!is.null(label)) { #se informa label, atualiza
-      valor_atual <- getTxtProgressBar(pb)
-      setTxtProgressBar(
-        pb,
-        value = valor_atual + 1,
-        label = label)
-    } else { #fecha barra se não fornecido label
-      close(pb)
+  }
+
+  # Atualizar barra existente
+  if (!is.null(label)) {
+    if (versao_texto) {
+      setTxtProgressBar(pb, value = getTxtProgressBar(pb) + 1, label = label)
+    } else {
+      setWinProgressBar(pb, value = getWinProgressBar(pb) + 1, label = label)
     }
 
     return(invisible(NULL))
   }
 
-  # If is Windows or not silent, use Windows version
-  if (is.null(pb)) { #se não informa pb (progress_bar) existente, cria
-
-    titulo <- get_config("geral")$script_nome
-
-    pb <- winProgressBar(
-      title = titulo,
-      label = label,
-      min = 0,
-      max = steps,
-      width = 500)
-
-    return(pb)
-  }
-
-  if (!is.null(label)) { #se informa label, atualiza
-    valor_atual <- getWinProgressBar(pb)
-
-    setWinProgressBar(
-      pb,
-      value = valor_atual + 1,
-      label = label)
-
-  } else { #fecha barra se não fornecido label
-
-    close(pb)
-
-  }
-
+  # Fechar barra
+  close(pb)
   return(invisible(NULL))
 }
 
-log_erro <- function(msg_erro = NULL, dados = NULL,
-                     titulo = "ERRO", alerta = FALSE, finalizar = FALSE) {
+log_erro <- function(
+  msg_erro = NULL,
+  dados = NULL,
+  titulo = "ERRO",
+  alerta = FALSE,
+  finalizar = FALSE
+) {
   #' Exibe e registra erros ou alertas
   #'
   #' @description

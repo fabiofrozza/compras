@@ -39,7 +39,7 @@ utils_ansi <- function(fg = "", bg = "") {
     bg <- paste0("\033[", ansi[[style]][[color]][2], "m")
   }
   
-  return(paste0("@ECHO ", fg, bg))
+  paste0("@ECHO ", fg, bg)
 }
 
 utils_border <- function(border) {
@@ -77,8 +77,9 @@ utils_border <- function(border) {
     bar_vertical_right   = borders[[border]][12]
   )
   
-  return(border)
+  border
 }
+
 utils_catalogo <- function() {
   #' Obtém dados do Catálogo de Materiais
   #'
@@ -123,7 +124,7 @@ utils_catalogo <- function() {
              finalizar = TRUE) 
   }
   
-  return(catalogo)
+  catalogo
   
 }
 
@@ -198,11 +199,11 @@ utils_color <- function(color = NULL) {
   }
   
   colors <- get_config("skin")$style
-  
+
   if (!(color %in% names(colors))) {
     return(invisible(NULL))
   }
-    
+
   shell(colors[[color]])
   
 }
