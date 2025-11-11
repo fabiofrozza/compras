@@ -266,7 +266,8 @@ atas_sicaf_ler <- function(sicaf_arquivos, dados_pregao) {
       error = function(e) {
         log_erro(
           paste("Não foi possível ler o arquivo", basename(sicaf_arquivos[i])),
-          e
+          e,
+          finalizar = TRUE
         )
       }
     )

@@ -630,7 +630,7 @@ config_finalizar <- function(sucesso = FALSE) {
   #' @seealso \code{\link{config_inicializar}}, \code{\link{log_erro}}
 
   config <- get_config()
-  log_r <- config$logR
+  log_r <- config$log_r
   tamanho_mensagens <- config$skin$tamanho_mensagens
   status <- config$status
 

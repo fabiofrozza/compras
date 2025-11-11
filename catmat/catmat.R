@@ -523,8 +523,6 @@ catmat_salvar <- function(resultado_final, processo, script_a_executar) {
 }
 
 catmat_main <- function() {
-  cat("=== INICIANDO SCRIPT. AGUARDE... ===\n")
-
   source(file.path("..", "_common", "config.R"), chdir = TRUE)
 
   pasta <- list(atual = getwd())

@@ -351,7 +351,7 @@ log_gravacao <- function() {
         sink(log_r$con, append = TRUE, type = "message")
       }
 
-      set_config(logR = log_r)
+      set_config(log_r = log_r)
     },
     error = function(e) {
       log_erro("Não foi possível iniciar a gravação do log. Encerrando...",
@@ -362,7 +362,7 @@ log_gravacao <- function() {
   )
 
   log_info("Log iniciado em",
-    logR$nome,
+    log_r$nome,
     cores = "highlight2"
   )
 }
