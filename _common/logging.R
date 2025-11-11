@@ -830,7 +830,7 @@ log_secao <- function(subtitulo, titulo = NULL) {
         print.data.frame(linha$conteudo, right = FALSE, row.names = FALSE)
         next
       }
-      
+
       cat(.log_montar_linha(linha$tipo, linha$posicao, linha), sep = "")
     }
 

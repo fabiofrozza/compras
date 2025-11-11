@@ -3,7 +3,7 @@
 # de configuração ou logging
 
 utils_ansi <- function(fg = "", bg = "") {
-  
+
   ansi <- list(
     dark = list(
       black   = c("30", "40"),
@@ -26,24 +26,24 @@ utils_ansi <- function(fg = "", bg = "") {
       white   = c("97", "107")
     )
   )
-  
+
   if (fg != "") {
     style <- strsplit(fg, "_")[[1]][1]
     color <- strsplit(fg, "_")[[1]][2]
     fg <- paste0("\033[", ansi[[style]][[color]][1], "m")
   }
-  
+
   if (bg != "") {
     style <- strsplit(bg, "_")[[1]][1]
     color <- strsplit(bg, "_")[[1]][2]
     bg <- paste0("\033[", ansi[[style]][[color]][2], "m")
   }
-  
+
   paste0("@ECHO ", fg, bg)
 }
 
 utils_border <- function(border) {
-  
+
   borders <- list(
     double  = c("╔", "╗", "╚", "╝", "╦", "╩", "╠", "╣", "═", "═", "║", "║"),
     heavy   = c("┏", "┓", "┗", "┛", "┳", "┻", "┣", "┫", "━", "━", "┃", "┃"),
@@ -55,13 +55,17 @@ utils_border <- function(border) {
     ascii   = c("/", "\\", "\\", "/", "^", "v", "<", ">", "-", "-", "|", "|"),
     minimal = c("", "", "", "", "", "", "", "", "", "", "", ""),
     dashed  = c("+", "+", "+", "+", "+", "+", "+", "+", "- ", "- ", "¦", "¦"),
-    wavy    = c("«", "»", "«", "»", "^", "v", "»", "«", "_,.-'~'-.,", "~'-.,_,.-'", "{", "}")
+    wavy    =
+      c(
+        "«", "»", "«", "»", "^", "v", "»", "«",
+        "_,.-'~'-.,", "~'-.,_,.-'", "{", "}"
+      )
   )
 
   if (!(border %in% names(borders))) {
     border <- "default"
   }
-  
+
   border <- list(
     corner_upper_left    = borders[[border]][1],
     corner_upper_right   = borders[[border]][2],
@@ -76,7 +80,7 @@ utils_border <- function(border) {
     bar_vertical_left    = borders[[border]][11],
     bar_vertical_right   = borders[[border]][12]
   )
-  
+
   border
 }
 
@@ -97,52 +101,52 @@ utils_catalogo <- function() {
   #' catalogo <- utils_catalogo()
   #'
   #' @seealso \code{\link{get_config}}
-  
+
   log_secao("OBTENDO GRUPOS DO CATÁLOGO DE MATERIAIS", "UTILS")
-  
+
   url_catalogo <- get_config("url")$catalogo
-  
+
   log_info("Planilha: Catálogo de Materiais",
            paste0("Link: ", url_catalogo),
            cores = "highlight1")
-  
+
   gs4_deauth()
-  
+
   tryCatch({
     catalogo <- range_read(url_catalogo) %>%
       mutate(grupoDescricao = paste(Grupo, "-", `Descrição Grupo`))
   },
-  error = function(e) { 
+  error = function(e) {
     log_erro("Erro ao acessar Catálogo de Materiais. Verifique a conexão. 
-             Encerrando...", 
+             Encerrando...",
              e,
-             finalizar = TRUE) 
+             finalizar = TRUE)
   })
-  
+
   if (nrow(catalogo) == 0) {
-    log_erro("Não há informações na planilha do Catálogo. Encerrando...", 
-             finalizar = TRUE) 
+    log_erro("Não há informações na planilha do Catálogo. Encerrando...",
+             finalizar = TRUE)
   }
-  
+
   catalogo
-  
+
 }
 
 utils_color <- function(color = NULL) {
   #' Define cores do console (somente Windows)
-  #' 
+  #'
   #' @description
   #' Controla as cores de texto e fundo do console do Windows durante a execução
   #' do script. A função verifica automaticamente se está rodando no Windows
   #' e se não está no modo silencioso antes de aplicar as cores.
-  #' 
+  #'
   #' Esta função centraliza todo o controle de cores usado pelas funções de log
   #' e configuração, garantindo consistência visual e facilitando manutenção.
-  #' 
+  #'
   #' Em sistemas não-Windows ou no modo silencioso, a função não faz nada,
   #' garantindo compatibilidade multiplataforma.
   #'
-  #' @param color Character. Nome da cor/estilo a ser aplicado. 
+  #' @param color Character. Nome da cor/estilo a ser aplicado.
   #' Opções disponíveis:
   #' \itemize{
   #'   \item{"inicial"}{: Fundo amarelo com texto azul (padrão do sistema)}
@@ -151,7 +155,7 @@ utils_color <- function(color = NULL) {
   #'   \item{"azul"}{: Texto azul (padrão)}
   #'   \item{"cinza_fundo"}{: Fundo cinza}
   #'   \item{"encerrar_erro"}{: Fundo vermelho com texto amarelo}
-  #'   \item{"encerrar_alerta"}{: Fundo cinza com texto azul}  
+  #'   \item{"encerrar_alerta"}{: Fundo cinza com texto azul}
   #'   \item{"encerrar_ok"}{: Fundo verde com texto amarelo}
   #' }
   #' Se color for NULL ou uma cor não reconhecida, usa "azul" como padrão.
@@ -163,11 +167,11 @@ utils_color <- function(color = NULL) {
   #'   \item{ESCXXm para cores de texto}
   #'   \item{ESCXXmESCYYm para combinações de fundo e texto}
   #' }
-  #' 
+  #'
   #' A verificação de plataforma garante que os comandos shell só sejam
   #' executados no Windows, evitando erros em outros sistemas operacionais.
   #'
-  #' @returns 
+  #' @returns
   #' Invisível. A função não retorna valor, apenas modifica as cores do console
   #' como efeito colateral. Em sistemas não-Windows ou modo silencioso,
   #' não há efeito visível.
@@ -176,28 +180,28 @@ utils_color <- function(color = NULL) {
   #' # Aplica cor verde ao texto
   #' utils_color("highlight1")
   #' cat("Este texto aparecerá em verde")
-  #' 
+  #'
   #' # Volta à cor padrão
   #' utils_color("default")
-  #' 
+  #'
   #' # Aplica estilo de erro (fundo vermelho, texto amarelo)
   #' utils_color("error")
   #' cat("ERRO: Mensagem importante")
-  #' 
+  #'
   #' # Restaura padrão do sistema
   #' utils_color("default")
   #'
-  #' @seealso \code{\link{utils_silent}}, \code{\link{log_erro}}, 
+  #' @seealso \code{\link{utils_silent}}, \code{\link{log_erro}},
   #' \code{\link{log_info}}
-  #' 
-  #' @references 
-  #' \href{https://ss64.com/nt/syntax-ansi.html}{How-to: Use ANSI colours 
+  #'
+  #' @references
+  #' \href{https://ss64.com/nt/syntax-ansi.html}{How-to: Use ANSI colours
   #' in the terminal}
-  
+
   if (!utils_is_windows() || utils_silent() || is.null(color)) {
     return(invisible(NULL))
   }
-  
+
   colors <- get_config("skin")$style
 
   if (!(color %in% names(colors))) {
@@ -205,7 +209,7 @@ utils_color <- function(color = NULL) {
   }
 
   shell(colors[[color]])
-  
+
 }
 
 utils_corrigir_valor <- function(valor) {
@@ -223,12 +227,12 @@ utils_corrigir_valor <- function(valor) {
   #' @examples
   #' # Corrige valor com vírgula decimal
   #' utils_corrigir_valor("1.234,56")  # Retorna 1234.56
-  #' 
+  #'
   #' # Corrige valor sem decimais
   #' utils_corrigir_valor("1.234")     # Retorna 1234
-  
+
   as.numeric(gsub(",", ".", gsub("\\.", "", valor)))
-  
+
 }
 
 utils_is_interactive <- function() {
@@ -243,13 +247,13 @@ utils_silent <- function() {
   #' Verifica se o script está executando em modo silencioso
   #'
   #' @description
-  #' Determina se o script foi chamado com o argumento de linha de comando 
+  #' Determina se o script foi chamado com o argumento de linha de comando
   #' "silent", que indica execução em segundo plano ou sem interface visual.
-  #' 
+  #'
   #' Esta função centraliza a verificação do modo silencioso, evitando
   #' duplicação de código em várias funções que precisam adaptar seu
   #' comportamento quando rodando sem interação do usuário.
-  #' 
+  #'
   #' Quando em modo silencioso, as funções do sistema tipicamente:
   #' \itemize{
   #'   \item{Não aplicam cores ao console}
@@ -258,19 +262,19 @@ utils_silent <- function() {
   #'   \item{Evitam comandos que requerem interação}
   #' }
   #'
-  #' @returns 
-  #' Logical. TRUE se o script está rodando em modo silencioso 
-  #' (argumento "silent" foi fornecido na linha de comando), 
+  #' @returns
+  #' Logical. TRUE se o script está rodando em modo silencioso
+  #' (argumento "silent" foi fornecido na linha de comando),
   #' FALSE caso contrário.
   #'
   #' @details
-  #' A função verifica os argumentos de linha de comando usando 
+  #' A função verifica os argumentos de linha de comando usando
   #' \code{commandArgs(trailingOnly = TRUE)} e procura pela string "silent".
-  #' 
+  #'
   #' O modo silencioso é útil quando:
   #' \itemize{
   #'   \item{O script é executado via agendador de tarefas}
-  #'   \item{Está rodando em um servidor sem interface gráfica}  
+  #'   \item{Está rodando em um servidor sem interface gráfica}
   #'   \item{Faz parte de um pipeline automatizado}
   #'   \item{Precisa rodar sem intervenção do usuário}
   #' }
@@ -282,29 +286,29 @@ utils_silent <- function() {
   #' } else {
   #'   cat("Executando em modo interativo\n")
   #' }
-  #' 
+  #'
   #' # Uso típico em outras funções
   #' if (!utils_silent()) {
   #'   # Aplica cores ou mostra interface visual
   #'   utils_color("highlight1")
   #' }
-  #' 
+  #'
   #' # Exemplo de chamada na linha de comando que ativaria o modo:
   #' # Rscript meu_script.R silent
   #'
   #' @seealso \code{\link{utils_color}}, \code{\link{log_barra_progresso}},
   #' \code{\link{commandArgs}}
-  
+
   "silent" %in% commandArgs(trailingOnly = TRUE)
-  
+
 }
 
 utils_style <- function(style) {
-  
+
   styles <- list(
     default = list(
       "default"    = utils_ansi("dark_blue", "light_yellow"),
-      "highlight1" = utils_ansi("light_green"), 
+      "highlight1" = utils_ansi("light_green"),
       "highlight2" = utils_ansi("dark_red"),
       "highlight3" = utils_ansi("dark_blue"),
       "alert"      = utils_ansi("dark_blue", "light_white"),
@@ -313,7 +317,7 @@ utils_style <- function(style) {
     ),
     mono = list(
       "default"    = utils_ansi("light_white", "dark_black"),
-      "highlight1" = utils_ansi("light_white"), 
+      "highlight1" = utils_ansi("light_white"),
       "highlight2" = utils_ansi("light_white"),
       "highlight3" = utils_ansi("light_white"),
       "alert"      = utils_ansi("dark_black", "light_white"),
@@ -322,7 +326,7 @@ utils_style <- function(style) {
     ),
     invert = list(
       "default"    = utils_ansi("dark_black", "light_white"),
-      "highlight1" = utils_ansi("dark_black"), 
+      "highlight1" = utils_ansi("dark_black"),
       "highlight2" = utils_ansi("dark_black"),
       "highlight3" = utils_ansi("dark_black"),
       "alert"      = utils_ansi("light_white", "dark_black"),
@@ -331,7 +335,7 @@ utils_style <- function(style) {
     ),
     matrix = list(
       "default"    = utils_ansi("light_green", "dark_black"),
-      "highlight1" = utils_ansi("dark_green"), 
+      "highlight1" = utils_ansi("dark_green"),
       "highlight2" = utils_ansi("dark_green"),
       "highlight3" = utils_ansi("light_white"),
       "alert"      = utils_ansi("dark_black", "light_green"),
@@ -340,7 +344,7 @@ utils_style <- function(style) {
     ),
     ocean = list(
       "default"    = utils_ansi("light_cyan", "dark_blue"),
-      "highlight1" = utils_ansi("light_white"), 
+      "highlight1" = utils_ansi("light_white"),
       "highlight2" = utils_ansi("light_blue"),
       "highlight3" = utils_ansi("dark_cyan"),
       "alert"      = utils_ansi("dark_blue", "light_cyan"),
@@ -349,7 +353,7 @@ utils_style <- function(style) {
     ),
     peach = list(
       "default"    = utils_ansi("light_yellow", "light_red"),
-      "highlight1" = utils_ansi("dark_red"), 
+      "highlight1" = utils_ansi("dark_red"),
       "highlight2" = utils_ansi("dark_magenta"),
       "highlight3" = utils_ansi("dark_yellow"),
       "alert"      = utils_ansi("dark_magenta", "dark_yellow"),
@@ -357,13 +361,13 @@ utils_style <- function(style) {
       "ok"         = utils_ansi("dark_magenta", "light_yellow")
     )
   )
-  
+
   if (!(style %in% names(styles))) {
     style <- "default"
   }
-  
-  return(styles[[style]])
-  
+
+  styles[[style]]
+
 }
 
 utils_unidades_requerentes_obter <- function(origem = "importacao") {
@@ -385,61 +389,62 @@ utils_unidades_requerentes_obter <- function(origem = "importacao") {
   #' @examples
   #' # Obtém dados para importação
   #' unidades <- utils_unidades_requerentes_obter()
-  #' 
+  #'
   #' # Obtém dados para Power BI
   #' unidades_bi <- utils_unidades_requerentes_obter("power bi")
   #'
   #' @seealso \code{\link{get_config}}
-  
+
   log_secao("OBTENDO DADOS DAS UNIDADES REQUERENTES", "UTILS")
-  
+
   url_unidades <- get_config("url")$unidades
-  
+
   log_info("Planilha: Unidades - espelhada",
            paste0("Link: ", url_unidades),
-           paste0("Aba : ", ifelse(origem == "importacao", 
-                                   "Script Importação", 
+           paste0("Aba : ", ifelse(origem == "importacao",
+                                   "Script Importação",
                                    "Power BI")),
            cores = "highlight1")
-  
+
   gs4_deauth()
-  
+
   tryCatch({
     if (origem == "importacao") {
-      
-      unidades <- range_read(url_unidades, 
-                             sheet = "Script Importação", 
+
+      unidades <- range_read(url_unidades,
+                             sheet = "Script Importação",
                              col_types = "cccccc")
-      
-      colnames(unidades)[c(3,4,5,6)] <- c("sigla_solar", "imovel", 
-                                          "cpf", "email")
-      
+
+      colnames(unidades)[c(3, 4, 5, 6)] <- c("sigla_solar", "imovel",
+                                             "cpf", "email")
+
     } else if (origem == "power bi") {
-      
-      unidades <- range_read(url_unidades, 
+
+      unidades <- range_read(url_unidades,
                              sheet = "Power BI")
-      
+
       sigla_solar_duplicidade <- unidades %>%
         group_by(`Sigla no Solar`) %>%
         filter(n() > 1) %>%
         mutate(siglas_duplicidade = paste(Setor, "-", `Sigla no Solar`)) %>%
         arrange(`Sigla no Solar`) %>%
         pull(siglas_duplicidade)
-      
+
       if (length(sigla_solar_duplicidade) > 0) {
-        log_erro("Há Unidades com siglas no Solar repetidas.Isto causará problemas no Painel do Observatório.", 
+        log_erro(paste("Há Unidades com siglas no Solar repetidas.",
+                       "Isto causará problemas no Painel do Observatório."),
                  "Mantenha somente siglas únicas na aba 'Power Bi'.")
-        log_erro("As Unidades que precisam ser ajustadas são:", 
+        log_erro("As Unidades que precisam ser ajustadas são:",
                  sigla_solar_duplicidade)
       }
-      
+
     }
     return(unidades)
   },
-  error = function(e) { 
-    log_erro("Erro ao acessar planilha de Unidades requerentes. Encerrando...", 
+  error = function(e) {
+    log_erro("Erro ao acessar planilha de Unidades requerentes. Encerrando...",
              e,
-             finalizar = TRUE) 
+             finalizar = TRUE)
   })
 }
 
@@ -461,28 +466,28 @@ utils_verificar_cnpj <- function(cnpj) {
   #' @examples
   #' # Valida CNPJ formatado
   #' utils_verificar_cnpj("11.222.333/0001-81")
-  #' 
+  #'
   #' # Valida CNPJ sem formatação
   #' utils_verificar_cnpj("11222333000181")
-  #' 
+  #'
   #' # Valida CNPJ inválido
   #' utils_verificar_cnpj("11.222.333/0001-00")
-  
+
   # Verifica se o CNPJ é NA ou vazio ou NULL
-  if (is.na(cnpj) || cnpj == "" || is.null(cnpj)) return(FALSE) 
-  
+  if (is.na(cnpj) || cnpj == "" || is.null(cnpj)) return(FALSE)
+
   # Remove caracteres não numéricos
   cnpj_limpo <- gsub("[^0-9]", "", cnpj)
-  
+
   # Verifica se o CNPJ tem 14 dígitos
   if (nchar(cnpj_limpo) != 14) return(FALSE)
-  
+
   # Converte para vetor numérico
   digitos <- as.numeric(strsplit(cnpj_limpo, "")[[1]])
-  
+
   # Verifica se todos os dígitos são iguais (ex: 00000000000000)
   if (length(unique(digitos)) == 1) return(FALSE)
-  
+
   d1 <- NULL
   d1[1]  <- digitos[1]  * 5
   d1[2]  <- digitos[2]  * 4
@@ -498,7 +503,7 @@ utils_verificar_cnpj <- function(cnpj) {
   d1[12] <- digitos[12] * 2
   resto1 <- sum(d1, na.rm = TRUE) %% 11
   dv1 <- ifelse(resto1 < 2, 0, 11 - resto1)
-  
+
   d2 <- NULL
   d2[1]  <- digitos[1]  * 6
   d2[2]  <- digitos[2]  * 5
@@ -515,12 +520,12 @@ utils_verificar_cnpj <- function(cnpj) {
   d2[13] <- dv1         * 2
   resto2 <- sum(d2, na.rm = TRUE) %% 11
   dv2 <- ifelse(resto2 < 2, 0, 11 - resto2)
-  
+
   # Compara os dígitos verificadores calculados com os informados
   dv_informado <- substring(cnpj_limpo, 13, 14)
   dv_calculado <- paste0(dv1, dv2)
-  
-  return(dv_informado == dv_calculado)
+
+  dv_informado == dv_calculado
 }
 
 utils_verificar_cpf <- function(cpf) {
@@ -541,65 +546,65 @@ utils_verificar_cpf <- function(cpf) {
   #' @examples
   #' # Valida CPF formatado
   #' utils_verificar_cpf("123.456.789-09")
-  #' 
+  #'
   #' # Valida CPF sem formatação
   #' utils_verificar_cpf("12345678909")
-  #' 
+  #'
   #' # Valida CPF inválido
   #' utils_verificar_cpf("111.111.111-11")
 
   # Se for NA, vazio ou NULL, já retorna inválido
-  if (is.na(cpf) || cpf == "" || is.null(cpf)) return(FALSE)  
-  
+  if (is.na(cpf) || cpf == "" || is.null(cpf)) return(FALSE)
+
   # Remove tudo que não for dígito e verifica se tem 11 caracteres
   cpf_limpo <- gsub("[^0-9]", "", cpf)
   if (nchar(cpf_limpo) != 11) return(FALSE)
-  
+
   # Converte para vetor numérico
   digitos <- as.numeric(strsplit(cpf_limpo, "")[[1]])
-  
+
   # Adicionar verificação de CPFs conhecidamente inválidos
   if (length(unique(digitos)) == 1) return(FALSE)
-  
+
   d1    <- NULL
-  d1[1] <- digitos[1]* 10
-  d1[2] <- digitos[2]* 9
-  d1[3] <- digitos[3]* 8
-  d1[4] <- digitos[4]* 7
-  d1[5] <- digitos[5]* 6
-  d1[6] <- digitos[6]* 5
-  d1[7] <- digitos[7]* 4
-  d1[8] <- digitos[8]* 3
-  d1[9] <- digitos[9]* 2
+  d1[1] <- digitos[1] * 10
+  d1[2] <- digitos[2] * 9
+  d1[3] <- digitos[3] * 8
+  d1[4] <- digitos[4] * 7
+  d1[5] <- digitos[5] * 6
+  d1[6] <- digitos[6] * 5
+  d1[7] <- digitos[7] * 4
+  d1[8] <- digitos[8] * 3
+  d1[9] <- digitos[9] * 2
   resto1 <- do.call(sum, as.list(d1)) %% 11
-  if (resto1 < 2) { 
-    dv1 <- 0 
-  } else { 
-    dv1 <- 11 - resto1 
+  if (resto1 < 2) {
+    dv1 <- 0
+  } else {
+    dv1 <- 11 - resto1
   }
-  
+
   d2     <- NULL
-  d2[1]  <- digitos[1]  * 11
-  d2[2]  <- digitos[2]  * 10
-  d2[3]  <- digitos[3]  * 9
-  d2[4]  <- digitos[4]  * 8
-  d2[5]  <- digitos[5]  * 7
-  d2[6]  <- digitos[6]  * 6
-  d2[7]  <- digitos[7]  * 5
-  d2[8]  <- digitos[8]  * 4
-  d2[9]  <- digitos[9]  * 3
-  d2[10] <- dv1         * 2
+  d2[1]  <- digitos[1] * 11
+  d2[2]  <- digitos[2] * 10
+  d2[3]  <- digitos[3] * 9
+  d2[4]  <- digitos[4] * 8
+  d2[5]  <- digitos[5] * 7
+  d2[6]  <- digitos[6] * 6
+  d2[7]  <- digitos[7] * 5
+  d2[8]  <- digitos[8] * 4
+  d2[9]  <- digitos[9] * 3
+  d2[10] <- dv1        * 2
   resto2 <- do.call(sum, as.list(d2)) %% 11
-  if (resto2 < 2) { 
-    dv2 <- 0 
-  } else { 
-    dv2 <- 11 - resto2 
+  if (resto2 < 2) {
+    dv2 <- 0
+  } else {
+    dv2 <- 11 - resto2
   }
-  
+
   dv_calculado <- paste0(as.character(dv1), as.character(dv2))
   dv_informado <- substr(cpf_limpo, 10, 11)
 
-  return(dv_calculado == dv_informado)
+  dv_calculado == dv_informado
 }
 
 utils_verificar_script <- function(scripts_permitidos, script_padrao) {
@@ -622,30 +627,30 @@ utils_verificar_script <- function(scripts_permitidos, script_padrao) {
   #' # Define scripts permitidos e padrão
   #' scripts <- c("script1.R", "script2.R", "script3.R")
   #' padrao <- "script1.R"
-  #' 
+  #'
   #' # Verifica script a executar
   #' script <- utils_verificar_script(scripts, padrao)
   #'
   #' @seealso \code{\link{log_erro}}
-  
+
   argumentos <- commandArgs(trailingOnly = TRUE)
-  
+
   if (length(argumentos) == 0) {
-    log_erro(sprintf("Nenhum argumento fornecido. Usando valor padrão: '%s'", 
+    log_erro(sprintf("Nenhum argumento fornecido. Usando valor padrão: '%s'",
                      script_padrao),
              alerta = TRUE)
     return(script_padrao)
   }
-  
+
   script_a_executar <- argumentos[1]
-  
+
   if (!(script_a_executar %in% scripts_permitidos)) {
-    log_erro(sprintf("Argumento inválido: '%s'. Usando valor padrão: '%s'", 
+    log_erro(sprintf("Argumento inválido: '%s'. Usando valor padrão: '%s'",
                      script_a_executar, script_padrao),
              alerta = TRUE)
     return(script_padrao)
   }
-  
-  return(script_a_executar)
-  
+
+  script_a_executar
+
 }
