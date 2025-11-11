@@ -482,7 +482,7 @@ config_json <- function(
   invisible()
 }
 
-config_ambiente <- function(pasta = NULL) {
+config_ambiente <- function(script_nome, pasta = NULL) {
   #' Define variáveis de ambiente iniciais
   #'
   #' @description
@@ -549,8 +549,7 @@ config_ambiente <- function(pasta = NULL) {
 
   geral <-
     list(
-      # busca o nome do script pelo nome da função chamadora
-      script_nome = toupper(strsplit(as.character(sys.call(1)), "_")[[1]][1]),
+      script_nome = script_nome,
       # registra a hora de início do script
       tempo_inicio_script = Sys.time(),
       config_centralizado = file.path(pasta$common, "config.json")
@@ -688,7 +687,7 @@ config_finalizar <- function(sucesso = FALSE) {
   }
 }
 
-config_inicializar <- function(pacotes, pasta = NULL) {
+config_inicializar <- function(script_nome, pacotes, pasta = NULL) {
   #' Inicializa o ambiente de execução do script
   #'
   #' @description
@@ -730,7 +729,7 @@ config_inicializar <- function(pacotes, pasta = NULL) {
   #' \code{\link{config_pacotes}}
 
   # Define variáveis de ambiente
-  config_ambiente(pasta)
+  config_ambiente(script_nome, pasta)
 
   # Define a cor do console
   utils_color("default")

@@ -263,7 +263,7 @@ mapas_main <- function() {
 
   pacotes <- c("openxlsx", "dplyr", "stringr")
 
-  config_inicializar(pacotes, pasta)
+  config_inicializar("MAPAS", pacotes, pasta)
 
   script_a_executar <-
     utils_verificar_script(

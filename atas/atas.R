@@ -246,7 +246,11 @@ atas_sicaf_ler <- function(sicaf_arquivos, dados_pregao) {
           str_trim(
             str_extract(
               pdf_responsavel,
-              "(?<=Dados do Responsável Legal\\\\nCPF:|Dados do Responsável Legal\\nCPF:)(?s)(.*?)(\\d\\d\\d\\.\\d\\d\\d\\.\\d\\d\\d-\\d\\d)"
+              paste0(
+                "(?<=Dados do Responsável Legal\\\\n",
+                "CPF:|Dados do Responsável Legal\\nCPF:)",
+                "(?s)(.*?)(\\d\\d\\d\\.\\d\\d\\d\\.\\d\\d\\d-\\d\\d)"
+              )
             )
           )
         if (is.na(cpf[i])) {
@@ -350,7 +354,7 @@ atas_main <- function() {
 
   pacotes <- c("openxlsx", "dplyr", "pdftools", "stringr")
 
-  config_inicializar(pacotes, pasta)
+  config_inicializar("ATAS", pacotes, pasta)
 
   log_secao("RECUPERANDO DADOS DO PREGÃO")
 

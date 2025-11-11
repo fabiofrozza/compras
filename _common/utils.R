@@ -448,7 +448,7 @@ utils_unidades_requerentes_obter <- function(origem = "importacao") {
       return(unidades)
     },
     error = function(e) {
-      log_erro("Erro ao acessar planilha de Unidades requerentes. Encerrando...",
+      log_erro("Erro ao acessar Unidades requerentes. Encerrando...",
         e,
         finalizar = TRUE
       )

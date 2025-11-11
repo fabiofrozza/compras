@@ -536,7 +536,7 @@ catmat_main <- function() {
 
   pacotes <- c("readxl", "httr", "openxlsx", "dplyr", "purrr", "stringr")
 
-  config_inicializar(pacotes, pasta)
+  config_inicializar("CATMAT", pacotes, pasta)
 
   log_secao("Obtendo lista de CATMATs do TR")
 

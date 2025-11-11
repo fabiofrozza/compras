@@ -8,7 +8,7 @@ power_bi_main <- function() {
     "dplyr", "stringr", "purrr", "tidyr"
   )
 
-  config_inicializar(pacotes)
+  config_inicializar("POWERBI", pacotes)
 
   log_secao("DEFINIÇÕES INICIAIS")
 

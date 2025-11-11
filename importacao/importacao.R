@@ -1390,7 +1390,7 @@ main_inicializar <- function(pacotes, script_a_executar) {
   pacotes <- if (missing(pacotes)) pacotes_compartilhados else append(pacotes_compartilhados, pacotes)
 
   # Chama função compartilhada para inicializar configurações gerais
-  config_inicializar(pacotes, pasta)
+  config_inicializar("IMPORTACAO", pacotes, pasta)
   
   log_secao("CONFIGURAÇÕES INICIAIS", "MAIN")
   

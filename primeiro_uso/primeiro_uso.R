@@ -9,7 +9,7 @@ primeiro_uso_main <- function() {
     "pdftools", "RColorBrewer"
   )
 
-  config_inicializar(pacotes)
+  config_inicializar("PRIMEIRO", pacotes)
 
   log_secao("TENTANDO OS PACOTES DE NOVO, SÓ PRA GARANTIR")
 
