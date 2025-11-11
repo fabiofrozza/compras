@@ -219,15 +219,15 @@ log_erro <- function(
   }
 
   tamanho_mensagens <- get_config("skin")$tamanho_mensagens
-  tamanho_erro      <- max(tamanho_mensagens, nchar(msg_erro) + 4)
+  tamanho_erro <- max(tamanho_mensagens, nchar(msg_erro) + 4)
 
   if (alerta && titulo == "ERRO") titulo <- "ALERTA"
 
   status <- get_config("status")
-  logR   <- get_config("logR")
+  log_r <- get_config("logR")
 
   if (status$inicio) {
-    config_json("msg_erro", logR$nome)
+    config_json("msg_erro", log_r$nome)
     status$inicio <- FALSE
   }
 
@@ -249,11 +249,13 @@ log_erro <- function(
   if (alerta) utils_color("alert") else utils_color("error")
 
   cat("\n", strrep("▄", tamanho_erro),
-      "\n█▓▒", strrep("░", espacamento),
-      titulo,
-      strrep("░", espacamento), "▒▓█", "\n█ ",
-      msg_erro,
-      strrep(" ", tamanho_erro - nchar(msg_erro) - 3), "█\n", sep = "")
+    "\n█▓▒", strrep("░", espacamento),
+    titulo,
+    strrep("░", espacamento), "▒▓█", "\n█ ",
+    msg_erro,
+    strrep(" ", tamanho_erro - nchar(msg_erro) - 3), "█\n",
+    sep = ""
+  )
 
   config_json("msg_erro", msg_erro, append = TRUE)
 
@@ -263,15 +265,15 @@ log_erro <- function(
       cat(sprintf("█ → Erro  : %s\n", dados$message))
 
       config_json("msg_erro", sprintf("  → Código: %s", deparse(dados$call)),
-                  append = TRUE)
+        append = TRUE
+      )
       config_json("msg_erro", sprintf("  → Erro  : %s", dados$message),
-                  append = TRUE)
-
+        append = TRUE
+      )
     } else if (is.data.frame(dados)) {
       print.data.frame(dados, right = FALSE, row.names = FALSE)
 
       config_json("msg_erro", dados, append = TRUE)
-
     } else {
       if (is.list(dados)) dados <- as.vector(unlist(dados))
       cat(dados, labels = "█ ", fill = 1)
@@ -280,12 +282,13 @@ log_erro <- function(
     }
   }
   cat("█", strrep("▄", tamanho_erro - 2), "█",
-      .log_tempo_decorrido(), "\n", sep = "")
+    .log_tempo_decorrido(), "\n",
+    sep = ""
+  )
 
   utils_color("default")
 
   if (finalizar) config_finalizar()
-
 }
 
 log_gravacao <- function() {
@@ -321,40 +324,47 @@ log_gravacao <- function() {
   #' @examples log_gravacao()
   #' @seealso \code{\link{set_config}}, \code{\link{config_json}}
 
-  pasta       <- get_config("pasta")
+  pasta <- get_config("pasta")
   script_nome <- get_config("geral")$script_nome
 
-  tryCatch({
-    logR      <- list()
-    logR$nome <- sprintf("Log_%s_%s_%s_%s-%s_R.log",
-                         toupper(strsplit(script_nome, " ")[[1]][1]),
-                         format(as.POSIXct(Sys.time()), format = "%Y-%m-%d"),
-                         format(as.POSIXct(Sys.time()), format = "%H-%M-%S"),
-                         toupper(Sys.getenv("USERNAME")),
-                         toupper(Sys.info()["nodename"]))
-    logR$nome <- gsub("[[:blank:]]", "", logR$nome)
-    logR$con  <- file(file.path(pasta$log, logR$nome),
-                      open = "wt",
-                      encoding = "UTF-8")
+  tryCatch(
+    {
+      log_r <- list()
+      log_r$nome <- sprintf(
+        "Log_%s_%s_%s_%s-%s_R.log",
+        toupper(strsplit(script_nome, " ")[[1]][1]),
+        format(as.POSIXct(Sys.time()), format = "%Y-%m-%d"),
+        format(as.POSIXct(Sys.time()), format = "%H-%M-%S"),
+        toupper(Sys.getenv("USERNAME")),
+        toupper(Sys.info()["nodename"])
+      )
+      log_r$nome <- gsub("[[:blank:]]", "", log_r$nome)
+      log_r$con <- file(file.path(pasta$log, log_r$nome),
+        open = "wt",
+        encoding = "UTF-8"
+      )
 
-    config_json("arquivo_log_R", logR$nome)
+      config_json("arquivo_log_R", log_r$nome)
 
-    if (!utils_is_interactive()) {
-      sink(logR$con, append = TRUE, split = TRUE)
-      sink(logR$con, append = TRUE, type = "message")
+      if (!utils_is_interactive()) {
+        sink(log_r$con, append = TRUE, split = TRUE)
+        sink(log_r$con, append = TRUE, type = "message")
+      }
+
+      set_config(logR = log_r)
+    },
+    error = function(e) {
+      log_erro("Não foi possível iniciar a gravação do log. Encerrando...",
+        e,
+        finalizar = TRUE
+      )
     }
-
-    set_config(logR = logR)
-  },
-  error = function(e) {
-    log_erro("Não foi possível iniciar a gravação do log. Encerrando...",
-             e,
-             finalizar = TRUE)
-  })
+  )
 
   log_info("Log iniciado em",
-           logR$nome,
-           cores = "highlight2")
+    logR$nome,
+    cores = "highlight2"
+  )
 }
 
 log_info <- function(..., estilo = "completo", cores = NULL, timestamp = TRUE) {
@@ -504,7 +514,6 @@ log_secao <- function(subtitulo, titulo = NULL) {
     titulo = toupper(trimws(ifelse(is.null(titulo), script_nome, titulo))),
     subtitulo = toupper(trimws(subtitulo))
   )
-
 }
 
 # ---- FUNÇÕES AUXILIARES INTERNAS ----
@@ -538,7 +547,8 @@ log_secao <- function(subtitulo, titulo = NULL) {
   agora <- Sys.time()
   decorrido <-
     format(agora - get_config("geral")$tempo_inicio_script,
-           digits = 2)
+      digits = 2
+    )
   paste0(" ‹", format(agora, "%H:%M"), " ◌ ", decorrido, "›")
 }
 
@@ -568,21 +578,21 @@ log_secao <- function(subtitulo, titulo = NULL) {
   skin <- get_config("skin")
   borders <- skin$border
   tamanho <- skin$tamanho_mensagens
-  margem  <- skin$margem
+  margem <- skin$margem
 
   if (tipo == "borda") {
     if (posicao == "superior") {
-      left  <- borders$corner_upper_left
+      left <- borders$corner_upper_left
       right <- borders$corner_upper_right
-      bar   <- borders$bar_horizontal_upper
+      bar <- borders$bar_horizontal_upper
     } else if (posicao == "inferior") {
-      left  <- borders$corner_lower_left
+      left <- borders$corner_lower_left
       right <- borders$corner_lower_right
-      bar   <- borders$bar_horizontal_lower
+      bar <- borders$bar_horizontal_lower
     } else if (posicao == "separador") {
-      left  <- borders$separator_left
+      left <- borders$separator_left
       right <- borders$separator_right
-      bar   <- borders$bar_horizontal_upper
+      bar <- borders$bar_horizontal_upper
     }
 
     margem_espacamento <-
@@ -661,19 +671,19 @@ log_secao <- function(subtitulo, titulo = NULL) {
       espacamento <-
         .log_calcular_espacamento(largura_coluna2, nchar(conteudo$subtitulo))
 
-      left       <- borders$bar_vertical_left
+      left <- borders$bar_vertical_left
       conteudo_1 <- paste0(
         strrep(" ", margem),
         conteudo$titulo,
         strrep(" ", margem)
       )
-      separador  <- borders$bar_vertical_right
+      separador <- borders$bar_vertical_right
       conteudo_2 <- paste0(
         strrep(" ", espacamento$esquerda),
         conteudo$subtitulo,
         strrep(" ", espacamento$direita)
       )
-      right      <- borders$bar_vertical_right
+      right <- borders$bar_vertical_right
       quebra_de_linha_inferior <- "\n"
 
       margem_espacamento <-
@@ -692,18 +702,18 @@ log_secao <- function(subtitulo, titulo = NULL) {
 
     if (posicao == "superior") {
       quebra_de_linha_superior <- "\n"
-      left       <- borders$corner_upper_left
-      bar        <- borders$bar_horizontal_upper
-      separador  <- borders$separator_upper
-      right      <- borders$corner_upper_right
+      left <- borders$corner_upper_left
+      bar <- borders$bar_horizontal_upper
+      separador <- borders$separator_upper
+      right <- borders$corner_upper_right
       quebra_de_linha_inferior <- "\n"
     }
     if (posicao == "inferior") {
-      left       <- borders$corner_lower_left
-      bar        <- borders$bar_horizontal_lower
-      separador  <- borders$separator_lower
-      right      <- borders$corner_lower_right
-      stamp      <- if (timestamp) .log_tempo_decorrido()
+      left <- borders$corner_lower_left
+      bar <- borders$bar_horizontal_lower
+      separador <- borders$separator_lower
+      right <- borders$corner_lower_right
+      stamp <- if (timestamp) .log_tempo_decorrido()
       quebra_de_linha_inferior <- "\n"
     }
 
@@ -736,7 +746,9 @@ log_secao <- function(subtitulo, titulo = NULL) {
 
   linhas <- list()
 
-  if (...length() == 0) return(linhas)
+  if (...length() == 0) {
+    return(linhas)
+  }
 
   margem <- get_config("skin")$margem
 
@@ -836,7 +848,8 @@ log_secao <- function(subtitulo, titulo = NULL) {
 
     if (borda_inferior) {
       cat(
-        .log_montar_linha("borda", "inferior", timestamp = timestamp), sep = ""
+        .log_montar_linha("borda", "inferior", timestamp = timestamp),
+        sep = ""
       )
     }
   }

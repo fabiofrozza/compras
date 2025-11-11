@@ -74,59 +74,59 @@ config_main <- function() {
     .config_env <<- new.env(parent = emptyenv())
   }
 
-  tryCatch({
+  tryCatch(
+    {
+      # Verifica se existe a pasta para instalação dos pacotes
+      cat("►►► Verificando pacote para arquivo de configurações...\n")
+      pasta_pacotes <- Sys.getenv("R_LIBS_USER")
+      if (pasta_pacotes == "") {
+        stop("Variável R_LIBS_USER não está definida")
+      }
 
-    # Verifica se existe a pasta para instalação dos pacotes
-    cat("►►► Verificando pacote para arquivo de configurações...\n")
-    pasta_pacotes <- Sys.getenv("R_LIBS_USER")
-    if (pasta_pacotes == "") {
-      stop("Variável R_LIBS_USER não está definida")
-    }
+      config_pasta(pasta_pacotes)
 
-    config_pasta(pasta_pacotes)
+      if (!require("jsonlite", lib.loc = pasta_pacotes)) {
+        cat("►►► Instalando pacote jsonlite. Aguarde...\n")
+        install.packages("jsonlite",
+          lib = pasta_pacotes,
+          repos = "https://cloud.r-project.org/"
+        )
+        library(jsonlite, lib.loc = pasta_pacotes)
+      }
 
-    if (!require("jsonlite", lib.loc = pasta_pacotes)) {
-      cat("►►► Instalando pacote jsonlite. Aguarde...\n")
-      install.packages("jsonlite",
-                       lib = pasta_pacotes,
-                       repos = "https://cloud.r-project.org/")
-      library(jsonlite, lib.loc = pasta_pacotes)
-    }
+      set_config(.config = list(status = list(inicio = TRUE)))
 
-    set_config(.config = list(status = list(inicio = TRUE)))
+      # Lê arquivo com definições exclusivas da empresa
+      readRenviron(".Renviron")
 
-    # Lê arquivo com definições exclusivas da empresa
-    readRenviron(".Renviron")
-
-    # Chama demais scripts compartilhados
-    source("logging.R")
-    source("utils.R")
-
-  },
-  error = function(e) {
-    shell("@COLOR 4F")
-    cat("=== OCORREU ALGUM ERRO NA INSTALAÇÃO DO PACOTE JSONLITE. 
+      # Chama demais scripts compartilhados
+      source("logging.R")
+      source("utils.R")
+    },
+    error = function(e) {
+      shell("@COLOR 4F")
+      cat("=== OCORREU ALGUM ERRO NA INSTALAÇÃO DO PACOTE JSONLITE.
         SEM ELE NÃO É POSSÍVEL CONTINUAR A EXECUÇÃO. ===\n")
-    print(e)
-    cat("\n\n\n=== CHAME O FÁBIO!!!\n")
-    cat("          _\n")
-    cat("         | |\n")
-    cat("         | |===( )   //////\n")
-    cat("         |_|   |||  | o o|\n")
-    cat("                ||| ( c  )                  ____\n")
-    cat("                 ||| \\= /                  ||   \\_\n")
-    cat("                  ||||||                   ||     |\n")
-    cat("                  ||||||                ...||__/|-\"\n")
-    cat("                  ||||||             __|________|__\n")
-    cat("                    |||             |______________|\n")
-    cat("                    |||             || ||      || ||\n")
-    cat("                    |||             || ||      || ||\n")
-    cat("--------------------|||-------------||-||------||-||-------\n")
-    cat("                    |__>            || ||      || ||\n")
-    shell("@PAUSE")
-    quit(status = 1)
-  })
-
+      print(e)
+      cat("\n\n\n=== CHAME O FÁBIO!!!\n")
+      cat("          _\n")
+      cat("         | |\n")
+      cat("         | |===( )   //////\n")
+      cat("         |_|   |||  | o o|\n")
+      cat("                ||| ( c  )                  ____\n")
+      cat("                 ||| \\= /                  ||   \\_\n")
+      cat("                  ||||||                   ||     |\n")
+      cat("                  ||||||                ...||__/|-\"\n")
+      cat("                  ||||||             __|________|__\n")
+      cat("                    |||             |______________|\n")
+      cat("                    |||             || ||      || ||\n")
+      cat("                    |||             || ||      || ||\n")
+      cat("--------------------|||-------------||-||------||-||-------\n")
+      cat("                    |__>            || ||      || ||\n")
+      shell("@PAUSE")
+      quit(status = 1)
+    }
+  )
 }
 
 set_config <- function(..., .config = NULL) {
@@ -177,7 +177,7 @@ set_config <- function(..., .config = NULL) {
 
   # Valida se o ambiente existe
   if (!exists(".config_env")) {
-    stop("Ambiente .config_env não foi inicializado. 
+    stop("Ambiente .config_env não foi inicializado.
          Execute config_main() primeiro.")
   }
 
@@ -243,7 +243,7 @@ get_config <- function(item = NULL) {
 
   # Valida se o ambiente existe
   if (!exists(".config_env")) {
-    stop("Ambiente .config_env não foi inicializado. 
+    stop("Ambiente .config_env não foi inicializado.
          Execute config_main() primeiro.")
   }
 
@@ -253,10 +253,13 @@ get_config <- function(item = NULL) {
 
   config <- get("config", envir = .config_env)
 
-  if (is.null(item)) return(config)
+  if (is.null(item)) {
+    return(config)
+  }
 
-  if (item %in% names(config)) return(config[[item]])
-
+  if (item %in% names(config)) {
+    return(config[[item]])
+  }
 }
 
 config_json <- function(
@@ -305,14 +308,14 @@ config_json <- function(
   # Verifica se o conteúdo está em cache e se não está desatualizado
   cache_key <- paste0("config_json_", secao)
   cache_time_key <- paste0(cache_key, "_timestamp")
-  R_config_secao <- get_config(cache_key)
+  r_config_secao <- get_config(cache_key)
   cache_timestamp <- get_config(cache_time_key)
 
   # Verifica se o cache está atualizado
   file_timestamp <-
     if (file.exists(arquivo_config)) file.info(arquivo_config)$mtime else NULL
   cache_valid <-
-    !is.null(R_config_secao) &&
+    !is.null(r_config_secao) &&
     !is.null(cache_timestamp) &&
     !is.null(file_timestamp) &&
     cache_timestamp >= file_timestamp
@@ -320,77 +323,86 @@ config_json <- function(
   # Função auxiliar para ler o arquivo com retry
   .ler_json <- function() {
     for (tentativa in 1:max_tentativas) {
-      tryCatch({
-        if (!file.exists(arquivo_config)) {
+      tryCatch(
+        {
           if (!file.exists(arquivo_config)) {
-            write_json(list(), arquivo_config, pretty = TRUE)
-            cat("=== Arquivo config.json centralizado não localizado. 
+            if (!file.exists(arquivo_config)) {
+              write_json(list(), arquivo_config, pretty = TRUE)
+              cat("=== Arquivo config.json centralizado não localizado.
                 Gerado um novo vazio. ===\n")
-          }
-        } else if (file.info(arquivo_config)$size == 0) {
-          write_json(list(), arquivo_config, pretty = TRUE)
-          cat("=== Arquivo config.json estava vazio. 
+            }
+          } else if (file.info(arquivo_config)$size == 0) {
+            write_json(list(), arquivo_config, pretty = TRUE)
+            cat("=== Arquivo config.json estava vazio.
               Inicializado com lista vazia. ===\n")
+          }
+
+          config_completo <- fromJSON(arquivo_config)
+
+          # Se a seção não existe, cria uma vazia
+          if (!(secao %in% names(config_completo))) {
+            config_completo[[secao]] <- list()
+          }
+
+          return(config_completo)
+        },
+        error = function(e) {
+          if (tentativa < max_tentativas) {
+            Sys.sleep(intervalo)
+          } else {
+            stop(sprintf(
+              "Erro ao ler config.json após %d tentativas: %s",
+              max_tentativas, e$message
+            ))
+          }
         }
-
-        config_completo <- fromJSON(arquivo_config)
-
-        # Se a seção não existe, cria uma vazia
-        if (!(secao %in% names(config_completo))) {
-          config_completo[[secao]] <- list()
-        }
-
-        return(config_completo)
-
-      },
-      error = function(e) {
-        if (tentativa < max_tentativas) {
-          Sys.sleep(intervalo)
-        } else {
-          stop(sprintf("Erro ao ler config.json após %d tentativas: %s",
-                       max_tentativas, e$message))
-        }
-      })
+      )
     }
   }
 
   # Função auxiliar para escrever no arquivo com retry
   .escrever_json <- function(config_completo) {
     for (tentativa in 1:max_tentativas) {
-      tryCatch({
-        # Escreve em arquivo temporário primeiro (escrita atômica)
-        temp_file <- tempfile(tmpdir = dirname(arquivo_config),
-                              fileext = ".json")
-        write_json(config_completo, temp_file,
-                   pretty = TRUE, auto_unbox = TRUE)
+      tryCatch(
+        {
+          # Escreve em arquivo temporário primeiro (escrita atômica)
+          temp_file <- tempfile(
+            tmpdir = dirname(arquivo_config),
+            fileext = ".json"
+          )
+          write_json(config_completo, temp_file,
+            pretty = TRUE, auto_unbox = TRUE
+          )
 
-        # Move o arquivo temporário para o definitivo
-        file.rename(temp_file, arquivo_config)
+          # Move o arquivo temporário para o definitivo
+          file.rename(temp_file, arquivo_config)
 
-        return(TRUE)
+          return(TRUE)
+        },
+        error = function(e) {
+          if (file.exists(temp_file)) file.remove(temp_file)
 
-      },
-      error = function(e) {
-        if (file.exists(temp_file)) file.remove(temp_file)
-
-        if (tentativa < max_tentativas) {
-          Sys.sleep(intervalo)
-        } else {
-          stop(sprintf("Erro ao salvar config.json após %d tentativas: %s",
-                       max_tentativas, e$message))
+          if (tentativa < max_tentativas) {
+            Sys.sleep(intervalo)
+          } else {
+            stop(sprintf(
+              "Erro ao salvar config.json após %d tentativas: %s",
+              max_tentativas, e$message
+            ))
+          }
         }
-      })
+      )
     }
   }
 
   # Se não está em cache ou está desatualizado, carrega do disco
   if (!cache_valid) {
     config_completo <- .ler_json()
-    R_config_secao <- config_completo[[secao]]
+    r_config_secao <- config_completo[[secao]]
 
     # Salva no cache com timestamp
     config_cache <- list()
-    config_cache[[cache_key]] <- R_config_secao
+    config_cache[[cache_key]] <- r_config_secao
     config_cache[[cache_time_key]] <- Sys.time()
     set_config(.config = modifyList(get_config(), config_cache))
   }
@@ -398,12 +410,16 @@ config_json <- function(
   modificado <- FALSE
 
   # Operações de leitura não alteram nada, apenas retornam o valor
-  if (opcao == "all") return(R_config_secao)
+  if (opcao == "all") {
+    return(r_config_secao)
+  }
 
-  if (opcao == "get") return(R_config_secao[[chave]])
+  if (opcao == "get") {
+    return(r_config_secao[[chave]])
+  }
 
   if (opcao == "remove") {
-    R_config_secao[[chave]] <- NULL
+    r_config_secao[[chave]] <- NULL
     modificado <- TRUE
   }
 
@@ -415,30 +431,33 @@ config_json <- function(
       # Por não ser necessário recuperar o dataframe a partir do config.json
       # não é preciso convertê-lo para lista
       valor <- capture.output(print.data.frame(valor,
-                                               right = FALSE,
-                                               row.names = FALSE))
+        right = FALSE,
+        row.names = FALSE
+      ))
     }
 
     # Verifica se a chave existe e se devemos fazer append
-    if (append && chave %in% names(R_config_secao)) {
+    if (append && chave %in% names(r_config_secao)) {
       # Caso append=TRUE e a chave exista, adiciona ao conteúdo existente
-      if (is.list(R_config_secao[[chave]]) && is.list(valor)) {
+      if (is.list(r_config_secao[[chave]]) && is.list(valor)) {
         # Se ambos são listas, combina recursivamente
-        R_config_secao[[chave]] <- modifyList(R_config_secao[[chave]], valor)
-      } else if (is.vector(R_config_secao[[chave]])) {
+        r_config_secao[[chave]] <- modifyList(r_config_secao[[chave]], valor)
+      } else if (is.vector(r_config_secao[[chave]])) {
         # Se é um vetor, concatena os valores
-        R_config_secao[[chave]] <- c(R_config_secao[[chave]], valor)
+        r_config_secao[[chave]] <- c(r_config_secao[[chave]], valor)
       } else {
         # Para outros tipos, cria uma lista com ambos valores
-        if (!identical(class(R_config_secao[[chave]]), class(valor))) {
-          warning(sprintf("Tipos diferentes ao fazer append: %s e %s",
-                          class(R_config_secao[[chave]]), class(valor)))
+        if (!identical(class(r_config_secao[[chave]]), class(valor))) {
+          warning(sprintf(
+            "Tipos diferentes ao fazer append: %s e %s",
+            class(r_config_secao[[chave]]), class(valor)
+          ))
         }
-        R_config_secao[[chave]] <- list(R_config_secao[[chave]], valor)
+        r_config_secao[[chave]] <- list(r_config_secao[[chave]], valor)
       }
     } else {
       # Caso append=FALSE ou chave não exista, substitui o valor
-      R_config_secao[[chave]] <- valor
+      r_config_secao[[chave]] <- valor
     }
     modificado <- TRUE
   }
@@ -449,19 +468,18 @@ config_json <- function(
     config_completo <- .ler_json()
 
     # Atualiza a seção específica
-    config_completo[[secao]] <- R_config_secao
+    config_completo[[secao]] <- r_config_secao
 
     # Salva no disco
     .escrever_json(config_completo)
 
     # Atualiza o cache
     config_cache <- list()
-    config_cache[[cache_key]] <- R_config_secao
+    config_cache[[cache_key]] <- r_config_secao
     set_config(.config = modifyList(get_config(), config_cache))
   }
 
   invisible()
-
 }
 
 config_ambiente <- function(pasta = NULL) {
@@ -518,16 +536,16 @@ config_ambiente <- function(pasta = NULL) {
   #'
   #' @seealso \code{\link{config_inicializar}}, \code{\link{set_config}}
 
-  options(width = 10000)                    #tamanho da linha do log
-  options(max.print = .Machine$integer.max) #máximo de linhas registradas no log
+  options(width = 10000) # tamanho da linha do log
+  options(max.print = .Machine$integer.max) # máximo de linhas no log
 
   if (is.null(pasta)) {
-    pasta       <- list()
+    pasta <- list()
     pasta$atual <- getwd()
   }
   pasta$superior <- dirname(pasta$atual)
-  pasta$common   <- file.path(pasta$superior, "_common")
-  pasta$log      <- file.path(pasta$common, "log")
+  pasta$common <- file.path(pasta$superior, "_common")
+  pasta$log <- file.path(pasta$common, "log")
 
   geral <-
     list(
@@ -541,13 +559,13 @@ config_ambiente <- function(pasta = NULL) {
   url <-
     list(
       # planilha de unidades requerentes
-      unidades   = Sys.getenv("url_unidades"),
+      unidades = Sys.getenv("url_unidades"),
       # planilha de grupos do Catálogo de Materiais
-      catalogo   = Sys.getenv("url_catalogo"),
+      catalogo = Sys.getenv("url_catalogo"),
       # planilha de Controle de Processos
-      controle   = Sys.getenv("url_controle"),
+      controle = Sys.getenv("url_controle"),
       # planilha de Processos Administrativos
-      pa         = Sys.getenv("url_pa"),
+      pa = Sys.getenv("url_pa"),
       # API dos Dados Abertos do Compras.gov.br para consulta aos Catmat e NCM
       api_catmat = Sys.getenv("url_api_catmat"),
       # Lista de CATMATs do Google Drive
@@ -576,7 +594,6 @@ config_ambiente <- function(pasta = NULL) {
     pasta  = pasta,
     skin   = skin
   )
-
 }
 
 config_finalizar <- function(sucesso = FALSE) {
@@ -612,10 +629,10 @@ config_finalizar <- function(sucesso = FALSE) {
   #'
   #' @seealso \code{\link{config_inicializar}}, \code{\link{log_erro}}
 
-  config            <- get_config()
-  logR              <- config$logR
+  config <- get_config()
+  log_r <- config$logR
   tamanho_mensagens <- config$skin$tamanho_mensagens
-  status            <- config$status
+  status <- config$status
 
   if (status$erros || status$alerta) {
     msg_aviso <- if (status$erros) "ERROS  " else "ALERTAS"
@@ -625,23 +642,25 @@ config_finalizar <- function(sucesso = FALSE) {
     log_secao(sprintf("ENCERRANDO SCRIPT !!! COM %s", msg_aviso), "CONFIG")
 
     cat(strrep("▄", tamanho_mensagens),
-        paste0("█▓▒",
-               strrep("░", (tamanho_mensagens - 26) / 2),
-               sprintf("RELATÓRIO DE %s", msg_aviso),
-               strrep("░", (tamanho_mensagens - 26) / 2),
-               "▒▓█"),
-        paste0("█", strrep("▀", tamanho_mensagens - 2), "█"), sep = "\n")
+      paste0(
+        "█▓▒",
+        strrep("░", (tamanho_mensagens - 26) / 2),
+        sprintf("RELATÓRIO DE %s", msg_aviso),
+        strrep("░", (tamanho_mensagens - 26) / 2),
+        "▒▓█"
+      ),
+      paste0("█", strrep("▀", tamanho_mensagens - 2), "█"),
+      sep = "\n"
+    )
     cat(unlist(as.vector(config_json("msg_erro", opcao = "get"))),
-        labels = "█ ",
-        fill = 1)
+      labels = "█ ",
+      fill = 1
+    )
     cat("█", strrep("▄", tamanho_mensagens - 2), "█\n", sep = "")
-
   } else {
-
     utils_color("ok")
 
     log_secao("ENCERRANDO SCRIPT SEM ERROS", "CONFIG")
-
   }
 
   if (sucesso && (status$erros || status$alerta)) {
@@ -663,11 +682,10 @@ config_finalizar <- function(sucesso = FALSE) {
     sink(type = "message")
     sink()
 
-    close(logR$con)
+    close(log_r$con)
 
     quit(status = codigo_saida)
   }
-
 }
 
 config_inicializar <- function(pacotes, pasta = NULL) {
@@ -717,8 +735,11 @@ config_inicializar <- function(pacotes, pasta = NULL) {
   # Define a cor do console
   utils_color("default")
 
+  config <- get_config()
+  pasta <- config$pasta
+  script_nome <- config$geral$script_nome
+
   # Verifica pastas de dependência obrigatoria
-  pasta <- get_config("pasta")
   config_pasta(pasta$log)
 
   # Inicia gravação do log
@@ -744,26 +765,29 @@ config_inicializar <- function(pacotes, pasta = NULL) {
     log_info("Modo silencioso ativado. Script executado em segundo plano.")
   }
 
-  log_secao(sprintf("INÍCIO SCRIPT ‹ %s ›", get_config("geral")$script_nome),
-            "CONFIG")
+  log_secao(
+    sprintf("INÍCIO SCRIPT ‹ %s ›", script_nome),
+    "CONFIG"
+  )
 
   log_info("Informações do sistema", Sys.info(),
-           "-",
-           "Informações da rede", config_rede(),
-           "-",
-           "Sessão R", R.version,
-           cores = "highlight1")
+    "-",
+    "Informações da rede", config_rede(),
+    "-",
+    "Sessão R", R.version,
+    cores = "highlight1"
+  )
 
   log_secao("CONFIGURAÇÕES INICIAIS", "CONFIG")
 
   log_info("PASTAS UTILIZADAS", pasta,
-           "-",
-           "LINHA DE COMANDO", commandArgs(),
-           cores = "highlight1")
+    "-",
+    "LINHA DE COMANDO", commandArgs(),
+    cores = "highlight1"
+  )
 
   # Carrega (ou instala) os pacotes necessários
   config_pacotes(pacotes)
-
 }
 
 config_pacotes <- function(pacotes) {
@@ -801,69 +825,92 @@ config_pacotes <- function(pacotes) {
 
   log_secao("PACOTES", "CONFIG")
 
-  log_info(estilo = "inicio",
-           "PACOTES SOLICITADOS", pacotes,
-           "-")
+  log_info(
+    estilo = "inicio",
+    "PACOTES SOLICITADOS", pacotes,
+    "-"
+  )
 
-  pasta_pacotes          <- Sys.getenv("R_LIBS_USER")
-  pacotes_instalados     <- pacotes %in%
+  pasta_pacotes <- Sys.getenv("R_LIBS_USER")
+  pacotes_instalados <- pacotes %in%
     rownames(installed.packages(lib.loc = pasta_pacotes))
   pacotes_nao_instalados <- pacotes[!pacotes_instalados]
 
   if (any(pacotes_instalados == FALSE)) {
-    log_info(estilo = "meio",
-             sprintf("Iniciando instalação dos pacotes %s em %s",
-                     pacotes_nao_instalados, pasta_pacotes))
+    log_info(
+      estilo = "meio",
+      sprintf(
+        "Iniciando instalação dos pacotes %s em %s",
+        pacotes_nao_instalados, pasta_pacotes
+      )
+    )
 
     pb <- log_barra_progresso("Aguarde...", length(pacotes_nao_instalados))
 
     for (i in 1:length(pacotes_nao_instalados)) {
-      log_barra_progresso(sprintf("Instalando pacote %s",
-                                  pacotes_nao_instalados[i]), pb = pb)
+      log_barra_progresso(sprintf(
+        "Instalando pacote %s",
+        pacotes_nao_instalados[i]
+      ), pb = pb)
 
       install.packages(pacotes_nao_instalados[i],
-                       lib = pasta_pacotes,
-                       dependencies = TRUE,
-                       repos = "https://cloud.r-project.org/")
+        lib = pasta_pacotes,
+        dependencies = TRUE,
+        repos = "https://cloud.r-project.org/"
+      )
     }
 
     log_barra_progresso(pb = pb)
 
-    pacotes_instalados     <- pacotes %in%
+    pacotes_instalados <- pacotes %in%
       rownames(installed.packages(lib.loc = pasta_pacotes))
     pacotes_nao_instalados <- pacotes[!pacotes_instalados]
 
     if (any(pacotes_instalados == FALSE)) {
-      log_erro(sprintf("Erro ao instalar os pacotes %s em %s",
-                       pacotes_nao_instalados, pasta_pacotes))
+      log_erro(sprintf(
+        "Erro ao instalar os pacotes %s em %s",
+        pacotes_nao_instalados, pasta_pacotes
+      ))
       return(FALSE)
     } else {
-      log_info(estilo = "meio",
-               sprintf("Pacotes necessários instalados em %s", pasta_pacotes))
+      log_info(
+        estilo = "meio",
+        sprintf("Pacotes necessários instalados em %s", pasta_pacotes)
+      )
     }
   }
 
   pb <- log_barra_progresso("Aguarde...", length(pacotes))
 
-  tryCatch({
-    for (i in 1:length(pacotes)) {
-      log_barra_progresso(sprintf("Carregando pacote %s", pacotes[i]), pb = pb)
+  tryCatch(
+    {
+      for (i in 1:length(pacotes)) {
+        log_barra_progresso(
+          sprintf("Carregando pacote %s", pacotes[i]), pb = pb
+        )
 
-      library(pacotes[i],
-              lib.loc = pasta_pacotes,
-              verbose = TRUE,
-              character.only = TRUE)
+        library(pacotes[i],
+          lib.loc = pasta_pacotes,
+          verbose = TRUE,
+          character.only = TRUE
+        )
+      }
+      log_barra_progresso(pb = pb)
+      log_info(paste0("Pacotes necessários carregados em ", pasta_pacotes),
+        estilo = "meio"
+      )
+    },
+    error = function(e) {
+      log_erro(
+        paste(
+          "Não foi possível carregar os pacotes necessários em",
+          pasta_pacotes
+        ),
+        e,
+        finalizar = TRUE
+      )
     }
-    log_barra_progresso(pb = pb)
-    log_info(paste0("Pacotes necessários carregados em ", pasta_pacotes),
-             estilo = "meio")
-  },
-  error = function(e) {
-    log_erro(paste("Não foi possível carregar os pacotes necessários em",
-                   pasta_pacotes),
-             e,
-             finalizar = TRUE)
-  })
+  )
 
   log_info(estilo = "fim")
 }
@@ -930,19 +977,22 @@ config_pasta <- function(...) {
     # Ignora valores NULL ou vazios
     if (is.null(pasta) || pasta == "") next
 
-    tryCatch({
-      if (!dir.exists(pasta)) {
-        cat(sprintf("=== Criando pasta %s ===\n", pasta))
-        dir.create(pasta, recursive = TRUE)
+    tryCatch(
+      {
+        if (!dir.exists(pasta)) {
+          cat(sprintf("=== Criando pasta %s ===\n", pasta))
+          dir.create(pasta, recursive = TRUE)
+        }
+      },
+      error = function(e) {
+        stop(sprintf(
+          "Não foi possível criar a pasta %s:\n%s\n",
+          pasta,
+          e$message
+        ))
       }
-    },
-    error = function(e) {
-      stop(sprintf("Não foi possível criar a pasta %s:\n%s\n",
-                   pasta,
-                   e$message))
-    })
+    )
   }
-
 }
 
 config_rede <- function() {
@@ -972,36 +1022,44 @@ config_rede <- function() {
   #'
   #' @seealso \code{\link{config_inicializar}}
 
-  tryCatch({
-    rede_info <-
-      system2("ipconfig", stdout = TRUE, stderr = TRUE, timeout = 5)
+  tryCatch(
+    {
+      rede_info <-
+        system2("ipconfig", stdout = TRUE, stderr = TRUE, timeout = 5)
 
-    linhas_dns <- grep("DNS", rede_info, useBytes = TRUE)
-    redes      <- c()
+      linhas_dns <- grep("DNS", rede_info, useBytes = TRUE)
+      redes <- c()
 
-    for (i in linhas_dns) {
-      linha <- rede_info[i]
+      for (i in linhas_dns) {
+        linha <- rede_info[i]
 
-      sufixo <- trimws(unlist(strsplit(rede_info[i], ":", useBytes = TRUE))[2])
+        sufixo <-
+          trimws(unlist(strsplit(rede_info[i], ":", useBytes = TRUE))[2])
 
-      if (sufixo != "" && !grepl("desconectada|disconnected",
-                                 rede_info[i - 1],
-                                 useBytes = TRUE)) redes <- c(redes, sufixo)
+        if (sufixo != "" &&
+          !grepl(
+            "desconectada|disconnected",
+            rede_info[i - 1],
+            useBytes = TRUE
+          )
+        ) {
+          redes <- c(redes, sufixo)
+        }
+      }
+
+      redes <- unique(redes)
+
+      if (length(redes) == 0) redes <- "NENHUMA CONEXÃO LOCALIZADA"
+
+      return(redes)
+    },
+    error = function(e) {
+      "Erro: NÃO FOI POSSÍVEL TESTAR A REDE"
+    },
+    warning = function(w) {
+      "Aviso: NÃO FOI POSSÍVEL TESTAR A REDE"
     }
-
-    redes <- unique(redes)
-
-    if (length(redes) == 0) redes <- "NENHUMA CONEXÃO LOCALIZADA"
-
-    return(redes)
-  },
-  error = function(e) {
-    "Erro: NÃO FOI POSSÍVEL TESTAR A REDE"
-  },
-  warning = function(w) {
-    "Aviso: NÃO FOI POSSÍVEL TESTAR A REDE"
-  })
-
+  )
 }
 
 # ---- INICIAR ----

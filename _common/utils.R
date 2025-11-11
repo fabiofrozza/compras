@@ -3,7 +3,6 @@
 # de configuração ou logging
 
 utils_ansi <- function(fg = "", bg = "") {
-
   ansi <- list(
     dark = list(
       black   = c("30", "40"),
@@ -43,19 +42,18 @@ utils_ansi <- function(fg = "", bg = "") {
 }
 
 utils_border <- function(border) {
-
   borders <- list(
-    double  = c("╔", "╗", "╚", "╝", "╦", "╩", "╠", "╣", "═", "═", "║", "║"),
-    heavy   = c("┏", "┓", "┗", "┛", "┳", "┻", "┣", "┫", "━", "━", "┃", "┃"),
-    round   = c("╭", "╮", "╰", "╯", "┬", "┴", "├", "┤", "─", "─", "│", "│"),
-    square  = c("┌", "┐", "└", "┘", "┬", "┴", "├", "┤", "─", "─", "│", "│"),
-    dotted  = c(".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ":", ":"),
-    bars    = c("█", "█", "█", "█", "█", "█", "█", "█", "▀", "▄", "█", "█"),
+    double = c("╔", "╗", "╚", "╝", "╦", "╩", "╠", "╣", "═", "═", "║", "║"),
+    heavy = c("┏", "┓", "┗", "┛", "┳", "┻", "┣", "┫", "━", "━", "┃", "┃"),
+    round = c("╭", "╮", "╰", "╯", "┬", "┴", "├", "┤", "─", "─", "│", "│"),
+    square = c("┌", "┐", "└", "┘", "┬", "┴", "├", "┤", "─", "─", "│", "│"),
+    dotted = c(".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ":", ":"),
+    bars = c("█", "█", "█", "█", "█", "█", "█", "█", "▀", "▄", "█", "█"),
     default = c("+", "+", "+", "+", "+", "+", "+", "+", "-", "-", "|", "|"),
-    ascii   = c("/", "\\", "\\", "/", "^", "v", "<", ">", "-", "-", "|", "|"),
+    ascii = c("/", "\\", "\\", "/", "^", "v", "<", ">", "-", "-", "|", "|"),
     minimal = c("", "", "", "", "", "", "", "", "", "", "", ""),
-    dashed  = c("+", "+", "+", "+", "+", "+", "+", "+", "- ", "- ", "¦", "¦"),
-    wavy    =
+    dashed = c("+", "+", "+", "+", "+", "+", "+", "+", "- ", "- ", "¦", "¦"),
+    wavy =
       c(
         "«", "»", "«", "»", "^", "v", "»", "«",
         "_,.-'~'-.,", "~'-.,_,.-'", "{", "}"
@@ -107,29 +105,33 @@ utils_catalogo <- function() {
   url_catalogo <- get_config("url")$catalogo
 
   log_info("Planilha: Catálogo de Materiais",
-           paste0("Link: ", url_catalogo),
-           cores = "highlight1")
+    paste0("Link: ", url_catalogo),
+    cores = "highlight1"
+  )
 
   gs4_deauth()
 
-  tryCatch({
-    catalogo <- range_read(url_catalogo) %>%
-      mutate(grupoDescricao = paste(Grupo, "-", `Descrição Grupo`))
-  },
-  error = function(e) {
-    log_erro("Erro ao acessar Catálogo de Materiais. Verifique a conexão. 
+  tryCatch(
+    {
+      catalogo <- range_read(url_catalogo) %>%
+        mutate(grupoDescricao = paste(Grupo, "-", `Descrição Grupo`))
+    },
+    error = function(e) {
+      log_erro("Erro ao acessar Catálogo de Materiais. Verifique a conexão.
              Encerrando...",
-             e,
-             finalizar = TRUE)
-  })
+        e,
+        finalizar = TRUE
+      )
+    }
+  )
 
   if (nrow(catalogo) == 0) {
     log_erro("Não há informações na planilha do Catálogo. Encerrando...",
-             finalizar = TRUE)
+      finalizar = TRUE
+    )
   }
 
   catalogo
-
 }
 
 utils_color <- function(color = NULL) {
@@ -209,7 +211,6 @@ utils_color <- function(color = NULL) {
   }
 
   shell(colors[[color]])
-
 }
 
 utils_corrigir_valor <- function(valor) {
@@ -232,7 +233,6 @@ utils_corrigir_valor <- function(valor) {
   #' utils_corrigir_valor("1.234")     # Retorna 1234
 
   as.numeric(gsub(",", ".", gsub("\\.", "", valor)))
-
 }
 
 utils_is_interactive <- function() {
@@ -300,11 +300,9 @@ utils_silent <- function() {
   #' \code{\link{commandArgs}}
 
   "silent" %in% commandArgs(trailingOnly = TRUE)
-
 }
 
 utils_style <- function(style) {
-
   styles <- list(
     default = list(
       "default"    = utils_ansi("dark_blue", "light_yellow"),
@@ -367,7 +365,6 @@ utils_style <- function(style) {
   }
 
   styles[[style]]
-
 }
 
 utils_unidades_requerentes_obter <- function(origem = "importacao") {
@@ -400,52 +397,63 @@ utils_unidades_requerentes_obter <- function(origem = "importacao") {
   url_unidades <- get_config("url")$unidades
 
   log_info("Planilha: Unidades - espelhada",
-           paste0("Link: ", url_unidades),
-           paste0("Aba : ", ifelse(origem == "importacao",
-                                   "Script Importação",
-                                   "Power BI")),
-           cores = "highlight1")
+    paste0("Link: ", url_unidades),
+    paste0("Aba : ", ifelse(origem == "importacao",
+      "Script Importação",
+      "Power BI"
+    )),
+    cores = "highlight1"
+  )
 
   gs4_deauth()
 
-  tryCatch({
-    if (origem == "importacao") {
+  tryCatch(
+    {
+      if (origem == "importacao") {
+        unidades <- range_read(url_unidades,
+          sheet = "Script Importação",
+          col_types = "cccccc"
+        )
 
-      unidades <- range_read(url_unidades,
-                             sheet = "Script Importação",
-                             col_types = "cccccc")
+        colnames(unidades)[c(3, 4, 5, 6)] <- c(
+          "sigla_solar", "imovel",
+          "cpf", "email"
+        )
+      } else if (origem == "power bi") {
+        unidades <- range_read(url_unidades,
+          sheet = "Power BI"
+        )
 
-      colnames(unidades)[c(3, 4, 5, 6)] <- c("sigla_solar", "imovel",
-                                             "cpf", "email")
+        sigla_solar_duplicidade <- unidades %>%
+          group_by(`Sigla no Solar`) %>%
+          filter(n() > 1) %>%
+          mutate(siglas_duplicidade = paste(Setor, "-", `Sigla no Solar`)) %>%
+          arrange(`Sigla no Solar`) %>%
+          pull(siglas_duplicidade)
 
-    } else if (origem == "power bi") {
-
-      unidades <- range_read(url_unidades,
-                             sheet = "Power BI")
-
-      sigla_solar_duplicidade <- unidades %>%
-        group_by(`Sigla no Solar`) %>%
-        filter(n() > 1) %>%
-        mutate(siglas_duplicidade = paste(Setor, "-", `Sigla no Solar`)) %>%
-        arrange(`Sigla no Solar`) %>%
-        pull(siglas_duplicidade)
-
-      if (length(sigla_solar_duplicidade) > 0) {
-        log_erro(paste("Há Unidades com siglas no Solar repetidas.",
-                       "Isto causará problemas no Painel do Observatório."),
-                 "Mantenha somente siglas únicas na aba 'Power Bi'.")
-        log_erro("As Unidades que precisam ser ajustadas são:",
-                 sigla_solar_duplicidade)
+        if (length(sigla_solar_duplicidade) > 0) {
+          log_erro(
+            paste(
+              "Há Unidades com siglas no Solar repetidas.",
+              "Isto causará problemas no Painel do Observatório."
+            ),
+            "Mantenha somente siglas únicas na aba 'Power Bi'."
+          )
+          log_erro(
+            "As Unidades que precisam ser ajustadas são:",
+            sigla_solar_duplicidade
+          )
+        }
       }
-
+      return(unidades)
+    },
+    error = function(e) {
+      log_erro("Erro ao acessar planilha de Unidades requerentes. Encerrando...",
+        e,
+        finalizar = TRUE
+      )
     }
-    return(unidades)
-  },
-  error = function(e) {
-    log_erro("Erro ao acessar planilha de Unidades requerentes. Encerrando...",
-             e,
-             finalizar = TRUE)
-  })
+  )
 }
 
 utils_verificar_cnpj <- function(cnpj) {
@@ -474,30 +482,36 @@ utils_verificar_cnpj <- function(cnpj) {
   #' utils_verificar_cnpj("11.222.333/0001-00")
 
   # Verifica se o CNPJ é NA ou vazio ou NULL
-  if (is.na(cnpj) || cnpj == "" || is.null(cnpj)) return(FALSE)
+  if (is.na(cnpj) || cnpj == "" || is.null(cnpj)) {
+    return(FALSE)
+  }
 
   # Remove caracteres não numéricos
   cnpj_limpo <- gsub("[^0-9]", "", cnpj)
 
   # Verifica se o CNPJ tem 14 dígitos
-  if (nchar(cnpj_limpo) != 14) return(FALSE)
+  if (nchar(cnpj_limpo) != 14) {
+    return(FALSE)
+  }
 
   # Converte para vetor numérico
   digitos <- as.numeric(strsplit(cnpj_limpo, "")[[1]])
 
   # Verifica se todos os dígitos são iguais (ex: 00000000000000)
-  if (length(unique(digitos)) == 1) return(FALSE)
+  if (length(unique(digitos)) == 1) {
+    return(FALSE)
+  }
 
   d1 <- NULL
-  d1[1]  <- digitos[1]  * 5
-  d1[2]  <- digitos[2]  * 4
-  d1[3]  <- digitos[3]  * 3
-  d1[4]  <- digitos[4]  * 2
-  d1[5]  <- digitos[5]  * 9
-  d1[6]  <- digitos[6]  * 8
-  d1[7]  <- digitos[7]  * 7
-  d1[8]  <- digitos[8]  * 6
-  d1[9]  <- digitos[9]  * 5
+  d1[1] <- digitos[1] * 5
+  d1[2] <- digitos[2] * 4
+  d1[3] <- digitos[3] * 3
+  d1[4] <- digitos[4] * 2
+  d1[5] <- digitos[5] * 9
+  d1[6] <- digitos[6] * 8
+  d1[7] <- digitos[7] * 7
+  d1[8] <- digitos[8] * 6
+  d1[9] <- digitos[9] * 5
   d1[10] <- digitos[10] * 4
   d1[11] <- digitos[11] * 3
   d1[12] <- digitos[12] * 2
@@ -505,19 +519,19 @@ utils_verificar_cnpj <- function(cnpj) {
   dv1 <- ifelse(resto1 < 2, 0, 11 - resto1)
 
   d2 <- NULL
-  d2[1]  <- digitos[1]  * 6
-  d2[2]  <- digitos[2]  * 5
-  d2[3]  <- digitos[3]  * 4
-  d2[4]  <- digitos[4]  * 3
-  d2[5]  <- digitos[5]  * 2
-  d2[6]  <- digitos[6]  * 9
-  d2[7]  <- digitos[7]  * 8
-  d2[8]  <- digitos[8]  * 7
-  d2[9]  <- digitos[9]  * 6
+  d2[1] <- digitos[1] * 6
+  d2[2] <- digitos[2] * 5
+  d2[3] <- digitos[3] * 4
+  d2[4] <- digitos[4] * 3
+  d2[5] <- digitos[5] * 2
+  d2[6] <- digitos[6] * 9
+  d2[7] <- digitos[7] * 8
+  d2[8] <- digitos[8] * 7
+  d2[9] <- digitos[9] * 6
   d2[10] <- digitos[10] * 5
   d2[11] <- digitos[11] * 4
   d2[12] <- digitos[12] * 3
-  d2[13] <- dv1         * 2
+  d2[13] <- dv1 * 2
   resto2 <- sum(d2, na.rm = TRUE) %% 11
   dv2 <- ifelse(resto2 < 2, 0, 11 - resto2)
 
@@ -554,19 +568,25 @@ utils_verificar_cpf <- function(cpf) {
   #' utils_verificar_cpf("111.111.111-11")
 
   # Se for NA, vazio ou NULL, já retorna inválido
-  if (is.na(cpf) || cpf == "" || is.null(cpf)) return(FALSE)
+  if (is.na(cpf) || cpf == "" || is.null(cpf)) {
+    return(FALSE)
+  }
 
   # Remove tudo que não for dígito e verifica se tem 11 caracteres
   cpf_limpo <- gsub("[^0-9]", "", cpf)
-  if (nchar(cpf_limpo) != 11) return(FALSE)
+  if (nchar(cpf_limpo) != 11) {
+    return(FALSE)
+  }
 
   # Converte para vetor numérico
   digitos <- as.numeric(strsplit(cpf_limpo, "")[[1]])
 
   # Adicionar verificação de CPFs conhecidamente inválidos
-  if (length(unique(digitos)) == 1) return(FALSE)
+  if (length(unique(digitos)) == 1) {
+    return(FALSE)
+  }
 
-  d1    <- NULL
+  d1 <- NULL
   d1[1] <- digitos[1] * 10
   d1[2] <- digitos[2] * 9
   d1[3] <- digitos[3] * 8
@@ -583,17 +603,17 @@ utils_verificar_cpf <- function(cpf) {
     dv1 <- 11 - resto1
   }
 
-  d2     <- NULL
-  d2[1]  <- digitos[1] * 11
-  d2[2]  <- digitos[2] * 10
-  d2[3]  <- digitos[3] * 9
-  d2[4]  <- digitos[4] * 8
-  d2[5]  <- digitos[5] * 7
-  d2[6]  <- digitos[6] * 6
-  d2[7]  <- digitos[7] * 5
-  d2[8]  <- digitos[8] * 4
-  d2[9]  <- digitos[9] * 3
-  d2[10] <- dv1        * 2
+  d2 <- NULL
+  d2[1] <- digitos[1] * 11
+  d2[2] <- digitos[2] * 10
+  d2[3] <- digitos[3] * 9
+  d2[4] <- digitos[4] * 8
+  d2[5] <- digitos[5] * 7
+  d2[6] <- digitos[6] * 6
+  d2[7] <- digitos[7] * 5
+  d2[8] <- digitos[8] * 4
+  d2[9] <- digitos[9] * 3
+  d2[10] <- dv1 * 2
   resto2 <- do.call(sum, as.list(d2)) %% 11
   if (resto2 < 2) {
     dv2 <- 0
@@ -636,21 +656,28 @@ utils_verificar_script <- function(scripts_permitidos, script_padrao) {
   argumentos <- commandArgs(trailingOnly = TRUE)
 
   if (length(argumentos) == 0) {
-    log_erro(sprintf("Nenhum argumento fornecido. Usando valor padrão: '%s'",
-                     script_padrao),
-             alerta = TRUE)
+    log_erro(
+      sprintf(
+        "Nenhum argumento fornecido. Usando valor padrão: '%s'",
+        script_padrao
+      ),
+      alerta = TRUE
+    )
     return(script_padrao)
   }
 
   script_a_executar <- argumentos[1]
 
   if (!(script_a_executar %in% scripts_permitidos)) {
-    log_erro(sprintf("Argumento inválido: '%s'. Usando valor padrão: '%s'",
-                     script_a_executar, script_padrao),
-             alerta = TRUE)
+    log_erro(
+      sprintf(
+        "Argumento inválido: '%s'. Usando valor padrão: '%s'",
+        script_a_executar, script_padrao
+      ),
+      alerta = TRUE
+    )
     return(script_padrao)
   }
 
   script_a_executar
-
 }
