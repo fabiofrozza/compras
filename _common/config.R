@@ -316,9 +316,9 @@ config_json <- function(
     if (file.exists(arquivo_config)) file.info(arquivo_config)$mtime else NULL
   cache_valid <-
     !is.null(r_config_secao) &&
-    !is.null(cache_timestamp) &&
-    !is.null(file_timestamp) &&
-    cache_timestamp >= file_timestamp
+      !is.null(cache_timestamp) &&
+      !is.null(file_timestamp) &&
+      cache_timestamp >= file_timestamp
 
   # Função auxiliar para ler o arquivo com retry
   .ler_json <- function() {
@@ -558,17 +558,17 @@ config_ambiente <- function(script_nome, pasta = NULL) {
   url <-
     list(
       # planilha de unidades requerentes
-      unidades = Sys.getenv("url_unidades"),
+      unidades = Sys.getenv("COMPRAS_url_unidades"),
       # planilha de grupos do Catálogo de Materiais
-      catalogo = Sys.getenv("url_catalogo"),
+      catalogo = Sys.getenv("COMPRAS_url_catalogo"),
       # planilha de Controle de Processos
-      controle = Sys.getenv("url_controle"),
+      controle = Sys.getenv("COMPRAS_url_controle"),
       # planilha de Processos Administrativos
-      pa = Sys.getenv("url_pa"),
+      pa = Sys.getenv("COMPRAS_url_pa"),
       # API dos Dados Abertos do Compras.gov.br para consulta aos Catmat e NCM
-      api_catmat = Sys.getenv("url_api_catmat"),
+      api_catmat = Sys.getenv("COMPRAS_url_api_catmat"),
       # Lista de CATMATs do Google Drive
-      lista_catmat = Sys.getenv("url_lista_catmat")
+      lista_catmat = Sys.getenv("COMPRAS_url_lista_catmat")
     )
 
   status <-
@@ -580,10 +580,10 @@ config_ambiente <- function(script_nome, pasta = NULL) {
 
   skin <-
     list(
-      style = utils_style(Sys.getenv("SKIN_STYLE")),
-      border = utils_border(Sys.getenv("SKIN_BORDER")),
-      tamanho_mensagens = as.numeric(Sys.getenv("TAMANHO_MENSAGENS")),
-      margem = as.numeric(Sys.getenv("MARGEM"))
+      style = utils_style(Sys.getenv("COMPRAS_SKIN_STYLE")),
+      border = utils_border(Sys.getenv("COMPRAS_SKIN_BORDER")),
+      tamanho_mensagens = as.numeric(Sys.getenv("COMPRAS_SKIN_SIZE_MESSAGE")),
+      tamanho_margem = as.numeric(Sys.getenv("COMPRAS_SKIN_SIZE_PADDING"))
     )
 
   set_config(
@@ -846,7 +846,7 @@ config_pacotes <- function(pacotes) {
 
     pb <- log_barra_progresso("Aguarde...", length(pacotes_nao_instalados))
 
-    for (i in 1:length(pacotes_nao_instalados)) {
+    for (i in seq_along(pacotes_nao_instalados)) {
       log_barra_progresso(sprintf(
         "Instalando pacote %s",
         pacotes_nao_instalados[i]
@@ -883,9 +883,10 @@ config_pacotes <- function(pacotes) {
 
   tryCatch(
     {
-      for (i in 1:length(pacotes)) {
+      for (i in seq_along(pacotes)) {
         log_barra_progresso(
-          sprintf("Carregando pacote %s", pacotes[i]), pb = pb
+          sprintf("Carregando pacote %s", pacotes[i]),
+          pb = pb
         )
 
         library(pacotes[i],

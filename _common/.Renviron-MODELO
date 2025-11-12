@@ -1,44 +1,44 @@
 # Links necessários aos scripts
-url_unidades     = Preencha com o link da planilha de unidades requerentes (Google Drive)
-url_catalogo     = Preencha com o link da planilha do catálogo de materiais (Google Drive)
-url_controle     = Preencha com o link da planilha de controle de processos (Google Drive)
-url_pa           = Preencha com o link da planilha de controle de processos administrativos e alterações contratuais (Google Drive)
-url_api_catmat   = 'https://dadosabertos.compras.gov.br/modulo-material/4_consultarItemMaterial?pagina=1&codigoItem='
-url_lista_catmat = Preencha com o link da lista de CATMATs (Google Drive)
+COMPRAS_url_unidades     = Preencha com o link da planilha de unidades requerentes (Google Drive)
+COMPRAS_url_catalogo     = Preencha com o link da planilha do catálogo de materiais (Google Drive)
+COMPRAS_url_controle     = Preencha com o link da planilha de controle de processos (Google Drive)
+COMPRAS_url_pa           = Preencha com o link da planilha de controle de processos administrativos e alterações contratuais (Google Drive)
+COMPRAS_url_api_catmat   = 'https://dadosabertos.compras.gov.br/modulo-material/4_consultarItemMaterial?pagina=1&codigoItem='
+COMPRAS_url_lista_catmat = Preencha com o link da lista de CATMATs (Google Drive)
 
 # Dados da empresa
-COMPANY_NAME    = Preencha com o nome da empresa
-COMPANY_SITE    = Preencha com o site da empresa
-DEPARTMENT_NAME = Preencha com o nome do departamento
-DEPARTMENT_SITE = Preencha com o site do departamento
-MANUAL_SITE     = Preencha com o site do manual
-LISTS_PAGE_SITE = Preencha com o link da página das listas
+COMPRAS_COMPANY_NAME    = Preencha com o nome da empresa
+COMPRAS_COMPANY_SITE    = Preencha com o site da empresa
+COMPRAS_DEPARTMENT_NAME = Preencha com o nome do departamento
+COMPRAS_DEPARTMENT_SITE = Preencha com o site do departamento
+COMPRAS_MANUAL_SITE     = Preencha com o site do manual
+COMPRAS_LISTS_PAGE_SITE = Preencha com o link da página das listas
 
 # Folders
-IMPORTACAO_ARQUIVOS_A_IMPORTAR = ARQUIVOS A IMPORTAR
-IMPORTACAO_RESUMO_PEDIDOS      = RESUMO PEDIDOS
-IMPORTACAO_RELATORIOS          = RELATORIOS
+COMPRAS_IMPORTACAO_ARQUIVOS_A_IMPORTAR = ARQUIVOS A IMPORTAR
+COMPRAS_IMPORTACAO_RESUMO_PEDIDOS      = RESUMO PEDIDOS
+COMPRAS_IMPORTACAO_RELATORIOS          = RELATORIOS
 
-ATAS_ATAS  = ATAS
-ATAS_SICAF = SICAF
+COMPRAS_ATAS_ATAS  = ATAS
+COMPRAS_ATAS_SICAF = SICAF
 
-CATMAT_TR               = TR
-CATMAT_ARQUIVOS_GERADOS = ARQUIVOS GERADOS
+COMPRAS_CATMAT_TR               = TR
+COMPRAS_CATMAT_ARQUIVOS_GERADOS = ARQUIVOS GERADOS
 
-MAPAS_MAPAS  = MAPAS
-MAPAS_LISTAS = LISTAS
+COMPRAS_MAPAS_MAPAS  = MAPAS
+COMPRAS_MAPAS_LISTAS = LISTAS
 
-FORNECEDORES_DADOS         = DADOS
-FORNECEDORES_PARA_IMPORTAR = PARA IMPORTAR
+COMPRAS_FORNECEDORES_DADOS         = DADOS
+COMPRAS_FORNECEDORES_PARA_IMPORTAR = PARA IMPORTAR
 
 # Informações para Power BI
-PLANEJAMENTO_ANO_INICIAL  = 2021
-PROCESSOS_ADM_ANO_INICIAL = 2020
+COMPRAS_PLANEJAMENTO_ANO_INICIAL  = 2021
+COMPRAS_PROCESSOS_ADM_ANO_INICIAL = 2020
 
 # Interface
 # default, mono, invert, matrix, ocean, peach
-SKIN_STYLE = default
+COMPRAS_SKIN_STYLE = default
 # double, heavy, round, square, dotted, bars, default, ascii, minimal, dashed, wavy   
-SKIN_BORDER = round
-TAMANHO_MENSAGENS = 100
-MARGEM = 1
+COMPRAS_SKIN_BORDER = round
+COMPRAS_SKIN_SIZE_MESSAGE = 100
+COMPRAS_SKIN_SIZE_PADDING = 1

@@ -3,7 +3,7 @@ title: "`r ifelse(importacao$validacao_manual, '[⚠ PRELIMINAR]{.vermelho} - ',
 subtitle: |
   | Grupo `r dados$info$grupo`
   | Etapa `r dados$info$etapa` - `r dados$info$ano`
-author: "`r Sys.getenv('DEPARTMENT_NAME')`"
+author: "`r Sys.getenv('COMPRAS_DEPARTMENT_NAME')`"
 output:
   html_document:
     theme:
@@ -60,7 +60,7 @@ knitr::opts_chunk$set(echo = FALSE)
   + Quantidade de itens abaixo do quantitativo mínimo: `r dados$stats$abaixo_qtde`
 ```{r qtde_minimo, eval = dados$stats$abaixo_qtde > 0}
 names(dados$filtros$abaixo_qtde)[1] <- "Linha"
-dados$filtros$abaixo_qtde[ , c(1, 4:5)] %>%
+dados$filtros$abaixo_qtde[, c(1, 4:5)] %>%
   kbl(align = "rcl") %>%
   kable_paper(c("striped", "condensed")) %>%
   kable_styling(htmltable_class = "tabela_esquerda")
@@ -70,7 +70,7 @@ dados$filtros$abaixo_qtde[ , c(1, 4:5)] %>%
   + Quantidade de itens abaixo do valor mínimo: `r dados$stats$abaixo_valor`
 ```{r valor_minimo, eval = dados$stats$abaixo_valor > 0}
 names(dados$filtros$abaixo_valor)[1] <- "Linha"
-dados$filtros$abaixo_valor[ , c(1:7, 9)] %>%
+dados$filtros$abaixo_valor[, c(1:7, 9)] %>%
   kbl(align = "rrrrlclr") %>%
   kable_paper(c("striped", "condensed")) %>%
   kable_styling(htmltable_class = "tabela_esquerda")
@@ -79,7 +79,7 @@ dados$filtros$abaixo_valor[ , c(1:7, 9)] %>%
 * Quantidade de itens excluídos manualmente: `r dados$stats$excluidos`
 ```{r qtde_excl_manual, eval = dados$stats$excluidos > 0}
 names(dados$filtros$excluidos)[1] <- "Linha"
-dados$filtros$excluidos[ , c(1:8)] %>%
+dados$filtros$excluidos[, c(1:8)] %>%
   kbl(align = "rrrrlclr") %>%
   kable_paper(c("striped", "condensed")) %>%
   kable_styling(htmltable_class = "tabela_esquerda")
@@ -97,50 +97,71 @@ cat(sprintf("- Quantidade de Unidades com ajustes: %s\n", dados$stats$unidades_c
 
 if (dados$stats$qtde_ajustes > 0) {
   pt_ajustes <- PivotTable$new()
-    pt_ajustes$addData(dados$filtros$com_ajuste)
-    if (importacao$consolidado) {
-      pt_ajustes$addRowDataGroups("Processo",
-                                  outlineBefore = list(isEmpty = FALSE,
-                                                       mergeSpace = "dataGroupsOnly"),
-                                  outlineTotal = list(mergeSpace = "dataGroupsAndCellsAs1",
-                                                      caption = "Total de itens"))
-      pt_ajustes$addRowDataGroups("Unidade",
-                                  addTotal = FALSE)
-    } else {
-      pt_ajustes$addRowDataGroups("Unidade",
-                                  outlineBefore = list(isEmpty = FALSE,
-                                                       mergeSpace = "dataGroupsOnly"),
-                                  outlineTotal = list(mergeSpace = "dataGroupsAndCellsAs1",
-                                                      caption = "Total de itens"))
-    }
-    pt_ajustes$addRowDataGroups("linha_planilha",
-                                header = "Linha",
-                                addTotal = FALSE,
-                                styleDeclarations = list("text-align"="right"))
-    pt_ajustes$addRowDataGroups("Nº Item", 
-                                addTotal = FALSE,
-                                styleDeclarations = list("text-align"="right"))
-    pt_ajustes$addRowDataGroups("Código do item", 
-                                addTotal = FALSE,
-                                styleDeclarations = list("text-align"="center"))
-    pt_ajustes$addRowDataGroups("Descrição Resumida", 
-                                addTotal = FALSE)
-    pt_ajustes$defineCalculation(calculationName = "Qtde. Itens", 
-                                 summariseExpression = "sum(Quantidade_0)")
-    pt_ajustes$theme <- "standardtable"
-    pt_ajustes$sortRowDataGroups(levelNumber = 1, 
-                                 orderBy = 'calculation', 
-                                 sortOrder = 'desc')
-    
-  tryCatch({
-    pt_ajustes$renderPivot(showRowGroupHeaders = TRUE)
-  },
-  error = function(e) {
-    log_erro("Não foi possível gerar esta seção do relatório. Podem estar faltando informações. Continuando...",
-             e,
-             alerta = TRUE)
-  })
+  pt_ajustes$addData(dados$filtros$com_ajuste)
+  if (importacao$consolidado) {
+    pt_ajustes$addRowDataGroups("Processo",
+      outlineBefore = list(
+        isEmpty = FALSE,
+        mergeSpace = "dataGroupsOnly"
+      ),
+      outlineTotal = list(
+        mergeSpace = "dataGroupsAndCellsAs1",
+        caption = "Total de itens"
+      )
+    )
+    pt_ajustes$addRowDataGroups("Unidade",
+      addTotal = FALSE
+    )
+  } else {
+    pt_ajustes$addRowDataGroups("Unidade",
+      outlineBefore = list(
+        isEmpty = FALSE,
+        mergeSpace = "dataGroupsOnly"
+      ),
+      outlineTotal = list(
+        mergeSpace = "dataGroupsAndCellsAs1",
+        caption = "Total de itens"
+      )
+    )
+  }
+  pt_ajustes$addRowDataGroups("linha_planilha",
+    header = "Linha",
+    addTotal = FALSE,
+    styleDeclarations = list("text-align" = "right")
+  )
+  pt_ajustes$addRowDataGroups("Nº Item",
+    addTotal = FALSE,
+    styleDeclarations = list("text-align" = "right")
+  )
+  pt_ajustes$addRowDataGroups("Código do item",
+    addTotal = FALSE,
+    styleDeclarations = list("text-align" = "center")
+  )
+  pt_ajustes$addRowDataGroups("Descrição Resumida",
+    addTotal = FALSE
+  )
+  pt_ajustes$defineCalculation(
+    calculationName = "Qtde. Itens",
+    summariseExpression = "sum(Quantidade_0)"
+  )
+  pt_ajustes$theme <- "standardtable"
+  pt_ajustes$sortRowDataGroups(
+    levelNumber = 1,
+    orderBy = "calculation",
+    sortOrder = "desc"
+  )
 
+  tryCatch(
+    {
+      pt_ajustes$renderPivot(showRowGroupHeaders = TRUE)
+    },
+    error = function(e) {
+      log_erro("Não foi possível gerar esta seção do relatório. Podem estar faltando informações. Continuando...",
+        e,
+        alerta = TRUE
+      )
+    }
+  )
 }
 
 cat("\n#### Exclusões por desistência ou não envio da documentação por parte da Unidade requerente\n")
@@ -150,51 +171,71 @@ cat(sprintf("- Quantidade de Unidades com demanda excluída: %s\n", dados$stats$
 
 if (dados$stats$qtde_demanda_excluida > 0) {
   pt_demanda_excluida <- PivotTable$new()
-    pt_demanda_excluida$addData(dados$filtros$com_demanda_excluida)
-    if (importacao$consolidado) {
-      pt_demanda_excluida$addRowDataGroups('Processo', 
-                                           outlineBefore = list(isEmpty = FALSE,
-                                                                mergeSpace = 'dataGroupsOnly'),
-                                           outlineTotal = list(mergeSpace = 'dataGroupsAndCellsAs1',
-                                                               caption = 'Total de itens'))
-      pt_demanda_excluida$addRowDataGroups('Unidade', 
-                                           addTotal = FALSE)
-    
-    } else {
-      pt_demanda_excluida$addRowDataGroups('Unidade', 
-                                           outlineBefore = list(isEmpty = FALSE,
-                                                                mergeSpace = 'dataGroupsOnly'),
-                                           outlineTotal = list(mergeSpace = 'dataGroupsAndCellsAs1',
-                                                               caption = 'Total de itens'))
-    }
-    pt_demanda_excluida$addRowDataGroups('linha_planilha',
-                                         header = "Linha",
-                                         addTotal = FALSE,
-                                         styleDeclarations = list('text-align'='right'))
-    pt_demanda_excluida$addRowDataGroups('Nº Item', 
-                                         addTotal = FALSE,
-                                         styleDeclarations = list('text-align'='right'))
-    pt_demanda_excluida$addRowDataGroups('Código do item', 
-                                         addTotal = FALSE,
-                                         styleDeclarations = list('text-align'='center'))
-    pt_demanda_excluida$addRowDataGroups('Descrição Resumida', 
-                                         addTotal = FALSE)
-    pt_demanda_excluida$defineCalculation(calculationName = 'Qtde. Itens', 
-                                          summariseExpression = 'sum(Quantidade_X)')
-    pt_demanda_excluida$theme <- 'standardtable'
-    pt_demanda_excluida$sortRowDataGroups(levelNumber = 1, 
-                                          orderBy = 'calculation', 
-                                          sortOrder = 'desc')
-    
-  tryCatch({
-    pt_demanda_excluida$renderPivot(showRowGroupHeaders = TRUE)
-  },
-  error = function(e) {
-    log_erro("Não foi possível gerar esta seção do relatório. Podem estar faltando informações. Continuando...",
-             e,
-             alerta = TRUE)
-  })
+  pt_demanda_excluida$addData(dados$filtros$com_demanda_excluida)
+  if (importacao$consolidado) {
+    pt_demanda_excluida$addRowDataGroups("Processo",
+      outlineBefore = list(
+        isEmpty = FALSE,
+        mergeSpace = "dataGroupsOnly"
+      ),
+      outlineTotal = list(
+        mergeSpace = "dataGroupsAndCellsAs1",
+        caption = "Total de itens"
+      )
+    )
+    pt_demanda_excluida$addRowDataGroups("Unidade",
+      addTotal = FALSE
+    )
+  } else {
+    pt_demanda_excluida$addRowDataGroups("Unidade",
+      outlineBefore = list(
+        isEmpty = FALSE,
+        mergeSpace = "dataGroupsOnly"
+      ),
+      outlineTotal = list(
+        mergeSpace = "dataGroupsAndCellsAs1",
+        caption = "Total de itens"
+      )
+    )
+  }
+  pt_demanda_excluida$addRowDataGroups("linha_planilha",
+    header = "Linha",
+    addTotal = FALSE,
+    styleDeclarations = list("text-align" = "right")
+  )
+  pt_demanda_excluida$addRowDataGroups("Nº Item",
+    addTotal = FALSE,
+    styleDeclarations = list("text-align" = "right")
+  )
+  pt_demanda_excluida$addRowDataGroups("Código do item",
+    addTotal = FALSE,
+    styleDeclarations = list("text-align" = "center")
+  )
+  pt_demanda_excluida$addRowDataGroups("Descrição Resumida",
+    addTotal = FALSE
+  )
+  pt_demanda_excluida$defineCalculation(
+    calculationName = "Qtde. Itens",
+    summariseExpression = "sum(Quantidade_X)"
+  )
+  pt_demanda_excluida$theme <- "standardtable"
+  pt_demanda_excluida$sortRowDataGroups(
+    levelNumber = 1,
+    orderBy = "calculation",
+    sortOrder = "desc"
+  )
 
+  tryCatch(
+    {
+      pt_demanda_excluida$renderPivot(showRowGroupHeaders = TRUE)
+    },
+    error = function(e) {
+      log_erro("Não foi possível gerar esta seção do relatório. Podem estar faltando informações. Continuando...",
+        e,
+        alerta = TRUE
+      )
+    }
+  )
 }
 ```
 
@@ -206,51 +247,74 @@ cat(sprintf("- Quantidade de itens excluídos: %s\n", dados$stats$qtde_itens_orc
 cat(sprintf("- Quantidade de Unidades afetadas com as exclusões: %s\n", dados$stats$qtde_unidades_afetadas_orcamentos))
 
 pt_orcamentos <- PivotTable$new()
-  pt_orcamentos$addData(dados$filtros$orcamentos_nao_enviados)
-  if (importacao$consolidado) {
-    pt_orcamentos$addRowDataGroups('Processo',
-                                   outlineBefore = list(isEmpty = FALSE,
-                                                        mergeSpace = 'dataGroupsOnly'),
-                                   outlineTotal = list(mergeSpace = 'dataGroupsAndCellsAs1',
-                                                       caption = 'Quantidade de Unidades'))
-    pt_orcamentos$addRowDataGroups("Responsável pela Pesquisa",
-                                   addTotal = FALSE,
-                                   outlineBefore = list(isEmpty = FALSE,
-                                                        mergeSpace = 'dataGroupsOnly'))
-  } else {
-    pt_orcamentos$addRowDataGroups('Responsável pela Pesquisa',
-                                   outlineBefore = list(isEmpty = FALSE,
-                                                        mergeSpace = 'dataGroupsOnly'),
-                                   outlineTotal = list(mergeSpace = 'dataGroupsAndCellsAs1',
-                                                       caption = 'Quantidade de Unidades'))
-  }
-  pt_orcamentos$addRowDataGroups("pedido",
-                                 header = "Pedido",
-                                 addTotal = FALSE,
-                                 styleDeclarations = list("text-align"="right"))
-  pt_orcamentos$addRowDataGroups("linha_planilha",
-                                 header = "Linha",
-                                 addTotal = FALSE,
-                                 styleDeclarations = list("text-align"="right"))
-  pt_orcamentos$addRowDataGroups("Código do item", 
-                                 addTotal = FALSE,
-                                 styleDeclarations = list("text-align"="center"))
-  pt_orcamentos$addRowDataGroups("Descrição Resumida", 
-                                 addTotal = FALSE)
-  pt_orcamentos$addRowDataGroups("Unidade", 
-                                 addTotal = FALSE)
-  pt_orcamentos$defineCalculation(calculationName = 'Qtde. Unidades', 
-                                  summariseExpression = 'n_distinct(Unidade)')
-  pt_orcamentos$theme <- "standardtable"
-  
-  tryCatch({
+pt_orcamentos$addData(dados$filtros$orcamentos_nao_enviados)
+if (importacao$consolidado) {
+  pt_orcamentos$addRowDataGroups("Processo",
+    outlineBefore = list(
+      isEmpty = FALSE,
+      mergeSpace = "dataGroupsOnly"
+    ),
+    outlineTotal = list(
+      mergeSpace = "dataGroupsAndCellsAs1",
+      caption = "Quantidade de Unidades"
+    )
+  )
+  pt_orcamentos$addRowDataGroups("Responsável pela Pesquisa",
+    addTotal = FALSE,
+    outlineBefore = list(
+      isEmpty = FALSE,
+      mergeSpace = "dataGroupsOnly"
+    )
+  )
+} else {
+  pt_orcamentos$addRowDataGroups("Responsável pela Pesquisa",
+    outlineBefore = list(
+      isEmpty = FALSE,
+      mergeSpace = "dataGroupsOnly"
+    ),
+    outlineTotal = list(
+      mergeSpace = "dataGroupsAndCellsAs1",
+      caption = "Quantidade de Unidades"
+    )
+  )
+}
+pt_orcamentos$addRowDataGroups("pedido",
+  header = "Pedido",
+  addTotal = FALSE,
+  styleDeclarations = list("text-align" = "right")
+)
+pt_orcamentos$addRowDataGroups("linha_planilha",
+  header = "Linha",
+  addTotal = FALSE,
+  styleDeclarations = list("text-align" = "right")
+)
+pt_orcamentos$addRowDataGroups("Código do item",
+  addTotal = FALSE,
+  styleDeclarations = list("text-align" = "center")
+)
+pt_orcamentos$addRowDataGroups("Descrição Resumida",
+  addTotal = FALSE
+)
+pt_orcamentos$addRowDataGroups("Unidade",
+  addTotal = FALSE
+)
+pt_orcamentos$defineCalculation(
+  calculationName = "Qtde. Unidades",
+  summariseExpression = "n_distinct(Unidade)"
+)
+pt_orcamentos$theme <- "standardtable"
+
+tryCatch(
+  {
     pt_orcamentos$renderPivot(showRowGroupHeaders = TRUE)
   },
   error = function(e) {
     log_erro("Não foi possível gerar esta seção do relatório. Podem estar faltando informações. Continuando...",
-             e,
-             alerta = TRUE)
-  })
+      e,
+      alerta = TRUE
+    )
+  }
+)
 ```
 
 ------------------------------------------------------------------------
@@ -263,9 +327,11 @@ if (total <= 5) {
   unidades_com_demanda_tabela <- dados$filtros$unidades_com_demanda
 } else {
   divisor <- ceiling(total / 3)
-  unidades_com_demanda_tabela <- list(dados$filtros$unidades_com_demanda[1:divisor], 
-                                      dados$filtros$unidades_com_demanda[(divisor + 1):(divisor * 2)], 
-                                      dados$filtros$unidades_com_demanda[(divisor * 2 + 1):total])
+  unidades_com_demanda_tabela <- list(
+    dados$filtros$unidades_com_demanda[1:divisor],
+    dados$filtros$unidades_com_demanda[(divisor + 1):(divisor * 2)],
+    dados$filtros$unidades_com_demanda[(divisor * 2 + 1):total]
+  )
 }
 
 unidades_com_demanda_tabela %>%
@@ -283,46 +349,63 @@ knitr::combine_words(names(dados$filtros$unidades_sem_demanda), and = " e ", oxf
 #### Distribuição dos itens por Unidade
 ```{r distribuicao_itens, message = FALSE}
 pt <- PivotTable$new()
-  pt$addData(dados$relatorio)
-  pt$addColumnGroup('item_compartilhado', 
-                    caption = 'Item compartilhado')
-  pt$addColumnDataGroups('item_compartilhado')
-  
-  if (importacao$pos_processos & importacao$consolidado) {
-    pt$addRowDataGroups('processoFmt', 
-                        header = 'Processo SPA', 
-                        outlineBefore = list(isEmpty = FALSE,
-                                             mergeSpace = 'dataGroupsOnly'),
-                        outlineTotal = list(mergeSpace = 'dataGroupsAndCellsAs1',
-                                            caption = 'Total de itens'))
-    pt$addRowDataGroups('setorResponsavelPesquisa', 
-                        header = 'Responsável pela pesquisa', 
-                        addTotal = FALSE)
-  } else {
-    pt$addRowDataGroups('setorResponsavelPesquisa', 
-                        header = 'Responsável pela pesquisa', 
-                        outlineBefore = list(isEmpty = FALSE,
-                                             mergeSpace = 'dataGroupsOnly'), 
-                        outlineTotal = list(mergeSpace = 'dataGroupsAndCellsAs1',
-                                            caption = 'Total de itens'))
-  }
-  pt$addRowDataGroups('setorOrigem', 
-                      header = 'Unidade requerente', 
-                      addTotal = FALSE)
-  pt$defineCalculation(calculationName = 'qtdeItens', 
-                       summariseExpression = 'n_distinct(linha_planilha)')
-  pt$addRowCalculationGroups()
-  pt$theme <- 'standardtable'
-  
-  tryCatch({
+pt$addData(dados$relatorio)
+pt$addColumnGroup("item_compartilhado",
+  caption = "Item compartilhado"
+)
+pt$addColumnDataGroups("item_compartilhado")
+
+if (importacao$pos_processos & importacao$consolidado) {
+  pt$addRowDataGroups("processoFmt",
+    header = "Processo SPA",
+    outlineBefore = list(
+      isEmpty = FALSE,
+      mergeSpace = "dataGroupsOnly"
+    ),
+    outlineTotal = list(
+      mergeSpace = "dataGroupsAndCellsAs1",
+      caption = "Total de itens"
+    )
+  )
+  pt$addRowDataGroups("setorResponsavelPesquisa",
+    header = "Responsável pela pesquisa",
+    addTotal = FALSE
+  )
+} else {
+  pt$addRowDataGroups("setorResponsavelPesquisa",
+    header = "Responsável pela pesquisa",
+    outlineBefore = list(
+      isEmpty = FALSE,
+      mergeSpace = "dataGroupsOnly"
+    ),
+    outlineTotal = list(
+      mergeSpace = "dataGroupsAndCellsAs1",
+      caption = "Total de itens"
+    )
+  )
+}
+pt$addRowDataGroups("setorOrigem",
+  header = "Unidade requerente",
+  addTotal = FALSE
+)
+pt$defineCalculation(
+  calculationName = "qtdeItens",
+  summariseExpression = "n_distinct(linha_planilha)"
+)
+pt$addRowCalculationGroups()
+pt$theme <- "standardtable"
+
+tryCatch(
+  {
     pt$renderPivot(showRowGroupHeaders = TRUE)
   },
   error = function(e) {
     log_erro("Não foi possível gerar esta seção do relatório. Podem estar faltando informações. Continuando...",
-             e,
-             alerta = TRUE)
-  })
-
+      e,
+      alerta = TRUE
+    )
+  }
+)
 ```
 
 ------------------------------------------------------------------------
@@ -333,35 +416,49 @@ cat("#### Itens para validação manual")
 dados_validacao_manual <- subset(dados$relatorio, setorResponsavelPesquisa == "VALIDAÇÃO MANUAL")
 
 pt_val_manual <- PivotTable$new()
-  pt_val_manual$addData(dados_validacao_manual)
-  pt_val_manual$addRowDataGroups('linha_planilha', 
-                        header = 'Linha original', 
-                        outlineBefore = list(isEmpty = FALSE,
-                                             mergeSpace = 'dataGroupsOnly'),
-                        outlineTotal = list(mergeSpace = 'dataGroupsAndCellsAs1',
-                                            caption = 'Quantidade total demandada'))
-  pt_val_manual$addRowDataGroups('descricaoResumida', 
-                        header = 'Descrição resumida',
-                        addTotal = FALSE)
-  pt_val_manual$addRowDataGroups('setorOrigem', 
-                        header = 'Unidade requerente',
-                        addTotal = FALSE)
-  pt_val_manual$defineCalculation(calculationName = 'Quantidade demandada', 
-                       summariseExpression = 'sum(qtd)')
-  pt_val_manual$addColumnCalculationGroups()
-  pt_val_manual$sortRowDataGroups(levelNumber = 3, 
-                                  orderBy = 'calculation', 
-                                  sortOrder = 'desc')
-  pt_val_manual$theme <- 'standardtable'
-  
-  tryCatch({
+pt_val_manual$addData(dados_validacao_manual)
+pt_val_manual$addRowDataGroups("linha_planilha",
+  header = "Linha original",
+  outlineBefore = list(
+    isEmpty = FALSE,
+    mergeSpace = "dataGroupsOnly"
+  ),
+  outlineTotal = list(
+    mergeSpace = "dataGroupsAndCellsAs1",
+    caption = "Quantidade total demandada"
+  )
+)
+pt_val_manual$addRowDataGroups("descricaoResumida",
+  header = "Descrição resumida",
+  addTotal = FALSE
+)
+pt_val_manual$addRowDataGroups("setorOrigem",
+  header = "Unidade requerente",
+  addTotal = FALSE
+)
+pt_val_manual$defineCalculation(
+  calculationName = "Quantidade demandada",
+  summariseExpression = "sum(qtd)"
+)
+pt_val_manual$addColumnCalculationGroups()
+pt_val_manual$sortRowDataGroups(
+  levelNumber = 3,
+  orderBy = "calculation",
+  sortOrder = "desc"
+)
+pt_val_manual$theme <- "standardtable"
+
+tryCatch(
+  {
     pt_val_manual$renderPivot(showRowGroupHeaders = TRUE)
   },
   error = function(e) {
     log_erro("Não foi possível gerar esta seção do relatório. Podem estar faltando informações. Continuando...",
-             e,
-             alerta = TRUE)
-  })
+      e,
+      alerta = TRUE
+    )
+  }
+)
 
 cat("------------------------------------------------------------------------")
 ```

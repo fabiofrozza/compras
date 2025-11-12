@@ -491,8 +491,8 @@ if (Test-Path -Path $configFullPath) {
     [Environment]::Exit(1)
 }    
 
-$fldData   = Join-Path $fldRoot (GetEnvConfig "FORNECEDORES_DADOS")
-$fldImport = Join-Path $fldRoot (GetEnvConfig "FORNECEDORES_PARA_IMPORTAR")
+$fldData   = Join-Path $fldRoot (GetEnvConfig "COMPRAS_FORNECEDORES_DADOS")
+$fldImport = Join-Path $fldRoot (GetEnvConfig "COMPRAS_FORNECEDORES_PARA_IMPORTAR")
 
 main "FORNECEDORES"
 

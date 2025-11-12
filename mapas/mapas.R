@@ -188,7 +188,8 @@ mapas_salvar <- function(mapas, script_a_executar) {
         addWorksheet(wb, "Mapa de Licitação")
         writeData(wb, "Mapa de Licitação", dados)
         saveWorkbook(
-          wb, file.path(pasta$listas, nome_arquivo), overwrite = TRUE
+          wb, file.path(pasta$listas, nome_arquivo),
+          overwrite = TRUE
         )
 
         log_info(sprintf("Arquivo salvo: %s", nome_arquivo),
@@ -257,8 +258,10 @@ mapas_main <- function() {
 
   pasta <- list()
   pasta$atual <- getwd()
-  pasta$mapas <- file.path(pasta$atual, Sys.getenv("MAPAS_MAPAS"))
-  pasta$listas <- file.path(pasta$atual, Sys.getenv("MAPAS_LISTAS"))
+  pasta$mapas <-
+    file.path(pasta$atual, Sys.getenv("COMPRAS_MAPAS_MAPAS"))
+  pasta$listas <-
+    file.path(pasta$atual, Sys.getenv("COMPRAS_MAPAS_LISTAS"))
   pasta$criar <- c(pasta$mapas, pasta$listas)
 
   pacotes <- c("openxlsx", "dplyr", "stringr")

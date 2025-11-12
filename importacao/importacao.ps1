@@ -889,9 +889,9 @@ if (Test-Path -Path $configFullPath) {
     [Environment]::Exit(1)
 }
 
-$fldToImport  = Join-Path $fldRoot (GetEnvConfig "IMPORTACAO_ARQUIVOS_A_IMPORTAR")
-$fldRelatorio = Join-Path $fldRoot (GetEnvConfig "IMPORTACAO_RELATORIOS")
-$fldResumo    = Join-Path $fldRoot (GetEnvConfig "IMPORTACAO_RESUMO_PEDIDOS" )
+$fldToImport  = Join-Path $fldRoot (GetEnvConfig "COMPRAS_IMPORTACAO_ARQUIVOS_A_IMPORTAR")
+$fldRelatorio = Join-Path $fldRoot (GetEnvConfig "COMPRAS_IMPORTACAO_RELATORIOS")
+$fldResumo    = Join-Path $fldRoot (GetEnvConfig "COMPRAS_IMPORTACAO_RESUMO_PEDIDOS" )
 
 main "IMPORTACAO"
 

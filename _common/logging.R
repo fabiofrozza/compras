@@ -578,7 +578,7 @@ log_secao <- function(subtitulo, titulo = NULL) {
   skin <- get_config("skin")
   borders <- skin$border
   tamanho <- skin$tamanho_mensagens
-  margem <- skin$margem
+  margem <- skin$tamanho_margem
 
   if (tipo == "borda") {
     if (posicao == "superior") {
@@ -750,7 +750,7 @@ log_secao <- function(subtitulo, titulo = NULL) {
     return(linhas)
   }
 
-  margem <- get_config("skin")$margem
+  margem <- get_config("skin")$tamanho_margem
 
   for (item in list(...)) {
     # Pula NULLs

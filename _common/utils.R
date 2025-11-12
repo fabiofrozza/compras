@@ -367,7 +367,7 @@ utils_style <- function(style) {
   styles[[style]]
 }
 
-utils_unidades_requerentes_obter <- function(origem = "importacao") {
+utils_unidades_obter <- function(origem = "importacao") {
   #' Obtém dados das unidades requerentes
   #'
   #' @description
@@ -385,10 +385,10 @@ utils_unidades_requerentes_obter <- function(origem = "importacao") {
   #'
   #' @examples
   #' # Obtém dados para importação
-  #' unidades <- utils_unidades_requerentes_obter()
+  #' unidades <- utils_unidades_obter()
   #'
   #' # Obtém dados para Power BI
-  #' unidades_bi <- utils_unidades_requerentes_obter("power bi")
+  #' unidades_bi <- utils_unidades_obter("power bi")
   #'
   #' @seealso \code{\link{get_config}}
 

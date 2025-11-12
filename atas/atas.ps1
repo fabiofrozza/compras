@@ -192,8 +192,8 @@ if (Test-Path -Path $configFullPath) {
     [Environment]::Exit(1)
 }
 
-$fldAtas   = Join-Path $fldRoot (GetEnvConfig "ATAS_ATAS")
-$fldSicaf  = Join-Path $fldRoot (GetEnvConfig "ATAS_SICAF")
+$fldAtas   = Join-Path $fldRoot (GetEnvConfig "COMPRAS_ATAS_ATAS")
+$fldSicaf  = Join-Path $fldRoot (GetEnvConfig "COMPRAS_ATAS_SICAF")
 
 main "ATAS"
 

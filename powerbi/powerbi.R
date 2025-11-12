@@ -90,16 +90,16 @@ power_bi_main <- function() {
 }
 
 power_bi_utils <- function() {
-  unidades <- utils_unidades_requerentes_obter("power bi")
+  unidades <- utils_unidades_obter("power bi")
 
   catalogo <- utils_catalogo()
 
-  ano_inicial <- Sys.getenv("PLANEJAMENTO_ANO_INICIAL")
+  ano_inicial <- Sys.getenv("COMPRAS_PLANEJAMENTO_ANO_INICIAL")
   ano_corrente <- format(Sys.Date(), "%Y")
   ano_licitacao <- seq(ano_inicial, ano_corrente)
 
   ano_inicial_processos_administrativos <-
-    Sys.getenv("PROCESSOS_ADM_ANO_INICIAL")
+    Sys.getenv("COMPRAS_PROCESSOS_ADM_ANO_INICIAL")
 
   list(
     unidades = unidades,
@@ -223,7 +223,8 @@ power_bi_renomear <- function(script_a_executar) {
         {
           if (opcao == "relatório de execução") {
             read_excel(
-              arquivo, .name_repair = ~ make.names(., unique = TRUE)
+              arquivo,
+              .name_repair = ~ make.names(., unique = TRUE)
             ) %>%
               mutate(
                 arquivo_relatorio = arquivo,
@@ -908,28 +909,28 @@ power_bi_execucao_main <- function(utils, resultado_renomear,
         if (length(item_mapa) == 0) next
 
         dados_lista[[length(dados_lista) + 1]] <- list(
-          id_unico        = paste(npregao, item_numero, sep = "-"),
-          ano             = mapa$Ano[item_mapa][1],
-          etapa           = mapa$Etapa[item_mapa][1],
-          processo        = mapa$Processo[item_mapa][1],
-          pregao          = npregao,
+          id_unico = paste(npregao, item_numero, sep = "-"),
+          ano = mapa$Ano[item_mapa][1],
+          etapa = mapa$Etapa[item_mapa][1],
+          processo = mapa$Processo[item_mapa][1],
+          pregao = npregao,
           pregao_processo =
             paste(npregao, mapa$Processo[item_mapa][1], sep = " - "),
-          objeto          = mapa$Objeto[item_mapa][1],
-          item            = item_numero,
-          grupo           =
+          objeto = mapa$Objeto[item_mapa][1],
+          item = item_numero,
+          grupo =
             catalogo %>%
-            filter(Grupo == str_sub(mapa$`Cód. Item`[item_mapa][1], 1, 6)) %>%
-            pull(grupoDescricao),
-          un_medida       = mapa$`Unidade de medida`[item_mapa][1],
-          descricao       = mapa$`Descrição resumida`[item_mapa][1],
-          especif         = mapa$Especificação[item_mapa][1],
-          detalh          = mapa$Detalhamento[item_mapa][1],
-          qt_total        =
+              filter(Grupo == str_sub(mapa$`Cód. Item`[item_mapa][1], 1, 6)) %>%
+              pull(grupoDescricao),
+          un_medida = mapa$`Unidade de medida`[item_mapa][1],
+          descricao = mapa$`Descrição resumida`[item_mapa][1],
+          especif = mapa$Especificação[item_mapa][1],
+          detalh = mapa$Detalhamento[item_mapa][1],
+          qt_total =
             utils_corrigir_valor(dados_item$`Qtde.Licitação`[1]),
-          valor           =
+          valor =
             utils_corrigir_valor(mapa$`Valor homologado`[item_mapa][1]),
-          fornecedor      = mapa$Vencedor[item_mapa][1]
+          fornecedor = mapa$Vencedor[item_mapa][1]
         )
       }
     }
@@ -1017,7 +1018,8 @@ power_bi_execucao_main <- function(utils, resultado_renomear,
       if (length(divisores) == 0) next
 
       log_barra_progresso(
-        sprintf("Processando pregão %s (%s)", npregao, tipo), pb = pb
+        sprintf("Processando pregão %s (%s)", npregao, tipo),
+        pb = pb
       )
 
       for (i in seq_along(divisores)) {

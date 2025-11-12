@@ -12,12 +12,12 @@ function InterfaceConstants {
 
     SetScriptConstants @{
         # Company info (for icons)
-        COMPANY_NAME    = if ([string]::IsNullOrEmpty($config.COMPANY_NAME))    { "empresa $msgNotPersonalized" }      else { $config.COMPANY_NAME }
-        COMPANY_SITE    = if ([string]::IsNullOrEmpty($config.COMPANY_SITE))    { "www.empresa.com.br" }               else { $config.COMPANY_SITE }
-        DEPARTMENT_NAME = if ([string]::IsNullOrEmpty($config.DEPARTMENT_NAME)) { "departamento $msgNotPersonalized" } else { $config.DEPARTMENT_NAME }
-        DEPARTMENT_SITE = if ([string]::IsNullOrEmpty($config.DEPARTMENT_SITE)) { "www.departamento.com.br" }          else { $config.DEPARTMENT_SITE }
-        MANUAL_SITE     = if ([string]::IsNullOrEmpty($config.MANUAL_SITE))     { "www.departamento.com.br/manual" }   else { $config.MANUAL_SITE }
-        LISTS_PAGE_SITE = if ([string]::IsNullOrEmpty($config.LISTS_PAGE_SITE)) { "www.departamento.com.br/lists" }    else { $config.LISTS_PAGE_SITE }
+        COMPANY_NAME    = if ([string]::IsNullOrEmpty($config.COMPRAS_COMPANY_NAME))    { "empresa $msgNotPersonalized" }      else { $config.COMPRAS_COMPANY_NAME }
+        COMPANY_SITE    = if ([string]::IsNullOrEmpty($config.COMPRAS_COMPANY_SITE))    { "www.empresa.com.br" }               else { $config.COMPRAS_COMPANY_SITE }
+        DEPARTMENT_NAME = if ([string]::IsNullOrEmpty($config.COMPRAS_DEPARTMENT_NAME)) { "departamento $msgNotPersonalized" } else { $config.COMPRAS_DEPARTMENT_NAME }
+        DEPARTMENT_SITE = if ([string]::IsNullOrEmpty($config.COMPRAS_DEPARTMENT_SITE)) { "www.departamento.com.br" }          else { $config.COMPRAS_DEPARTMENT_SITE }
+        MANUAL_SITE     = if ([string]::IsNullOrEmpty($config.COMPRAS_MANUAL_SITE))     { "www.departamento.com.br/manual" }   else { $config.COMPRAS_MANUAL_SITE }
+        LISTS_PAGE_SITE = if ([string]::IsNullOrEmpty($config.COMPRAS_LISTS_PAGE_SITE)) { "www.departamento.com.br/lists" }    else { $config.COMPRAS_LISTS_PAGE_SITE }
 
         # UI control sizes
         FRM_MAIN_WIDTH    = $frmWidth
