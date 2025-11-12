@@ -297,29 +297,6 @@ config_json <- function(
   #' @param max_tentativas Numeric. Número máximo de tentativas em caso de erro.
   #' @param intervalo Numeric. Intervalo em segundos entre tentativas.
 
-  # Define a seção (nome do script)
-  if (is.null(secao)) {
-    secao <- get_config("geral")$script_nome
-  }
-
-  # Caminho do arquivo centralizado
-  arquivo_config <- get_config("geral")$config_centralizado
-
-  # Verifica se o conteúdo está em cache e se não está desatualizado
-  cache_key <- paste0("config_json_", secao)
-  cache_time_key <- paste0(cache_key, "_timestamp")
-  r_config_secao <- get_config(cache_key)
-  cache_timestamp <- get_config(cache_time_key)
-
-  # Verifica se o cache está atualizado
-  file_timestamp <-
-    if (file.exists(arquivo_config)) file.info(arquivo_config)$mtime else NULL
-  cache_valid <-
-    !is.null(r_config_secao) &&
-      !is.null(cache_timestamp) &&
-      !is.null(file_timestamp) &&
-      cache_timestamp >= file_timestamp
-
   # Função auxiliar para ler o arquivo com retry
   .ler_json <- function() {
     for (tentativa in 1:max_tentativas) {
@@ -336,14 +313,14 @@ config_json <- function(
             cat("=== Arquivo config.json estava vazio.
               Inicializado com lista vazia. ===\n")
           }
-
+          
           config_completo <- fromJSON(arquivo_config)
-
+          
           # Se a seção não existe, cria uma vazia
           if (!(secao %in% names(config_completo))) {
             config_completo[[secao]] <- list()
           }
-
+          
           return(config_completo)
         },
         error = function(e) {
@@ -359,7 +336,7 @@ config_json <- function(
       )
     }
   }
-
+  
   # Função auxiliar para escrever no arquivo com retry
   .escrever_json <- function(config_completo) {
     for (tentativa in 1:max_tentativas) {
@@ -371,17 +348,17 @@ config_json <- function(
             fileext = ".json"
           )
           write_json(config_completo, temp_file,
-            pretty = TRUE, auto_unbox = TRUE
+                     pretty = TRUE, auto_unbox = TRUE
           )
-
+          
           # Move o arquivo temporário para o definitivo
           file.rename(temp_file, arquivo_config)
-
+          
           return(TRUE)
         },
         error = function(e) {
           if (file.exists(temp_file)) file.remove(temp_file)
-
+          
           if (tentativa < max_tentativas) {
             Sys.sleep(intervalo)
           } else {
@@ -394,6 +371,27 @@ config_json <- function(
       )
     }
   }
+  
+  # Define a seção (nome do script)
+  if (is.null(secao)) secao <- get_config("geral")$script_nome
+
+  # Caminho do arquivo centralizado
+  arquivo_config <- get_config("geral")$config_centralizado
+
+  # Verifica se o conteúdo está em cache e se não está desatualizado
+  cache_key <- paste0("config_json_", secao)
+  cache_time_key <- paste0(cache_key, "_timestamp")
+  r_config_secao <- get_config(cache_key)
+  cache_timestamp <- get_config(cache_time_key)
+
+  # Verifica se o cache está atualizado
+  file_timestamp <-
+    if (file.exists(arquivo_config)) file.info(arquivo_config)$mtime else NULL
+  cache_valid <-
+    !is.null(r_config_secao) &&
+    !is.null(cache_timestamp) &&
+    !is.null(file_timestamp) &&
+    cache_timestamp >= file_timestamp
 
   # Se não está em cache ou está desatualizado, carrega do disco
   if (!cache_valid) {
@@ -418,6 +416,12 @@ config_json <- function(
     return(r_config_secao[[chave]])
   }
 
+  # Atualiza cache antes de modificar
+  if (opcao %in% c("remove", "set")) {
+    config_completo <- .ler_json()
+    r_config_secao <- config_completo[[secao]]
+  }
+  
   if (opcao == "remove") {
     r_config_secao[[chave]] <- NULL
     modificado <- TRUE

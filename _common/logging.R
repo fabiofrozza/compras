@@ -224,7 +224,7 @@ log_erro <- function(
   if (alerta && titulo == "ERRO") titulo <- "ALERTA"
 
   status <- get_config("status")
-  log_r <- get_config("logR")
+  log_r <- get_config("log_r")
 
   if (status$inicio) {
     config_json("msg_erro", log_r$nome)
