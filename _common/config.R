@@ -313,14 +313,14 @@ config_json <- function(
             cat("=== Arquivo config.json estava vazio.
               Inicializado com lista vazia. ===\n")
           }
-          
+
           config_completo <- fromJSON(arquivo_config)
-          
+
           # Se a seção não existe, cria uma vazia
           if (!(secao %in% names(config_completo))) {
             config_completo[[secao]] <- list()
           }
-          
+
           return(config_completo)
         },
         error = function(e) {
@@ -336,7 +336,7 @@ config_json <- function(
       )
     }
   }
-  
+
   # Função auxiliar para escrever no arquivo com retry
   .escrever_json <- function(config_completo) {
     for (tentativa in 1:max_tentativas) {
@@ -347,18 +347,19 @@ config_json <- function(
             tmpdir = dirname(arquivo_config),
             fileext = ".json"
           )
-          write_json(config_completo, temp_file,
-                     pretty = TRUE, auto_unbox = TRUE
+          write_json(
+            config_completo, temp_file,
+            pretty = TRUE, auto_unbox = TRUE
           )
-          
+
           # Move o arquivo temporário para o definitivo
           file.rename(temp_file, arquivo_config)
-          
+
           return(TRUE)
         },
         error = function(e) {
           if (file.exists(temp_file)) file.remove(temp_file)
-          
+
           if (tentativa < max_tentativas) {
             Sys.sleep(intervalo)
           } else {
@@ -371,7 +372,7 @@ config_json <- function(
       )
     }
   }
-  
+
   # Define a seção (nome do script)
   if (is.null(secao)) secao <- get_config("geral")$script_nome
 
@@ -389,9 +390,9 @@ config_json <- function(
     if (file.exists(arquivo_config)) file.info(arquivo_config)$mtime else NULL
   cache_valid <-
     !is.null(r_config_secao) &&
-    !is.null(cache_timestamp) &&
-    !is.null(file_timestamp) &&
-    cache_timestamp >= file_timestamp
+      !is.null(cache_timestamp) &&
+      !is.null(file_timestamp) &&
+      cache_timestamp >= file_timestamp
 
   # Se não está em cache ou está desatualizado, carrega do disco
   if (!cache_valid) {
@@ -421,7 +422,7 @@ config_json <- function(
     config_completo <- .ler_json()
     r_config_secao <- config_completo[[secao]]
   }
-  
+
   if (opcao == "remove") {
     r_config_secao[[chave]] <- NULL
     modificado <- TRUE
@@ -850,70 +851,72 @@ config_pacotes <- function(pacotes) {
 
     pb <- log_barra_progresso("Aguarde...", length(pacotes_nao_instalados))
 
-    for (i in seq_along(pacotes_nao_instalados)) {
-      log_barra_progresso(sprintf(
-        "Instalando pacote %s",
-        pacotes_nao_instalados[i]
-      ), pb = pb)
-
-      install.packages(pacotes_nao_instalados[i],
-        lib = pasta_pacotes,
-        dependencies = TRUE,
-        repos = "https://cloud.r-project.org/"
+    sapply(pacotes_nao_instalados, function(pacote) {
+      tryCatch(
+        {
+          log_barra_progresso(sprintf("Instalando pacote %s", pacote), pb = pb)
+          install.packages(pacote,
+            lib = pasta_pacotes,
+            dependencies = TRUE,
+            repos = "https://cloud.r-project.org/"
+          )
+        },
+        error = function(e) {
+          log_erro(
+            sprintf("Falha ao instalar o pacote '%s'", pacote),
+            e$message
+          )
+        }
       )
-    }
+    })
 
     log_barra_progresso(pb = pb)
 
+    # Re-verifica os pacotes após a tentativa de instalação
     pacotes_instalados <- pacotes %in%
       rownames(installed.packages(lib.loc = pasta_pacotes))
-    pacotes_nao_instalados <- pacotes[!pacotes_instalados]
 
-    if (any(pacotes_instalados == FALSE)) {
-      log_erro(sprintf(
-        "Erro ao instalar os pacotes %s em %s",
-        pacotes_nao_instalados, pasta_pacotes
-      ))
-      return(FALSE)
+    if (any(!pacotes_instalados)) {
+      pacotes_faltando <- pacotes[!pacotes_instalados]
+      log_erro(
+        "Não foi possível instalar os seguintes pacotes:",
+        paste(pacotes_faltando, collapse = ", "),
+        finalizar = TRUE
+      )
     } else {
       log_info(
-        estilo = "meio",
-        sprintf("Pacotes necessários instalados em %s", pasta_pacotes)
+        "Todos os pacotes necessários foram instalados.",
+        estilo = "meio"
       )
     }
   }
 
   pb <- log_barra_progresso("Aguarde...", length(pacotes))
 
-  tryCatch(
-    {
-      for (i in seq_along(pacotes)) {
-        log_barra_progresso(
-          sprintf("Carregando pacote %s", pacotes[i]),
-          pb = pb
-        )
-
-        library(pacotes[i],
+  for (pacote in pacotes) {
+    tryCatch(
+      {
+        log_barra_progresso(sprintf("Carregando pacote %s", pacote), pb = pb)
+        library(pacote,
           lib.loc = pasta_pacotes,
-          verbose = TRUE,
-          character.only = TRUE
+          character.only = TRUE,
+          warn.conflicts = FALSE,
+          quietly = TRUE
+        )
+      },
+      error = function(e) {
+        log_erro(
+          sprintf("Não foi possível carregar o pacote '%s'", pacote),
+          e$message,
+          finalizar = TRUE
         )
       }
-      log_barra_progresso(pb = pb)
-      log_info(paste0("Pacotes necessários carregados em ", pasta_pacotes),
-        estilo = "meio"
-      )
-    },
-    error = function(e) {
-      log_erro(
-        paste(
-          "Não foi possível carregar os pacotes necessários em",
-          pasta_pacotes
-        ),
-        e,
-        finalizar = TRUE
-      )
-    }
+    )
+  }
+
+  log_barra_progresso(pb = pb)
+  log_info(paste0("Pacotes necessários carregados de ", pasta_pacotes),
+    estilo = "meio"
   )
 
   log_info(estilo = "fim")
