@@ -135,47 +135,46 @@ utils_catalogo <- function() {
 }
 
 utils_cmd_info <- function(value_name) {
-  
   .decode_dword <- function(dword_hex_string) {
     decimal_value <- strtoi(dword_hex_string)
     if (is.na(decimal_value)) {
-      return(list(Altura = NA, Largura = NA, erro = "Valor hexadecimal inválido"))
+      return(list(erro = "Valor hexadecimal inválido"))
     }
     altura <- bitwShiftR(decimal_value, 16)
     largura <- bitwAnd(decimal_value, 0xFFFF)
-    
+
     list(altura = altura, largura = largura)
   }
-  
+
   .decode_colors <- function(dword_hex_string) {
     map <- c(
-      "0" = "Preto", "1" = "Azul", "2" = "Verde", 
+      "0" = "Preto", "1" = "Azul", "2" = "Verde",
       "3" = "Aqua (Azul-piscina)", "4" = "Vermelho", "5" = "Roxo",
       "6" = "Amarelo", "7" = "Branco (Cinza Claro)",
       "8" = "Cinza (Cinza Escuro)", "9" = "Azul Claro", "10" = "Verde Claro",
       "11" = "Aqua Claro", "12" = "Vermelho Claro", "13" = "Roxo Claro",
       "14" = "Amarelo Claro", "15" = "Branco Brilhante"
     )
-    
+
     decimal_value <- strtoi(dword_hex_string)
-    if (is.na(decimal_value)) return(list(erro = "Valor hexadecimal inválido"))
-    
+    if (is.na(decimal_value)) {
+      return(list(erro = "Valor hexadecimal inválido"))
+    }
+
     bg_code <- bitwShiftR(decimal_value, 4)
     fg_code <- bitwAnd(decimal_value, 0xF)
-    
+
     bg_name <- map[as.character(bg_code)]
     fg_name <- map[as.character(fg_code)]
-    
-    return(
-      list(
-        codigoFundo = bg_code,
-        nomeFundo = unname(bg_name),
-        codigoTexto = fg_code,
-        nomeTexto = unname(fg_name)
-      )
+
+    list(
+      codigoFundo = bg_code,
+      nomeFundo = unname(bg_name),
+      codigoTexto = fg_code,
+      nomeTexto = unname(fg_name)
     )
   }
-  
+
   reg_key <- '"HKCU\\Console\\%SystemRoot%_system32_cmd.exe"'
   output <-
     try(
@@ -187,10 +186,10 @@ utils_cmd_info <- function(value_name) {
       ),
       silent = TRUE
     )
-  
+
   if (inherits(output, "try-error") || any(grepl("ERRO:", output))) {
     reg_key <- '"HKCU\\Console"'
-    output <- 
+    output <-
       try(
         system2(
           "reg",
@@ -198,24 +197,25 @@ utils_cmd_info <- function(value_name) {
           stdout = TRUE,
           stderr = TRUE
         ),
-        silent = TRUE)
-    
+        silent = TRUE
+      )
+
     if (inherits(output, "try-error") || any(grepl("ERRO:", output))) {
       return(paste("Valor '", value_name, "' não encontrado.", sep = ""))
     }
   }
-  
+
   value_line <- grep(value_name, output, value = TRUE, ignore.case = TRUE)
-  
+
   if (length(value_line) == 0) {
     return(paste("Valor '", value_name, "' não encontrado.", sep = ""))
   }
-  
+
   type_data <-
     trimws(gsub(".*(REG_(SZ|DWORD|BINARY)).*", "\\1", value_line))
-  value_data <- 
+  value_data <-
     trimws(sub(".*(REG_(SZ|DWORD|BINARY))\\s+", "", value_line))
-  
+
   if (type_data == "REG_SZ") {
     return(
       list(
@@ -224,22 +224,20 @@ utils_cmd_info <- function(value_name) {
       )
     )
   }
-  
+
   if (type_data == "REG_DWORD") {
     if (value_name == "ScreenColors") {
       decoded_value <- .decode_colors(value_data)
     } else {
-      decoded_value <- .decode_dword(value_data)  
+      decoded_value <- .decode_dword(value_data)
     }
-    
-    return(
-      modifyList(
-        list(
-          type = type_data,
-          value = value_data
-        ),
-        decoded_value
-      )
+
+    modifyList(
+      list(
+        type = type_data,
+        value = value_data
+      ),
+      decoded_value
     )
   }
 }
@@ -309,17 +307,17 @@ utils_color <- function(color = NULL) {
   #' @references
   #' \href{https://ss64.com/nt/syntax-ansi.html}{How-to: Use ANSI colours
   #' in the terminal}
-  
+
   if (!utils_is_windows() || utils_silent() || is.null(color)) {
     return(invisible(NULL))
   }
-  
+
   colors <- get_config("skin")$style
-  
+
   if (!(color %in% names(colors))) {
     return(invisible(NULL))
   }
-  
+
   shell(colors[[color]])
 }
 
@@ -341,7 +339,7 @@ utils_corrigir_valor <- function(valor) {
   #'
   #' # Corrige valor sem decimais
   #' utils_corrigir_valor("1.234")     # Retorna 1234
-  
+
   as.numeric(gsub(",", ".", gsub("\\.", "", valor)))
 }
 
@@ -408,7 +406,7 @@ utils_silent <- function() {
   #'
   #' @seealso \code{\link{utils_color}}, \code{\link{log_barra_progresso}},
   #' \code{\link{commandArgs}}
-  
+
   "silent" %in% commandArgs(trailingOnly = TRUE)
 }
 
@@ -469,11 +467,11 @@ utils_style <- function(style) {
       "ok"         = utils_ansi("dark_magenta", "light_yellow")
     )
   )
-  
+
   if (!(style %in% names(styles))) {
     style <- "default"
   }
-  
+
   styles[[style]]
 }
 
@@ -501,46 +499,46 @@ utils_unidades_obter <- function(origem = "importacao") {
   #' unidades_bi <- utils_unidades_obter("power bi")
   #'
   #' @seealso \code{\link{get_config}}
-  
+
   log_secao("OBTENDO DADOS DAS UNIDADES REQUERENTES", "UTILS")
-  
+
   url_unidades <- get_config("url")$unidades
-  
+
   log_info("Planilha: Unidades - espelhada",
-           paste0("Link: ", url_unidades),
-           paste0("Aba : ", ifelse(origem == "importacao",
-                                   "Script Importação",
-                                   "Power BI"
-           )),
-           cores = "highlight1"
+    paste0("Link: ", url_unidades),
+    paste0("Aba : ", ifelse(origem == "importacao",
+      "Script Importação",
+      "Power BI"
+    )),
+    cores = "highlight1"
   )
-  
+
   gs4_deauth()
-  
+
   tryCatch(
     {
       if (origem == "importacao") {
         unidades <- range_read(url_unidades,
-                               sheet = "Script Importação",
-                               col_types = "cccccc"
+          sheet = "Script Importação",
+          col_types = "cccccc"
         )
-        
+
         colnames(unidades)[c(3, 4, 5, 6)] <- c(
           "sigla_solar", "imovel",
           "cpf", "email"
         )
       } else if (origem == "power bi") {
         unidades <- range_read(url_unidades,
-                               sheet = "Power BI"
+          sheet = "Power BI"
         )
-        
+
         sigla_solar_duplicidade <- unidades %>%
           group_by(`Sigla no Solar`) %>%
           filter(n() > 1) %>%
           mutate(siglas_duplicidade = paste(Setor, "-", `Sigla no Solar`)) %>%
           arrange(`Sigla no Solar`) %>%
           pull(siglas_duplicidade)
-        
+
         if (length(sigla_solar_duplicidade) > 0) {
           log_erro(
             paste(
@@ -559,8 +557,8 @@ utils_unidades_obter <- function(origem = "importacao") {
     },
     error = function(e) {
       log_erro("Erro ao acessar Unidades requerentes. Encerrando...",
-               e,
-               finalizar = TRUE
+        e,
+        finalizar = TRUE
       )
     }
   )
@@ -590,28 +588,28 @@ utils_verificar_cnpj <- function(cnpj) {
   #'
   #' # Valida CNPJ inválido
   #' utils_verificar_cnpj("11.222.333/0001-00")
-  
+
   # Verifica se o CNPJ é NA ou vazio ou NULL
   if (is.na(cnpj) || cnpj == "" || is.null(cnpj)) {
     return(FALSE)
   }
-  
+
   # Remove caracteres não numéricos
   cnpj_limpo <- gsub("[^0-9]", "", cnpj)
-  
+
   # Verifica se o CNPJ tem 14 dígitos
   if (nchar(cnpj_limpo) != 14) {
     return(FALSE)
   }
-  
+
   # Converte para vetor numérico
   digitos <- as.numeric(strsplit(cnpj_limpo, "")[[1]])
-  
+
   # Verifica se todos os dígitos são iguais (ex: 00000000000000)
   if (length(unique(digitos)) == 1) {
     return(FALSE)
   }
-  
+
   d1 <- NULL
   d1[1] <- digitos[1] * 5
   d1[2] <- digitos[2] * 4
@@ -627,7 +625,7 @@ utils_verificar_cnpj <- function(cnpj) {
   d1[12] <- digitos[12] * 2
   resto1 <- sum(d1, na.rm = TRUE) %% 11
   dv1 <- ifelse(resto1 < 2, 0, 11 - resto1)
-  
+
   d2 <- NULL
   d2[1] <- digitos[1] * 6
   d2[2] <- digitos[2] * 5
@@ -644,11 +642,11 @@ utils_verificar_cnpj <- function(cnpj) {
   d2[13] <- dv1 * 2
   resto2 <- sum(d2, na.rm = TRUE) %% 11
   dv2 <- ifelse(resto2 < 2, 0, 11 - resto2)
-  
+
   # Compara os dígitos verificadores calculados com os informados
   dv_informado <- substring(cnpj_limpo, 13, 14)
   dv_calculado <- paste0(dv1, dv2)
-  
+
   dv_informado == dv_calculado
 }
 
@@ -676,26 +674,26 @@ utils_verificar_cpf <- function(cpf) {
   #'
   #' # Valida CPF inválido
   #' utils_verificar_cpf("111.111.111-11")
-  
+
   # Se for NA, vazio ou NULL, já retorna inválido
   if (is.na(cpf) || cpf == "" || is.null(cpf)) {
     return(FALSE)
   }
-  
+
   # Remove tudo que não for dígito e verifica se tem 11 caracteres
   cpf_limpo <- gsub("[^0-9]", "", cpf)
   if (nchar(cpf_limpo) != 11) {
     return(FALSE)
   }
-  
+
   # Converte para vetor numérico
   digitos <- as.numeric(strsplit(cpf_limpo, "")[[1]])
-  
+
   # Adicionar verificação de CPFs conhecidamente inválidos
   if (length(unique(digitos)) == 1) {
     return(FALSE)
   }
-  
+
   d1 <- NULL
   d1[1] <- digitos[1] * 10
   d1[2] <- digitos[2] * 9
@@ -712,7 +710,7 @@ utils_verificar_cpf <- function(cpf) {
   } else {
     dv1 <- 11 - resto1
   }
-  
+
   d2 <- NULL
   d2[1] <- digitos[1] * 11
   d2[2] <- digitos[2] * 10
@@ -730,10 +728,10 @@ utils_verificar_cpf <- function(cpf) {
   } else {
     dv2 <- 11 - resto2
   }
-  
+
   dv_calculado <- paste0(as.character(dv1), as.character(dv2))
   dv_informado <- substr(cpf_limpo, 10, 11)
-  
+
   dv_calculado == dv_informado
 }
 
@@ -762,9 +760,9 @@ utils_verificar_script <- function(scripts_permitidos, script_padrao) {
   #' script <- utils_verificar_script(scripts, padrao)
   #'
   #' @seealso \code{\link{log_erro}}
-  
+
   argumentos <- commandArgs(trailingOnly = TRUE)
-  
+
   if (length(argumentos) == 0) {
     log_erro(
       sprintf(
@@ -775,9 +773,9 @@ utils_verificar_script <- function(scripts_permitidos, script_padrao) {
     )
     return(script_padrao)
   }
-  
+
   script_a_executar <- argumentos[1]
-  
+
   if (!(script_a_executar %in% scripts_permitidos)) {
     log_erro(
       sprintf(

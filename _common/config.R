@@ -694,10 +694,10 @@ config_finalizar <- function(sucesso = FALSE) {
 
 config_info <- function() {
   #' Exibe informaçõe do sistema para log e debug
-  
+
   screen_colors <- utils_cmd_info("ScreenColors")
   window_size <- utils_cmd_info("WindowSize")
-  
+
   log_info(
     "Informações do sistema", Sys.info(),
     "-",
@@ -705,18 +705,18 @@ config_info <- function() {
     c(
       paste("Código de página:", Sys.getlocale("LC_CTYPE")),
       paste(
-        "Fonte:", utils_cmd_info("FaceName")$value, 
+        "Fonte:", utils_cmd_info("FaceName")$value,
         "- Tamanho:", utils_cmd_info("FontSize")$altura
       ),
       paste("Cores:", screen_colors$nomeFundo, "-", screen_colors$nomeTexto),
-      paste("Tamanho janela:", window_size$altura, "-", window_size$largura)),
+      paste("Tamanho janela:", window_size$altura, "-", window_size$largura)
+    ),
     "-",
     "Informações da rede", c(config_rede()),
     "-",
     "Sessão R", R.version,
     cores = "highlight1"
   )
-  
 }
 
 config_inicializar <- function(script_nome, pacotes, pasta = NULL) {
@@ -802,7 +802,7 @@ config_inicializar <- function(script_nome, pacotes, pasta = NULL) {
   )
 
   config_info()
-  
+
   log_secao("CONFIGURAÇÕES INICIAIS", "CONFIG")
 
   log_info("PASTAS UTILIZADAS", pasta,
