@@ -117,7 +117,7 @@ catmat_obter_margens <- function() {
 
   # Adiciona coluna com números das linhas do Excel (começando de 1)
   planilha_margens$linha_planilha <-
-    1:nrow(planilha_margens) + 1 # +1 = Excel começa na linha 1 (cabeçalho)
+    seq_len(nrow(planilha_margens) + 1) # +1 Excel começa na linha 1 (cabeçalho)
 
   margens <- planilha_margens %>%
     filter(!is.na(NCM)) %>%

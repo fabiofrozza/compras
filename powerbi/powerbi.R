@@ -98,15 +98,13 @@ power_bi_utils <- function() {
   ano_corrente <- format(Sys.Date(), "%Y")
   ano_licitacao <- seq(ano_inicial, ano_corrente)
 
-  ano_inicial_processos_administrativos <-
-    Sys.getenv("COMPRAS_PROCESSOS_ADM_ANO_INICIAL")
+  ano_inicial_pa <- Sys.getenv("COMPRAS_PROCESSOS_ADM_ANO_INICIAL")
 
   list(
     unidades = unidades,
     catalogo = catalogo,
     ano_licitacao = ano_licitacao,
-    ano_inicial_processos_administrativos =
-      ano_inicial_processos_administrativos
+    ano_inicial_pa = ano_inicial_pa
   )
 }
 
@@ -425,7 +423,7 @@ power_bi_renomear <- function(script_a_executar) {
   # ---- INICIANDO ----
 
   geral <- get_config("geral")
-  geral$script_nome <- "POWER" # "PowerBI - Renomear"
+  geral$script_nome <- "POWERBI" # "PowerBI - Renomear"
   set_config(geral = geral)
 
   log_secao("OBTENDO LISTA DE MAPAS DE LICITAÇÕES")
@@ -706,7 +704,7 @@ power_bi_planejamento_main <- function(utils, script_a_executar) {
   # ---- INICIANDO ----
 
   geral <- get_config("geral")
-  geral$script_nome <- "POWER" # "PowerBI - Planejamento"
+  geral$script_nome <- "POWERBI" # "PowerBI - Planejamento"
   set_config(geral = geral)
 
   ano_licitacao <- utils$ano_licitacao
@@ -838,7 +836,7 @@ power_bi_licitacao_main <- function(utils, mapas_dados, script_a_executar) {
   # ---- INICIANDO ----
 
   geral <- get_config("geral")
-  geral$script_nome <- "POWER" # "Power BI - Licitação"
+  geral$script_nome <- "POWERBI" # "Power BI - Licitação"
   set_config(geral = geral)
 
   unidades <- utils$unidades
@@ -1080,7 +1078,7 @@ power_bi_execucao_main <- function(utils, resultado_renomear,
   # ---- INICIANDO ----
 
   geral <- get_config("geral")
-  geral$script_nome <- "POWER" # "PowerBI - Execução"
+  geral$script_nome <- "POWERBI" # "PowerBI - Execução"
   set_config(geral = geral)
 
   unidades <- utils$unidades
@@ -1158,7 +1156,7 @@ power_bi_execucao_main <- function(utils, resultado_renomear,
 # ---- PROCESSOS ADMINISTRATIVOS E ALTERAÇÕES CONTRATUAIS ----
 
 power_bi_paalteracoes_main <- function(utils, script_a_executar) {
-  planilha_obter <- function(ano_inicial_processos_administrativos) {
+  planilha_obter <- function(ano_inicial_pa) {
     url_planilha <- get_config("url")$pa
 
     log_info("Planilha: Processos Administrativos",
@@ -1225,7 +1223,7 @@ power_bi_paalteracoes_main <- function(utils, script_a_executar) {
           filter(
             !is.na(`Nº. PROCESSO`),
             ABERTURA >=
-              as.Date(paste0(ano_inicial_processos_administrativos, "-01-01"))
+              as.Date(paste0(ano_inicial_pa, "-01-01"))
           )
 
         # Criar mapeamento de fornecedores para IDs sequenciais
@@ -1273,16 +1271,15 @@ power_bi_paalteracoes_main <- function(utils, script_a_executar) {
   # ---- INICIANDO ----
 
   geral <- get_config("geral")
-  geral$script_nome <- "POWER" # "PowerBI - PAs e alterações"
+  geral$script_nome <- "POWERBI" # "PowerBI - PAs e alterações"
   set_config(geral = geral)
 
-  ano_inicial_processos_administrativos <-
-    utils$ano_inicial_processos_administrativos
+  ano_inicial_pa <- utils$ano_inicial_pa
   unidades <- utils$unidades
 
   log_secao("OBTENDO DADOS DA PLANILHA DE PROCESSOS ADMINISTRATIVOS")
 
-  planilha_original <- planilha_obter(ano_inicial_processos_administrativos)
+  planilha_original <- planilha_obter(ano_inicial_pa)
 
   if (is.null(planilha_original)) {
     log_erro(

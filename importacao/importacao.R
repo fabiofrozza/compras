@@ -20,7 +20,13 @@ main_dados_obter <- function(script_a_executar) {
 
   log_secao("MONTANDO ARQUIVO", "MAIN")
 
-  dados_montados <- main_dados_montar(lista_final$planilha, lista_final$unidades, lista_final$info, script_a_executar)
+  dados_montados <-
+    main_dados_montar(
+      lista_final$planilha,
+      lista_final$unidades,
+      lista_final$info,
+      script_a_executar
+    )
 
   if (is.null(dados_montados)) {
     log_erro("Não foi possível montar o arquivo. Encerrando...",
@@ -38,7 +44,7 @@ main_dados_obter <- function(script_a_executar) {
         )
       )
 
-    return(dados)
+    dados
   }
 }
 
@@ -76,7 +82,12 @@ main_dados_filtrar <- function(lista_final) {
 
         # Se a planilha lida não tiver as colunas informadas acima, gera erro
         if (ncol(planilha_controle) != length(nomes_colunas)) {
-          stop(sprintf("A aba Licitação %s não possui o número correto de colunas.", ano_corrente))
+          stop(
+            sprintf(
+              "A aba Licitação %s não possui o número correto de colunas.",
+              ano_corrente
+            )
+          )
         } else {
           colnames(planilha_controle) <- nomes_colunas
         }
@@ -94,20 +105,30 @@ main_dados_filtrar <- function(lista_final) {
       },
       error = function(e) {
         log_erro(
-          "Erro ao acessar Planilha de Controle. Verifique se há permissão para leitura e se o link está correto.",
+          paste(
+            "Erro ao acessar Planilha de Controle. Verifique se há permissão",
+            "para leitura e se o link está correto."
+          ),
           e
         )
-        return(NULL)
+        NULL
       }
     )
   }
 
-  planilha_controle_analisar <- function(planilha_controle_original, planilha, unidades) {
+  planilha_controle_analisar <- function(
+    planilha_controle_original, planilha, unidades
+  ) {
     # Função para obter dados da planilha de controle
 
-    # Função auxiliar para igualar número de linhas das colunas Requerentes, Pedidos/SD e Itens
+    # Função auxiliar para igualar número de linhas das colunas
+    # Requerentes, Pedidos/SD e Itens
     padronizar_colunas <- function(coluna, tamanho, preencher) {
-      if (length(coluna) < tamanho) c(coluna, rep(preencher, tamanho - length(coluna))) else coluna
+      if (length(coluna) < tamanho) {
+        c(coluna, rep(preencher, tamanho - length(coluna)))
+      } else {
+        coluna
+      }
     }
 
     # Obtém os responsáveis pela orçamentação conforme a coluna da Lista Final
@@ -119,9 +140,10 @@ main_dados_filtrar <- function(lista_final) {
       mutate(tipo = "Pedido")
 
     # Organiza a planilha de controle, cruzando dados da Lista Final
-    # Se a Unidade na planilha de controle está nos responsáveis pela orçamentação na Lista Final
-    # registra como pedido, senão SD
-    # Se tem OK no Pedido/SD na planilha de controle, informa como enviado, senão não
+    # Se a Unidade na planilha de controle está nos responsáveis pela
+    # orçamentação na Lista Final registra como pedido, senão SD
+    # Se tem OK no Pedido/SD na planilha de controle, informa como enviado,
+    # senão não
     planilha_controle <- planilha_controle_original %>%
       filter(processo %in% unique(planilha$Processo)) %>%
       mutate(
@@ -134,8 +156,10 @@ main_dados_filtrar <- function(lista_final) {
       ) %>%
       select(-requerente, -pedido) %>%
       mutate(
-        requerente = map2(requerente_lista, tamanho_maximo, padronizar_colunas, "ERRO"),
-        pedido     = map2(pedido_lista, tamanho_maximo, padronizar_colunas, "ERRO"),
+        requerente =
+          map2(requerente_lista, tamanho_maximo, padronizar_colunas, "ERRO"),
+        pedido =
+          map2(pedido_lista, tamanho_maximo, padronizar_colunas, "ERRO"),
       ) %>%
       select(-requerente_lista, -pedido_lista) %>%
       unnest(c(requerente, pedido)) %>%
@@ -162,76 +186,99 @@ main_dados_filtrar <- function(lista_final) {
         equipe_apoio = ""
       ) %>%
       select(
-        processo, Sigla, requerente, pedido, enviado, tipo, oficio, peculiaridades, etp, equipe_apoio
+        processo, Sigla, requerente, pedido, enviado, tipo, oficio,
+        peculiaridades, etp, equipe_apoio
       )
 
-    return(planilha_controle)
+    planilha_controle
   }
 
-  filtro_planilha_controle <- function(filtros, planilha, unidades, script_a_executar, importacao) {
+  filtro_planilha_controle <- function(
+    filtros, planilha, unidades, script_a_executar, importacao
+  ) {
     # Se estiver sendo gerado o relatório após a geração dos processos
     # lê a planilha de controle para verificar pedidos enviados ou não
 
-    if (script_a_executar == "relatorio" & importacao$pos_processos) {
+    if (script_a_executar == "relatorio" && importacao$pos_processos) {
       planilha_controle_original <- planilha_controle_obter()
-      filtros$planilha_controle <- planilha_controle_analisar(planilha_controle_original, planilha, unidades)
+      filtros$planilha_controle <-
+        planilha_controle_analisar(
+          planilha_controle_original, planilha, unidades
+        )
     }
 
-    return(filtros)
+    filtros
   }
 
-  filtro_processo_especifico <- function(filtros, planilha, script_a_executar, importacao) {
-    # Se não for relatório consolidado, filtra a planilha (Lista Final) e planilha de controle
-    # com o processo que está sendo analisado
+  filtro_processo_especifico <- function(
+    filtros, planilha, script_a_executar, importacao
+  ) {
+    # Se não for relatório consolidado, filtra a planilha (Lista Final) e
+    # planilha de controle com o processo que está sendo analisado
 
     if (!importacao$consolidado) {
       planilha <- planilha %>%
         filter(Processo == importacao$processo_para_relatorio)
 
-      if (script_a_executar == "relatorio" & importacao$pos_processos) {
+      if (script_a_executar == "relatorio" && importacao$pos_processos) {
         filtros$planilha_controle <- filtros$planilha_controle %>%
           filter(processo == importacao$processo_para_relatorio)
       }
     }
 
-    return(list(
+    list(
       planilha = planilha,
       filtros = filtros
-    ))
+    )
   }
 
   filtro_estatisticas <- function(filtros, stats, planilha, importacao) {
-    demandas_unidades <- planilha[, importacao$coluna_inicial:importacao$coluna_final_unidades]
+    demandas_unidades <-
+      planilha[, importacao$coluna_inicial:importacao$coluna_final_unidades]
     contagem_demandas_unidades <- colSums(!is.na(demandas_unidades))
 
-    filtros$unidades_com_demanda <- sort(contagem_demandas_unidades[which(contagem_demandas_unidades != 0)], decreasing = TRUE)
-    filtros$unidades_sem_demanda <- contagem_demandas_unidades[which(contagem_demandas_unidades == 0)]
+    filtros$unidades_com_demanda <-
+      sort(
+        contagem_demandas_unidades[which(contagem_demandas_unidades != 0)],
+        decreasing = TRUE
+      )
+    filtros$unidades_sem_demanda <-
+      contagem_demandas_unidades[which(contagem_demandas_unidades == 0)]
 
     stats$unidades_com_demanda <- length(filtros$unidades_com_demanda)
     stats$unidades_sem_demanda <- length(filtros$unidades_sem_demanda)
 
     stats$itens_lista_final <- sum(!is.na(planilha$`Código do item`))
 
-    return(list(
+    list(
       filtros = filtros,
       stats = stats
-    ))
+    )
   }
 
-  filtro_orcamentos_nao_enviados <- function(filtros, stats, planilha, script_a_executar, importacao) {
+  filtro_orcamentos_nao_enviados <- function(
+    filtros, stats, planilha, script_a_executar, importacao
+  ) {
     # Se estiver sendo gerado o relatório após a geração dos processos
     # verifica orçamentos não enviados
-    if (script_a_executar == "relatorio" & importacao$pos_processos) {
-      # Transforma Lista Final em formato longo (uma linha para cada item e cada Unidade)
+    if (script_a_executar == "relatorio" && importacao$pos_processos) {
+      # Transforma Lista Final em formato longo
+      # (uma linha para cada item e cada Unidade)
       subset_planilha_ajustes_exclusao <- planilha %>%
         pivot_longer(
-          cols           = all_of(names(planilha)[importacao$coluna_inicial:importacao$coluna_final_unidades]),
-          names_to       = "Unidade",
-          values_to      = "Quantitativo",
+          cols =
+            all_of(
+              names(
+                planilha
+              )[importacao$coluna_inicial:importacao$coluna_final_unidades]
+            ),
+          names_to = "Unidade",
+          values_to = "Quantitativo",
           values_drop_na = TRUE
         )
 
-      # Registra Unidades que tem pedido na planilha de controle e não enviaram documentação
+      # Registra Unidades que tem pedido na planilha de controle e
+      # não enviaram documentação
       filtros$orcamentos_nao_enviados <- subset_planilha_ajustes_exclusao %>%
         right_join(
           filtros$planilha_controle %>%
@@ -240,7 +287,10 @@ main_dados_filtrar <- function(lista_final) {
             select(Sigla, pedido),
           by = c("Responsável pela Pesquisa" = "Sigla")
         ) %>%
-        select(Processo, pedido, `Responsável pela Pesquisa`, `Código do item`, `Descrição Resumida`, linha_planilha, Unidade, Quantitativo) %>%
+        select(
+          Processo, pedido, `Responsável pela Pesquisa`, `Código do item`,
+          `Descrição Resumida`, linha_planilha, Unidade, Quantitativo
+        ) %>%
         mutate(
           Quantitativo = suppressWarnings(as.numeric(Quantitativo)),
           Quantitativo = ifelse(is.na(Quantitativo), 0, Quantitativo)
@@ -248,7 +298,9 @@ main_dados_filtrar <- function(lista_final) {
 
       # Registra estatísticas dos orçamentos não enviados
       stats$unidades_nao_orcamentos <-
-        length(unique(filtros$orcamentos_nao_enviados$`Responsável pela Pesquisa`))
+        length(
+          unique(filtros$orcamentos_nao_enviados$`Responsável pela Pesquisa`)
+        )
       stats$qtde_itens_orcamentos_nao_enviados <-
         length(unique(filtros$orcamentos_nao_enviados$linha_planilha))
       stats$qtde_unidades_afetadas_orcamentos <-
@@ -258,10 +310,10 @@ main_dados_filtrar <- function(lista_final) {
       filtro_exibir(filtros$orcamentos_nao_enviados)
     }
 
-    return(list(
+    list(
       filtros = filtros,
       stats = stats
-    ))
+    )
   }
 
   filtro_sem_demanda <- function(filtros, stats, planilha) {
@@ -274,41 +326,46 @@ main_dados_filtrar <- function(lista_final) {
     stats$itens_sem_demanda <- nrow(filtros$sem_demanda)
     stats$itens_com_demanda <- stats$itens_lista_final - stats$itens_sem_demanda
 
-    # Exclui do dataframe principal as linhas com a quantidade igual à zero (sem demanda)
+    # Exclui do dataframe principal as linhas com a quantidade
+    # igual à zero (sem demanda)
     planilha <- planilha %>%
       filter(`Qtd. Total` > 0 & `Código do item` != "")
 
     # Exibe resultado do filtro
     filtro_exibir(filtros$sem_demanda)
 
-    return(list(
+    list(
       filtros = filtros,
       stats = stats,
       planilha = planilha
-    ))
+    )
   }
 
   filtro_abaixo_qtde <- function(filtros, stats, planilha, importacao) {
     # Registra os itens com valor total menor que o mínimo informado
     filtros$abaixo_qtde <- planilha %>%
       filter(`Qtd. Total` < importacao$qtde_minima) %>%
-      select(linha_planilha, `Nº Item`, `Qtd. Total`, Processo, `Responsável pela Pesquisa`, `Código do item`, `Descrição Resumida`)
+      select(
+        linha_planilha, `Nº Item`, `Qtd. Total`, Processo,
+        `Responsável pela Pesquisa`, `Código do item`, `Descrição Resumida`
+      )
 
     # Registra, para estatística, a quantidade de itens abaixo do valor mínimo
     stats$abaixo_qtde <- nrow(filtros$abaixo_qtde)
 
-    # Excluir do dataframe principal as linhas com a quantidade total menor que a mínima definida
+    # Excluir do dataframe principal as linhas com a quantidade total menor
+    # que a mínima definida
     planilha <- planilha %>%
       filter(planilha$`Qtd. Total` >= importacao$qtde_minima)
 
     # Exibe resultado do filtro
     filtro_exibir(filtros$abaixo_qtde)
 
-    return(list(
+    list(
       filtros = filtros,
       stats = stats,
       planilha = planilha
-    ))
+    )
   }
 
   filtro_valor_minimo <- function(filtros, stats, planilha, importacao) {
@@ -321,59 +378,78 @@ main_dados_filtrar <- function(lista_final) {
       noquote()
 
     if (nchar(valor_total_com_problemas) > 0) {
-      log_erro(sprintf(
-        "Há algum problema na coluna 'Valores Totais' na(s) linha(s) %s. Verifique a planilha.",
-        valor_total_com_problemas
-      ))
+      log_erro(
+        paste0(
+          "Há algum problema na coluna 'Valores Totais' na(s) linha(s) ",
+          valor_total_com_problemas,
+          ". Verifique a planilha."
+        )
+      )
     }
 
     # Registra informações dos itens abaixo do valor mínimo
     filtros$abaixo_valor <- planilha %>%
       filter(`Valor total` > 0, `Valor total` < importacao$valor_minimo) %>%
       select(
-        linha_planilha, `Nº Item`, `Qtd. Total`, Processo, `Responsável pela Pesquisa`,
+        linha_planilha, `Nº Item`, `Qtd. Total`, Processo,
+        `Responsável pela Pesquisa`,
         `Código do item`, `Descrição Resumida`, `Valor unitário`, `Valor total`
       ) %>%
-      mutate(`Valor total` = paste0("R$ ", formatC(`Valor total`,
-        format = "f", digits = 2,
-        big.mark = ".", decimal.mark = ","
-      )))
+      mutate(
+        `Valor total` =
+          paste0(
+            "R$ ", formatC(`Valor total`,
+              format = "f", digits = 2,
+              big.mark = ".", decimal.mark = ","
+            )
+          )
+      )
 
     # Registra estatística da quantidade de itens abaixo do valor mínimo
     stats$abaixo_valor <- nrow(filtros$abaixo_valor)
 
-    # Mantém apenas linhas com o valor total igual a 0 ou maior ou igual ao mínimo definido
+    # Mantém apenas linhas com o valor total igual a 0 ou
+    # maior ou igual ao mínimo definido
     planilha <- planilha %>%
       filter(`Valor total` == 0 | `Valor total` >= importacao$valor_minimo)
 
     # Exibe resultado do filtro
     filtro_exibir(filtros$abaixo_valor)
 
-    return(list(
+    list(
       filtros = filtros,
       stats = stats,
       planilha = planilha
-    ))
+    )
   }
 
   filtro_ajustes_exclusoes <- function(filtros, stats, planilha, importacao) {
-    # Função para verificar ajustes (solicitação pela Unidade ou DCOM, 0 na planilha)
+    # Função para verificar ajustes (solicitação pela Unidade ou DCOM,
+    # 0 na planilha)
     # ou exclusões (desistência ou não envio de documentos, X na planilha)
 
     # Transforma os dados da Lista Final no formato longo
     # Uma linha para cada item para cada Unidade com demanda
     subset_planilha_ajustes_exclusao <- planilha %>%
       pivot_longer(
-        cols           = all_of(names(planilha)[importacao$coluna_inicial:importacao$coluna_final_unidades]),
-        names_to       = "Unidade",
-        values_to      = "Quantitativo",
+        cols =
+          all_of(
+            names(
+              planilha
+            )[importacao$coluna_inicial:importacao$coluna_final_unidades]
+          ),
+        names_to = "Unidade",
+        values_to = "Quantitativo",
         values_drop_na = TRUE
       )
 
     # Verifica ajustes (0 na planilha)
     filtros$com_ajustes <- subset_planilha_ajustes_exclusao %>%
       filter(Quantitativo == "0") %>%
-      group_by(`Processo`, `Nº Item`, linha_planilha, `Código do item`, `Descrição Resumida`, Unidade) %>%
+      group_by(
+        `Processo`, `Nº Item`, linha_planilha, `Código do item`,
+        `Descrição Resumida`, Unidade
+      ) %>%
       summarise(Quantidade_0 = n(), .groups = "drop")
 
     stats$unidades_com_ajustes <- length(unique(filtros$com_ajustes$Unidade))
@@ -382,16 +458,21 @@ main_dados_filtrar <- function(lista_final) {
     # Verifica exclusões (X na planilha)
     filtros$com_demanda_excluida <- subset_planilha_ajustes_exclusao %>%
       filter(Quantitativo == "X" | Quantitativo == "x") %>%
-      group_by(`Processo`, `Nº Item`, linha_planilha, `Código do item`, `Descrição Resumida`, Unidade) %>%
+      group_by(
+        `Processo`, `Nº Item`, linha_planilha, `Código do item`,
+        `Descrição Resumida`, Unidade
+      ) %>%
       summarise(Quantidade_X = n(), .groups = "drop")
 
-    stats$unidades_com_demanda_excluida <- length(unique(filtros$com_demanda_excluida$Unidade))
-    stats$qtde_demanda_excluida <- sum(filtros$com_demanda_excluida$Quantidade_X)
+    stats$unidades_com_demanda_excluida <-
+      length(unique(filtros$com_demanda_excluida$Unidade))
+    stats$qtde_demanda_excluida <-
+      sum(filtros$com_demanda_excluida$Quantidade_X)
 
-    return(list(
+    list(
       filtros = filtros,
       stats = stats
-    ))
+    )
   }
 
   filtro_excluidos <- function(filtros, stats, planilha) {
@@ -399,13 +480,19 @@ main_dados_filtrar <- function(lista_final) {
     filtros$excluidos <- planilha %>%
       filter(`Item excl.` == "TRUE") %>%
       select(
-        linha_planilha, `Nº Item`, `Qtd. Total`, Processo, `Responsável pela Pesquisa`,
+        linha_planilha, `Nº Item`, `Qtd. Total`, Processo,
+        `Responsável pela Pesquisa`,
         `Código do item`, `Descrição Resumida`, `Valor total`
       ) %>%
-      mutate(`Valor total` = paste0("R$ ", formatC(`Valor total`,
-        format = "f", digits = 2,
-        big.mark = ".", decimal.mark = ","
-      )))
+      mutate(
+        `Valor total` =
+          paste0(
+            "R$ ", formatC(`Valor total`,
+              format = "f", digits = 2,
+              big.mark = ".", decimal.mark = ","
+            )
+          )
+      )
 
     # Registra para estatística o número de itens excluídos manualmente
     stats$excluidos <- nrow(filtros$excluidos)
@@ -417,11 +504,11 @@ main_dados_filtrar <- function(lista_final) {
     # Exibe resultado do filtro
     filtro_exibir(filtros$excluidos)
 
-    return(list(
+    list(
       filtros = filtros,
       stats = stats,
       planilha = planilha
-    ))
+    )
   }
 
   filtro_exibir <- function(filtro) {
@@ -445,13 +532,16 @@ main_dados_filtrar <- function(lista_final) {
 
   importacao <- get_config("importacao")
 
-  importacao$pos_processos <- ifelse(sum(!is.na(planilha$Processo)) == 0, FALSE, TRUE)
-  importacao$validacao_manual <- any(planilha$"Responsável pela Pesquisa" == "VALIDAÇÃO MANUAL")
+  importacao$pos_processos <-
+    ifelse(sum(!is.na(planilha$Processo)) == 0, FALSE, TRUE)
+  importacao$validacao_manual <-
+    any(planilha$"Responsável pela Pesquisa" == "VALIDAÇÃO MANUAL")
 
   # Define a coluna final das Unidades
   # Coluna inicial + quantidade de Unidades
   # Isto já somaria uma Unidade a mais, e excluindo UFSC GERAL, diminui-se 2
-  importacao$coluna_final_unidades <- importacao$coluna_inicial + importacao$qtde_unidades - 2
+  importacao$coluna_final_unidades <-
+    importacao$coluna_inicial + importacao$qtde_unidades - 2
 
   set_config(importacao = importacao)
 
@@ -459,11 +549,15 @@ main_dados_filtrar <- function(lista_final) {
 
   log_secao("OBTENDO DADOS DA PLANILHA DE CONTROLE", "FILTROS")
 
-  filtros <- filtro_planilha_controle(filtros, planilha, unidades, script_a_executar, importacao)
+  filtros <-
+    filtro_planilha_controle(
+      filtros, planilha, unidades, script_a_executar, importacao
+    )
 
   log_secao("VERIFICANDO PROCESSO(S) A ANALISAR E ESTATÍSTICAS", "FILTROS")
 
-  filtro_resultado <- filtro_processo_especifico(filtros, planilha, script_a_executar, importacao)
+  filtro_resultado <-
+    filtro_processo_especifico(filtros, planilha, script_a_executar, importacao)
   planilha <- filtro_resultado$planilha
   filtros <- filtro_resultado$filtros
 
@@ -473,7 +567,10 @@ main_dados_filtrar <- function(lista_final) {
 
   log_secao("VERIFICANDO ORÇAMENTOS NÃO ENVIADOS", "FILTROS")
 
-  filtro_resultado <- filtro_orcamentos_nao_enviados(filtros, stats, planilha, script_a_executar, importacao)
+  filtro_resultado <-
+    filtro_orcamentos_nao_enviados(
+      filtros, stats, planilha, script_a_executar, importacao
+    )
   filtros <- filtro_resultado$filtros
   stats <- filtro_resultado$stats
 
@@ -484,14 +581,20 @@ main_dados_filtrar <- function(lista_final) {
   stats <- filtro_resultado$stats
   planilha <- filtro_resultado$planilha
 
-  log_secao(paste0("QUANTIDADE DEMANDADA MENOR QUE ", importacao$qtde_minima), "FILTROS")
+  log_secao(
+    paste0("QUANTIDADE DEMANDADA MENOR QUE ", importacao$qtde_minima),
+    "FILTROS"
+  )
 
   filtro_resultado <- filtro_abaixo_qtde(filtros, stats, planilha, importacao)
   filtros <- filtro_resultado$filtros
   stats <- filtro_resultado$stats
   planilha <- filtro_resultado$planilha
 
-  log_secao(paste0("VALOR MÍNIMO (R$ ", importacao$valor_minimo, ") NÃO ATINGIDO"), "FILTROS")
+  log_secao(
+    paste0("VALOR MÍNIMO (R$ ", importacao$valor_minimo, ") NÃO ATINGIDO"),
+    "FILTROS"
+  )
 
   filtro_resultado <- filtro_valor_minimo(filtros, stats, planilha, importacao)
   filtros <- filtro_resultado$filtros
@@ -500,20 +603,24 @@ main_dados_filtrar <- function(lista_final) {
 
   log_secao("VERIFICANDO AJUSTES E EXCLUSÕES", "FILTROS")
 
-  filtro_resultado <- filtro_ajustes_exclusoes(filtros, stats, planilha, importacao)
+  filtro_resultado <-
+    filtro_ajustes_exclusoes(filtros, stats, planilha, importacao)
   filtros <- filtro_resultado$filtros
   stats <- filtro_resultado$stats
 
-  log_secao("EXCLUÍDOS MANUALMENTE NA PLANILHA (MARCADO NA COLUNA 'F')", "FILTROS")
+  log_secao(
+    "EXCLUÍDOS MANUALMENTE NA PLANILHA (MARCADO NA COLUNA 'F')", "FILTROS"
+  )
 
   filtro_resultado <- filtro_excluidos(filtros, stats, planilha)
 
-  # Retorna o resultado do último filtro, que já contém planilhas, filtros e stats
-  return(filtro_resultado)
+  # Retorna o resultado do último filtro, contendo planilhas, filtros e stats
+  filtro_resultado
 }
 
 main_dados_limpar <- function(planilha) {
-  # Função para eliminar caracteres que podem causar problemas na importação no Solar
+  # Função para eliminar caracteres que podem causar problemas
+  # na importação no Solar
 
   planilha %>%
     mutate(
@@ -522,7 +629,8 @@ main_dados_limpar <- function(planilha) {
         str_replace_all("[\r\n]", "") %>%
         str_trim(),
 
-      # Elimina caracteres não conversíveis nos textos das descrições dos itens e quebras de linha
+      # Elimina caracteres não conversíveis nos textos das
+      # descrições dos itens e quebras de linha
       across(
         c(
           `Descrição Resumida`,
@@ -545,12 +653,16 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
   main_dados_pivotar <- function(planilha, importacao) {
     tryCatch(
       {
-        # Pivotar os dados para formato longo (uma linha por unidade com demanda)
+        # Pivotar os dados para formato longo
+        # (uma linha por unidade com demanda)
         planilha_longa <- planilha %>%
           pivot_longer(
-            cols           = importacao$coluna_inicial:(importacao$coluna_inicial + importacao$qtde_unidades - 1),
-            names_to       = "Unidade",
-            values_to      = "Quantitativo",
+            cols =
+              importacao$coluna_inicial:(
+                importacao$coluna_inicial + importacao$qtde_unidades - 1
+              ),
+            names_to = "Unidade",
+            values_to = "Quantitativo",
             values_drop_na = TRUE
           ) %>%
           # Filtrar apenas valores válidos (não zero, não X/x, não NA)
@@ -560,7 +672,12 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
             tolower(Quantitativo) != "x"
           ) %>%
           # Converter quantidade para numérico
-          mutate(qtd = suppressWarnings(as.numeric(gsub(",", ".", gsub("\\.", "", Quantitativo)))))
+          mutate(
+            qtd =
+              suppressWarnings(
+                as.numeric(gsub(",", ".", gsub("\\.", "", Quantitativo)))
+              )
+          )
 
         return(planilha_longa)
       },
@@ -573,13 +690,18 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
     )
   }
 
-  main_dados_adicionar_colunas <- function(planilha_longa, unidades, importacao) {
+  main_dados_adicionar_colunas <- function(
+    planilha_longa, unidades, importacao
+  ) {
     planilha_longa <- planilha_longa %>%
       mutate(
         setorResponsavelPesquisa = ifelse(
-          `Responsável pela Pesquisa` == "VALIDAÇÃO MANUAL" & !importacao$pos_processos,
+          `Responsável pela Pesquisa` ==
+            "VALIDAÇÃO MANUAL" & !importacao$pos_processos,
           "VALIDAÇÃO MANUAL",
-          unidades$sigla_solar[match(`Responsável pela Pesquisa`, unidades$Sigla)]
+          unidades$sigla_solar[
+            match(`Responsável pela Pesquisa`, unidades$Sigla)
+          ]
         ),
         setorOrigem = unidades$sigla_solar[match(Unidade, unidades$Sigla)],
         codigoItem = `Código do item`,
@@ -590,17 +712,22 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
     if (importacao$pos_processos) {
       planilha_longa <- planilha_longa %>%
         mutate(
-          n_item                 = `Nº Item`,
-          processoFmt            = Processo,
-          cpfResponsavelPesquisa = str_pad(unidades$cpf[match(`Responsável pela Pesquisa`, unidades$Sigla)], 11, pad = "0"),
-          codigoImovel           = unidades$imovel[match(Unidade, unidades$Sigla)],
-          unidadeMedida          = toupper(`Unidade de Medida`),
-          especificacao          = Especificação,
-          detalhamento           = `Detalhamento (especificação complementar)`
+          n_item = `Nº Item`,
+          processoFmt = Processo,
+          cpfResponsavelPesquisa =
+            str_pad(
+              unidades$cpf[match(`Responsável pela Pesquisa`, unidades$Sigla)],
+              11,
+              pad = "0"
+            ),
+          codigoImovel = unidades$imovel[match(Unidade, unidades$Sigla)],
+          unidadeMedida = toupper(`Unidade de Medida`),
+          especificacao = Especificação,
+          detalhamento = `Detalhamento (especificação complementar)`
         )
     }
 
-    return(planilha_longa)
+    planilha_longa
   }
 
   main_dados_verificar_erros <- function(planilha_longa, importacao) {
@@ -615,7 +742,11 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
         msg_erro,
         paste(
           "Quantitativos inválidos nas linhas:",
-          paste(planilha_longa$linha_planilha[invalidos], invalidos_unidade, sep = " da Unidade ", collapse = ", ")
+          paste(
+            planilha_longa$linha_planilha[invalidos], invalidos_unidade,
+            sep = " da Unidade ",
+            collapse = ", "
+          )
         )
       )
     }
@@ -627,7 +758,10 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
         msg_erro,
         paste(
           "Setor responsável pela pesquisa inválido nas linhas:",
-          paste(unique(planilha_longa$linha_planilha[invalidos]), collapse = ", ")
+          paste(
+            unique(planilha_longa$linha_planilha[invalidos]),
+            collapse = ", "
+          )
         )
       )
     }
@@ -639,20 +773,28 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
         msg_erro,
         paste(
           "Setor requerente inválido nas linhas:",
-          paste(unique(planilha_longa$linha_planilha[invalidos]), collapse = ", ")
+          paste(
+            unique(planilha_longa$linha_planilha[invalidos]),
+            collapse = ", "
+          )
         )
       )
     }
 
     # Verificar código do item
     invalidos <- which(is.na(planilha_longa$codigoItem) |
-      !str_detect(planilha_longa$codigoItem, "^\\d\\d\\d\\.\\d\\d\\.\\d\\d\\d\\d\\d\\d$"))
+      !str_detect(
+        planilha_longa$codigoItem, "^\\d\\d\\d\\.\\d\\d\\.\\d\\d\\d\\d\\d\\d$"
+      ))
     if (length(invalidos)) {
       msg_erro <- c(
         msg_erro,
         paste(
           "Código do item inválido nas linhas:",
-          paste(unique(planilha_longa$linha_planilha[invalidos]), collapse = ", ")
+          paste(
+            unique(planilha_longa$linha_planilha[invalidos]),
+            collapse = ", "
+          )
         )
       )
     }
@@ -664,7 +806,10 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
         msg_erro,
         paste(
           "Descrição resumida inválida nas linhas:",
-          paste(unique(planilha_longa$linha_planilha[invalidos]), collapse = ", ")
+          paste(
+            unique(planilha_longa$linha_planilha[invalidos]),
+            collapse = ", "
+          )
         )
       )
     }
@@ -674,13 +819,19 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
     if (importacao$pos_processos) {
       # Verificar processo
       invalidos <- which(is.na(planilha_longa$processoFmt) |
-        !str_detect(planilha_longa$processoFmt, "^23080\\.\\d\\d\\d\\d\\d\\d/\\d\\d\\d\\d-\\d\\d$"))
+        !str_detect(
+          planilha_longa$processoFmt,
+          "^23080\\.\\d\\d\\d\\d\\d\\d/\\d\\d\\d\\d-\\d\\d$"
+        ))
       if (length(invalidos)) {
         msg_erro <- c(
           msg_erro,
           paste(
             "Número de processo inválido nas linhas:",
-            paste(unique(planilha_longa$linha_planilha[invalidos]), collapse = ", ")
+            paste(
+              unique(planilha_longa$linha_planilha[invalidos]),
+              collapse = ", "
+            )
           )
         )
       }
@@ -693,7 +844,10 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
           msg_erro,
           paste(
             "CPF do responsável inválido nas linhas:",
-            paste(unique(planilha_longa$linha_planilha[invalidos]), collapse = ", ")
+            paste(
+              unique(planilha_longa$linha_planilha[invalidos]),
+              collapse = ", "
+            )
           )
         )
       }
@@ -706,7 +860,10 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
           msg_erro,
           paste(
             "Código do imóvel inválido nas linhas:",
-            paste(unique(planilha_longa$linha_planilha[invalidos]), collapse = ", ")
+            paste(
+              unique(planilha_longa$linha_planilha[invalidos]),
+              collapse = ", "
+            )
           )
         )
       }
@@ -719,7 +876,10 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
           msg_erro,
           paste(
             "Unidade de medida inválida nas linhas:",
-            paste(unique(planilha_longa$linha_planilha[invalidos]), collapse = ", ")
+            paste(
+              unique(planilha_longa$linha_planilha[invalidos]),
+              collapse = ", "
+            )
           )
         )
       }
@@ -731,7 +891,10 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
           msg_erro,
           paste(
             "Especificação inválida nas linhas:",
-            paste(unique(planilha_longa$linha_planilha[invalidos]), collapse = ", ")
+            paste(
+              unique(planilha_longa$linha_planilha[invalidos]),
+              collapse = ", "
+            )
           )
         )
       }
@@ -743,13 +906,16 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
           msg_erro,
           paste(
             "Detalhamento inválido nas linhas:",
-            paste(unique(planilha_longa$linha_planilha[invalidos]), collapse = ", ")
+            paste(
+              unique(planilha_longa$linha_planilha[invalidos]),
+              collapse = ", "
+            )
           )
         )
       }
     }
 
-    return(msg_erro)
+    msg_erro
   }
 
   main_dados_criar_dataframe <- function(planilha_longa, importacao, info) {
@@ -784,11 +950,11 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
           setorResponsavelPesquisa, setorOrigem, codigoItem, descricaoResumida
         )
 
-      return(list(
+      list(
         importar = as.data.frame(dados_importar),
         relatorio = as.data.frame(dados_relatorio),
         info = info
-      ))
+      )
     } else {
       dados_relatorio <- planilha_longa %>%
         select(
@@ -796,25 +962,28 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
           setorOrigem, codigoItem, descricaoResumida
         )
 
-      return(list(
+      list(
         relatorio = as.data.frame(dados_relatorio),
         info = info
-      ))
+      )
     }
   }
 
   # verifique se há processos distribuídos e se há VALIDAÇÃO MANUAL
   importacao <- get_config("importacao")
 
-  importacao$pos_processos <- ifelse(sum(!is.na(planilha$Processo)) == 0, FALSE, TRUE)
-  importacao$validacao_manual <- any(planilha$"Responsável pela Pesquisa" == "VALIDAÇÃO MANUAL")
+  importacao$pos_processos <-
+    ifelse(sum(!is.na(planilha$Processo)) == 0, FALSE, TRUE)
+  importacao$validacao_manual <-
+    any(planilha$"Responsável pela Pesquisa" == "VALIDAÇÃO MANUAL")
 
   set_config(importacao = importacao)
 
   # verifica se o script chamado é para gerar arquivos para importação
   # se não foram gerados os processos (pos_processos = FALSE) avisa e encerra
-  if (script_a_executar == "gerar" & !importacao$pos_processos) {
-    log_erro("Você está tentando gerar os arquivos para importação no Solar, mas ainda não foram distribuídos os processos. Encerrando...",
+  if (script_a_executar == "gerar" && !importacao$pos_processos) {
+    log_erro(
+      "Você está tentando gerar os arquivos para importação no Solar, mas ainda não foram distribuídos os processos. Encerrando...",
       finalizar = TRUE
     )
   }
@@ -823,7 +992,8 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
   planilha_longa <- main_dados_pivotar(planilha, importacao)
 
   # Adicionar colunas
-  planilha_longa <- main_dados_adicionar_colunas(planilha_longa, unidades, importacao)
+  planilha_longa <-
+    main_dados_adicionar_colunas(planilha_longa, unidades, importacao)
 
   # Verificar erros
   erros <- main_dados_verificar_erros(planilha_longa, importacao)
@@ -843,13 +1013,22 @@ main_dados_montar <- function(planilha, unidades, info, script_a_executar) {
     paste0("N. ITENS        : ", dados_finais$info$n_itens),
     paste0("N. SOLICITAÇÕES : ", dados_finais$info$n_solicitacoes),
     "-",
-    sprintf("Pós geração dos processos : %s", ifelse(importacao$pos_processos, "Sim", "Não")),
-    sprintf("Validação manual          : %s", ifelse(importacao$validacao_manual, "Sim", "Não")),
-    sprintf("Relatório consolidado     : %s", ifelse(importacao$consolidado, "Sim", "Não")),
+    sprintf(
+      "Pós geração dos processos : %s",
+      ifelse(importacao$pos_processos, "Sim", "Não")
+    ),
+    sprintf(
+      "Validação manual          : %s",
+      ifelse(importacao$validacao_manual, "Sim", "Não")
+    ),
+    sprintf(
+      "Relatório consolidado     : %s",
+      ifelse(importacao$consolidado, "Sim", "Não")
+    ),
     cores = "highlight1"
   )
 
-  return(dados_finais)
+  dados_finais
 }
 
 main_lista_final_obter <- function() {
@@ -883,14 +1062,14 @@ main_lista_final_obter <- function() {
 
   log_barra_progresso(pb = pb)
 
-  if (!is.null(planilha_ajustada) & !is.null(unidades)) {
+  if (!is.null(planilha_ajustada) && !is.null(unidades)) {
     lista_final <- list(
       original = planilha_original,
       ajustada = planilha_ajustada,
       info = planilha_info,
       unidades = unidades
     )
-    return(lista_final)
+    lista_final
   } else {
     log_erro("Não foi possível obter os dados da Lista Final. Encerrando...",
       finalizar = TRUE
@@ -908,12 +1087,17 @@ main_lista_final_baixar <- function(importacao) {
           sheet = importacao$aba_lista_final,
           skip = importacao$linha_inicial - 2,
           col_names = TRUE,
-          col_types = paste0("cccccllllcccccnn", strrep("c", importacao$qtde_unidades), "cccccn")
+          col_types = paste0(
+            "cccccllllcccccnn",
+            strrep("c", importacao$qtde_unidades),
+            "cccccn"
+          )
         )
       return(planilha_original)
     },
     error = function(e) {
-      log_erro("Erro ao acessar planilha de inserção de demandas. Verifique o link informado. Encerrando...",
+      log_erro(
+        "Erro ao acessar planilha de inserção de demandas. Verifique o link informado. Encerrando...",
         e,
         finalizar = TRUE
       )
@@ -926,15 +1110,23 @@ main_lista_final_limpar <- function(planilha_original, importacao) {
     {
       # adiciona o número da linha da planilha original do Google Drive
       # altera o nome da última coluna para "Linha original"
-      planilha_original$`Qtd. Mapa` <- seq.int(importacao$linha_inicial, nrow(planilha_original) + importacao$linha_inicial - 1)
+      planilha_original$`Qtd. Mapa` <-
+        seq.int(
+          importacao$linha_inicial,
+          nrow(planilha_original) + importacao$linha_inicial - 1
+        )
       colnames(planilha_original)[ncol(planilha_original)] <- "linha_planilha"
 
-      # ajusta número da linha da planilha original com 3 dígitos antecedidos por 0
+      # ajusta número da linha da planilha original com
+      # 3 dígitos antecedidos por 0
       planilha_original <- planilha_original %>%
         mutate(linha_planilha = str_pad(linha_planilha, width = 3, pad = "0"))
 
       # exclui últimas colunas que não são de unidades
-      planilha_original[(importacao$coluna_inicial + importacao$qtde_unidades):(ncol(planilha_original) - 1)] <- NULL
+      planilha_original[
+        (importacao$coluna_inicial + importacao$qtde_unidades):
+        (ncol(planilha_original) - 1)
+      ] <- NULL
 
       return(planilha_original)
     },
@@ -950,7 +1142,13 @@ main_lista_final_limpar <- function(planilha_original, importacao) {
 main_lista_final_info <- function(importacao) {
   tryCatch(
     {
-      info_lista <- range_read(importacao$url_planilha, sheet = importacao$aba_menu, range = "G4:G7", col_names = FALSE)
+      info_lista <-
+        range_read(
+          importacao$url_planilha,
+          sheet = importacao$aba_menu,
+          range = "G4:G7",
+          col_names = FALSE
+        )
 
       ano <- as.numeric(unlist(info_lista)[1])
       etapa <- as.character(unlist(info_lista)[2])
@@ -990,7 +1188,8 @@ main_lista_final_info <- function(importacao) {
       return(info)
     },
     error = function(e) {
-      log_erro("Erro ao acessar as informações da lista (ano, etapa e grupo). Verifique a aba Menu da LISTA FINAL. Encerrando...",
+      log_erro(
+        "Erro ao acessar as informações da lista (ano, etapa e grupo). Verifique a aba Menu da LISTA FINAL. Encerrando...",
         e,
         finalizar = TRUE
       )
@@ -1014,11 +1213,12 @@ main_utils_grupo <- function(dados) {
       return(grupo)
     },
     error = function(e) {
-      log_erro("Não foi possível obter o nome do grupo. Utilizando nome genérico.",
+      log_erro(
+        "Não foi possível obter o nome do grupo. Utilizando nome genérico.",
         e,
         alerta = TRUE
       )
-      return("grupo_invalido")
+      "grupo_invalido"
     }
   )
 }
@@ -1029,7 +1229,8 @@ gerar_comparar_detalhamentos <- function(dados) {
   pasta <- get_config("pasta")
   grupo <- main_utils_grupo(dados)
 
-  # salva arquivo com os itens que tiveram caracteres ajustados na descrição complementar para o sistema Solar
+  # salva arquivo com os itens que tiveram caracteres ajustados na
+  # descrição complementar para o sistema Solar
   tryCatch(
     {
       comparacao <- dados$importar %>%
@@ -1045,7 +1246,8 @@ gerar_comparar_detalhamentos <- function(dados) {
         select(linha_planilha, codigoItem, descricaoResumida, detalhamento)
     },
     error = function(e) {
-      log_erro("Não foi possível verificar os detalhamentos a ajustar. ATENÇÃO: Isto não impede a importação dos pedidos.",
+      log_erro(
+        "Não foi possível verificar os detalhamentos a ajustar. ATENÇÃO: Isto não impede a importação dos pedidos.",
         e,
         alerta = TRUE
       )
@@ -1075,14 +1277,18 @@ gerar_comparar_detalhamentos <- function(dados) {
           sheet = grupo,
           style = createStyle(fgFill = "yellow"),
           cols = 4,
-          rows = 1:nrow(comparacao) + 1
+          rows = seq_len(nrow(comparacao) + 1)
         )
         saveWorkbook(wb,
           file.path(pasta$arquivos_importar, arquivo_descricao),
           overwrite = TRUE
         )
 
-        log_erro(sprintf("%d descrições precisam de ajuste. Verifique o arquivo 'Descrição a ajustar'", nrow(comparacao)),
+        log_erro(
+          sprintf(
+            "%d descrições precisam de ajuste. Verifique o arquivo 'Descrição a ajustar'",
+            nrow(comparacao)
+          ),
           alerta = TRUE
         )
 
@@ -1093,7 +1299,8 @@ gerar_comparar_detalhamentos <- function(dados) {
         )
       },
       error = function(e) {
-        log_erro("Não foi possível salvar o arquivo com as descrições a ajustar. Verifique o arquivo de log.",
+        log_erro(
+          "Não foi possível salvar o arquivo com as descrições a ajustar. Verifique o arquivo de log.",
           e,
           alerta = TRUE
         )
@@ -1145,8 +1352,9 @@ gerar_salvar_arquivos_a_importar <- function(dados) {
 }
 
 gerar_main <- function(dados) {
-  if (is.null(dados) | is.null(dados$importar)) {
-    log_erro("Não foi possível gerar arquivos. Dados importados não encontrados. Encerrando...",
+  if (is.null(dados) || is.null(dados$importar)) {
+    log_erro(
+      "Não foi possível gerar arquivos. Dados importados não encontrados. Encerrando...",
       finalizar = TRUE
     )
   }
@@ -1167,7 +1375,7 @@ gerar_main <- function(dados) {
 
 relatorio_gerar_temporario <- function(dados) {
   # Define o nome do arquivo .html a ser salvo,
-  # gera e salva o .html temporário, que depois será excluído após salvar em .pdf
+  # gera e salva o .html temporário, que será excluído após salvar em .pdf
   # e passa o nome do arquivo de volta à função principal
 
   pasta <- get_config("pasta")
@@ -1257,7 +1465,8 @@ relatorio_salvar_pdf <- function(relatorio_arquivo) {
       unlink(file.path(pasta$relatorios, paste0(relatorio_arquivo, ".html")))
     },
     error = function(e) {
-      log_erro("Não foi possível salvar o relatório final em PDF. Encerrando...",
+      log_erro(
+        "Não foi possível salvar o relatório final em PDF. Encerrando...",
         e,
         finalizar = TRUE
       )
@@ -1277,7 +1486,9 @@ relatorio_planilha_dfd <- function(dados) {
     # Planilha com as Unidades e números dos pedidos/SDs
     planilha_dfd <- dados$filtros$planilha_controle %>%
       filter(processo == processo_spa) %>%
-      select(requerente, pedido, tipo, oficio, peculiaridades, etp, equipe_apoio)
+      select(
+        requerente, pedido, tipo, oficio, peculiaridades, etp, equipe_apoio
+      )
 
     # Planilha com as informações dos itens
     planilha_itens <- dados$relatorio %>%
@@ -1299,14 +1510,20 @@ relatorio_planilha_dfd <- function(dados) {
         # Cria o arquivo Excel
         wb <- createWorkbook()
         addWorksheet(wb, "DFD", tabColour = "blue")
-        writeDataTable(wb, "DFD", planilha_dfd, tableStyle = "TableStyleMedium2")
+        writeDataTable(
+          wb, "DFD", planilha_dfd,
+          tableStyle = "TableStyleMedium2"
+        )
         setColWidths(wb, "DFD",
           cols   = 1:7,
           widths = 20
         )
 
         addWorksheet(wb, "Itens", tabColour = "green")
-        writeDataTable(wb, "Itens", planilha_itens, tableStyle = "TableStyleMedium4")
+        writeDataTable(
+          wb, "Itens", planilha_itens,
+          tableStyle = "TableStyleMedium4"
+        )
         setColWidths(wb, "Itens",
           cols   = 1:5,
           widths = c(15, 15, 15, 50, 15)
@@ -1314,7 +1531,10 @@ relatorio_planilha_dfd <- function(dados) {
 
         # Salva o arquivo
         saveWorkbook(wb,
-          file.path(pasta$relatorios, paste0("DFD - ", gsub("/", "-", processo_spa), ".xlsx")),
+          file.path(
+            pasta$relatorios,
+            paste0("DFD - ", gsub("/", "-", processo_spa), ".xlsx")
+          ),
           overwrite = TRUE
         )
       },
@@ -1338,8 +1558,9 @@ relatorio_main <- function(dados) {
   # FUNÇÃO PRINCIPAL PARA RELATÓRIO GERENCIAL
 
   # Se não houver dados, gera erro e finaliza
-  if (is.null(dados) | is.null(dados$relatorio)) {
-    log_erro("Não foi possível gerar relatórios. Dados importados não encontrados. Encerrando...",
+  if (is.null(dados) || is.null(dados$relatorio)) {
+    log_erro(
+      "Não foi possível gerar relatórios. Dados importados não encontrados. Encerrando...",
       finalizar = TRUE
     )
   }
@@ -1395,10 +1616,13 @@ resumo_montar <- function(dados, lista_inicial) {
       }
 
       # Processa todos os elementos da lista_inicial
-      lista_processo <- extrair_todos_dados(lista_inicial, "\\d{5}\\.\\d{6}/\\d{4}-\\d{2}")
-      lista_unidade <- extrair_todos_dados(lista_inicial, "[:alpha:].+[:alpha:]") %>%
+      lista_processo <-
+        extrair_todos_dados(lista_inicial, "\\d{5}\\.\\d{6}/\\d{4}-\\d{2}")
+      lista_unidade <-
+        extrair_todos_dados(lista_inicial, "[:alpha:].+[:alpha:]") %>%
         str_replace("PRODEGESP/UFS", "PRODEGESP/UFSC")
-      lista_protocolo <- extrair_todos_dados(lista_inicial, " \\d{6}/\\d{4}") %>%
+      lista_protocolo <-
+        extrair_todos_dados(lista_inicial, " \\d{6}/\\d{4}") %>%
         str_trim()
       lista_qtd <- extrair_todos_dados(lista_inicial, "\\s\\d{1,3}\\s") %>%
         str_trim() %>%
@@ -1419,7 +1643,9 @@ resumo_montar <- function(dados, lista_inicial) {
           `N. Pedido`  = coalesce(`N. Pedido`, sprintf("SD %s", Unidade)),
           `Para orçar` = as.numeric(`Para orçar`)
         ) %>%
-        select(Processo, Unidade, `N. Pedido`, `N. itens`, `Para orçar`, `E-mail`) %>%
+        select(
+          Processo, Unidade, `N. Pedido`, `N. itens`, `Para orçar`, `E-mail`
+        ) %>%
         arrange(Processo, desc(`Para orçar`), Unidade)
 
       # Inclui informações no objeto dados
@@ -1453,12 +1679,16 @@ resumo_obter_pdf <- function() {
       pdf_dados <- as.character(pdf_dados)
 
       # obtém dados dos PDFs
-      lista_pedidos <- str_extract(pdf_dados, "(\\d\\d\\d\\d\\d\\.\\d\\d\\d\\d\\d\\d/\\d\\d\\d\\d-\\d\\d)(?s)(.*)(\\d\\d\\d\\d\\d\\d/\\d\\d\\d\\d)")
+      lista_pedidos <-
+        str_extract(
+          pdf_dados, "(\\d{5}\\.\\d{6}/\\d{4}-\\d{2})(?s)(.*)(\\d{6}/\\d{4})"
+        )
 
       return(lista_pedidos)
     },
     error = function(e) {
-      log_erro("Não foi possível obter o conteúdo dos PDFs dos resumos. Encerrando...",
+      log_erro(
+        "Não foi possível obter o conteúdo dos PDFs dos resumos. Encerrando...",
         finalizar = TRUE
       )
     }
@@ -1490,7 +1720,9 @@ resumo_salvar <- function(dados) {
         widths = "auto"
       )
       saveWorkbook(wb,
-        file.path(pasta$resumo_pedidos, paste0("Resumo - Grupo ", grupo, ".xlsx")),
+        file.path(
+          pasta$resumo_pedidos, paste0("Resumo - Grupo ", grupo, ".xlsx")
+        ),
         overwrite = TRUE
       )
     },
@@ -1510,8 +1742,12 @@ resumo_salvar <- function(dados) {
 }
 
 resumo_main <- function(dados) {
-  if (is.null(dados) | is.null(dados$importar)) {
-    log_erro("Não foi possível gerar arquivos. Dados importados não encontrados. Encerrando...",
+  if (is.null(dados) || is.null(dados$importar)) {
+    log_erro(
+      paste(
+        "Não foi possível gerar arquivos. Dados importados não encontrados.",
+        "Encerrando..."
+      ),
       finalizar = TRUE
     )
   }
@@ -1537,7 +1773,7 @@ resumo_main <- function(dados) {
 main_inicializar <- function(pacotes, script_a_executar) {
   # Função chamada pela função principal para inicializar ambiente
 
-  # Complementa com as pastas necessárias aos scripts vinculados às listas finais
+  # Complementa com pastas necessárias aos scripts vinculados às listas finais
   pasta <- list()
   pasta$atual <- getwd()
   pasta$arquivos_importar <- file.path(
@@ -1558,12 +1794,17 @@ main_inicializar <- function(pacotes, script_a_executar) {
     pasta$resumo_pedidos
   )
 
-  # Complementa com os pacotes necessários aos scripts vinculados às listas finais
+  # Complementa com pacotes necessários aos scripts vinculados às listas finais
   pacotes_compartilhados <- c(
     "googlesheets4", "openxlsx2", "openxlsx",
     "stringr", "tidyr", "dplyr", "purrr"
   )
-  pacotes <- if (missing(pacotes)) pacotes_compartilhados else append(pacotes_compartilhados, pacotes)
+  pacotes <-
+    if (missing(pacotes)) {
+      pacotes_compartilhados
+    } else {
+      append(pacotes_compartilhados, pacotes)
+    }
 
   # Chama função compartilhada para inicializar configurações gerais
   config_inicializar("IMPORTACAO", pacotes, pasta)
@@ -1584,7 +1825,8 @@ main_ambiente <- function(script_a_executar) {
   # Limpa informações para conferência da geração anterior
   config_json("conferencia", opcao = "remove")
 
-  # Se o script for para gerar arquivo para importacao ou o resumo, não será consolidado
+  # Se o script for para gerar arquivo para importacao ou o resumo,
+  # não será consolidado
   # Se for para relatório e não houver número do processo, será consolidado
   importacao$processo_para_relatorio <- config_json("processo", opcao = "get")
   importacao$consolidado <-
@@ -1598,23 +1840,24 @@ main_ambiente <- function(script_a_executar) {
 
   tryCatch(
     {
-      # Lê arquivo config.json para carregar configurações e gravar no ambiente atual
-      R_config <- config_json(opcao = "all")
+      # Lê arquivo para carregar configurações e gravar no ambiente atual
+      r_config <- config_json(opcao = "all")
 
-      celula_inicial <- trimws(R_config$celula)
+      celula_inicial <- trimws(r_config$celula)
 
-      importacao$url_planilha <- R_config$link_planilha
-      importacao$valor_minimo <- as.numeric(R_config$valor_minimo)
-      importacao$qtde_minima <- as.numeric(R_config$qtde_minima)
+      importacao$url_planilha <- r_config$link_planilha
+      importacao$valor_minimo <- as.numeric(r_config$valor_minimo)
+      importacao$qtde_minima <- as.numeric(r_config$qtde_minima)
 
       # Separa a celula_inicial para saber
       # a coluna (posição no alfabeto da letra da coluna) e o número da linha
-      importacao$coluna_inicial <- which(letters[1:26] == tolower(substring(celula_inicial, 1, 1)))
+      importacao$coluna_inicial <-
+        which(letters[1:26] == tolower(substring(celula_inicial, 1, 1)))
       importacao$linha_inicial <- as.numeric(substring(celula_inicial, 2, 2))
 
-      importacao$qtde_unidades <- as.numeric(R_config$unidades)
-      importacao$aba_menu <- trimws(R_config$aba_menu)
-      importacao$aba_lista_final <- trimws(R_config$aba_lista_final)
+      importacao$qtde_unidades <- as.numeric(r_config$unidades)
+      importacao$aba_menu <- trimws(r_config$aba_menu)
+      importacao$aba_lista_final <- trimws(r_config$aba_lista_final)
 
       log_info("Pastas",
         c(
@@ -1632,7 +1875,9 @@ main_ambiente <- function(script_a_executar) {
           sprintf("Quantidade de Unidades : %s", importacao$qtde_unidades),
           sprintf("Aba Menu               : %s", importacao$aba_menu),
           sprintf("Aba LISTA FINAL        : %s", importacao$aba_lista_final),
-          sprintf("Processo - Relatório   : %s", importacao$processo_para_relatorio),
+          sprintf(
+            "Processo - Relatório   : %s", importacao$processo_para_relatorio
+          ),
           sprintf("Script a executar      : %s", script_a_executar)
         ),
         cores = "highlight1"
@@ -1642,7 +1887,8 @@ main_ambiente <- function(script_a_executar) {
       set_config(importacao = importacao)
     },
     error = function(e) {
-      log_erro("Erro ao acessar o arquivo de configurações 'config.json'. Encerrando...",
+      log_erro(
+        "Erro ao acessar o arquivo de configurações. Encerrando...",
         e,
         finalizar = TRUE
       )
