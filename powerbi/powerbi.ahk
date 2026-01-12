@@ -189,7 +189,7 @@ MonitorarSaidaR:
         }
 
         ; Verificação de erros
-        resultado_geracao := VerificarResultadoR("POWER", true)
+        resultado_geracao := VerificarResultadoR("POWERBI", true)
         resultado_geracao := resultado_geracao[1]  ; Obtém somente o resultado_geracao retornado
 
         if (resultado_geracao = "erro") {

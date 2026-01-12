@@ -18,7 +18,7 @@ power_bi_main <- function() {
         "planejamento", "licitacao", "execucao",
         "paalteracoes", "renomear", "todos"
       ),
-      script_padrao = "execucao"
+      script_padrao = "planejamento"
     )
 
   if (script_a_executar != "renomear") utils <- power_bi_utils()
@@ -501,6 +501,30 @@ power_bi_renomear <- function(script_a_executar) {
 # ---- PLANEJAMENTO ----
 
 power_bi_planejamento_main <- function(utils, script_a_executar) {
+  checar_abas <- function(url_planilha, ano_licitacao) {
+    # Verifica se há todas as abas dos anos solicitados, 
+    # no formato "Licitação XXXX"
+    sheet_names <- sheet_names(url_planilha)
+    
+    abas_encontradas <- unlist(str_extract_all(sheet_names, "Licitação \\d{4}"))
+    abas_nomes <- paste("Licitação", ano_licitacao)
+    
+    ha_aba_ausente <- !(abas_nomes %in% abas_encontradas)
+    
+    if (any(ha_aba_ausente)) {
+      log_erro(
+        sprintf(
+          "A(s) aba(s) %s não foi(ram) encontrada(s) na planilha de Controle. ",
+          paste(abas_nomes[ha_aba_ausente], collapse = ", ")
+        ),
+        "Encerrando..."
+      )
+      return(FALSE)
+    }
+    
+    return(TRUE)
+  }
+  
   planilha_obter <- function(ano_licitacao) {
     url_planilha <- get_config("url")$controle
 
@@ -509,7 +533,11 @@ power_bi_planejamento_main <- function(utils, script_a_executar) {
       paste0("Anos: ", paste(ano_licitacao, collapse = ", ")),
       cores = "highlight1"
     )
-
+    
+    if (!checar_abas(url_planilha, ano_licitacao)) {
+      return(NULL)
+    }
+    
     pb <-
       log_barra_progresso(
         "Lendo planilha de Controle de Processos", length(ano_licitacao)
