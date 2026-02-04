@@ -28,7 +28,7 @@ primeiro_uso_main <- function() {
       pandoc::pandoc_activate()
     },
     error = function(e) {
-      log_erro_tratar(
+      log_erro(
         "Não foi possível instalar o pacote Pandoc.",
         e
       )
