@@ -526,7 +526,9 @@ main_dados_filtrar <- function(lista_final) {
   # Define variáveis
   planilha <- lista_final$ajustada
   unidades <- lista_final$unidades
-  script_a_executar <- config_json("script_a_executar", opcao = "get")
+  script_a_executar <- commandArgs(trailingOnly = TRUE)[1]
+  # MANTIDO PARA REFERÊNCIA: DEPRECATED
+  # script_a_executar <- config_json("script_a_executar", opcao = "get")
   stats <- list()
   filtros <- list()
 
@@ -1828,7 +1830,11 @@ main_ambiente <- function(script_a_executar) {
   # Se o script for para gerar arquivo para importacao ou o resumo,
   # não será consolidado
   # Se for para relatório e não houver número do processo, será consolidado
-  importacao$processo_para_relatorio <- config_json("processo", opcao = "get")
+
+  # MANTIDO PARA REFERÊNCIA: DEPRECATED
+  # importacao$processo_para_relatorio <- config_json("processo", opcao = "get")
+
+  importacao$processo_para_relatorio <- commandArgs(trailingOnly = TRUE)[9]
   importacao$consolidado <-
     if (script_a_executar != "relatorio" ||
       importacao$processo_para_relatorio == "todos" ||
@@ -1841,7 +1847,18 @@ main_ambiente <- function(script_a_executar) {
   tryCatch(
     {
       # Lê arquivo para carregar configurações e gravar no ambiente atual
-      r_config <- config_json(opcao = "all")
+      # MANTIDO PARA CONFERÊNCIA: DEPRECATED
+      # r_config <- config_json(opcao = "all")
+
+      r_config <- list(
+        link_planilha = commandArgs(trailingOnly = TRUE)[2],
+        valor_minimo = commandArgs(trailingOnly = TRUE)[3],
+        qtde_minima = commandArgs(trailingOnly = TRUE)[4],
+        celula_inicial = commandArgs(trailingOnly = TRUE)[5],
+        unidades = commandArgs(trailingOnly = TRUE)[6],
+        aba_menu = commandArgs(trailingOnly = TRUE)[7],
+        aba_lista_final = commandArgs(trailingOnly = TRUE)[8]
+      )
 
       celula_inicial <- trimws(r_config$celula)
 
