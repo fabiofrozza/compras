@@ -13,3 +13,4 @@ scripts/primeiro_uso/*.exe
 **/*.pdf
 **/*.zip
 **/*.txt
+**/*.doc*
