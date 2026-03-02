@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<div class="row">
+    <div class="col">
+        <!-- Mapas a processar -->
+        <div class="script-form shadow-sm">
+            <h4><i class="fa-solid fa-gavel"></i> Mapas a processar</h4>
+            <div id="mapas-mapas-a-processar" class="files-list" data-folder="mapas" data-selectable="false">
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <!-- Forma de geração -->
+        <form id="form-mapas" class="script-form shadow-sm">
+            <h4><i class="fa-solid fa-filter"></i> Forma de geração</h4>
+            <div class="form-group">
+                <label for="mapas-estilo" class="form-label">
+                    Escolha a forma de geração das listas prévias:
+                </label>
+                <select class="form-select form-select-sm" id="mapas-estilo" aria-label="Forma de geração das listas prévias">
+                    <option selected value="grupo">Agrupada: lista única com todos os itens</option>
+                    <option value="processo">Por processo: listas separadas por processo</option>
+                </select>
+            </div>
+            <div class="form-buttons">
+                <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-run-mapas" data-script-name="mapas">
+                    Gerar listas prévias
+                </button>
+            </div>
+        </form>
+        <!-- Listas processadas -->
+        <div class="script-form shadow-sm">
+            <h4><i class="fa-solid fa-list"></i> Listas processadas</h4>
+            <div id="mapas-listas-processadas" class="files-list" data-folder="listas" data-selectable="false">
+            </div>
+        </div>
+    </div>
+</div>

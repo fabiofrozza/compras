@@ -1,0 +1,418 @@
+/* ==========================================================================
+NOTIFICAÇÕES (Toasts e Central de Notificações)
+========================================================================== */
+
+#toast-container {
+    position: fixed;
+    top: calc(var(--top-nav-height) + var(--padding-main-container));
+    right: var(--padding-main-container);
+    z-index: 9999 !important;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    pointer-events: none;
+    align-items: flex-end;
+}
+
+.app-toast {
+    padding-block: 6px;
+    border-radius: 6px;
+    min-width: 200px;
+    max-width: 400px;
+    animation: slideInRight 0.3s ease-out forwards !important;
+    pointer-events: auto;
+    word-break: break-word;
+    white-space: normal;
+    line-height: 1.4;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.app-toast::before {
+    padding-inline: 8px;
+    font-size: 120% !important;
+}
+
+/* Cores e Estados dos Toasts */
+.app-toast.success {
+    border-left: var(--toast-border-left) solid var(--toast-success);
+    color: color-mix(in srgb, var(--toast-success) calc(100% - var(--toast-alpha)), black);
+    background-color: color-mix(in srgb, var(--toast-success) var(--toast-alpha), white);
+}
+
+.app-toast.success::before {
+    font: var(--fa-font-solid);
+    content: '\f058';
+    /* circle check */
+}
+
+.app-toast.error {
+    border-left: var(--toast-border-left) solid var(--toast-error);
+    color: color-mix(in srgb, var(--toast-error) calc(100% - var(--toast-alpha)), black);
+    background-color: color-mix(in srgb, var(--toast-error) var(--toast-alpha), white);
+}
+
+.app-toast.error::before {
+    font: var(--fa-font-solid);
+    content: '\f057';
+    /* circle x mark */
+}
+
+.app-toast.info {
+    border-left: var(--toast-border-left) solid var(--toast-info);
+    color: color-mix(in srgb, var(--toast-info) calc(100% - var(--toast-alpha)), black);
+    background-color: color-mix(in srgb, var(--toast-info) var(--toast-alpha), white);
+}
+
+.app-toast.info::before {
+    font: var(--fa-font-solid);
+    content: '\f05a';
+    /* circle info */
+}
+
+.app-toast.warning {
+    border-left: var(--toast-border-left) solid var(--toast-warning);
+    color: color-mix(in srgb, var(--toast-warning) calc(100% - var(--toast-alpha)), black);
+    background-color: color-mix(in srgb, var(--toast-warning) var(--toast-alpha), white);
+}
+
+.app-toast.warning::before {
+    font: var(--fa-font-solid);
+    content: '\f06a';
+    /* circle exclamation */
+}
+
+.toast-message {
+    width: 100%;
+    text-align: left;
+}
+
+.toast-close-btn {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 12px;
+    padding: 0 8px;
+    flex-shrink: 0;
+}
+
+/* Animações dos Toasts */
+.app-toast.removing {
+    animation: slideOutRight 0.3s ease-out forwards !important;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+/* ==========================================================================
+CENTRAL DE NOTIFICAÇÕES (Painel no Header)
+========================================================================== */
+
+/* Badge de contagem no ícone do sino */
+.notification-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    background: var(--color-error);
+    color: white;
+    font-size: 0.6rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    pointer-events: none;
+    animation: badgePop 0.5s ease-out;
+    box-shadow: 0 0 0 2px var(--color-surface-1);
+}
+
+/* Animação de balanço do sino ao receber nova notificação */
+@keyframes bellShake {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    10% {
+        transform: rotate(18deg);
+    }
+
+    20% {
+        transform: rotate(-16deg);
+    }
+
+    30% {
+        transform: rotate(14deg);
+    }
+
+    40% {
+        transform: rotate(-10deg);
+    }
+
+    50% {
+        transform: rotate(7deg);
+    }
+
+    60% {
+        transform: rotate(-4deg);
+    }
+
+    70% {
+        transform: rotate(2deg);
+    }
+
+    80% {
+        transform: rotate(-1deg);
+    }
+
+    90%,
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+#notificationsBtn.bell-shake i {
+    display: inline-block;
+    transform-origin: top center;
+    animation: bellShake 0.7s ease-out;
+}
+
+@keyframes badgePop {
+    0% {
+        transform: scale(0);
+    }
+
+    33% {
+        transform: scale(2.5);
+    }
+
+    50% {
+        transform: scale(.75);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.header-icon-btn:hover .notification-badge {
+    transform: scale(1.5);
+}
+
+/* Lista de notificações dentro do painel */
+.notification-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 50vh;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.notification-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+    background: rgba(128, 128, 128, 0.3);
+    border-radius: 4px;
+}
+
+/* Item de notificação individual */
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(128, 128, 128, 0.06);
+    border-left: 4px solid var(--color-idle);
+    animation: notifSlideIn 0.25s ease-out;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.notification-item:hover {
+    background: rgba(128, 128, 128, 0.12);
+}
+
+.notification-item.removing {
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+@keyframes notifSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tipos/cores das notificações */
+.notification-item.success {
+    border-left-color: var(--color-success);
+}
+
+.notification-item.error {
+    border-left-color: var(--color-error);
+}
+
+.notification-item.warning {
+    border-left-color: var(--color-warning);
+}
+
+.notification-item.info {
+    border-left-color: var(--color-info);
+}
+
+/* Ícone do tipo da notificação */
+.notification-icon {
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+    font-size: 0.85rem;
+    margin-top: 1px;
+}
+
+.notification-item.success .notification-icon {
+    color: var(--color-success);
+}
+
+.notification-item.error .notification-icon {
+    color: var(--color-error);
+}
+
+.notification-item.warning .notification-icon {
+    color: var(--color-warning);
+}
+
+.notification-item.info .notification-icon {
+    color: var(--color-info);
+}
+
+/* Corpo da notificação (mensagem + metadados) */
+.notification-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-message {
+    font-size: 0.8rem;
+    color: var(--color-text-primary);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.notification-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    font-size: 0.68rem;
+    color: var(--color-text-muted);
+}
+
+.notification-source {
+    background: rgba(128, 128, 128, 0.12);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* Botão para dispensar notificação individual */
+.notification-dismiss {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 0.7rem;
+    padding: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.15s ease, background 0.15s ease;
+    line-height: 1;
+}
+
+.notification-item:hover .notification-dismiss {
+    opacity: 1;
+}
+
+.notification-dismiss:hover {
+    background: rgba(128, 128, 128, 0.15);
+    color: var(--color-text-primary);
+}
+
+/* Estado vazio */
+.notification-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    color: var(--color-text-muted);
+    gap: 8px;
+}
+
+.notification-empty i {
+    font-size: 1.8rem;
+    opacity: 0.4;
+}
+
+.notification-empty span {
+    font-size: 0.8rem;
+}
+
+/* Rodapé do painel com botão 'Limpar tudo' */
+.notification-footer {
+    padding-top: 10px;
+    margin-top: 6px;
+    border-top: 1px solid rgba(128, 128, 128, 0.15);
+    display: flex;
+    justify-content: center;
+}
+
+.notification-clear-all {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 4px 12px;
+    border-radius: 6px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.notification-clear-all:hover {
+    background: rgba(128, 128, 128, 0.12);
+    color: var(--color-text-primary);
+}

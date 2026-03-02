@@ -1,0 +1,62 @@
+/* ==========================================================================
+RESET, BASE, VARIÁVEIS GLOBAIS E TEMAS
+========================================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Cores de Status */
+    --color-success: limegreen;
+    --color-warning: orange;
+    --color-error: salmon;
+    --color-info: cornflowerblue;
+    --color-idle: gray;
+
+    /* Cores do Tema Claro (Padrão) */
+    --color-background: var(--bs-primary-bg-subtle);
+    /*--color-background: lightsteelblue*/
+    --color-surface-1: ivory;
+    --color-surface-2: var(--color-background);
+    --color-text-primary: rgb(0, 56, 147);
+    /* Azul UFSC */
+    --color-text-secondary: #555;
+    --color-text-muted: #666;
+    --color-border-focus: #667eea;
+    --color-accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --color-shadow-accent: rgba(102, 126, 234, 0.4);
+    --color-text-on-accent: white;
+
+    /* Dimensões e Layout */
+    --padding-screen: 20px;
+    --padding-main-container: 12px;
+    --padding-buttons: 4px;
+    --top-nav-height: 52px;
+    --sidebar-collapsed-width: 52px;
+    --sidebar-expanded-width: 160px;
+    --transition-time: 0.25s;
+
+    /* Variáveis Específicas: Console e Toasts */
+    --running-timeout: .5s;
+    /* Duração total do ciclo de piscar do console */
+
+    --toast-success: var(--color-success);
+    --toast-error: var(--color-error);
+    --toast-info: var(--color-info);
+    --toast-warning: var(--color-warning);
+    --toast-alpha: 25%;
+    --toast-border-left: 6px;
+}
+
+/* Tema Escuro */
+body.dark-mode {
+    --color-background: #1e1e1e;
+    --color-surface-1: rgb(2, 2, 58);
+    --color-surface-2: #3d3d3d;
+    --color-text-primary: ivory;
+    --color-text-secondary: #b0b0b0;
+    --color-text-muted: #999;
+}

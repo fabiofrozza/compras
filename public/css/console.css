@@ -1,0 +1,407 @@
+/* ==========================================================================
+FLOATING CONSOLE AND LOGS DRAWER
+========================================================================== */
+
+#console-container {
+    position: fixed;
+    bottom: var(--padding-main-container);
+    right: var(--padding-main-container);
+    width: 700px;
+    height: 400px;
+    min-width: 350px;
+    background: #1e1e1e;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    display: none;
+    flex-direction: column;
+    z-index: 1102;
+    resize: both;
+    overflow: auto;
+}
+
+#console-container.show {
+    display: flex;
+}
+
+/* Estado arrastando o console */
+body.dragging-console {
+    user-select: none;
+}
+
+/* Header do Console */
+.console-header {
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+    background: linear-gradient(#f6f6f6, #d3d3d3 18%, #7e7e7e 87%, #7e7e7e 94%, #393456 100%);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.header-buttons {
+    display: flex;
+    gap: 4px;
+    align-items: baseline;
+}
+
+.console-header .btn-minimize,
+.console-header .btn-close {
+    background: transparent;
+    border: none;
+    color: black;
+    font-size: .75rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.console-header .btn-minimize:hover,
+.console-header .btn-close:hover {
+    color: white;
+}
+
+#console-container.running .btn-close {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   OVERLAY DE BLOQUEIO DURANTE EXECUÇÃO DE SCRIPT
+   ========================================================================== */
+
+#script-running-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1101;
+    /* acima da navbar (1100) e sidebar (1099); console fica em 1102 */
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+#script-running-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Pílula informativa no centro do overlay */
+#script-running-overlay .overlay-badge {
+    position: absolute;
+    bottom: var(--padding-screen);
+    left: var(--padding-screen);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-size: 0.75rem;
+}
+
+/* Indicadores de Status do Console */
+.status-indicators {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+}
+
+.status-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+#status-1 {
+    background-color: #34a952;
+}
+
+#status-2 {
+    background-color: #fbbd06;
+}
+
+#status-3 {
+    background-color: #ea4436;
+}
+
+#console-container.running .status-circle {
+    animation: 2s console-status-bounce ease infinite;
+}
+
+#console-container.running #status-1 {
+    animation-delay: 0s;
+}
+
+#console-container.running #status-2 {
+    animation-delay: 0.25s;
+}
+
+#console-container.running #status-3 {
+    animation-delay: 0.5s;
+}
+
+/* Estados Finais do Console */
+#console-container.finished-success #status-1 {
+    background-color: var(--color-success);
+    animation: none;
+}
+
+#console-container.finished-warning #status-2 {
+    background-color: var(--color-warning);
+    animation: none;
+}
+
+#console-container.finished-error #status-3 {
+    background-color: var(--color-error);
+    animation: none;
+}
+
+#console-container.finished-success #status-2,
+#console-container.finished-success #status-3,
+#console-container.finished-warning #status-1,
+#console-container.finished-warning #status-3,
+#console-container.finished-error #status-1,
+#console-container.finished-error #status-2 {
+    background-color: var(--color-idle);
+    animation: none;
+}
+
+@keyframes console-status-bounce {
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+/* Estado Minimizado do Console */
+#console-container.minimized {
+    height: auto !important;
+    resize: none;
+}
+
+#console-container.minimized #console-output,
+#console-container.minimized #console-summary {
+    display: none !important;
+}
+
+/* Resumo do Console */
+#console-summary {
+    display: none;
+    align-items: center;
+    padding: 8px 8px 8px 0;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+#console-container.show #console-summary {
+    display: flex;
+}
+
+.summary-icon {
+    font-size: 1.5rem;
+    margin-inline: 15px;
+    line-height: 1;
+}
+
+.summary-text h4 {
+    margin: 0 0 4px 0;
+    font-size: .9rem;
+    font-weight: 600;
+    color: white !important;
+}
+
+.summary-text p {
+    margin: 0;
+    font-size: 0.75rem;
+    opacity: 0.9;
+}
+
+.progress-bar {
+    overflow: visible;
+}
+
+#console-summary.summary-running {
+    background-color: var(--color-idle);
+}
+
+#console-summary.summary-running .summary-icon::before {
+    font: var(--fa-font-solid);
+    content: '\f254';
+    /* hourglass */
+}
+
+#console-summary.summary-success {
+    background-color: var(--color-success);
+}
+
+#console-summary.summary-success .summary-icon::before {
+    font: var(--fa-font-solid);
+    content: '\f00c';
+    /* checkmark */
+}
+
+#console-summary.summary-warning {
+    background-color: var(--color-warning);
+}
+
+#console-summary.summary-warning .summary-icon::before {
+    font: var(--fa-font-solid);
+    content: '\f071';
+    /* warning */
+}
+
+#console-summary.summary-error {
+    background-color: var(--color-error);
+}
+
+#console-summary.summary-error .summary-icon::before {
+    font: var(--fa-font-solid);
+    content: '\f00d';
+    /* x mark */
+}
+
+/* Output do Console */
+#console-output {
+    flex: 1;
+    padding: 15px;
+    line-height: normal;
+    overflow-y: auto;
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 12px;
+    color: #00ff00;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background: linear-gradient(to bottom,
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, .1) 50%,
+            rgba(0, 0, 0, .2) 70%,
+            rgba(0, 0, 0, .6));
+    background-size: 100% .3rem;
+}
+
+#console-output::-webkit-scrollbar {
+    width: 10px;
+}
+
+#console-output::-webkit-scrollbar-track {
+    background: #2d2d2d;
+}
+
+#console-output::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 4px;
+}
+
+.error-text {
+    color: var(--color-error);
+}
+
+@media (max-width: 768px) {
+    #console-container {
+        width: calc(100% - 40px);
+        left: var(--padding-screen);
+        right: var(--padding-screen);
+    }
+}
+
+/* Floating Logs Drawer */
+
+#logs-drawer {
+    --logs-drawer-header-height: 28px;
+    position: fixed;
+    bottom: 0;
+    right: var(--padding-main-container);
+    width: 40vw;
+    max-height: 75vh;
+    min-height: 10vh;
+    background: var(--color-text-primary);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    z-index: 1001;
+    transition: calc(var(--transition-time) * 2) ease-in-out;
+}
+
+#logs-drawer.collapsed {
+    width: 36px;
+    transform: translateY(calc(100% - var(--logs-drawer-header-height)));
+}
+
+#logs-drawer.collapsed .logs-drawer-content {
+    opacity: 0;
+}
+
+#logs-drawer.collapsed #logs-drawer-title span {
+    display: none;
+}
+
+#logs-drawer.collapsed #logs-minimize-icon {
+    display: none;
+}
+
+.logs-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 12px;
+    height: var(--logs-drawer-header-height);
+    color: var(--color-surface-1);
+    cursor: ns-resize;
+}
+
+#logs-drawer-title {
+    font-size: .9rem;
+}
+
+.logs-drawer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logs-drawer-action-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-surface-1);
+    font-size: .75rem;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    opacity: 0.75;
+    transition: opacity 0.15s ease, background 0.15s ease;
+    line-height: 1;
+}
+
+.logs-drawer-action-btn:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+#logs-drawer.collapsed .logs-drawer-actions {
+    display: none;
+}
+
+.logs-drawer-header #logs-minimize-icon {
+    font-size: .75rem;
+}
+
+.logs-drawer-content {
+    padding: 0 10px;
+    overflow-y: auto;
+    flex-grow: 1;
+    opacity: 1;
+    transition: calc(var(--transition-time) * 2) ease-in-out;
+}
+
+#logs-drawer .files-table-container {
+    overflow-y: auto;
+    max-height: 20vh;
+}
+
+#logs-drawer.d-none {
+    display: none !important;
+}

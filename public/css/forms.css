@@ -1,0 +1,128 @@
+/* ==========================================================================
+FORMS AND FILES
+========================================================================== */
+
+.indicator-required {
+    font: var(--fa-font-solid);
+    color: var(--color-error);
+    font-size: 50%;
+    cursor: help;
+    margin-left: 3px;
+}
+
+.form-label {
+    margin-bottom: .2rem;
+    font-size: 87.5%;
+}
+
+.script-form {
+    background-color: color-mix(in srgb, var(--color-background) 75%, white);
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.script-form h4,
+#importacaoTabs .nav-link {
+    font-size: 1em;
+}
+
+.script-form h4,
+#importacaoTabs .nav-link.active {
+    color: var(--color-text-primary);
+}
+
+.script-form h4 {
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--color-border-focus);
+    padding-bottom: 8px;
+}
+
+.form-group {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row-reverse;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+/* File Manager */
+
+.files-list {
+    background-color: color-mix(in srgb, var(--color-background) 50%, white);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 6px;
+    min-height: 100px;
+    margin-bottom: 12px;
+}
+
+.files-list:not(.is-invalid):has(.selectable) {
+    border: 1px solid var(--bs-primary);
+}
+
+.files-list.is-invalid {
+    border-color: var(--bs-form-invalid-border-color);
+}
+
+.folder-path-container {
+    border-bottom: var(--bs-border-color) solid 1px;
+    padding: 5px;
+    font-size: 12px;
+    color: var(--color-text-primary);
+    font-family: Consolas, 'Courier New', monospace;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.icon-and-path {
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+}
+
+.copy-icon {
+    --bs-btn-padding-y: .1rem;
+    --bs-btn-padding-x: .25rem;
+    --bs-btn-font-size: .75rem;
+}
+
+.files-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    background-color: var(--color-surface-1);
+}
+
+.files-table td {
+    padding: 2px;
+    vertical-align: top;
+}
+
+.files-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.files-table tbody tr {
+    cursor: pointer;
+}
+
+.file-icon {
+    margin-left: 6px;
+}
+
+.folder-buttons-container {
+    display: flex;
+    border-top: var(--bs-border-color) solid 1px;
+    justify-content: right;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 10px;
+}

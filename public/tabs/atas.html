@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<div class="row">
+    <div class="col">
+        <!-- Formulário com Informações do Pregão -->
+        <form id="form-info-pregao" class="script-form shadow-sm">
+            <h4><i class="fas fa-gavel"></i> Informações do Pregão</h4>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="atas-numero-pregao" class="form-label">
+                            Número do pregão
+                        </label>
+                        <input type="number" class="form-control form-control-sm" id="atas-numero-pregao"
+                            data-field="n_pregao" min="1" placeholder="Ex: 90123" data-validate-rule="numeric" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="atas-ano-pregao" class="form-label">
+                            Ano do pregão
+                        </label>
+                        <select class="form-select form-select-sm" id="atas-ano-pregao" data-field="ano_pregao"
+                            data-validate-rule="numeric" required>
+                            <option value="">-- Selecione --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="atas-processo-spa" class="form-label">
+                            Processo SPA
+                        </label>
+                        <input type="text" class="form-control form-control-sm" id="atas-processo-spa"
+                            data-field="processo" placeholder="23080.XXXXXX/XXXX-XX" data-validate-rule="pattern"
+                            data-regex-pattern="\d{5}\.\d{6}/\d{4}-\d{2}" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="atas-data-pregao" class="form-label">
+                            Data Pregão DOU
+                        </label>
+                        <input type="date" class="form-control form-control-sm" id="atas-data-pregao" data-field="data"
+                            required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="atas-primeira-ata" class="form-label">
+                            Primeira Ata
+                        </label>
+                        <input type="number" class="form-control form-control-sm" id="atas-primeira-ata"
+                            data-field="n_ata" min="1" data-validate-rule="numeric" placeholder="Ex: 868" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="atas-ano-ata" class="form-label">
+                            Ano Ata
+                        </label>
+                        <select class="form-select form-select-sm" id="atas-ano-ata" data-field="ano_ata"
+                            data-validate-rule="numeric" required>
+                            <option value="">-- Selecione --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="atas-objeto" class="form-label">
+                    Objeto
+                </label>
+                <textarea id="atas-objeto" class="form-control form-control-sm" data-field="objeto" rows="3"
+                    placeholder="Descrição do objeto do pregão" required></textarea>
+            </div>
+        </form>
+    </div>
+
+    <div class="col">
+        <!-- Lista de Relatórios SICAF -->
+        <div class="script-form shadow-sm">
+            <h4><i class="fas fa-address-card"></i> Relatórios SICAF</h4>
+            <div id="atas-relatorios-sicaf" class="files-list" data-folder="sicaf" data-selectable="false">
+            </div>
+            <div class="form-buttons">
+                <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-form-info-pregao"
+                    data-script-name="atas">
+                    Obter dados dos SICAF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <!-- Modelos de Ata -->
+        <div id="form-atas-modelos" class="script-form shadow-sm">
+            <h4><i class="fa-brands fa-firstdraft"></i> Modelos de Ata </h4>
+
+            <!-- Lista de Modelos -->
+            <div id="atas-modelos" class="files-list" data-field="atas_modelos" data-validate-rule="file-selectable"
+                required data-folder="atas_modelos" data-selectable="true">
+            </div>
+
+            <!-- Botão Gerar Atas -->
+            <div class="form-buttons">
+
+                <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-form-atas-modelos"
+                    onclick="executarMailmergeAtas()" disabled>
+                    Gerar Atas
+                </button>
+
+                <!-- Status dos Dados -->
+                <div id="status-dados-atas" class="alert alert-light border d-flex align-items-start p-1" role="alert">
+                    <div id="icon-status-dados" class="me-2 text-muted">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <span id="texto-status-dados" class="text-primary-emphasis">Verificando disponibilidade...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <!-- Atas Finalizadas -->
+        <div class="script-form shadow-sm">
+            <h4><i class="fa-solid fa-clipboard-check"></i> Atas Finalizadas</h4>
+            <div id="atas-finalizadas" class="files-list" data-folder="atas_finalizadas" data-selectable="false">
+                <div class="no-files-message">Não há Atas finalizadas.</div>
+            </div>
+        </div>
+    </div>
+</div>

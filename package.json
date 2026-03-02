@@ -1,0 +1,23 @@
+{
+  "name": "compras-web",
+  "version": "2.0.0",
+  "description": "Some scripts to help my colleagues with activities related to public procurement / Alguns scripts para auxiliar meus colegas nas atividades relacionadas a compras públicas",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "keywords": [
+    "R",
+    "Node.js",
+    "web interface"
+  ],
+  "author": "Fábio Frozza",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "exceljs": "^4.4.0",
+    "express": "^5.2.1",
+    "jszip": "^3.10.1",
+    "ws": "^8.19.0"
+  }
+}

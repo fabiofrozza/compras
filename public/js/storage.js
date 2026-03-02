@@ -1,0 +1,317 @@
+// ====== SISTEMA DE PREFERÊNCIAS E CONFIGURAÇÕES DO USUÁRIO ======
+// Utiliza LocalStorage para salvar preferências de interface e configurações de campos
+
+const STORAGE_KEY = 'compras_web_state';
+
+// Estado padrão global
+let appState = {
+    preferences: {
+        darkMode: false,
+        sidebarExpanded: false,
+        preferredTab: ''
+    }
+};
+
+// Carregar todo o estado do LocalStorage
+function loadAppState() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            Object.keys(parsed).forEach(key => {
+                if (typeof parsed[key] === 'object') {
+                    appState[key] = { ...(appState[key] || {}), ...parsed[key] };
+                } else {
+                    appState[key] = parsed[key];
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao ler LocalStorage:', error);
+    }
+}
+
+// Salvar o estado completo no LocalStorage
+function saveAppState() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    } catch (error) {
+        console.error('Erro ao salvar no LocalStorage:', error);
+    }
+}
+
+// ==== PREFERÊNCIAS DE UI ====
+
+function populateFavoriteTabSelectList() {
+    const selectPreferredTab = document.getElementById('preferredTab');
+    if (!selectPreferredTab) return;
+
+    // 1. Construir lista de opções (começando com a padrão)
+    const options = [{
+        id: 'default',
+        value: '',
+        label: 'Abrir última aba visualizada',
+        icon: 'fas fa-clock'
+    }];
+
+    // Buscar botões da sidebar para obter ícones e nomes
+    const sidebarLinks = document.querySelectorAll('#sidebar .nav-link');
+
+    sidebarLinks.forEach(link => {
+        if (!link.id || !link.id.includes('-tab')) return;
+        const tabId = link.id.replace('-tab', '');
+
+        const nameElement = link.querySelector('.link-text');
+        const name = nameElement ? nameElement.textContent.trim() : tabId;
+
+        const icon = link.querySelector('i');
+        const iconClass = icon ? icon.className : 'fas fa-circle';
+
+        options.push({
+            id: tabId,
+            value: tabId,
+            label: name,
+            icon: iconClass
+        });
+    });
+
+    // 2. Gerar HTML a partir da lista
+    const html = options.map(opt => `
+        <input type="radio" class="btn-check" name="preferredTabRadio" id="pref-tab-${opt.id}" value="${opt.value}" autocomplete="off" data-field="preferredTab">
+        <label class="btn btn-sm btn-outline-secondary text-start text-nowrap" for="pref-tab-${opt.id}">
+            <i class="${opt.icon} fa-fw me-2"></i> ${opt.label}
+        </label>
+    `).join('');
+
+    selectPreferredTab.innerHTML = html;
+}
+
+// Mostrar indicador de preferências salvas
+function showPreferencesSaveIndicator() {
+    if (typeof showToast === 'function') {
+        showToast('Preferências salvas', 'success', 2000, 'configurações');
+    }
+}
+
+// Obter informações do usuário
+async function getUserInfo() {
+    try {
+        const response = await fetch('/api/user-info');
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Erro ao obter informações do usuário:', error);
+        return { computerName: 'Local (Navegador)' };
+    }
+}
+
+// Inicializar página de Preferências (Carga Global)
+function initPreferencesPage() {
+    try {
+        loadAppState();
+        applyUserPreferences(appState.preferences);
+    } catch (error) {
+        console.error('Erro ao inicializar página de Preferências:', error);
+    }
+}
+
+// Aplicar preferências carregadas
+function applyUserPreferences(preferences) {
+    if (preferences.darkMode) {
+        if (typeof applyDarkMode === 'function') applyDarkMode(true);
+        const el = document.getElementById('darkMode');
+        if (el) el.checked = true;
+    } else {
+        if (typeof applyDarkMode === 'function') applyDarkMode(false);
+        const el = document.getElementById('darkMode');
+        if (el) el.checked = false;
+    }
+
+    if (preferences.sidebarExpanded) {
+        if (typeof expandSidebar === 'function') expandSidebar();
+        const el = document.getElementById('sidebarExpanded');
+        if (el) el.checked = true;
+    } else {
+        if (typeof collapseSidebar === 'function') collapseSidebar();
+        const el = document.getElementById('sidebarExpanded');
+        if (el) el.checked = false;
+    }
+
+    const tabContainer = document.getElementById('preferredTab');
+    if (tabContainer) {
+        const val = preferences.preferredTab || '';
+        const radio = tabContainer.querySelector(`input[name="preferredTabRadio"][value="${val}"]`);
+        if (radio) radio.checked = true;
+    }
+
+    // Aplicar navegação (abrir a aba) se estivermos na inicialização
+    if (!window.navigationInitialized) {
+        window.navigationInitialized = true;
+        if (preferences.preferredTab) {
+            setTimeout(() => {
+                const tabButton = document.getElementById(preferences.preferredTab + '-tab');
+                const tabContent = document.getElementById(preferences.preferredTab);
+                if (tabButton && tabContent) {
+                    const tab = new bootstrap.Tab(tabButton);
+                    tab.show();
+                }
+            }, 500);
+        } else {
+            const lastTab = localStorage.getItem('lastActiveTab');
+            if (lastTab) {
+                setTimeout(() => {
+                    const tabButton = document.getElementById(lastTab + '-tab') || document.getElementById('' + lastTab + '-tab');
+                    const tabContent = document.getElementById(lastTab);
+                    if (tabButton && tabContent) {
+                        const tab = new bootstrap.Tab(tabButton);
+                        tab.show();
+                    } else {
+                        const homeTab = new bootstrap.Tab(document.getElementById('home-tab'));
+                        homeTab.show();
+                    }
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    const homeTab = new bootstrap.Tab(document.getElementById('home-tab'));
+                    homeTab.show();
+                }, 500);
+            }
+        }
+    }
+}
+
+// ==== CAMPOS DO FORMULÁRIO (CONFIG) ====
+
+let saveTimeout = null;
+
+function setupAutoSave(container) {
+    const fields = container.querySelectorAll('[data-field]');
+    fields.forEach(field => {
+        // Evitar adicionar listeners duplicados
+        if (field.hasAttribute('data-autosave-bound')) return;
+        field.setAttribute('data-autosave-bound', 'true');
+        ['input', 'change'].forEach(eventType => {
+            field.addEventListener(eventType, (e) => {
+                const target = e.target;
+                target.classList.remove('is-invalid');
+
+                const fieldName = target.dataset.field;
+                // Radio buttons in a group share the same data-field
+                let value;
+                if (target.type === 'radio') {
+                    if (target.checked) value = target.value;
+                    else return; // only save the checked one
+                } else {
+                    value = target.type === 'checkbox' ? target.checked : target.value;
+                }
+
+                // Preferências UI
+                if (['darkMode', 'sidebarExpanded', 'preferredTab'].includes(fieldName)) {
+                    appState.preferences[fieldName] = value;
+                    saveAppState();
+                    applyUserPreferences(appState.preferences);
+
+                    if (eventType === 'change') {
+                        showPreferencesSaveIndicator();
+                    }
+                } else {
+                    // Configurações de campos
+                    const tabPane = target.closest('.tab-pane');
+                    const tabId = tabPane ? tabPane.id : 'global';
+
+                    if (target.type === 'date' && fieldName === 'data' && value) {
+                        if (typeof formatarDataBrasil === 'function') {
+                            value = formatarDataBrasil(value);
+                        }
+                    }
+
+                    if (!appState[tabId]) {
+                        appState[tabId] = {};
+                    }
+                    appState[tabId][fieldName] = value;
+
+                    if (saveTimeout) clearTimeout(saveTimeout);
+                    saveTimeout = setTimeout(() => {
+                        saveAppState();
+                        if (typeof showToast === 'function') {
+                            showToast('Alterações salvas com sucesso!', 'success', 2000, 'configuração');
+                        }
+                    }, 500);
+                }
+            });
+        });
+    });
+}
+
+function loadConfig(container = document) {
+    try {
+        loadAppState();
+
+        if (typeof popularAnosSelector === 'function') {
+            popularAnosSelector();
+        }
+
+        const scope = container || document;
+
+        scope.querySelectorAll('[data-field]').forEach(field => {
+            const fieldName = field.dataset.field;
+
+            // Ignorar as preenchimentos de preferências para não sobrescrever a lógica principal
+            if (['darkMode', 'sidebarExpanded', 'preferredTab'].includes(fieldName)) return;
+
+            const tabPane = field.closest('.tab-pane');
+            const tabId = tabPane ? tabPane.id : 'global';
+
+            if (appState[tabId] && appState[tabId].hasOwnProperty(fieldName)) {
+                let valor = appState[tabId][fieldName] || '';
+
+                if (field.type === 'date' && fieldName === 'data' && valor) {
+                    if (typeof converterDataBrasilParaISO === 'function') {
+                        valor = converterDataBrasilParaISO(valor);
+                    }
+                }
+
+                if (field.type === 'checkbox') {
+                    field.checked = valor === true || valor === 'true';
+                } else if (field.type === 'radio') {
+                    field.checked = (field.value === valor);
+                } else {
+                    field.value = valor;
+                }
+
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+                // Trigger change to validate any dependent UI logic, only if it doesn't cause infinite loops
+                // In setupAutoSave we save on input/change, so it will re-save the loaded data, which is fine
+            }
+        });
+
+        setupAutoSave(scope);
+
+    } catch (error) {
+        console.error('Erro ao carregar configuração:', error);
+    }
+}
+
+// ==== STARTUP HOOKS ====
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Inicializa a UI (sidebar, modo escuro, e abre aba)
+    initPreferencesPage();
+
+    // Observador para detectar lazy load de abas
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'data-loaded') {
+                const target = mutation.target;
+                if (target.getAttribute('data-loaded') === 'true') {
+                    // Usar timeout para permitir que o navegador renderize o conteúdo antes
+                    setTimeout(() => loadConfig(target), 0);
+                }
+            }
+        });
+    });
+
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        observer.observe(pane, { attributes: true });
+    });
+});
