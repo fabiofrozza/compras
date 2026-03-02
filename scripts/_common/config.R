@@ -645,22 +645,38 @@ config_finalizar <- function(sucesso = FALSE) {
 
     log_secao(sprintf("ENCERRANDO SCRIPT !!! COM %s", msg_aviso), "CONFIG")
 
-    cat(strrep("▄", tamanho_mensagens),
+    message_vector <- c(
+      strrep("▄", tamanho_mensagens), "\n",
       paste0(
         "█▓▒",
-        strrep("░", (tamanho_mensagens - 26) / 2),
+        strrep("░", floor((tamanho_mensagens - 26) / 2)),
         sprintf("RELATÓRIO DE %s", msg_aviso),
-        strrep("░", (tamanho_mensagens - 26) / 2),
+        strrep("░", ceiling((tamanho_mensagens - 26) / 2)),
         "▒▓█"
-      ),
-      paste0("█", strrep("▀", tamanho_mensagens - 2), "█"),
-      sep = "\n"
+      ), "\n",
+      paste0("█", strrep("▀", tamanho_mensagens - 2), "█"), "\n"
     )
-    cat(unlist(as.vector(config_json("msg_erro", opcao = "get"))),
-      labels = "█ ",
-      fill = 1
-    )
-    cat("█", strrep("▄", tamanho_mensagens - 2), "█\n", sep = "")
+
+    dados_erro <- unlist(as.vector(config_json("msg_erro", opcao = "get")))
+    out_str <- capture.output(cat(dados_erro, labels = "█ ", fill = 1))
+    out_str <- paste0(out_str, "\n")
+    message_vector <- c(message_vector, out_str)
+
+    message_vector <-
+      c(
+        message_vector,
+        paste0(
+          "█", strrep("▄", tamanho_mensagens - 2),
+          "█\n"
+        )
+      )
+
+    json_log_level <- if (status$erros) "error" else "warning"
+    if (utils_json_output()) {
+      utils_json_log(json_log_level, message_vector)
+    } else {
+      cat(message_vector, sep = "")
+    }
   } else {
     utils_color("ok")
 
@@ -695,22 +711,8 @@ config_finalizar <- function(sucesso = FALSE) {
 config_info <- function() {
   #' Exibe informaçõe do sistema para log e debug
 
-  screen_colors <- utils_cmd_info("ScreenColors")
-  window_size <- utils_cmd_info("WindowSize")
-
   log_info(
     "Informações do sistema", Sys.info(),
-    "-",
-    "Informações do console",
-    c(
-      paste("Código de página:", Sys.getlocale("LC_CTYPE")),
-      paste(
-        "Fonte:", utils_cmd_info("FaceName")$value,
-        "- Tamanho:", utils_cmd_info("FontSize")$altura
-      ),
-      paste("Cores:", screen_colors$nomeFundo, "-", screen_colors$nomeTexto),
-      paste("Tamanho janela:", window_size$altura, "-", window_size$largura)
-    ),
     "-",
     "Informações da rede", c(config_rede()),
     "-",
@@ -793,7 +795,9 @@ config_inicializar <- function(script_nome, pacotes, pasta = NULL) {
   config_json("resultado_geracao", "running")
 
   if (utils_silent()) {
-    log_info("Modo silencioso ativado. Script executado em segundo plano.")
+    log_info(
+      "Script executado em modo console (formatação poderá variar)."
+    )
   }
 
   log_secao(

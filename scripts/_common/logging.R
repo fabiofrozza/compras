@@ -69,7 +69,43 @@ log_barra_progresso <- function(label = NULL, steps = NULL, pb = NULL) {
   #' @seealso \code{\link{config_ambiente}}, \code{\link{config_opcoes}},
   #' \code{\link{config_inicializar}}
 
-  versao_texto <- !utils_is_windows() || utils_silent()
+  versao_texto <-
+    !utils_is_windows() || (utils_silent() && !utils_json_output())
+
+  # Modo JSON (WebSocket pro frontend Web)
+  if (utils_json_output()) {
+    if (is.null(pb)) {
+      pb <- new.env()
+      pb$value <- 0
+      pb$max <- steps
+
+      label_esc <- if (!is.null(label)) gsub('"', '\\\\"', label) else ""
+      cat(
+        sprintf(
+          '{"json_log":true,"type":"progress","action":"start","max":%d,"label":"%s"}\n',
+          steps,
+          label_esc
+        )
+      )
+      return(pb)
+    }
+
+    if (!is.null(label)) {
+      pb$value <- pb$value + 1
+      label_esc <- gsub('"', '\\\\"', label)
+      cat(
+        sprintf(
+          '{"json_log":true,"type":"progress","action":"update","value":%d,"label":"%s"}\n',
+          pb$value,
+          label_esc
+        )
+      )
+      return(invisible(NULL))
+    }
+
+    cat('{"json_log":true,"type":"progress","action":"close"}\n')
+    return(invisible(NULL))
+  }
 
   # Criar nova barra
   if (is.null(pb)) {
@@ -246,23 +282,33 @@ log_erro <- function(
     titulo <- paste0(titulo, "░")
   }
 
-  if (alerta) utils_color("alert") else utils_color("error")
+  if (alerta) {
+    utils_color("alert")
+    json_log_level <- "warning"
+  } else {
+    utils_color("error")
+    json_log_level <- "error"
+  }
 
-  cat("\n", strrep("▄", tamanho_erro),
+  # Constrói o quadro da mensagem principal
+  message <- c(
+    "\n", strrep("▄", tamanho_erro),
     "\n█▓▒", strrep("░", espacamento),
     titulo,
     strrep("░", espacamento), "▒▓█", "\n█ ",
     msg_erro,
-    strrep(" ", tamanho_erro - nchar(msg_erro) - 3), "█\n",
-    sep = ""
+    strrep(" ", tamanho_erro - nchar(msg_erro) - 3), "█\n"
   )
 
   config_json("msg_erro", msg_erro, append = TRUE)
 
   if (!(missing(dados))) {
     if ("error" %in% class(dados) || "warning" %in% class(dados)) {
-      cat(sprintf("█ → Código: %s\n", deparse(dados$call)))
-      cat(sprintf("█ → Erro  : %s\n", dados$message))
+      message <- c(
+        message,
+        sprintf("█ → Código: %s\n", deparse(dados$call)),
+        sprintf("█ → Erro  : %s\n", dados$message)
+      )
 
       config_json("msg_erro", sprintf("  → Código: %s", deparse(dados$call)),
         append = TRUE
@@ -271,21 +317,37 @@ log_erro <- function(
         append = TRUE
       )
     } else if (is.data.frame(dados)) {
-      print.data.frame(dados, right = FALSE, row.names = FALSE)
+      df_str <-
+        capture.output(
+          print.data.frame(dados, right = FALSE, row.names = FALSE)
+        )
+      df_str <- paste0("█ ", df_str, "\n")
+      message <- c(message, df_str)
 
       config_json("msg_erro", dados, append = TRUE)
     } else {
       if (is.list(dados)) dados <- as.vector(unlist(dados))
-      cat(dados, labels = "█ ", fill = 1)
+
+      out_str <- capture.output(cat(dados, labels = "█ ", fill = 1))
+      out_str <- paste0(out_str, "\n")
+      message <- c(message, out_str)
 
       config_json("msg_erro", dados, append = TRUE)
     }
   }
-  cat("█", strrep("▄", tamanho_erro - 2), "█",
-    .log_tempo_decorrido(), "\n",
-    sep = ""
+
+  # Adiciona o encerramento do quadro
+  message <- c(
+    message,
+    "█", strrep("▄", tamanho_erro - 2), "█",
+    .log_tempo_decorrido(), "\n"
   )
 
+  if (utils_json_output()) {
+    utils_json_log(json_log_level, message)
+  } else {
+    cat(message, sep = "")
+  }
   utils_color("default")
 
   if (finalizar) config_finalizar()
@@ -608,6 +670,7 @@ log_secao <- function(subtitulo, titulo = NULL) {
 
     return(
       c(
+        if (posicao == "superior") "\n",
         if (posicao %in% c("inferior", "separador")) margem_espacamento,
         paste0(
           left,
@@ -833,24 +896,46 @@ log_secao <- function(subtitulo, titulo = NULL) {
   if (!is.null(cores)) utils_color(cores)
 
   if (tipo == "info") {
+    message_vector <- c()
+
     if (borda_superior) {
-      cat(.log_montar_linha("borda", "superior"), sep = "")
+      message_vector <-
+        c(
+          message_vector,
+          .log_montar_linha("borda", "superior")
+        )
     }
 
     for (linha in linhas) {
       if (linha$tipo == "dataframe") {
-        print.data.frame(linha$conteudo, right = FALSE, row.names = FALSE)
+        df_str <-
+          capture.output(
+            print.data.frame(linha$conteudo, right = FALSE, row.names = FALSE)
+          )
+        df_str <- paste0(df_str, "\n")
+        message_vector <- c(message_vector, df_str)
         next
       }
 
-      cat(.log_montar_linha(linha$tipo, linha$posicao, linha), sep = "")
+      message_vector <-
+        c(
+          message_vector,
+          .log_montar_linha(linha$tipo, linha$posicao, linha)
+        )
     }
 
     if (borda_inferior) {
-      cat(
-        .log_montar_linha("borda", "inferior", timestamp = timestamp),
-        sep = ""
-      )
+      message_vector <-
+        c(
+          message_vector,
+          .log_montar_linha("borda", "inferior", timestamp = timestamp)
+        )
+    }
+
+    if (utils_json_output()) {
+      utils_json_log("info", message_vector)
+    } else {
+      cat(message_vector, sep = "")
     }
   }
 
@@ -860,12 +945,17 @@ log_secao <- function(subtitulo, titulo = NULL) {
       subtitulo = subtitulo
     )
 
-    cat(.log_montar_linha("secao", "superior", conteudo), sep = "")
+    message_vector <- c(
+      .log_montar_linha("secao", "superior", conteudo),
+      .log_montar_linha("secao", "meio", conteudo),
+      .log_montar_linha("secao", "inferior", conteudo, timestamp)
+    )
 
-    cat(.log_montar_linha("secao", "meio", conteudo), sep = "")
-
-    cat(.log_montar_linha("secao", "inferior", conteudo, timestamp), sep = "")
+    if (utils_json_output()) {
+      utils_json_log("section", message_vector)
+    } else {
+      cat(message_vector, sep = "")
+    }
   }
-
   if (!is.null(cores)) utils_color("default")
 }

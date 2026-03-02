@@ -134,114 +134,6 @@ utils_catalogo <- function() {
   catalogo
 }
 
-utils_cmd_info <- function(value_name) {
-  .decode_dword <- function(dword_hex_string) {
-    decimal_value <- strtoi(dword_hex_string)
-    if (is.na(decimal_value)) {
-      return(list(erro = "Valor hexadecimal inválido"))
-    }
-    altura <- bitwShiftR(decimal_value, 16)
-    largura <- bitwAnd(decimal_value, 0xFFFF)
-
-    list(altura = altura, largura = largura)
-  }
-
-  .decode_colors <- function(dword_hex_string) {
-    map <- c(
-      "0" = "Preto", "1" = "Azul", "2" = "Verde",
-      "3" = "Aqua (Azul-piscina)", "4" = "Vermelho", "5" = "Roxo",
-      "6" = "Amarelo", "7" = "Branco (Cinza Claro)",
-      "8" = "Cinza (Cinza Escuro)", "9" = "Azul Claro", "10" = "Verde Claro",
-      "11" = "Aqua Claro", "12" = "Vermelho Claro", "13" = "Roxo Claro",
-      "14" = "Amarelo Claro", "15" = "Branco Brilhante"
-    )
-
-    decimal_value <- strtoi(dword_hex_string)
-    if (is.na(decimal_value)) {
-      return(list(erro = "Valor hexadecimal inválido"))
-    }
-
-    bg_code <- bitwShiftR(decimal_value, 4)
-    fg_code <- bitwAnd(decimal_value, 0xF)
-
-    bg_name <- map[as.character(bg_code)]
-    fg_name <- map[as.character(fg_code)]
-
-    list(
-      codigoFundo = bg_code,
-      nomeFundo = unname(bg_name),
-      codigoTexto = fg_code,
-      nomeTexto = unname(fg_name)
-    )
-  }
-
-  reg_key <- '"HKCU\\Console\\%SystemRoot%_system32_cmd.exe"'
-  output <-
-    try(
-      system2(
-        "reg",
-        args = c("query", reg_key, "/v", value_name),
-        stdout = TRUE,
-        stderr = TRUE
-      ),
-      silent = TRUE
-    )
-
-  if (inherits(output, "try-error") || any(grepl("ERRO:", output))) {
-    reg_key <- '"HKCU\\Console"'
-    output <-
-      try(
-        system2(
-          "reg",
-          args = c("query", reg_key, "/v", value_name),
-          stdout = TRUE,
-          stderr = TRUE
-        ),
-        silent = TRUE
-      )
-
-    if (inherits(output, "try-error") || any(grepl("ERRO:", output))) {
-      return(paste("Valor '", value_name, "' não encontrado.", sep = ""))
-    }
-  }
-
-  value_line <- grep(value_name, output, value = TRUE, ignore.case = TRUE)
-
-  if (length(value_line) == 0) {
-    return(paste("Valor '", value_name, "' não encontrado.", sep = ""))
-  }
-
-  type_data <-
-    trimws(gsub(".*(REG_(SZ|DWORD|BINARY)).*", "\\1", value_line))
-  value_data <-
-    trimws(sub(".*(REG_(SZ|DWORD|BINARY))\\s+", "", value_line))
-
-  if (type_data == "REG_SZ") {
-    return(
-      list(
-        type = type_data,
-        value = value_data
-      )
-    )
-  }
-
-  if (type_data == "REG_DWORD") {
-    if (value_name == "ScreenColors") {
-      decoded_value <- .decode_colors(value_data)
-    } else {
-      decoded_value <- .decode_dword(value_data)
-    }
-
-    modifyList(
-      list(
-        type = type_data,
-        value = value_data
-      ),
-      decoded_value
-    )
-  }
-}
-
 utils_color <- function(color = NULL) {
   #' Define cores do console (somente Windows)
   #'
@@ -407,7 +299,53 @@ utils_silent <- function() {
   #' @seealso \code{\link{utils_color}}, \code{\link{log_barra_progresso}},
   #' \code{\link{commandArgs}}
 
-  "silent" %in% commandArgs(trailingOnly = TRUE)
+  args <- commandArgs(trailingOnly = TRUE)
+  "silent" %in% args || "json-output" %in% args
+}
+
+utils_json_output <- function() {
+  #' Verifica se o script deve exportar logs em formato JSON
+  #'
+  #' @description
+  #' Determina se o argumento "json-output" foi passado, instruindo o script
+  #' a emitir saídas e logs no formato JSON.
+  "json-output" %in% commandArgs(trailingOnly = TRUE)
+}
+
+utils_json_log <- function(level, message) {
+  #' Envia log formatado em JSON para a saída padrão
+  #'
+  #' @param level O nível do log
+  #' (ex: "info", "warning", "error", "success", "section")
+  #' @param message A mensagem do log ou um vetor de mensagens
+
+  if (!utils_json_output()) {
+    return(invisible(NULL))
+  }
+
+  # 1. Trata vetores e colapsa tudo numa string só
+  message <- message[!is.na(message)]
+  msg_colapsada <- paste(message, collapse = "")
+
+  # 2. Divide em várias linhas, ignorando pulos de linha vazios
+  linhas <- strsplit(msg_colapsada, "(\r\n|\n|\r)")[[1]]
+
+  for (linha_atual in linhas) {
+    linha_atual <- trimws(linha_atual, "right")
+    if (linha_atual == "") next
+
+    # Tratamento básico de escape para strings JSON válidas
+    msg_esc <- gsub("\\\\", "\\\\\\\\", linha_atual)
+    msg_esc <- gsub('"', '\\\\"', msg_esc)
+
+    cat(
+      sprintf(
+        '{"json_log":true,"level":"%s","message":"%s"}\n',
+        level,
+        msg_esc
+      )
+    )
+  }
 }
 
 utils_style <- function(style) {
