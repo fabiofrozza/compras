@@ -202,7 +202,7 @@ function popularComboProcessosSPA(processos) {
     const comboSPA = document.getElementById('importacao-combo-spa');
     if (!comboSPA) return;
 
-    comboSPA.innerHTML = '<option value="todos">-- Selecione o processo ou deixe em branco --</option>';
+    comboSPA.innerHTML = '<option value="todos">Relatório consolidado (todos os processos)</option>';
     processos.forEach(proc => {
         const option = document.createElement('option');
         option.value = proc;

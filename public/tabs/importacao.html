@@ -6,7 +6,10 @@
 
             <div class="row">
                 <div class="col">
-                    <label for="importacao-link" class="form-label">Link da Planilha do Google Drive </label>
+                    <label for="importacao-link" class="form-label" data-bs-toggle="tooltip"
+                        data-bs-title="Link da aba LISTA FINAL da planilha de inserção de demandas.">
+                        Link da Planilha do Google Drive
+                    </label>
                     <input type="url" class="form-control form-control-sm" id="importacao-link"
                         data-field="planilha_link" placeholder="https://docs.google.com/spreadsheets/d/..." required>
                     <div id="importacao-sheet-status" class="alert alert-light border d-flex align-items-start p-1 mt-2"
@@ -28,14 +31,20 @@
             <div class="row">
                 <div class="col">
                     <div class="form-group">
-                        <label for="importacao-val-min" class="form-label">Valor Mínimo </label>
+                        <label for="importacao-val-min" class="form-label" data-bs-toggle="tooltip"
+                            data-bs-title="Valor mínimo total do item para inclusão no processo">
+                            Valor Mínimo
+                        </label>
                         <input type="number" class="form-control form-control-sm" id="importacao-val-min"
                             data-field="valor_minimo" data-validate-rule="numeric" min="1" required>
                     </div>
                 </div>
                 <div class="col">
                     <div class="form-group">
-                        <label for="importacao-qtd-min" class="form-label">Qtd. Mínima </label>
+                        <label for="importacao-qtd-min" class="form-label" data-bs-toggle="tooltip"
+                            data-bs-title="Quantidade mínima demandada do item para inclusão no processo">
+                            Qtd. Mínima
+                        </label>
                         <input type="number" class="form-control form-control-sm" id="importacao-qtd-min"
                             data-field="qtd_minima" data-validate-rule="numeric" min="1" required>
                     </div>
@@ -43,7 +52,10 @@
                 <div class="col">
 
                     <div class="form-group">
-                        <label for="importacao-celula" class="form-label">Célula Inicial </label>
+                        <label for="importacao-celula" class="form-label" data-bs-toggle="tooltip"
+                            data-bs-title="Célula da LISTA FINAL onde inicia a área de inserção dos quantitativos pelas Unidades (ex: Q6)">
+                            Célula Inicial
+                        </label>
                         <input type="text" class="form-control form-control-sm" id="importacao-celula"
                             data-field="celula_inicial" data-validate-rule="pattern"
                             data-regex-pattern="^[A-Za-z]+[1-9][0-9]*$" placeholder="Ex: Q6" required>
@@ -54,21 +66,30 @@
             <div class="row">
                 <div class="col">
                     <div class="form-group">
-                        <label for="importacao-qtd-un" class="form-label">Qtd. Unidades </label>
+                        <label for="importacao-qtd-un" class="form-label" data-bs-toggle="tooltip"
+                            data-bs-title="Quantidade de colunas de Unidades requerentes (incluindo ocultas)">
+                            Qtd. Unidades
+                        </label>
                         <input type="number" class="form-control form-control-sm" id="importacao-qtd-un"
                             data-field="qtd_unidades" min="1" data-validate-rule="numeric" min="1" required>
                     </div>
                 </div>
                 <div class="col">
                     <div class="form-group">
-                        <label for="importacao-aba-menu" class="form-label">Aba Menu </label>
+                        <label for="importacao-aba-menu" class="form-label" data-bs-toggle="tooltip"
+                            data-bs-title="Nome da aba Menu na planilha (apenas letras, números e espaços)">
+                            Aba Menu
+                        </label>
                         <input type="text" class="form-control form-control-sm" id="importacao-aba-menu"
                             data-field="aba_menu" placeholder="Ex: Menu" required>
                     </div>
                 </div>
                 <div class="col">
                     <div class="form-group">
-                        <label for="importacao-aba-lista" class="form-label">Aba LISTA FINAL </label>
+                        <label for="importacao-aba-lista" class="form-label" data-bs-toggle="tooltip"
+                            data-bs-title="Nome da aba LISTA FINAL na planilha (apenas letras, números e espaços)">
+                            Aba LISTA FINAL
+                        </label>
                         <input type="text" class="form-control form-control-sm" id="importacao-aba-lista"
                             data-field="aba_lista_final" placeholder="Ex: LISTA FINAL" value="LISTA FINAL" required>
                     </div>
@@ -149,10 +170,13 @@
                 <div class="tab-pane fade" id="content-relatorio-gerencial" role="tabpanel">
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="importacao-combo-spa" class="form-label">Processo SPA</label>
+                            <label for="importacao-combo-spa" class="form-label" data-bs-toggle="tooltip"
+                                data-bs-title="Selecione o processo para geração do relatório (ou consolidado)">
+                                Processo SPA
+                            </label>
                             <select class="form-select form-select-sm" id="importacao-combo-spa"
                                 data-field="processo_selecionado">
-                                <option value="">-- Insira a planilha para extrair os processos --</option>
+                                <option value="">-- Processos --</option>
                             </select>
                         </div>
                     </div>
