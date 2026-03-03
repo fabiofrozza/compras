@@ -399,7 +399,7 @@ BARRAS DE NAVEGAÇÃO SUPERIOR E LATERAL
 .sidebar-footer {
     width: 100%;
     padding: var(--padding-buttons);
-    text-align: right;
     font-size: 0.5em;
     color: var(--color-text-muted);
+    text-decoration: none;
 }

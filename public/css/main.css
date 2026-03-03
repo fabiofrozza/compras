@@ -81,16 +81,12 @@ body {
     width: fit-content;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 5px 10px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.25);
+    padding: 4px;
+    border-radius: 4px;
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     border: 1px solid rgba(255, 255, 255, 0.4);
-    font-size: 0.72rem;
     text-decoration: none;
-    letter-spacing: 0.03em;
     transition: 0.3s ease;
 }
 
