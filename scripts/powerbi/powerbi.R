@@ -10,6 +10,18 @@ power_bi_main <- function() {
 
   config_inicializar("POWERBI", pacotes)
 
+  # Sobrescreve pasta$superior com o argumento fornecido pelo usuário (2º argumento)
+  argumentos <- commandArgs(trailingOnly = TRUE)
+  if (length(argumentos) >= 2 && argumentos[2] != "json-output") {
+    pasta_config <- get_config("pasta")
+    pasta_config$superior <- argumentos[2]
+    set_config(pasta = pasta_config)
+    log_info("Pasta da base de dados (fornecida pelo usuário):",
+      argumentos[2],
+      cores = "highlight1"
+    )
+  }
+
   log_secao("DEFINIÇÕES INICIAIS")
 
   script_a_executar <-
@@ -502,15 +514,15 @@ power_bi_renomear <- function(script_a_executar) {
 
 power_bi_planejamento_main <- function(utils, script_a_executar) {
   checar_abas <- function(url_planilha, ano_licitacao) {
-    # Verifica se há todas as abas dos anos solicitados, 
+    # Verifica se há todas as abas dos anos solicitados,
     # no formato "Licitação XXXX"
     sheet_names <- sheet_names(url_planilha)
-    
+
     abas_encontradas <- unlist(str_extract_all(sheet_names, "Licitação \\d{4}"))
     abas_nomes <- paste("Licitação", ano_licitacao)
-    
+
     ha_aba_ausente <- !(abas_nomes %in% abas_encontradas)
-    
+
     if (any(ha_aba_ausente)) {
       log_erro(
         sprintf(
@@ -521,10 +533,10 @@ power_bi_planejamento_main <- function(utils, script_a_executar) {
       )
       return(FALSE)
     }
-    
+
     return(TRUE)
   }
-  
+
   planilha_obter <- function(ano_licitacao) {
     url_planilha <- get_config("url")$controle
 
@@ -533,11 +545,11 @@ power_bi_planejamento_main <- function(utils, script_a_executar) {
       paste0("Anos: ", paste(ano_licitacao, collapse = ", ")),
       cores = "highlight1"
     )
-    
+
     if (!checar_abas(url_planilha, ano_licitacao)) {
       return(NULL)
     }
-    
+
     pb <-
       log_barra_progresso(
         "Lendo planilha de Controle de Processos", length(ano_licitacao)

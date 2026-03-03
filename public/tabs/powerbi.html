@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<div class="row">
+    <div class="col">
+        <!-- Formulário de seleção do painel -->
+        <form id="form-powerbi" class="script-form shadow-sm">
+            <h4><i class="fas fa-chart-line"></i> Geração de Dados para Power BI</h4>
+            <p class="text-muted mb-3" style="font-size: 87.5%;">
+                Selecione o painel para gerar os dados para o Power BI (ou as opções de manutenção) e clique em
+                Executar.
+            </p>
+
+            <!-- Pasta da base de dados -->
+            <div class="form-group">
+                <label for="powerbi-pasta" class="form-label">
+                    <i class="fas fa-folder-open me-1"></i> Pasta da base de dados
+                </label>
+                <input type="text" class="form-control form-control-sm" id="powerbi-pasta" data-field="pasta_powerbi"
+                    placeholder="Ex: C:\Users\usuario\POWERBI" required>
+                <div class="form-text">
+                    Pasta que contém as subpastas "Mapa de Licitações" e "Execução AF Empenho", e onde serão salvos os
+                    arquivos gerados.
+                </div>
+            </div>
+
+            <!-- Grupo: Painel do Observatório -->
+            <div class="row">
+                <div class="col">
+                    <fieldset class="script-form shadow-sm mb-0">
+                        <legend class="form-label fw-semibold" style="font-size: 93%;">
+                            <i class="fas fa-binoculars me-1"></i> Painel do Observatório
+                        </legend>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-planejamento"
+                                value="planejamento" checked>
+                            <label class="form-check-label" for="powerbi-planejamento">
+                                Planejamento
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-licitacao"
+                                value="licitacao">
+                            <label class="form-check-label" for="powerbi-licitacao">
+                                Licitação
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-execucao"
+                                value="execucao">
+                            <label class="form-check-label" for="powerbi-execucao">
+                                Execução
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-paalteracoes"
+                                value="paalteracoes">
+                            <label class="form-check-label" for="powerbi-paalteracoes">
+                                Processos Administrativos e Alterações Contratuais
+                            </label>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="col-auto">
+                    <fieldset class="script-form shadow-sm mb-0">
+                        <legend class="form-label fw-semibold" style="font-size: 93%;">
+                            <i class="fas fa-wrench me-1"></i> Manutenção
+                        </legend>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-renomear"
+                                value="renomear">
+                            <label class="form-check-label" for="powerbi-renomear">
+                                Renomear arquivos
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-todos"
+                                value="todos">
+                            <label class="form-check-label" for="powerbi-todos">
+                                Todos os Painéis
+                            </label>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
+            <!-- Descrição dinâmica da opção selecionada -->
+            <div id="powerbi-descricao" class="alert alert-light border d-flex align-items-start p-2 mt-3 mb-0"
+                role="alert">
+                <div class="me-2 text-muted">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <span id="powerbi-descricao-texto" class="text-primary-emphasis" style="font-size: 87.5%;">
+                    Painel Visão Planejamento — Será acessada a planilha de controle para recuperar os dados dos
+                    processos, Unidades requerentes e situação do envio da documentação.
+                </span>
+            </div>
+
+            <div class="form-buttons mt-3">
+                <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-run-powerbi"
+                    onclick="executarPowerBI()">
+                    <i class="fas fa-play me-1"></i> Executar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

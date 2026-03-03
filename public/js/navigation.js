@@ -207,7 +207,7 @@ document.addEventListener('shown.bs.tab', async (event) => {
 
 
             // Atualiza os logs após a troca de aba
-            if (globalComputerName && (tabId === 'atas' || tabId === 'catmat' || tabId === 'importacao' || tabId === 'mapas')) {
+            if (globalComputerName && (tabId === 'atas' || tabId === 'catmat' || tabId === 'importacao' || tabId === 'mapas' || tabId === 'powerbi')) {
                 const logsList = document.getElementById('logs-file-list');
                 const logsDrawer = document.getElementById('logs-drawer');
 
