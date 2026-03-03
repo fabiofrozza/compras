@@ -12,8 +12,8 @@
                     </label>
                     <input type="url" class="form-control form-control-sm" id="importacao-link"
                         data-field="planilha_link" placeholder="https://docs.google.com/spreadsheets/d/..." required>
-                    <div id="importacao-sheet-status" class="alert alert-light border d-flex align-items-start p-1 mt-2"
-                        role="alert">
+                    <div id="importacao-sheet-status"
+                        class="alert alert-light border d-flex align-items-start p-1 mt-2 mb-2" role="alert">
                         <div id="icon-status-link" class="me-2 text-muted">
                             <i class="fas fa-circle-info"></i>
                         </div>
@@ -21,6 +21,12 @@
                             validação.</span>
                     </div>
                 </div>
+            </div>
+            <div class="form-buttons">
+                <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
+                    class="btn btn-outline-danger btn-sm" onclick="limparFormulario('form-importacao-link')">
+                    <i class="fas fa-eraser"></i>
+                </button>
             </div>
         </form>
     </div>
@@ -94,6 +100,12 @@
                             data-field="aba_lista_final" placeholder="Ex: LISTA FINAL" value="LISTA FINAL" required>
                     </div>
                 </div>
+            </div>
+            <div class="form-buttons">
+                <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
+                    class="btn btn-outline-danger btn-sm" onclick="limparFormulario('form-importacao-config')">
+                    <i class="fas fa-eraser"></i>
+                </button>
             </div>
         </form>
     </div>

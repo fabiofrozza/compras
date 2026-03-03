@@ -207,3 +207,31 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape') closeAllPanels();
     });
 });
+
+/**
+ * Limpa todos os campos de um formulário e dispara eventos necessários
+ * @param {string} formId O ID do formulário a ser limpo
+ */
+function limparFormulario(formId) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+
+    // Busca todos os campos de input, select e textarea dentro do formulário
+    const campos = form.querySelectorAll('input, select, textarea');
+
+    campos.forEach(campo => {
+        // Ignorar botões e campos escondidos
+        if (['button', 'submit', 'reset', 'hidden'].includes(campo.type)) return;
+
+        if (campo.type === 'checkbox' || campo.type === 'radio') {
+            campo.checked = false;
+        } else {
+            campo.value = '';
+        }
+
+        // Disparar eventos para que componentes que observam alterações (como numerarAtas) reajam
+        campo.dispatchEvent(new Event('input', { bubbles: true }));
+        campo.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+}
