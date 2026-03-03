@@ -219,12 +219,6 @@ function setupAutoSave(container) {
                     const tabPane = target.closest('.tab-pane');
                     const tabId = tabPane ? tabPane.id : 'global';
 
-                    if (target.type === 'date' && fieldName === 'data' && value) {
-                        if (typeof formatarDataBrasil === 'function') {
-                            value = formatarDataBrasil(value);
-                        }
-                    }
-
                     if (!appState[tabId]) {
                         appState[tabId] = {};
                     }
@@ -264,12 +258,6 @@ function loadConfig(container = document) {
 
             if (appState[tabId] && appState[tabId].hasOwnProperty(fieldName)) {
                 let valor = appState[tabId][fieldName] || '';
-
-                if (field.type === 'date' && fieldName === 'data' && valor) {
-                    if (typeof converterDataBrasilParaISO === 'function') {
-                        valor = converterDataBrasilParaISO(valor);
-                    }
-                }
 
                 if (field.type === 'checkbox') {
                     field.checked = valor === true || valor === 'true';

@@ -296,7 +296,8 @@ atas_sicaf_ler <- function(sicaf_arquivos, dados_pregao) {
   # cria dataframe
   dados_atas <- data.frame(
     pregao, ano_pregao,
-    processo, objeto, data,
+    processo, objeto,
+    data = as.Date(data),
     ata, ano_ata,
     cnpj, razao_social,
     endereco, cep, cidade, estado,

@@ -137,6 +137,10 @@ async function executarMailmerge(params, logger) {
                 headers.forEach((header, idx) => {
                     const valor = row.getCell(idx + 1).value;
                     dadosLinha[header] = valor || '';
+
+                    if (header === 'data' && dadosLinha[header]) {
+                        dadosLinha[header] = formatarDataBrasil(dadosLinha[header]);
+                    }
                 });
 
                 // Usar número da ata do arquivo de dados ao invés de sequencial
@@ -309,4 +313,41 @@ function substituirCampos(conteudo, dados, numeroAta) {
 
     return resultado;
 }
+
+/**
+ * Formata data de Date object (UTC) ou string "YYYY-MM-DD" para "dd de mês de yyyy"
+ */
+function formatarDataBrasil(valorData) {
+    if (!valorData) return '';
+
+    let dia, mesIndex, ano;
+
+    if (valorData instanceof Date) {
+        // ExcelJS reads dates as UTC midnight
+        dia = valorData.getUTCDate();
+        mesIndex = valorData.getUTCMonth();
+        ano = valorData.getUTCFullYear();
+    } else if (typeof valorData === 'string') {
+        const partes = valorData.substring(0, 10).split('-');
+        if (partes.length === 3) {
+            ano = parseInt(partes[0]);
+            mesIndex = parseInt(partes[1]) - 1;
+            dia = parseInt(partes[2]);
+        } else {
+            return valorData;
+        }
+    } else {
+        return valorData;
+    }
+
+    if (isNaN(dia) || isNaN(ano)) return valorData;
+
+    const meses = [
+        'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+        'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+    ];
+
+    return `${dia} de ${meses[mesIndex]} de ${ano}`;
+}
+
 module.exports = { executarMailmerge };

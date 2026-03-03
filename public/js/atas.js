@@ -10,50 +10,6 @@ const atasData = {
 let atasInicializado = false;
 
 /**
- * Converte data de "dd de mês de yyyy" para "YYYY-MM-DD"
- */
-function converterDataBrasilParaISO(dataBrasil) {
-    if (!dataBrasil) return '';
-
-    // Padrão: "17 de fevereiro de 2026"
-    const meses = {
-        'janeiro': '01', 'fevereiro': '02', 'março': '03', 'abril': '04',
-        'maio': '05', 'junho': '06', 'julho': '07', 'agosto': '08',
-        'setembro': '09', 'outubro': '10', 'novembro': '11', 'dezembro': '12'
-    };
-
-    const partes = dataBrasil.trim().split(' de ');
-    if (partes.length !== 3) return '';
-
-    const dia = String(parseInt(partes[0])).padStart(2, '0');
-    const mesNome = partes[1].toLowerCase();
-    const ano = partes[2];
-    const mes = meses[mesNome];
-
-    if (!mes) return '';
-
-    return `${ano}-${mes}-${dia}`;
-}
-
-/**
- * Formata data de YYYY-MM-DD para "dd de mês de yyyy"
- */
-function formatarDataBrasil(dataISO) {
-    if (!dataISO) return '';
-
-    const data = new Date(dataISO + 'T00:00:00');
-    const dia = String(data.getDate()).padStart(2, '0');
-    const meses = [
-        'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-        'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
-    ];
-    const mes = meses[data.getMonth()];
-    const ano = data.getFullYear();
-
-    return `${parseInt(dia)} de ${mes} de ${ano}`;
-}
-
-/**
  * Popula os selectors de ano com os últimos 10 anos
  * Preserva os valores existentes carregados da configuração
  */
@@ -221,16 +177,6 @@ function setupAtasListeners() {
     if (inputPrimeiraAta) {
         inputPrimeiraAta.addEventListener('change', numerarAtas);
         inputPrimeiraAta.addEventListener('input', numerarAtas);
-    }
-
-    // Listener para data - converte para formato Brasil ao sair do campo
-    if (inputDataPregao) {
-        inputDataPregao.addEventListener('change', () => {
-            if (inputDataPregao.value) {
-                // Armazenar a data em formato ISO para salvar
-                // Mas podemos validar aqui se necessário
-            }
-        });
     }
 
     // Listener para máscara de processo SPA
