@@ -309,8 +309,6 @@ function executarMailmergeAtas() {
         return;
     }
 
-    console.log('Iniciando mailmerge com modelo:', modeloSelecionado);
-
     // Preparar dados para enviar
     const dados = {
         modelo_ata: modeloSelecionado

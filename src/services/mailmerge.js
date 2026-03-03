@@ -141,7 +141,7 @@ async function executarMailmerge(params, logger) {
 
                 // Usar número da ata do arquivo de dados ao invés de sequencial
                 numeroAta = parseInt(dadosLinha['ata']) || (i - 1);
-                logger(`📄 Processando Ata ${numeroAta} de ${numRegistros}...`, 'info');
+                logger(`📄 Processando Ata ${i - 1} de ${numRegistros}...`, 'info');
 
                 // Substituir dados no documento
                 const documentoProcessado = await processarDocumento(
