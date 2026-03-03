@@ -3,13 +3,21 @@ atas_configuracoes_iniciais <- function() {
     {
       dados_pregao <- list()
 
-      dados_pregao$pregao <- config_json("n_pregao", opcao = "get")
-      dados_pregao$ano_pregao <- config_json("ano_pregao", opcao = "get")
-      dados_pregao$processo <- config_json("processo", opcao = "get")
-      dados_pregao$objeto <- config_json("objeto", opcao = "get")
-      dados_pregao$data <- config_json("data", opcao = "get")
-      dados_pregao$ata <- config_json("n_ata", opcao = "get")
-      dados_pregao$ano_ata <- config_json("ano_ata", opcao = "get")
+      dados_pregao$pregao <- commandArgs(trailingOnly = TRUE)[1]
+      dados_pregao$ano_pregao <- commandArgs(trailingOnly = TRUE)[2]
+      dados_pregao$processo <- commandArgs(trailingOnly = TRUE)[3]
+      dados_pregao$data <- commandArgs(trailingOnly = TRUE)[4]
+      dados_pregao$ata <- commandArgs(trailingOnly = TRUE)[5]
+      dados_pregao$ano_ata <- commandArgs(trailingOnly = TRUE)[6]
+      dados_pregao$objeto <- commandArgs(trailingOnly = TRUE)[7]
+
+      # dados_pregao$pregao <- config_json("n_pregao", opcao = "get")
+      # dados_pregao$ano_pregao <- config_json("ano_pregao", opcao = "get")
+      # dados_pregao$processo <- config_json("processo", opcao = "get")
+      # dados_pregao$objeto <- config_json("objeto", opcao = "get")
+      # dados_pregao$data <- config_json("data", opcao = "get")
+      # dados_pregao$ata <- config_json("n_ata", opcao = "get")
+      # dados_pregao$ano_ata <- config_json("ano_ata", opcao = "get")
 
       log_info("DADOS DO PREGÃO", dados_pregao,
         cores = "highlight1"
