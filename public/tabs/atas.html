@@ -12,7 +12,7 @@
                             Número do pregão
                         </label>
                         <input type="number" class="form-control form-control-sm" id="atas-numero-pregao"
-                            data-field="n_pregao" min="1" placeholder="Ex: 90123" data-validate-rule="numeric" required>
+                            data-field="n_pregao" min="1" data-validate-rule="numeric" required>
                     </div>
                 </div>
                 <div class="col">
@@ -31,17 +31,19 @@
             <div class="row">
                 <div class="col">
                     <div class="form-group">
-                        <label for="atas-processo-spa" class="form-label">
+                        <label for="atas-processo-spa" class="form-label" data-bs-toggle="tooltip"
+                            data-bs-title="Informe o número completo do processo SPA. Digite somente os números, sem pontuação.">
                             Processo SPA
                         </label>
                         <input type="text" class="form-control form-control-sm" id="atas-processo-spa"
-                            data-field="processo" placeholder="23080.XXXXXX/XXXX-XX" data-validate-rule="pattern"
-                            data-regex-pattern="\d{5}\.\d{6}/\d{4}-\d{2}" required>
+                            data-field="processo" data-validate-rule="pattern"
+                            data-regex-pattern="23080\.\d{6}/\d{4}-\d{2}" required>
                     </div>
                 </div>
                 <div class="col">
                     <div class="form-group">
-                        <label for="atas-data-pregao" class="form-label">
+                        <label for="atas-data-pregao" class="form-label" data-bs-toggle="tooltip"
+                            data-bs-title="Informe a data da publicação do pregão no DOU.">
                             Data Pregão DOU
                         </label>
                         <input type="date" class="form-control form-control-sm" id="atas-data-pregao" data-field="data"
@@ -53,11 +55,12 @@
             <div class="row">
                 <div class="col">
                     <div class="form-group">
-                        <label for="atas-primeira-ata" class="form-label">
+                        <label for="atas-primeira-ata" class="form-label" data-bs-toggle="tooltip"
+                            data-bs-title="Informe o número da primeira Ata a ser gerada. As próximas serão numeradas automaticamente, conforme os relatórios SICAF presentes na pasta.">
                             Primeira Ata
                         </label>
                         <input type="number" class="form-control form-control-sm" id="atas-primeira-ata"
-                            data-field="n_ata" min="1" data-validate-rule="numeric" placeholder="Ex: 868" required>
+                            data-field="n_ata" min="1" data-validate-rule="numeric" required>
                     </div>
                 </div>
                 <div class="col">
@@ -73,11 +76,12 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="atas-objeto" class="form-label">
+                <label for="atas-objeto" class="form-label" data-bs-toggle="tooltip"
+                    data-bs-title="Informe o objeto do pregão conforme o Edital. Na Ata, esta informação será incluída após o trecho 'REGISTRAR PREÇO...'.">
                     Objeto
                 </label>
                 <textarea id="atas-objeto" class="form-control form-control-sm" data-field="objeto" rows="3"
-                    placeholder="Descrição do objeto do pregão" required></textarea>
+                    required></textarea>
             </div>
         </form>
     </div>
