@@ -10,7 +10,8 @@ power_bi_main <- function() {
 
   config_inicializar("POWERBI", pacotes)
 
-  # Sobrescreve pasta$superior com o argumento fornecido pelo usuário (2º argumento)
+  # Sobrescreve pasta$superior com o argumento
+  # fornecido pelo usuário (2º argumento)
   argumentos <- commandArgs(trailingOnly = TRUE)
   if (length(argumentos) >= 2 && argumentos[2] != "json-output") {
     pasta_config <- get_config("pasta")
@@ -396,14 +397,29 @@ power_bi_renomear <- function(script_a_executar) {
   renomear_arquivos <- function(dados, coluna_antigo,
                                 coluna_novo, tipo_arquivo) {
     alteracoes <- dados %>%
-      filter({{ coluna_antigo }} != {{ coluna_novo }}) %>%
+      filter(
+        tolower(
+          normalizePath({{ coluna_antigo }}, winslash = "/", mustWork = FALSE)
+        )
+        !=
+          tolower(
+            normalizePath({{ coluna_novo }}, winslash = "/", mustWork = FALSE)
+          )
+      ) %>%
       select(
         antigo = {{ coluna_antigo }},
         novo   = {{ coluna_novo }}
       )
 
     if (nrow(alteracoes) > 0) {
+      pb <- log_barra_progresso("Renomeando...", nrow(alteracoes))
+
       walk2(alteracoes$antigo, alteracoes$novo, ~ {
+        log_barra_progresso(
+          sprintf("Renomeando %s: %s", tipo_arquivo, basename(.x)),
+          pb = pb
+        )
+
         tryCatch(
           {
             if (file.rename(.x, .y)) {
@@ -425,6 +441,8 @@ power_bi_renomear <- function(script_a_executar) {
           }
         )
       })
+
+      log_barra_progresso(pb = pb)
     } else {
       log_info(sprintf("Nenhum %s para ser renomeado.", tipo_arquivo),
         cores = "highlight2"
@@ -534,7 +552,7 @@ power_bi_planejamento_main <- function(utils, script_a_executar) {
       return(FALSE)
     }
 
-    return(TRUE)
+    TRUE
   }
 
   planilha_obter <- function(ano_licitacao) {
@@ -921,7 +939,7 @@ power_bi_execucao_main <- function(utils, resultado_renomear,
 
     processos <- unique(relatorios_dados$processo)
 
-    pb <- log_barra_progresso("Aguarde...", size = length(processos))
+    pb <- log_barra_progresso("Aguarde...", length(processos))
 
     for (processo_a_analisar in processos) {
       dados <- relatorios_dados %>%
@@ -1323,7 +1341,7 @@ power_bi_paalteracoes_main <- function(utils, script_a_executar) {
 
   if (is.null(planilha_original)) {
     log_erro(
-      pasteo(
+      paste0(
         "Não foi possível obter os dados da planilha de ",
         "Processos Administrativos."
       ),
