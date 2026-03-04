@@ -13,6 +13,7 @@ FORMS AND FILES
 .form-label {
     margin-bottom: .2rem;
     font-size: 87.5%;
+    width: fit-content;
 }
 
 .script-form {

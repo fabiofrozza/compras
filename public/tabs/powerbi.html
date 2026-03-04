@@ -1,103 +1,100 @@
 <!DOCTYPE html>
 <div class="row">
     <div class="col">
-        <!-- Formulário de seleção do painel -->
-        <form id="form-powerbi" class="script-form shadow-sm">
-            <h4><i class="fas fa-chart-line"></i> Geração de Dados para Power BI</h4>
-            <p class="text-muted mb-3" style="font-size: 87.5%;">
-                Selecione o painel para gerar os dados para o Power BI (ou as opções de manutenção) e clique em
-                Executar.
-            </p>
+        <!-- Pasta da base de dados -->
+        <form id="form-powerbi-path" class="script-form shadow-sm">
+            <h4><i class="fas fa-table"></i> Base de dados</h4>
 
-            <!-- Pasta da base de dados -->
             <div class="form-group">
-                <label for="powerbi-pasta" class="form-label">
-                    <i class="fas fa-folder-open me-1"></i> Pasta da base de dados
+                <label for="powerbi-pasta" class="form-label" data-bs-toggle="tooltip"
+                    data-bs-title="Pasta que contém as subpastas 'Mapa de Licitações' e 'Execução AF Empenho', e onde serão salvos os arquivos gerados.">
+                    Caminho da pasta
                 </label>
                 <input type="text" class="form-control form-control-sm" id="powerbi-pasta" data-field="pasta_powerbi"
-                    placeholder="Ex: C:\Users\usuario\POWERBI" required>
-                <div class="form-text">
-                    Pasta que contém as subpastas "Mapa de Licitações" e "Execução AF Empenho", e onde serão salvos os
-                    arquivos gerados.
-                </div>
+                    data-validate-rule="pattern" data-regex-pattern=".+(?=\\)"
+                    placeholder="Ex: G:\Google Drive\Base de Dados\POWERBI" required>
             </div>
-
-            <!-- Grupo: Painel do Observatório -->
-            <div class="row">
-                <div class="col">
-                    <fieldset class="script-form shadow-sm mb-0">
-                        <legend class="form-label fw-semibold" style="font-size: 93%;">
-                            <i class="fas fa-binoculars me-1"></i> Painel do Observatório
-                        </legend>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-planejamento"
-                                value="planejamento" checked>
-                            <label class="form-check-label" for="powerbi-planejamento">
-                                Planejamento
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-licitacao"
-                                value="licitacao">
-                            <label class="form-check-label" for="powerbi-licitacao">
-                                Licitação
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-execucao"
-                                value="execucao">
-                            <label class="form-check-label" for="powerbi-execucao">
-                                Execução
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-paalteracoes"
-                                value="paalteracoes">
-                            <label class="form-check-label" for="powerbi-paalteracoes">
-                                Processos Administrativos e Alterações Contratuais
-                            </label>
-                        </div>
-                    </fieldset>
-                </div>
-                <div class="col-auto">
-                    <fieldset class="script-form shadow-sm mb-0">
-                        <legend class="form-label fw-semibold" style="font-size: 93%;">
-                            <i class="fas fa-wrench me-1"></i> Manutenção
-                        </legend>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-renomear"
-                                value="renomear">
-                            <label class="form-check-label" for="powerbi-renomear">
-                                Renomear arquivos
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-todos"
-                                value="todos">
-                            <label class="form-check-label" for="powerbi-todos">
-                                Todos os Painéis
-                            </label>
-                        </div>
-                    </fieldset>
-                </div>
+            <div class="form-buttons">
+                <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
+                    class="btn btn-outline-danger btn-sm" onclick="limparFormulario('form-powerbi-path')">
+                    <i class="fas fa-eraser"></i>
+                </button>
             </div>
-
-            <!-- Descrição dinâmica da opção selecionada -->
-            <div id="powerbi-descricao" class="alert alert-light border d-flex align-items-start p-2 mt-3 mb-0"
-                role="alert">
-                <div class="me-2 text-muted">
-                    <i class="fas fa-info-circle"></i>
+        </form>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <!-- Formulário de seleção do painel -->
+        <form id="form-powerbi-panel" class="script-form shadow-sm">
+            <h4><i class="fas fa-chart-line"></i> Painel do Observatório</h4>
+            <fieldset class="shadow-sm m-0 p-3 mb-3" form="form-powerbi-panel">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-planejamento"
+                        value="planejamento" checked>
+                    <label class="form-check-label" for="powerbi-planejamento" data-bs-toggle="tooltip"
+                        data-bs-title="Será acessada a planilha de controle para recuperar os dados dos processos, Unidades requerentes e situação do envio da documentação.">
+                        Planejamento
+                    </label>
                 </div>
-                <span id="powerbi-descricao-texto" class="text-primary-emphasis" style="font-size: 87.5%;">
-                    Painel Visão Planejamento — Será acessada a planilha de controle para recuperar os dados dos
-                    processos, Unidades requerentes e situação do envio da documentação.
-                </span>
-            </div>
-
-            <div class="form-buttons mt-3">
-                <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-run-powerbi"
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-licitacao"
+                        value="licitacao">
+                    <label class="form-check-label" for="powerbi-licitacao" data-bs-toggle="tooltip"
+                        data-bs-title="Serão obtidos os dados dos Mapas de Licitação da pasta 'Mapa de licitações'.">
+                        Licitação
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-execucao"
+                        value="execucao">
+                    <label class="form-check-label" for="powerbi-execucao" data-bs-toggle="tooltip"
+                        data-bs-title="Serão obtidos os dados dos relatórios de execução das AFs/Empenhos da pasta 'Execução AF Empenho'.">
+                        Execução
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-paalteracoes"
+                        value="paalteracoes">
+                    <label class="form-check-label" for="powerbi-paalteracoes" data-bs-toggle="tooltip"
+                        data-bs-title="Será acessada a planilha de controle para recuperar os dados dos processos administrativos, trocas de marca, cancelamentos e reequilíbrios.">
+                        Processos Administrativos e Alterações Contratuais
+                    </label>
+                </div>
+                <hr>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-todos" value="todos">
+                    <label class="form-check-label" for="powerbi-todos">
+                        Todos os Painéis
+                    </label>
+                </div>
+            </fieldset>
+            <div class="form-buttons">
+                <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-run-powerbi-panel"
                     onclick="executarPowerBI()">
-                    <i class="fas fa-play me-1"></i> Executar
+                    Gerar dados
+                </button>
+            </div>
+        </form>
+    </div>
+    <div class="col-auto">
+        <!-- Formulário de manutenção -->
+        <form id="form-powerbi-manutencao" class="script-form shadow-sm">
+            <h4><i class="fas fa-wrench"></i> Manutenção</h4>
+            <fieldset class="shadow-sm m-0 p-3 mb-3" form="form-powerbi-manutencao">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-renomear"
+                        value="renomear" checked>
+                    <label class="form-check-label" for="powerbi-renomear" data-bs-toggle="tooltip"
+                        data-bs-title="Os arquivos das pastas 'Mapa de licitações' e 'Execução AF Empenho' serão renomeados conforme o padrão TIPO - ANO - ETAPA - PROCESSO - PREGÃO.">
+                        Renomear arquivos
+                    </label>
+                </div>
+            </fieldset>
+            <div class="form-buttons">
+                <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"
+                    id="btn-run-powerbi-maintenance" onclick="executarPowerBI()">
+                    Executar
                 </button>
             </div>
         </form>
