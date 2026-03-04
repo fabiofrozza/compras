@@ -72,23 +72,33 @@ function validateSingleField(field) {
 function setButtonState(field) {
     const formElement = field.closest('.script-form');
     if (!formElement) return;
-    
+
     const formId = formElement.id;
+
+    if (formId === 'form-powerbi-path') {
+        const hasInvalidFields = Array.from(document.querySelectorAll(`#${formId} [data-field]`)).some(f => f.classList.contains('is-invalid'));
+        ['btn-run-powerbi-panel', 'btn-run-powerbi-maintenance'].forEach(btnId => {
+            const btn = document.getElementById(btnId);
+            if (btn) btn.disabled = hasInvalidFields;
+        });
+        return;
+    }
+
     const button = document.getElementById('btn-' + formId);
 
     if (!button) return;
 
     const hasInvalidFields = Array.from(document.querySelectorAll(`#${formId} [data-field]`)).some(f => f.classList.contains('is-invalid'));
-    
+
     // Por padrão, habilitar se não há campos inválidos
     let shouldDisable = hasInvalidFields;
-    
+
     // Verificações adicionais de regras de negócio por tipo de botão
     if (button.id === 'btn-form-atas-modelos') {
         // Para o botão de gerar atas, também verificar se os dados do SICAF estão disponíveis
         shouldDisable = hasInvalidFields || !atasData.dadosDisponiveis;
     }
-    
+
     button.disabled = shouldDisable;
 }
 
