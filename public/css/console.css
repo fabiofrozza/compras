@@ -219,25 +219,25 @@ body.dragging-console {
     opacity: 0.9;
 }
 
-/* .summary-text é o contexto de posicionamento para o popup */
-.summary-text {
-    position: relative;
-}
-
 /* ==========================================================================
    PROGRESS BAR
    ========================================================================== */
 
+#console-progress-container {
+    position: relative;
+    overflow: visible !important;
+}
+
 .progress-bar {
     overflow: visible;
+    position: relative;
+    border-radius: var(--bs-progress-border-radius) 0 0 var(--bs-progress-border-radius);
 }
 
 .progress-percent-popup {
     position: absolute;
-    top: -2px;
-    /* left é definido via JS para acompanhar o preenchimento da barra */
-    transform: translateX(-100%);
-    margin-left: 5px;
+    right: -5px;
+    top: -21px;
     background: var(--bs-primary, #0d6efd);
     color: #fff;
     font-size: 0.65rem;
@@ -247,7 +247,7 @@ body.dragging-console {
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.2s ease, left 0.6s ease;
+    transition: opacity 0.2s ease;
     letter-spacing: 0.02em;
     line-height: 1.4;
     font-family: Consolas, 'Courier New', monospace;
@@ -262,8 +262,7 @@ body.dragging-console {
     border-top-color: var(--bs-primary, #0d6efd);
 }
 
-/* Visível quando a barra de progresso está ativa */
-.summary-text.has-progress .progress-percent-popup {
+.progress-bar-animated .progress-percent-popup {
     opacity: 1;
 }
 
@@ -351,7 +350,9 @@ body.dragging-console {
     }
 }
 
-/* Floating Logs Drawer */
+/* ==========================================================================
+   LOGS DRAWER
+   ========================================================================== */
 
 #logs-drawer {
     --logs-drawer-header-height: 28px;
