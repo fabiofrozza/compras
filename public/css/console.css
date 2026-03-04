@@ -224,7 +224,14 @@ body.dragging-console {
     position: relative;
 }
 
-/* Popup flutuante de percentual — irmão do container, dentro de .summary-text */
+/* ==========================================================================
+   PROGRESS BAR
+   ========================================================================== */
+
+.progress-bar {
+    overflow: visible;
+}
+
 .progress-percent-popup {
     position: absolute;
     top: -2px;
@@ -246,7 +253,6 @@ body.dragging-console {
     font-family: Consolas, 'Courier New', monospace;
 }
 
-/* Seta no canto inferior direito */
 .progress-percent-popup::after {
     content: '';
     position: absolute;
