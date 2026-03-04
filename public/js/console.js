@@ -260,13 +260,15 @@ function handleScriptResult(result) {
  * Lida com as atualizações da barra de progresso do R via WebSocket 
  * @param {{action: 'start'|'update'|'close', value: number, max: number, label: string}} data 
  */
+let _progressBarGeneration = 0; // Contador para evitar que um close atrasado feche uma barra nova
+
 function updateProgressBar(data) {
     let container = document.getElementById('console-progress-container');
     let bar = document.getElementById('console-progress-bar');
+    const textContainer = document.querySelector('#console-summary .summary-text');
 
     // Create elements if they don't exist
     if (!container) {
-        const textContainer = document.querySelector('#console-summary .summary-text');
         if (textContainer) {
             textContainer.classList.add('flex-grow-1'); // ensure takes full width
 
@@ -281,18 +283,43 @@ function updateProgressBar(data) {
             bar.setAttribute('role', 'progressbar');
             bar.style.width = '0%';
 
+            // Popup flutuante de percentual (irmão do container, dentro de .summary-text)
+            const popup = document.createElement('span');
+            popup.className = 'progress-percent-popup';
+            popup.textContent = '0%';
+            popup.style.left = '0%';
+
             container.appendChild(bar);
             textContainer.appendChild(container);
+            textContainer.appendChild(popup);
         }
     }
 
-    if (!container || !bar) return;
+    if (!container || !bar || !textContainer) return;
+
+    // Garante que o popup existe (caso a barra tenha sido criada antes desta versão)
+    let popup = textContainer.querySelector('.progress-percent-popup');
+    if (!popup) {
+        popup = document.createElement('span');
+        popup.className = 'progress-percent-popup';
+        popup.textContent = '0%';
+        popup.style.left = '0%';
+        textContainer.appendChild(popup);
+    }
 
     if (data.action === 'start') {
+        _progressBarGeneration++; // Nova geração: invalida qualquer close pendente
         container.classList.remove('d-none');
         summaryDescription.classList.add('d-none');
+        textContainer.classList.add('has-progress');
         bar.style.width = '0%';
         bar.setAttribute('aria-valuemax', data.max);
+        popup.textContent = '0%';
+        // Desabilita transição para resetar posição instantaneamente
+        popup.style.transition = 'none';
+        popup.style.left = '0%';
+        popup.offsetLeft; // força reflow para aplicar a posição antes de reativar a transição
+        popup.style.transition = '';
         if (data.label) {
             bar.innerText = data.label;
         }
@@ -300,13 +327,20 @@ function updateProgressBar(data) {
         const max = parseFloat(bar.getAttribute('aria-valuemax') || '100');
         const percentage = (data.value / max) * 100;
         bar.style.width = `${percentage}%`;
+        popup.textContent = `${Math.round(percentage)}%`;
+        popup.style.left = `${percentage}%`;
         if (data.label) {
             bar.innerText = data.label;
         }
     } else if (data.action === 'close') {
+        const generationAtClose = _progressBarGeneration;
         setTimeout(() => {
-            container.classList.add('d-none');
-            summaryDescription.classList.remove('d-none');
+            // Só esconde se nenhuma nova barra foi iniciada desde o close
+            if (_progressBarGeneration === generationAtClose) {
+                container.classList.add('d-none');
+                summaryDescription.classList.remove('d-none');
+                textContainer.classList.remove('has-progress');
+            }
         }, 300);
     }
 }

@@ -716,7 +716,7 @@ function getLoader() {
 >
   <g filter="url(#filter0_i_163_1030)">
     <path
-      fill="#E9E9E9"
+      fill="transparent"
       d="M235.036 304.223C236.949 303.118 240.051 303.118 241.964 304.223L470.072 435.921C473.898 438.13 473.898 441.712 470.072 443.921L247.16 572.619C242.377 575.38 234.623 575.38 229.84 572.619L6.92817 443.921C3.10183 441.712 3.10184 438.13 6.92817 435.921L235.036 304.223Z"
     ></path>
   </g>
@@ -1801,6 +1801,7 @@ function getLoader() {
   width: 200px;
   height: 200px;
   perspective: 800px;
+  transform: translate(50px, -50px) !important;
 }
 
 .crystal {
@@ -2328,8 +2329,8 @@ function getLoader() {
 <style>
 .ajax-loader {
   position: absolute;
-  top: 25%;
-  left: 50%;
+  bottom: 50px;
+  left: 200px;
   transform-origin: 50% 50%;
   transform: rotate(90deg) translate(-50%, 0%);
   font-size: 50px;
@@ -2491,9 +2492,7 @@ function getLoader() {
 
 <style>
 .sausage-dog-animation {
-  height: 25rem;
-  max-height: 80vh;
-  max-width: 80vw;
+  height: 15rem;
 }
 
 .ear,
@@ -3121,8 +3120,8 @@ function getLoader() {
 }
 
 .corgi {
-  height: 60vmin;
-  width: 84vmin;
+  height: 180px;
+  width: 252px;
   position: relative;
 }
 .corgi div {
