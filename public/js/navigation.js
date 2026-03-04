@@ -1,5 +1,25 @@
 // SIDEBAR TOGGLE CONTROLS
 
+// --- Lazy Loading de Scripts sob demanda ---
+const _loadedScripts = new Set();
+function loadScript(src) {
+    if (_loadedScripts.has(src)) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = () => { _loadedScripts.add(src); resolve(); };
+        script.onerror = () => reject(new Error(`Falha ao carregar script: ${src}`));
+        document.head.appendChild(script);
+    });
+}
+
+// Mapeamento de abas para scripts sob demanda
+const TAB_SCRIPTS = {
+    atas: 'js/atas.js',
+    importacao: 'js/importacao.js',
+    powerbi: 'js/powerbi.js'
+};
+
 const mainContent = document.getElementById('mainContent');
 
 const navbar = document.getElementById('navbar');
@@ -152,11 +172,29 @@ document.addEventListener('shown.bs.tab', async (event) => {
 
                     const html = await response.text();
                     targetPane.innerHTML = html;
+
+                    // Lazy-load do script da aba ANTES de marcar data-loaded,
+                    // pois o MutationObserver do storage.js reage a data-loaded
+                    // e chama loadConfig() que precisa de funções do script da aba
+                    // (ex: popularAnosSelector definida em atas.js)
+                    const tabIdForScript = tabButton.getAttribute('id')?.replace('-tab', '') || tabButton.getAttribute('aria-controls');
+                    if (tabIdForScript && TAB_SCRIPTS[tabIdForScript]) {
+                        await loadScript(TAB_SCRIPTS[tabIdForScript]);
+                    }
+
                     targetPane.setAttribute('data-loaded', 'true');
                 } catch (error) {
                     console.error('Erro no lazy loading:', error);
                     let msgError = `<div class="alert alert-danger">Erro ao carregar aba: ${error.message}</div>`;
-                    msgError += catLoader();
+                    // Lazy-load other.js para exibir catLoader (animação de erro)
+                    if (typeof catLoader === 'function') {
+                        msgError += catLoader();
+                    } else {
+                        try {
+                            await loadScript('js/other.js');
+                            if (typeof catLoader === 'function') msgError += catLoader();
+                        } catch (e) { /* fallback: sem animação */ }
+                    }
                     targetPane.innerHTML = msgError;
                 }
             }
@@ -197,7 +235,7 @@ document.addEventListener('shown.bs.tab', async (event) => {
             // Criar tooltips para campos obrigatórios
             createRequiredFieldsTooltip();
 
-            if (tabId === 'atas') {
+            if (tabId === 'atas' && typeof inicializarAtas === 'function') {
                 inicializarAtas();
             }
 
@@ -208,15 +246,16 @@ document.addEventListener('shown.bs.tab', async (event) => {
 
             // Atualiza os logs após a troca de aba
             if (globalComputerName && (tabId === 'atas' || tabId === 'catmat' || tabId === 'importacao' || tabId === 'mapas' || tabId === 'powerbi')) {
+                // Garante que o DOM do console/logs-drawer exista
+                if (typeof ensureConsoleDOM === 'function') ensureConsoleDOM();
+
                 const logsList = document.getElementById('logs-file-list');
                 const logsDrawer = document.getElementById('logs-drawer');
 
-                if (logsList) {
+                if (logsList && logsDrawer) {
                     // Formato esperado de log: "nomeScript_nomeComputador" ou variações com '_'
                     let logsNameFilter = `${tabId}_${globalComputerName}`.toLowerCase();
                     logsList.dataset.nameContains = logsNameFilter;
-
-                    //document.getElementById('logs-drawer-title').innerHTML = `<i class="fas fa-file-alt me-2"></i>Logs - ${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`;
 
                     // Mostra o drawer se estiver oculto
                     logsDrawer.classList.remove('d-none');
@@ -225,8 +264,9 @@ document.addEventListener('shown.bs.tab', async (event) => {
                     loadFiles('logs-file-list', '_common', 'log', false);
                 }
             } else {
-                // Esconde drawer em home
-                document.getElementById('logs-drawer').classList.add('d-none');
+                // Esconde drawer em home (se existir)
+                const logsDrawer = document.getElementById('logs-drawer');
+                if (logsDrawer) logsDrawer.classList.add('d-none');
             }
         }
     }

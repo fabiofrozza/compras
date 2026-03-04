@@ -14,7 +14,7 @@ function connectWebSocket() {
             const data = JSON.parse(event.data);
 
             // Processar output e progresso apenas se o console estiver visível
-            if (consoleContainer.classList.contains('show')) {
+            if (consoleContainer && consoleContainer.classList.contains('show')) {
                 if (data.type === 'output') {
                     // Escolher a formatação baseada no nível do log
                     let colorStyle = '';
@@ -43,7 +43,7 @@ function connectWebSocket() {
                 const result = {
                     status: data.type,
                     message: data.message,
-                    log: consoleOutput.innerHTML,
+                    log: consoleOutput ? consoleOutput.innerHTML : '',
                     scriptName: data.scriptName
                 };
                 handleScriptResult(result);

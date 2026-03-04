@@ -1,16 +1,8 @@
 // --- LÓGICA INTEGRADA DO CONSOLE ---
 
-// Seleciona os elementos do DOM para o console
-const consoleContainer = document.getElementById('console-container');
-const consoleHeader = document.getElementById('console-header');
-const consoleSummary = document.getElementById('console-summary');
-const summaryTitle = consoleSummary.querySelector('h4');
-const summaryDescription = consoleSummary.querySelector('p');
-const closeButton = consoleContainer.querySelector('.btn-close');
-const minimizeButton = consoleContainer.querySelector('.btn-minimize');
-const consoleOutput = document.getElementById('console-output');
-const scriptRunningOverlay = document.getElementById('script-running-overlay');
-const overlayLoader = document.getElementById('overlay-loader');
+// Referências para elementos DOM — inicializadas sob demanda via ensureConsoleDOM()
+let consoleContainer, consoleHeader, consoleSummary, summaryTitle, summaryDescription;
+let closeButton, minimizeButton, consoleOutput, scriptRunningOverlay, overlayLoader;
 
 // Flag global que indica se há um script em execução
 let isScriptRunning = false;
@@ -18,12 +10,138 @@ let isScriptRunning = false;
 // Flag que indica se ao menos um script já foi executado na sessão
 let hasEverRun = false;
 
+// Flag que indica se o DOM do console já foi injetado
+let _consoleDOMReady = false;
+
+/**
+ * Injeta o HTML do console, overlay e logs-drawer no body (uma única vez).
+ * Também configura todos os event listeners de arrastar, fechar, minimizar e resize.
+ */
+function ensureConsoleDOM() {
+    if (_consoleDOMReady) return;
+    _consoleDOMReady = true;
+
+    // --- Overlay de bloqueio durante execução de script ---
+    const overlayHTML = `
+    <div id="script-running-overlay" role="status" aria-live="polite" aria-label="Script em execução">
+        <div class="overlay-badge">
+            <div class="overlay-loader" id="overlay-loader"></div>
+            <span class="d-none">Script em execução. Aguarde...</span>
+        </div>
+    </div>`;
+
+    // --- Console flutuante ---
+    const consoleHTML = `
+    <div id="console-container">
+        <div class="console-header" id="console-header">
+            <div class="status-indicators">
+                <div class="status-circle" id="status-1"></div>
+                <div class="status-circle" id="status-2"></div>
+                <div class="status-circle" id="status-3"></div>
+            </div>
+            <div class="header-buttons">
+                <button class="btn-minimize" type="button" aria-label="Minimizar" data-bs-toggle="tooltip"
+                    title="Minimizar">
+                    <i class="fas fa-window-minimize"></i>
+                </button>
+                <button class="btn-close" type="button" aria-label="Fechar" data-bs-toggle="tooltip" title="Fechar">
+                    <i class="fas fa-window-close"></i>
+                </button>
+            </div>
+        </div>
+        <div id="console-output"></div>
+        <div id="console-summary">
+            <div class="summary-icon"></div>
+            <div class="summary-text">
+                <h4></h4>
+                <p style="height: 16px;"></p>
+            </div>
+        </div>
+    </div>`;
+
+    // --- Drawer flutuante de logs ---
+    const logsDrawerHTML = `
+    <div id="logs-drawer" class="d-none shadow-lg collapsed">
+        <div class="logs-drawer-header" onclick="toggleLogsDrawer()">
+            <span id="logs-drawer-title">
+                <i class="fas fa-file-alt me-2" data-bs-toggle="tooltip" title="Exibir logs das últimas execuções"></i>
+                <span>Logs</span>
+            </span>
+            <div class="logs-drawer-actions">
+                <button id="btn-reopen-console" class="logs-drawer-action-btn" data-bs-toggle="tooltip"
+                    title="Reabrir console" style="display:none" onclick="event.stopPropagation(); reopenConsole();">
+                    <i class="fas fa-terminal"></i>
+                </button>
+                <i class="fas fa-window-minimize" id="logs-minimize-icon" data-bs-toggle="tooltip"
+                    title="Minimizar"></i>
+            </div>
+        </div>
+        <div class="logs-drawer-content">
+            <div id="logs-file-list" class="files-list" data-folder="log" data-script-name="_common"
+                data-selectable="false" data-extensions="log" data-name-contains="" data-sort="desc">
+            </div>
+        </div>
+    </div>`;
+
+    // Inserir no body (antes dos scripts)
+    document.body.insertAdjacentHTML('beforeend', overlayHTML + consoleHTML + logsDrawerHTML);
+
+    // --- Cachear referências DOM ---
+    consoleContainer = document.getElementById('console-container');
+    consoleHeader = document.getElementById('console-header');
+    consoleSummary = document.getElementById('console-summary');
+    summaryTitle = consoleSummary.querySelector('h4');
+    summaryDescription = consoleSummary.querySelector('p');
+    closeButton = consoleContainer.querySelector('.btn-close');
+    minimizeButton = consoleContainer.querySelector('.btn-minimize');
+    consoleOutput = document.getElementById('console-output');
+    scriptRunningOverlay = document.getElementById('script-running-overlay');
+    overlayLoader = document.getElementById('overlay-loader');
+
+    // --- Configurar event listeners ---
+
+    // Fechar console
+    closeButton.addEventListener('click', () => {
+        if (!consoleContainer.classList.contains('running')) {
+            consoleContainer.classList.remove('show');
+        }
+    });
+
+    // Minimizar/restaurar console
+    minimizeButton.addEventListener('click', () => {
+        consoleContainer.classList.toggle('minimized');
+        if (consoleContainer.classList.contains('minimized')) {
+            minimizeButton.innerHTML = '<i class="fas fa-window-restore"></i>';
+            minimizeButton.setAttribute('title', 'Restaurar');
+        } else {
+            minimizeButton.innerHTML = '<i class="fas fa-window-minimize"></i>';
+            minimizeButton.setAttribute('title', 'Minimizar');
+        }
+    });
+
+    // --- Lógica de arrastar e limites ---
+    const consoleResizeObserver = new ResizeObserver(() => {
+        if (!isDragging) {
+            enforceConsoleConstraints();
+        }
+    });
+    consoleResizeObserver.observe(consoleContainer);
+    const sidebarEl = document.getElementById('sidebar');
+    if (sidebarEl) consoleResizeObserver.observe(sidebarEl);
+    window.addEventListener('resize', enforceConsoleConstraints);
+}
+
 /** Ativa o overlay de bloqueio */
-function showScriptRunningOverlay() {
+async function showScriptRunningOverlay() {
     isScriptRunning = true;
+    ensureConsoleDOM();
     if (scriptRunningOverlay) {
         scriptRunningOverlay.classList.add('active');
-        overlayLoader.innerHTML = getLoader();
+        // Lazy-load other.js sob demanda para getLoader()
+        if (typeof getLoader !== 'function' && typeof loadScript === 'function') {
+            try { await loadScript('js/other.js'); } catch (e) { /* fallback */ }
+        }
+        overlayLoader.innerHTML = typeof getLoader === 'function' ? getLoader() : '';
     }
 }
 
@@ -46,6 +164,8 @@ function reopenConsole() {
 
 /** @param {string} scriptName */
 function prepareConsoleForExecution(scriptName) {
+    ensureConsoleDOM();
+
     const btnRun = document.getElementById('btn-run-' + scriptName);
     if (btnRun) {
         btnRun.disabled = true;
@@ -264,27 +384,6 @@ function runRScript(scriptName, customParams = null) {
     }
 }
 
-// Adiciona o evento para fechar o console
-closeButton.addEventListener('click', () => {
-    if (!consoleContainer.classList.contains('running')) {
-        consoleContainer.classList.remove('show');
-    }
-});
-
-// Adiciona o evento para minimizar/restaurar o console
-minimizeButton.addEventListener('click', () => {
-    consoleContainer.classList.toggle('minimized');
-
-    // Alterna o texto do botão
-    if (consoleContainer.classList.contains('minimized')) {
-        minimizeButton.innerHTML = '<i class="fas fa-window-restore"></i>';
-        minimizeButton.setAttribute('title', 'Restaurar');
-    } else {
-        minimizeButton.innerHTML = '<i class="fas fa-window-minimize"></i>';
-        minimizeButton.setAttribute('title', 'Minimizar');
-    }
-});
-
 // Lógica para tornar o console arrastável e respeitar limites
 
 let isDragging = false;
@@ -292,6 +391,7 @@ let offsetX, offsetY;
 
 // Função para garantir que o console respeite os limites
 const enforceConsoleConstraints = () => {
+    if (!consoleContainer) return;
     const rect = consoleContainer.getBoundingClientRect();
     if (rect.width === 0 && rect.height === 0) return;
 
@@ -365,16 +465,6 @@ const enforceConsoleConstraints = () => {
         consoleContainer.style.maxHeight = `${window.innerHeight - minTop - (parseInt(cs.bottom) || 0)}px`;
     }
 };
-
-const consoleResizeObserver = new ResizeObserver(() => {
-    if (!isDragging) {
-        enforceConsoleConstraints();
-    }
-});
-consoleResizeObserver.observe(consoleContainer);
-const sidebarEl = document.getElementById('sidebar');
-if (sidebarEl) consoleResizeObserver.observe(sidebarEl);
-window.addEventListener('resize', enforceConsoleConstraints);
 
 // Função para iniciar o arraste
 const onDragStart = (e) => {
