@@ -15,6 +15,21 @@ const logger = new Logger({ minLevel: 'debug' });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const SCRIPTS_PATH = path.resolve(path.join(__dirname, '..', 'scripts'));
+const ALLOWED_DELETE_FOLDERS = [
+  'atas_finalizadas',
+  'sicaf',
+  'arquivos_gerados',
+  'tr',
+  'listas',
+  'mapas',
+  'arquivos_importar',
+  'relatorios',
+  'resumo_pedidos',
+  'log',
+  'temp'
+];
+let cachedRScriptPath = null;
 
 // Middlewares
 app.use(express.json({ limit: '5mb' }));
@@ -52,9 +67,6 @@ function matchFilePattern(filename, patterns) {
     return new RegExp(regexString, 'i').test(filename);
   });
 }
-
-// Caminho base dos scripts (usado em validações de path e rotas)
-const SCRIPTS_PATH = path.resolve(path.join(__dirname, '..', 'scripts'));
 
 // Abre uma pasta, arquivo ou URL no aplicativo padrão do sistema operacional
 function abrirNaInterface(targetPath, isFile = false) {
@@ -104,25 +116,6 @@ function arquivoPassaNoFiltro(file, patterns, filterNameContains) {
   }
   return matchFilePattern(file, patterns);
 }
-
-// Variável para cachear o caminho do R
-let cachedRScriptPath = null;
-
-// Pastas permitidas para exclusão de arquivos (whitelist)
-const ALLOWED_DELETE_FOLDERS = [
-  'atas_finalizadas',
-  'sicaf',
-  'arquivos_gerados',
-  'tr',
-  'listas',
-  'mapas',
-  'arquivos_importar',
-  'relatorios',
-  'resumo_pedidos',
-  'log',
-  'temp'
-];
-
 
 async function getRScriptPath() {
   if (cachedRScriptPath) return cachedRScriptPath;
@@ -175,8 +168,6 @@ async function getRScriptPath() {
   cachedRScriptPath = rscriptCmd; // Fallback para o comando genérico
   return cachedRScriptPath;
 }
-
-
 
 // API - Open folder
 app.post('/api/open-folder', async (req, res) => {
@@ -357,10 +348,7 @@ app.delete('/api/clear-folder/:scriptName/:innerFolder', async (req, res) => {
   }
 });
 
-
-
 // API - Validate Link (proxy server-side para evitar CORS)
-// Replica o comportamento do TestLink + TestLinkResponse do PowerShell
 app.post('/api/validate-link', async (req, res) => {
   const { url } = req.body;
 
@@ -384,7 +372,6 @@ app.post('/api/validate-link', async (req, res) => {
   }
 
   try {
-    // Fetch com timeout de 10s (equivalente ao Invoke-WebRequest -TimeoutSec 5)
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
 
@@ -404,7 +391,6 @@ app.post('/api/validate-link', async (req, res) => {
 
     const htmlContent = await response.text();
 
-    // Verifica se contém "LISTA FINAL" (TestLinkResponse)
     if (htmlContent.includes('LISTA FINAL')) {
       // Extrair grupo de materiais dos campos input (value)
       const inputValueRegex = /<input[^>]*value="([^"]+)"[^>]*>/gi;
@@ -417,7 +403,7 @@ app.post('/api/validate-link', async (req, res) => {
       }
       const grupoMateriais = inputValues.length > 0 ? inputValues.join(', ') : 'Grupo não identificado';
 
-      // Extrair processos SPA (regex do PowerShell: 23080\.\d{6}/\d{4}-\d{2})
+      // Extrair processos SPA
       const regexSPA = /23080\.\d{6}\/\d{4}-\d{2}/g;
       const processosSPA = [...new Set(htmlContent.match(regexSPA) || [])].sort();
 
@@ -522,23 +508,22 @@ const server = app.listen(PORT, async () => {
   logger.debug(`Pasta: ${__dirname}`, 'Server');
 
   abrirNaInterface(`http://localhost:${PORT}`);
-});
 
-// Configurar WebSocket e rastrear conexões
-const wss = new WebSocket.Server({ server });
-let clientCount = 0;
+  // Configurar WebSocket e rastrear conexões
+  const wss = new WebSocket.Server({ server });
+  let clientCount = 0;
 
-logger.section('WebSocket Server iniciado');
+  logger.section('WebSocket Server iniciado');
 
-const interval = setInterval(() => {
-  wss.clients.forEach((ws) => {
-    if (ws.isAlive === false) return ws.terminate();
-    ws.isAlive = false;
-    ws.ping();
-  });
-}, 30000);
+  const interval = setInterval(() => {
+    wss.clients.forEach((ws) => {
+      if (ws.isAlive === false) return ws.terminate();
+      ws.isAlive = false;
+      ws.ping();
+    });
+  }, 30000);
 
-wss.on('connection', (ws, req) => {
+  wss.on('connection', (ws, req) => {
   ws.isAlive = true;
   ws.on('pong', () => { ws.isAlive = true; });
 
@@ -592,6 +577,7 @@ wss.on('connection', (ws, req) => {
 
   ws.on('error', (error) => {
     logger.error(`Erro WebSocket: ${error.message}`, 'WebSocket', error);
+  });
   });
 });
 
