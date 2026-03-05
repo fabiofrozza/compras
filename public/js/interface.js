@@ -68,11 +68,9 @@ async function setHomeBackground() {
     img.src = imageUrl;
 }
 
-// Inicializar background da Home
 document.addEventListener('DOMContentLoaded', setHomeBackground);
 
-// Event Delegation para links de navegação (.card-link)
-// Permite que funcione mesmo em conteúdo carregado dinamicamente (Lazy Loading)
+// Event delegation para .card-link — funciona mesmo em conteúdo carregado dinamicamente
 document.addEventListener('click', (e) => {
     const link = e.target.closest('.card-link');
     if (link) {
@@ -98,7 +96,6 @@ function toggleLogsDrawer() {
 const overlay = document.getElementById('header-panel-overlay');
 
 function openPanel(panelId, triggerBtn) {
-    // Fechar qualquer painel aberto antes de abrir o novo
     document.querySelectorAll('.header-panel.open').forEach(p => {
         if (p.id !== panelId) closeAllPanels();
     });
@@ -136,7 +133,6 @@ function closeAllPanels() {
     document.querySelectorAll('.header-icon-btn').forEach(b => b.classList.remove('active'));
 }
 
-// Preencher painel de usuário
 async function popularUserPanel() {
     const nameEl = document.getElementById('userComputerName');
     const syncEl = document.getElementById('lastSyncTime');
@@ -155,7 +151,6 @@ async function popularUserPanel() {
     }
 }
 
-// Inicializar painel de preferências
 function inicializarPreferenciasPanel() {
     if (typeof populateFavoriteTabSelectList === 'function') {
         populateFavoriteTabSelectList();
@@ -177,13 +172,11 @@ function inicializarPreferenciasPanel() {
         if (radio) radio.checked = true;
     }
 
-    // Configurar auto-save nos campos do painel
     if (typeof setupAutoSave === 'function') {
         setupAutoSave(document.getElementById('settings-panel'));
     }
 }
 
-// Wiring dos botões
 document.addEventListener('DOMContentLoaded', () => {
     const settingsBtn = document.getElementById('settingsBtn');
     const userBtn = document.getElementById('userBtn');
@@ -199,28 +192,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (userPanelClose) userPanelClose.addEventListener('click', closeAllPanels);
     if (notificationsPanelClose) notificationsPanelClose.addEventListener('click', closeAllPanels);
 
-    // Fechar painel ao clicar no overlay
     if (overlay) overlay.addEventListener('click', closeAllPanels);
-
-    // Fechar com Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeAllPanels();
     });
 });
 
-/**
- * Limpa todos os campos de um formulário e dispara eventos necessários
- * @param {string} formId O ID do formulário a ser limpo
- */
 function limparFormulario(formId) {
     const form = document.getElementById(formId);
     if (!form) return;
 
-    // Busca todos os campos de input, select e textarea dentro do formulário
     const campos = form.querySelectorAll('input, select, textarea');
 
     campos.forEach(campo => {
-        // Ignorar botões e campos escondidos
         if (['button', 'submit', 'reset', 'hidden'].includes(campo.type)) return;
 
         if (campo.type === 'checkbox' || campo.type === 'radio') {
@@ -229,7 +213,6 @@ function limparFormulario(formId) {
             campo.value = '';
         }
 
-        // Disparar eventos para que componentes que observam alterações (como numerarAtas) reajam
         campo.dispatchEvent(new Event('input', { bubbles: true }));
         campo.dispatchEvent(new Event('change', { bubbles: true }));
     });

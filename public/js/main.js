@@ -1,7 +1,6 @@
-let ws; // Variável global para WebSocket
+let ws;
 let selectedFiles = {}; // Armazena arquivos selecionados por containerId
 
-// Conectar ao WebSocket
 function connectWebSocket() {
     ws = new WebSocket('ws://localhost:3000');
 
@@ -19,11 +18,11 @@ function connectWebSocket() {
                     // Escolher a formatação baseada no nível do log
                     let colorStyle = '';
                     switch (data.level) {
-                        case 'error': colorStyle = 'color: #ff6b6b; font-weight: bold;'; break; // Vermelho
-                        case 'warning': colorStyle = 'color: #ffc107; font-weight: bold;'; break; // Amarelo
-                        case 'success': colorStyle = 'color: #20c997; font-weight: bold;'; break; // Verde
-                        case 'command': colorStyle = 'color: #0dcaf0;'; break; // Ciano
-                        case 'section': colorStyle = 'color: #6ea8fe; font-weight: bold;'; break; // Azul
+                        case 'error':   colorStyle = 'color: #ff6b6b; font-weight: bold;'; break;
+                        case 'warning': colorStyle = 'color: #ffc107; font-weight: bold;'; break;
+                        case 'success': colorStyle = 'color: #20c997; font-weight: bold;'; break;
+                        case 'command': colorStyle = 'color: #0dcaf0;'; break;
+                        case 'section': colorStyle = 'color: #6ea8fe; font-weight: bold;'; break;
                         case 'info':
                         default: colorStyle = 'color: inherit;'; break;
                     }
@@ -39,7 +38,6 @@ function connectWebSocket() {
             // Finalização do script: SEMPRE processar, independente do console estar visível
             // Isso garante que isScriptRunning seja resetado e o overlay seja removido
             if (data.type === 'success' || data.type === 'warning' || data.type === 'error') {
-                // Finalizar o console e resetar a flag isScriptRunning
                 const result = {
                     status: data.type,
                     message: data.message,
@@ -48,7 +46,6 @@ function connectWebSocket() {
                 };
                 handleScriptResult(result);
 
-                // Registrar na central de notificações
                 const tabNames = {
                     atas: 'Atas', atas_mailmerge: 'Atas (Mailmerge)', catmat: 'Catmat',
                     fornecedores: 'Fornecedores', importacao: 'Importação',
@@ -62,7 +59,6 @@ function connectWebSocket() {
                     source: sourceName
                 });
 
-                // Atualizar as listas de arquivos
                 if (data.scriptName) {
                     setTimeout(async () => {
                         const tabName = data.scriptName === 'atas_mailmerge' ? 'atas' : data.scriptName;
@@ -88,13 +84,9 @@ function connectWebSocket() {
     };
 
     ws.onclose = () => {
-        // Resetar flag de script em execução para evitar bloqueio permanente após desconexão
-        if (isScriptRunning) {
-            hideScriptRunningOverlay();
-        }
+        if (isScriptRunning) hideScriptRunningOverlay();
         showToast('Desconectado do servidor. Tentando reconectar...', 'error', 2000, 'inicialização');
         addNotification({ message: 'Desconectado do servidor. Tentando reconectar...', type: 'warning', source: 'Sistema' });
-        // Reconectar após 3 segundos
         setTimeout(connectWebSocket, 3000);
     };
 
@@ -104,7 +96,6 @@ function connectWebSocket() {
 }
 
 
-// Inicializar tudo quando a página carregar
 window.addEventListener('load', async () => {
     connectWebSocket();
     await loadConfig();

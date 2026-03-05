@@ -1,5 +1,3 @@
-// TOASTS, TOOLTIPS AND MODALS
-
 function showToast(message, type = 'success', duration, source = 'origem não informada') {
     const container = document.getElementById('toast-container');
     const defaultDurations = {
@@ -49,12 +47,10 @@ function createRequiredFieldsTooltip() {
         field.appendChild(asteriskSpan);
     });
 
-    // Re-inicializar tooltips para incluir os novos campos obrigatórios
     initializeTooltips();
 }
 
 function initializeTooltips() {
-    // Initialize tooltips (Bootstrap 5)
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
         container: 'body',
@@ -77,8 +73,6 @@ function testToasts() {
     showToast('Testando toast de aviso', 'warning', 500000)
     showToast('Testando toast de informação', 'info', 500000)
 }
-
-//testToasts();
 
 // ==========================================================================
 // CENTRAL DE NOTIFICAÇÕES (Painel no Header)
@@ -227,7 +221,6 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Botão 'Limpar tudo'
 document.addEventListener('DOMContentLoaded', () => {
     const clearAllBtn = document.getElementById('notification-clear-all');
     if (clearAllBtn) {
@@ -235,7 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Inicializar a lista vazia ao carregar
 renderNotificationList();
 
 /**

@@ -1,52 +1,34 @@
-// Mapear extensões para ícones
 const FILE_ICON_MAP = {
-    // Documentos Microsoft Office
-    'doc': '<i class="fa-solid fa-file-word" style="color: #2B579A;"></i>',
+    'doc':  '<i class="fa-solid fa-file-word" style="color: #2B579A;"></i>',
     'docx': '<i class="fa-solid fa-file-word" style="color: #2B579A;"></i>',
     'docm': '<i class="fa-solid fa-file-word" style="color: #2B579A;"></i>',
-
-    // Planilhas Microsoft Excel
-    'xls': '<i class="fa-solid fa-file-excel" style="color: #217346;"></i>',
+    'xls':  '<i class="fa-solid fa-file-excel" style="color: #217346;"></i>',
     'xlsx': '<i class="fa-solid fa-file-excel" style="color: #217346;"></i>',
     'xlsm': '<i class="fa-solid fa-file-excel" style="color: #217346;"></i>',
-    'csv': '<i class="fa-solid fa-file-csv" style="color: #217346;"></i>',
-
-    // PDF
-    'pdf': '<i class="fa-solid fa-file-pdf" style="color: #D30015;"></i>',
-
-    // Texto
-    'txt': '<i class="fa-solid fa-file-text" style="color: #444;"></i>',
-    'rtf': '<i class="fa-solid fa-file-alt" style="color: #444;"></i>',
-
-    // Imagens
-    'jpg': '<i class="fa-solid fa-file-image" style="color: #FF6B6B;"></i>',
+    'csv':  '<i class="fa-solid fa-file-csv" style="color: #217346;"></i>',
+    'pdf':  '<i class="fa-solid fa-file-pdf" style="color: #D30015;"></i>',
+    'txt':  '<i class="fa-solid fa-file-text" style="color: #444;"></i>',
+    'rtf':  '<i class="fa-solid fa-file-alt" style="color: #444;"></i>',
+    'jpg':  '<i class="fa-solid fa-file-image" style="color: #FF6B6B;"></i>',
     'jpeg': '<i class="fa-solid fa-file-image" style="color: #FF6B6B;"></i>',
-    'png': '<i class="fa-solid fa-file-image" style="color: #FF6B6B;"></i>',
-    'gif': '<i class="fa-solid fa-file-image" style="color: #FF6B6B;"></i>',
-    'bmp': '<i class="fa-solid fa-file-image" style="color: #FF6B6B;"></i>',
-
-    // Compactados
-    'zip': '<i class="fa-solid fa-file-archive" style="color: #FF6B35;"></i>',
-    'rar': '<i class="fa-solid fa-file-archive" style="color: #FF6B35;"></i>',
-    '7z': '<i class="fa-solid fa-file-archive" style="color: #FF6B35;"></i>',
-
-    // R Scripts
-    'r': '<i class="fa-solid fa-file-code" style="color: #276DC3;"></i>',
+    'png':  '<i class="fa-solid fa-file-image" style="color: #FF6B6B;"></i>',
+    'gif':  '<i class="fa-solid fa-file-image" style="color: #FF6B6B;"></i>',
+    'bmp':  '<i class="fa-solid fa-file-image" style="color: #FF6B6B;"></i>',
+    'zip':  '<i class="fa-solid fa-file-archive" style="color: #FF6B35;"></i>',
+    'rar':  '<i class="fa-solid fa-file-archive" style="color: #FF6B35;"></i>',
+    '7z':   '<i class="fa-solid fa-file-archive" style="color: #FF6B35;"></i>',
+    'r':    '<i class="fa-solid fa-file-code" style="color: #276DC3;"></i>',
 };
 
-// Obter ícone personalizado baseado no tipo de arquivo/pasta
 function getFileIcon(fileName, isDirectory) {
     if (isDirectory) return '<i class="fa-solid fa-folder"></i>';
-
-    // Verificar se é arquivo temporário (começa com ~)
-    if (fileName.startsWith('~')) return '<i class="fa-solid fa-question"></i>';
+    if (fileName.startsWith('~')) return '<i class="fa-solid fa-question"></i>'; // arquivo temporário
 
     const extension = fileName.split('.').pop().toLowerCase();
 
     return FILE_ICON_MAP[extension] || '<i class="fa-solid fa-file"></i>';
 }
 
-// Abrir pasta no gerenciador de arquivos
 async function openFolder(folderPath) {
     try {
         const response = await fetch('/api/open-folder', {
@@ -66,7 +48,6 @@ async function openFolder(folderPath) {
     }
 }
 
-// Abrir arquivo nativamente
 async function openFile(filePath) {
     try {
         const response = await fetch('/api/open-file', {
@@ -89,7 +70,6 @@ async function openFile(filePath) {
     }
 }
 
-// Limpar/excluir todos os arquivos da pasta com confirmação
 async function clearFolderFiles(containerId, folderPath, scriptName, innerFolder) {
     // Escapar caminho para exibição segura em HTML
     const safePath = folderPath.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
@@ -114,9 +94,7 @@ async function clearFolderFiles(containerId, folderPath, scriptName, innerFolder
         confirmColor: 'btn-danger'
     });
 
-    if (!confirmed) {
-        return; // Usuário clicou em Cancelar
-    }
+    if (!confirmed) return;
 
     try {
         filesList.innerHTML = `
@@ -162,11 +140,9 @@ async function clearFolderFiles(containerId, folderPath, scriptName, innerFolder
     }
 }
 
-// Atualizar apenas as listas de um script específico
 async function refreshScriptFileLists(scriptName) {
-
-    aba = document.getElementById(`${scriptName}`);
-    fileLists = aba.querySelectorAll('.files-list');
+    const aba = document.getElementById(scriptName);
+    const fileLists = aba.querySelectorAll('.files-list');
 
     const promises = [];
     fileLists.forEach((fileList) => {
@@ -180,7 +156,6 @@ async function refreshScriptFileLists(scriptName) {
     await Promise.all(promises);
 }
 
-// Atualizar lista de arquivo após clique no botão de atualizar
 function refreshFileList(containerId, scriptName) {
     const fileList = document.getElementById(containerId);
 
@@ -199,13 +174,12 @@ function refreshFileList(containerId, scriptName) {
     return loadFiles(containerId, scriptName, folder, selectable);
 }
 
-// Carregar e exibir arquivos da pasta
 async function loadFiles(containerId, scriptName, innerFolder, selectable) {
     const filesList = document.getElementById(containerId);
     if (!filesList) return;
     const extensions = filesList.dataset.extensions;
-    const nameContains = filesList.dataset.nameContains; // Novo atributo de dataset
-    const sort = filesList.dataset.sort; // Novo atributo de dataset
+    const nameContains = filesList.dataset.nameContains;
+    const sort = filesList.dataset.sort;
 
     try {
         filesList.innerHTML = `
@@ -255,8 +229,6 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
         `;
 
         const hasFiles = data.files && data.files.length > 0;
-
-        // Verificar se a pasta permite exclusão de arquivos (baseado na resposta do servidor)
         const canDelete = data.canDelete;
 
         let filesHTMLButtons = `
@@ -283,8 +255,6 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
             `;
             filesHTML += filesHTMLButtons;
             filesList.innerHTML = filesHTML;
-
-            // Adicionar event listeners para os botões
             setupFileListButtons(filesList);
             return;
         }
@@ -328,11 +298,7 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
         filesList.innerHTML = filesHTML;
 
         colorSelectedRow(containerId);
-
-        // Adicionar event listeners para os botões
         setupFileListButtons(filesList);
-
-        // Inicializar tooltips para os novos botões carregados
         initializeTooltips();
 
     } catch (error) {
@@ -344,15 +310,11 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
         `;
     }
 
-    // Disparar evento de lista atualizada para que outros módulos possam reagir
     document.dispatchEvent(new CustomEvent('files-loaded', {
         detail: { containerId }
     }));
 }
 
-/**
- * Configura event listeners para os botões da lista de arquivos
- */
 function setupFileListButtons(filesList) {
     const btnRefresh = filesList.querySelector('.btn-refresh');
     const btnOpen = filesList.querySelector('.btn-open');
@@ -418,32 +380,25 @@ function setupFileListButtons(filesList) {
     }
 }
 
-// Selecionar arquivo da lista
 function selectFile(containerId, fileName, fileId) {
-    // Remover seleção anterior
     const container = document.getElementById(containerId);
     if (container) {
         const previousSelected = container.querySelector('tr.selected');
         if (previousSelected) {
             previousSelected.classList.remove('selected');
-            // Remover estilos inline da linha anterior
             previousSelected.style.borderLeft = '';
             previousSelected.style.backgroundColor = '';
         }
     }
 
-    // Adicionar nova seleção
     const fileRow = document.getElementById(fileId);
     if (fileRow) {
         fileRow.classList.add('selected');
-
         colorSelectedRow(containerId);
     }
 
-    // Armazenar arquivo selecionado
     selectedFiles[containerId] = fileName;
 
-    // Disparar evento customizado para notificar outras partes do sistema
     const event = new CustomEvent('file-selected', {
         detail: { containerId: containerId, fileName: fileName }
     });

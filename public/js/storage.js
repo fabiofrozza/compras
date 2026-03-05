@@ -1,9 +1,7 @@
 // ====== SISTEMA DE PREFERÊNCIAS E CONFIGURAÇÕES DO USUÁRIO ======
-// Utiliza LocalStorage para salvar preferências de interface e configurações de campos
 
 const STORAGE_KEY = 'compras_web_state';
 
-// Estado padrão global
 let appState = {
     preferences: {
         darkMode: false,
@@ -12,7 +10,6 @@ let appState = {
     }
 };
 
-// Carregar todo o estado do LocalStorage
 function loadAppState() {
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -31,7 +28,6 @@ function loadAppState() {
     }
 }
 
-// Salvar o estado completo no LocalStorage
 function saveAppState() {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
@@ -46,7 +42,6 @@ function populateFavoriteTabSelectList() {
     const selectPreferredTab = document.getElementById('preferredTab');
     if (!selectPreferredTab) return;
 
-    // 1. Construir lista de opções (começando com a padrão)
     const options = [{
         id: 'default',
         value: '',
@@ -75,7 +70,6 @@ function populateFavoriteTabSelectList() {
         });
     });
 
-    // 2. Gerar HTML a partir da lista
     const html = options.map(opt => `
         <input type="radio" class="btn-check" name="preferredTabRadio" id="pref-tab-${opt.id}" value="${opt.value}" autocomplete="off" data-field="preferredTab">
         <label class="btn btn-sm btn-outline-secondary text-start text-nowrap" for="pref-tab-${opt.id}">
@@ -86,14 +80,12 @@ function populateFavoriteTabSelectList() {
     selectPreferredTab.innerHTML = html;
 }
 
-// Mostrar indicador de preferências salvas
 function showPreferencesSaveIndicator() {
     if (typeof showToast === 'function') {
         showToast('Preferências salvas', 'success', 2000, 'configurações');
     }
 }
 
-// Obter informações do usuário
 async function getUserInfo() {
     try {
         const response = await fetch('/api/user-info');
@@ -105,7 +97,6 @@ async function getUserInfo() {
     }
 }
 
-// Inicializar página de Preferências (Carga Global)
 function initPreferencesPage() {
     try {
         loadAppState();
@@ -115,7 +106,6 @@ function initPreferencesPage() {
     }
 }
 
-// Aplicar preferências carregadas
 function applyUserPreferences(preferences) {
     if (preferences.darkMode) {
         if (typeof applyDarkMode === 'function') applyDarkMode(true);
@@ -187,8 +177,7 @@ let saveTimeout = null;
 function setupAutoSave(container) {
     const fields = container.querySelectorAll('[data-field]');
     fields.forEach(field => {
-        // Evitar adicionar listeners duplicados
-        if (field.hasAttribute('data-autosave-bound')) return;
+        if (field.hasAttribute('data-autosave-bound')) return; // evita listeners duplicados
         field.setAttribute('data-autosave-bound', 'true');
         ['input', 'change'].forEach(eventType => {
             field.addEventListener(eventType, (e) => {
@@ -215,13 +204,10 @@ function setupAutoSave(container) {
                         showPreferencesSaveIndicator();
                     }
                 } else {
-                    // Configurações de campos
                     const tabPane = target.closest('.tab-pane');
                     const tabId = tabPane ? tabPane.id : 'global';
 
-                    if (!appState[tabId]) {
-                        appState[tabId] = {};
-                    }
+                    if (!appState[tabId]) appState[tabId] = {};
                     appState[tabId][fieldName] = value;
 
                     if (saveTimeout) clearTimeout(saveTimeout);
@@ -250,7 +236,7 @@ function loadConfig(container = document) {
         scope.querySelectorAll('[data-field]').forEach(field => {
             const fieldName = field.dataset.field;
 
-            // Ignorar as preenchimentos de preferências para não sobrescrever a lógica principal
+            // Preferências são aplicadas por applyUserPreferences — não sobrescrever aqui
             if (['darkMode', 'sidebarExpanded', 'preferredTab'].includes(fieldName)) return;
 
             const tabPane = field.closest('.tab-pane');
@@ -268,8 +254,6 @@ function loadConfig(container = document) {
                 }
 
                 field.dispatchEvent(new Event('input', { bubbles: true }));
-                // Trigger change to validate any dependent UI logic, only if it doesn't cause infinite loops
-                // In setupAutoSave we save on input/change, so it will re-save the loaded data, which is fine
             }
         });
 

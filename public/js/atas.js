@@ -1,6 +1,3 @@
-// atas.js - Lógica específica para a aba Atas
-
-// Objeto para armazenar dados da aba Atas
 const atasData = {
     arquivos: [],
     ataAtual: null,
@@ -9,65 +6,29 @@ const atasData = {
 // Flag para evitar re-inicialização e duplicação de listeners
 let atasInicializado = false;
 
-/**
- * Popula os selectors de ano com os últimos 10 anos
- * Preserva os valores existentes carregados da configuração
- */
 function popularAnosSelector() {
-    const anoAtual = new Date().getFullYear() + 1; // Considerar o próximo ano para pregões futuros
+    const anoAtual = new Date().getFullYear() + 1; // +1 para incluir pregões do próximo ano
     const selectorAnoPregao = document.getElementById('atas-ano-pregao');
     const selectorAnoAta = document.getElementById('atas-ano-ata');
 
-    if (selectorAnoPregao) {
-        // Salvar o valor atual antes de limpar opções
-        const valorAtualPregao = selectorAnoPregao.value;
-
-        // Limpar opções existentes (menos a opção vazia)
-        while (selectorAnoPregao.options.length > 1) {
-            selectorAnoPregao.remove(1);
-        }
-
+    const popularSelector = (selector) => {
+        if (!selector) return;
+        const valorAtual = selector.value;
+        while (selector.options.length > 1) selector.remove(1);
         for (let i = 0; i < 10; i++) {
             const ano = anoAtual - i;
             const option = document.createElement('option');
             option.value = ano;
             option.textContent = ano;
-            selectorAnoPregao.appendChild(option);
+            selector.appendChild(option);
         }
+        if (valorAtual) selector.value = valorAtual;
+    };
 
-        // Restaurar o valor anterior se estiver disponível nas novas opções
-        if (valorAtualPregao) {
-            selectorAnoPregao.value = valorAtualPregao;
-        }
-    }
-
-    if (selectorAnoAta) {
-        // Salvar o valor atual antes de limpar opções
-        const valorAtualAta = selectorAnoAta.value;
-
-        // Limpar opções existentes (menos a opção vazia)
-        while (selectorAnoAta.options.length > 1) {
-            selectorAnoAta.remove(1);
-        }
-
-        for (let i = 0; i < 10; i++) {
-            const ano = anoAtual - i;
-            const option = document.createElement('option');
-            option.value = ano;
-            option.textContent = ano;
-            selectorAnoAta.appendChild(option);
-        }
-
-        // Restaurar o valor anterior se estiver disponível nas novas opções
-        if (valorAtualAta) {
-            selectorAnoAta.value = valorAtualAta;
-        }
-    }
+    popularSelector(selectorAnoPregao);
+    popularSelector(selectorAnoAta);
 }
 
-/**
- * Carrega lista de PDFs da pasta SICAF e cria tabela dinâmica com numeração
- */
 function numerarAtas() {
     const container = document.getElementById('atas-relatorios-sicaf');
     const numeroPrimeiraAta = parseInt(document.getElementById('atas-primeira-ata').value);
@@ -101,9 +62,6 @@ function numerarAtas() {
     }
 }
 
-/**
- * Verifica se o arquivo dados_atas.xlsx existe e atualiza a interface
- */
 async function verificarStatusDadosAtas() {
     const statusContainer = document.getElementById('status-dados-atas');
     const statusText = document.getElementById('texto-status-dados');
@@ -147,9 +105,6 @@ async function verificarStatusDadosAtas() {
     atualizarBotaoGerarAtas();
 }
 
-/**
- * Habilita ou desabilita o botão de gerar atas baseado nos requisitos
- */
 function atualizarBotaoGerarAtas() {
     const statusContainer = document.getElementById('status-dados-atas');
     const btnGerar = document.getElementById('btn-form-atas-modelos');
@@ -165,15 +120,11 @@ function atualizarBotaoGerarAtas() {
     }
 }
 
-/**
- * Setup de listeners para campos da aba Atas
- */
 function setupAtasListeners() {
     const inputPrimeiraAta = document.getElementById('atas-primeira-ata');
     const inputDataPregao = document.getElementById('atas-data-pregao');
     const inputProcessoSPA = document.getElementById('atas-processo-spa');
 
-    // Listener para quando n_ata muda - atualiza numeração da lista
     if (inputPrimeiraAta) {
         inputPrimeiraAta.addEventListener('change', numerarAtas);
         inputPrimeiraAta.addEventListener('input', numerarAtas);
@@ -206,9 +157,6 @@ function setupAtasListeners() {
     });
 }
 
-/**
- * Processa dados da ata para envio ao servidor
- */
 function processarDadosAtas() {
     const form = document.getElementById('form-info-pregao');
     const dados = {};
@@ -232,13 +180,9 @@ function processarDadosAtas() {
     return dados;
 }
 
-/**
- * Executa o mailmerge para gerar as Atas finalizadas
- */
 function executarMailmergeAtas() {
     const btnGerar = document.getElementById('btn-form-atas-modelos');
 
-    // Validação primeiro: se o botão está desabilitado, não fazer nada
     if (btnGerar && btnGerar.disabled) {
         return;
     }
@@ -255,7 +199,6 @@ function executarMailmergeAtas() {
         return;
     }
 
-    // Preparar dados para enviar
     const dados = {
         modelo_ata: modeloSelecionado
     };
@@ -263,21 +206,10 @@ function executarMailmergeAtas() {
     runRScript('atas_mailmerge', dados);
 }
 
-/**
- * Inicializa a aba Atas
- */
 function inicializarAtas() {
-    // Se já foi inicializado, não faz nada para evitar duplicar listeners
     if (atasInicializado) return;
-
-    // Popular selects de ano (necessário pois o HTML acabou de ser injetado)
     popularAnosSelector();
-
-    // Verificar status dos dados
     verificarStatusDadosAtas();
-
-    // Setup de listeners
     setupAtasListeners();
-
     atasInicializado = true;
 }

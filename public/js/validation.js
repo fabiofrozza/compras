@@ -1,18 +1,6 @@
-/**
- * Sistema centralizado de validação de formulários
- * Usa atributos data-* para definir regras de validação
- */
-
 function validateTabFields(abaName) {
-    const selector = `#${abaName} [data-field]`;
-
-    let fields = [];
-
-    fields = Array.from(document.querySelectorAll(selector));
-
-    fields.forEach(field => {
-        validateSingleField(field)
-    });
+    const fields = Array.from(document.querySelectorAll(`#${abaName} [data-field]`));
+    fields.forEach(field => validateSingleField(field));
 }
 
 /**
@@ -90,31 +78,20 @@ function setButtonState(field) {
 
     const hasInvalidFields = Array.from(document.querySelectorAll(`#${formId} [data-field]`)).some(f => f.classList.contains('is-invalid'));
 
-    // Por padrão, habilitar se não há campos inválidos
     let shouldDisable = hasInvalidFields;
 
-    // Verificações adicionais de regras de negócio por tipo de botão
+    // Regras de negócio: botão de atas também exige dados do SICAF disponíveis
     if (button.id === 'btn-form-atas-modelos') {
-        // Para o botão de gerar atas, também verificar se os dados do SICAF estão disponíveis
         shouldDisable = hasInvalidFields || !atasData.dadosDisponiveis;
     }
 
     button.disabled = shouldDisable;
 }
 
-/**
- * Configura listeners de validação em tempo real para um container
- * Valida o campo ao digitar e mostra erro imediatamente se inválido
- * @param {string|HTMLElement} aba - Seletor da aba para configurar validação
- */
 function setupLiveValidation(aba) {
-    let container = null;
-
-    container = document.querySelector('#' + aba);
-
+    const container = document.querySelector('#' + aba);
     const fields = container.querySelectorAll('[data-field]');
     fields.forEach(field => {
-        // Valida em tempo real ao digitar/mudar valor
         ['input', 'change', 'blur', 'click'].forEach(eventType => {
             field.addEventListener(eventType, () => {
                 validateSingleField(field);

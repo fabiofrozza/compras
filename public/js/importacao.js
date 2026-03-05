@@ -1,12 +1,6 @@
-// js/importacao.js - Lógica específica para a aba Importação
-
 let importacaoLinkValido = false;
 let importacaoInicializado = false;
 
-/**
- * Inicializa a aba de importação
- * Chamado pelo navigation.js após o carregamento do HTML
- */
 function inicializarImportacao() {
     if (importacaoInicializado) return;
 
@@ -24,7 +18,6 @@ function configurarValidacaoContinuaImportacao() {
     if (linkInput) {
         linkInput.addEventListener('change', validarLinkGoogle);
         linkInput.addEventListener('input', () => {
-            // Limpa o currentLink para permitir re-validação (como ClearLinkStates do PowerShell)
             linkInput.dataset.currentLink = '';
             linkInput.classList.remove('is-valid', 'is-invalid');
             atualizarFeedbackPlanilha('info', 'Informe o link da aba LISTA FINAL e aguarde.', 'fa-circle-info');
@@ -47,18 +40,12 @@ function configurarValidacaoContinuaImportacao() {
 
 async function validarLinkGoogle() {
     const linkInput = document.getElementById('importacao-link');
-
-    // Proteção caso os elementos ainda não existam
     if (!linkInput) return;
 
     const url = linkInput.value.trim();
 
-    // Se o link atual é o mesmo que já foi validado, não refaz (como no PowerShell: CheckLink)
-    if (linkInput.dataset.currentLink === url && url !== '') {
-        return;
-    }
+    if (linkInput.dataset.currentLink === url && url !== '') return;
 
-    // Se vazio, estado neutro
     if (!url) {
         linkInput.dataset.currentLink = '';
         atualizarFeedbackPlanilha('info', 'Informe o link da aba LISTA FINAL e aguarde.', 'fa-circle-info');
@@ -66,7 +53,6 @@ async function validarLinkGoogle() {
         return;
     }
 
-    // Validação básica de formato de URL (equivalente a [Uri]::IsWellFormedUriString do PowerShell)
     try {
         new URL(url);
     } catch {
@@ -75,7 +61,6 @@ async function validarLinkGoogle() {
         return;
     }
 
-    // Mostrar estado de carregamento (equivalente ao $lbl_wait.Show() + "Aguarde..." do PowerShell)
     atualizarFeedbackPlanilha('loading', 'Aguarde... Acessando o link informado...', 'fa-spinner fa-spin');
 
     try {
@@ -86,36 +71,24 @@ async function validarLinkGoogle() {
         });
 
         const result = await response.json();
-
-        // Marcar o link como já validado (equivalente a InterfaceCustomProperty "currentLink")
         linkInput.dataset.currentLink = url;
 
-        // Mapear resultado do servidor para o feedback visual
         switch (result.status) {
             case 'success':
-                // Link contém "LISTA FINAL" → mostra grupo de materiais (como no PowerShell)
                 atualizarFeedbackPlanilha('success', result.msg, 'fa-check-circle');
                 break;
-
             case 'warning':
-                // Link válido mas não parece ser planilha de inserção de demandas
                 atualizarFeedbackPlanilha('warning', result.msg, 'fa-exclamation-triangle');
                 break;
-
             case 'error':
-                // Erro ao acessar ou link inválido
                 atualizarFeedbackPlanilha('error', result.msg, 'fa-times-circle');
-                if (result.error) {
-                    console.error('Erro ao acessar link:', result.error);
-                }
+                if (result.error) console.error('Erro ao acessar link:', result.error);
                 break;
-
             default:
                 atualizarFeedbackPlanilha('info', result.msg, 'fa-circle-info');
                 break;
         }
 
-        // Popular combo de processos SPA (como no PowerShell: RefreshCmbProcessos)
         popularComboProcessosSPA(result.processosSPA || []);
 
     } catch (error) {
@@ -151,7 +124,6 @@ function atualizarFeedbackPlanilha(tipo, mensagem, iconeClass) {
 
     // Atualiza ícone
     statusIcon.innerHTML = `<i class="fa-solid ${iconeClass}"></i>`;
-    // Atualiza mensagem
     statusText.innerHTML = mensagem;
 
     switch (tipo) {
@@ -239,7 +211,7 @@ function verificarLiberacaoBotoesImportacao() {
 }
 
 function executarAcaoImportacao(abaDestino) {
-    // Corrige possível discordância de nome das abas (ex: HTML usa 'gerar', form usa 'arquivos')
+    // Mapeia aliases de abas: HTML usa 'gerar', form usa 'arquivos'
     const btnIdMap = {
         'gerar': 'btn-importacao-arquivos',
         'resumo': 'btn-importacao-resumo',
@@ -251,17 +223,14 @@ function executarAcaoImportacao(abaDestino) {
 
     if (btn && btn.disabled) return;
 
+    // Parâmetros enviados em ordem específica (o script R os lê posicionalmente)
     const paramsOrdenados = {};
-
-    // 1. Primeiro: argumento_aba
     paramsOrdenados['argumento_aba'] = abaDestino;
 
-    // 2. Campos do formulário na ordem em que aparecem no DOM
     document.querySelectorAll('#form-importacao-link [data-field], #form-importacao-config [data-field]').forEach(campo => {
         paramsOrdenados[campo.dataset.field] = campo.value;
     });
 
-    // 3. Último: processo_selecionado (apenas para relatório)
     if (abaDestino === 'relatorio') {
         const comboSPA = document.getElementById('importacao-combo-spa');
         if (comboSPA) paramsOrdenados['processo_selecionado'] = comboSPA.value;

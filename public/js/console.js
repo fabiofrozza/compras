@@ -1,22 +1,11 @@
-// --- LÓGICA INTEGRADA DO CONSOLE ---
-
 // Referências para elementos DOM — inicializadas sob demanda via ensureConsoleDOM()
 let consoleContainer, consoleHeader, consoleSummary, summaryTitle, summaryDescription;
 let closeButton, minimizeButton, consoleOutput, scriptRunningOverlay, overlayLoader;
 
-// Flag global que indica se há um script em execução
 let isScriptRunning = false;
-
-// Flag que indica se ao menos um script já foi executado na sessão
 let hasEverRun = false;
-
-// Flag que indica se o DOM do console já foi injetado
 let _consoleDOMReady = false;
 
-/**
- * Injeta o HTML do console, overlay e logs-drawer no body (uma única vez).
- * Também configura todos os event listeners de arrastar, fechar, minimizar e resize.
- */
 function ensureConsoleDOM() {
     if (_consoleDOMReady) return;
     _consoleDOMReady = true;
@@ -86,7 +75,6 @@ function ensureConsoleDOM() {
     // Inserir no body (antes dos scripts)
     document.body.insertAdjacentHTML('beforeend', overlayHTML + consoleHTML + logsDrawerHTML);
 
-    // --- Cachear referências DOM ---
     consoleContainer = document.getElementById('console-container');
     consoleHeader = document.getElementById('console-header');
     consoleSummary = document.getElementById('console-summary');
@@ -98,16 +86,12 @@ function ensureConsoleDOM() {
     scriptRunningOverlay = document.getElementById('script-running-overlay');
     overlayLoader = document.getElementById('overlay-loader');
 
-    // --- Configurar event listeners ---
-
-    // Fechar console
     closeButton.addEventListener('click', () => {
         if (!consoleContainer.classList.contains('running')) {
             consoleContainer.classList.remove('show');
         }
     });
 
-    // Minimizar/restaurar console
     minimizeButton.addEventListener('click', () => {
         consoleContainer.classList.toggle('minimized');
         if (consoleContainer.classList.contains('minimized')) {
@@ -131,21 +115,19 @@ function ensureConsoleDOM() {
     window.addEventListener('resize', enforceConsoleConstraints);
 }
 
-/** Ativa o overlay de bloqueio */
 async function showScriptRunningOverlay() {
     isScriptRunning = true;
     ensureConsoleDOM();
     if (scriptRunningOverlay) {
         scriptRunningOverlay.classList.add('active');
-        // Lazy-load other.js sob demanda para getLoader()
+        // Lazy-load loaders.js sob demanda para getLoader()
         if (typeof getLoader !== 'function' && typeof loadScript === 'function') {
-            try { await loadScript('js/other.js'); } catch (e) { /* fallback */ }
+            try { await loadScript('js/loaders.js'); } catch (e) { /* fallback */ }
         }
         overlayLoader.innerHTML = typeof getLoader === 'function' ? getLoader() : '';
     }
 }
 
-/** Desativa o overlay de bloqueio */
 function hideScriptRunningOverlay() {
     isScriptRunning = false;
     if (scriptRunningOverlay) {
@@ -153,10 +135,6 @@ function hideScriptRunningOverlay() {
     }
 }
 
-/**
- * Reabre o console flutuante — só funciona se ao menos um script já tiver sido executado.
- * Chamada pelo botão no logs-drawer.
- */
 function reopenConsole() {
     if (!hasEverRun) return; // nada a exibir ainda
     consoleContainer.classList.add('show');
@@ -171,28 +149,21 @@ function prepareConsoleForExecution(scriptName) {
         btnRun.disabled = true;
     }
 
-    // Registra que ao menos um script já foi executado e libera o botão de reabrir console
     if (!hasEverRun) {
         hasEverRun = true;
         const btnReopen = document.getElementById('btn-reopen-console');
         if (btnReopen) btnReopen.style.removeProperty('display');
     }
 
-    // Ativa o overlay de bloqueio para impedir execuções simultâneas
     showScriptRunningOverlay();
-
-    // Remove o estado minimizado
     consoleContainer.classList.remove('minimized');
 
-    // Remove as classes de status anterior
     const statusClasses = ['finished-success', 'finished-warning', 'finished-error'];
     statusClasses.forEach(cls => consoleContainer.classList.remove(cls));
 
-    // Esconde possíveis barras de progresso anteriores
     const pbContainer = document.getElementById('console-progress-container');
     if (pbContainer) pbContainer.classList.add('d-none');
 
-    // Limpa e configura o estado de "executando"
     consoleOutput.innerHTML = '';
     consoleContainer.classList.add('show', 'running');
     consoleSummary.className = 'summary-running';
@@ -210,26 +181,18 @@ function prepareConsoleForExecution(scriptName) {
 
 /** @param {{status: 'success'|'warning'|'error', message: string, log: string, scriptName: string}} result */
 function handleScriptResult(result) {
-    // Remove a classe de executando
     consoleContainer.classList.remove('running');
-
-    // Desativa o overlay de bloqueio
     hideScriptRunningOverlay();
 
-    // Remove as classes de status correspondente
     const statusClasses = ['finished-success', 'finished-warning', 'finished-error'];
     statusClasses.forEach(cls => consoleContainer.classList.remove(cls));
 
-    // Esconde a barra de progresso
     const pbContainer = document.getElementById('console-progress-container');
     if (pbContainer) pbContainer.classList.add('d-none');
 
     const btnRun = document.getElementById('btn-run-' + result.scriptName);
-    if (btnRun) {
-        btnRun.disabled = false;
-    }
+    if (btnRun) btnRun.disabled = false;
 
-    // Atualiza o resumo com base no status
     switch (result.status) {
         case 'success':
             consoleSummary.className = 'summary-success';
@@ -250,7 +213,6 @@ function handleScriptResult(result) {
 
     summaryDescription.textContent = result.message || 'Verifique o log para mais detalhes.';
 
-    // Adiciona uma mensagem final ao log se não houver uma
     if (consoleOutput.innerHTML.trim() === '') {
         consoleOutput.innerHTML = result.log || 'Nenhum log detalhado foi retornado.';
     }
@@ -270,7 +232,7 @@ function updateProgressBar(data) {
     if (!container) {
         const textContainer = document.querySelector('#console-summary .summary-text');
         if (textContainer) {
-            textContainer.classList.add('flex-grow-1'); // ensure takes full width
+            textContainer.classList.add('flex-grow-1');
 
             container = document.createElement('div');
             container.id = 'console-progress-container';
@@ -338,13 +300,11 @@ function updateProgressBar(data) {
 }
 
 function runRScript(scriptName, customParams = null) {
-    // 0. Bloquear se já há um script em execução
     if (isScriptRunning) {
         showToast('Aguarde o término do script em execução antes de iniciar outro.', 'warning', 5000, 'execução');
         return;
     }
 
-    // 1. Verificar se está conectado
     if (!ws || ws.readyState !== WebSocket.OPEN) {
         showToast('Servidor não está conectado. Execute novamente o arquivo start.cmd para iniciar o servidor.', 'error', 10000, 'inicialização');
         return;
@@ -355,41 +315,30 @@ function runRScript(scriptName, customParams = null) {
     if (customParams) {
         dados = customParams;
     } else {
-        // 2. Coletar dados do formulário
         const aba = document.querySelector(`#${scriptName}`);
         if (!aba) {
             console.error(`Aba ${scriptName} não encontrada`);
             return;
         }
 
-        // Lógica específica para cada script
         if (scriptName === 'atas') {
-            // Para Atas, usar a função específica de processamento
             dados = processarDadosAtas();
         } else {
-            // Para outros scripts, manter comportamento original
             const campos = aba.querySelectorAll('input, select, textarea');
             campos.forEach(campo => {
                 if (campo.id) {
-                    if (campo.type === 'checkbox' || campo.type === 'radio') {
-                        dados[campo.id] = campo.checked;
-                    } else {
-                        dados[campo.id] = campo.value;
-                    }
+                    dados[campo.id] = (campo.type === 'checkbox' || campo.type === 'radio') ? campo.checked : campo.value;
                 }
             });
         }
 
-        // Adicionar arquivos selecionados aos parâmetros
         if (scriptName === 'catmat' && selectedFiles['catmat-lista-itens-tr']) {
             dados['arquivo_selecionado'] = selectedFiles['catmat-lista-itens-tr'];
         }
     }
 
-    // 4. Preparar a UI do console
     prepareConsoleForExecution(scriptName);
 
-    // 5. Enviar a mensagem via WebSocket
     const message = {
         action: 'execute-r-script',
         scriptName: scriptName,
@@ -400,7 +349,7 @@ function runRScript(scriptName, customParams = null) {
         ws.send(JSON.stringify(message));
     } catch (error) {
         console.error('Erro ao enviar mensagem:', error);
-        // Reverter o estado da UI em caso de falha no envio
+        // Reverter estado da UI em caso de falha no envio
         handleScriptResult({
             status: 'error',
             message: `Falha ao enviar comando para o servidor: ${error.message}`,
@@ -410,12 +359,11 @@ function runRScript(scriptName, customParams = null) {
     }
 }
 
-// Lógica para tornar o console arrastável e respeitar limites
+// --- Lógica de arraste e limites do console ---
 
 let isDragging = false;
 let offsetX, offsetY;
 
-// Função para garantir que o console respeite os limites
 const enforceConsoleConstraints = () => {
     if (!consoleContainer) return;
     const rect = consoleContainer.getBoundingClientRect();
@@ -492,17 +440,14 @@ const enforceConsoleConstraints = () => {
     }
 };
 
-// Função para iniciar o arraste
 const onDragStart = (e) => {
-    // Ignorar se o clique foi no botão de fechar ou em outro botão no header
-    if (e.target.closest('button')) {
+    if (e.target.closest('button')) { // ignorar cliques em botões do header
         return;
     }
 
     isDragging = true;
 
-    // A primeira vez que arrastamos, o console é posicionado com 'bottom' e 'right'.
-    // Convertemos para 'top' e 'left' para que o arraste funcione corretamente.
+    // Na primeira vez, o console usa 'bottom'/'right'; convertemos para 'top'/'left' para o arraste funcionar
     const rect = consoleContainer.getBoundingClientRect();
     if (getComputedStyle(consoleContainer).bottom !== 'auto' || getComputedStyle(consoleContainer).right !== 'auto') {
         consoleContainer.style.top = `${rect.top}px`;
@@ -512,17 +457,14 @@ const onDragStart = (e) => {
         enforceConsoleConstraints();
     }
 
-    // Calcula o deslocamento do mouse em relação ao canto superior esquerdo do console
     offsetX = e.clientX - consoleContainer.offsetLeft;
     offsetY = e.clientY - consoleContainer.offsetTop;
 
     document.body.classList.add('dragging-console');
-
     document.addEventListener('mousemove', onDragMove);
     document.addEventListener('mouseup', onDragEnd, { once: true });
 };
 
-// Função para mover o console
 const onDragMove = (e) => {
     if (!isDragging) return;
 
@@ -548,7 +490,6 @@ const onDragMove = (e) => {
     consoleContainer.style.maxHeight = `${window.innerHeight - newTop}px`;
 };
 
-// Função para finalizar o arraste
 const onDragEnd = () => {
     isDragging = false;
     document.body.classList.remove('dragging-console');
@@ -556,15 +497,13 @@ const onDragEnd = () => {
     enforceConsoleConstraints();
 };
 
-// Configurar Event Delegation para botões de execução (.btn-run)
-// Isso permite que botões carregados dinamicamente (Lazy Loading) funcionem sem reatribuir listeners
+// Event delegation para .btn-run — permite que botões carregados dinamicamente funcionem
 document.addEventListener('click', (event) => {
     const btn = event.target.closest('.btn-run');
 
     if (btn) {
-        // Botões com onclick gerenciam sua própria execução (ex: importação, mailmerge).
-        // O onclick já foi disparado antes desta delegação (fase target vs bubbling),
-        // então a verificação de isScriptRunning é feita pelo próprio runRScript internamente.
+        // Botões com onclick gerenciam sua própria execução (ex: importação, mailmerge);
+        // isScriptRunning é verificado internamente pelo próprio runRScript.
         if (btn.hasAttribute('onclick')) return;
 
         // Bloqueia clique se há script em execução — apenas para botões sem onclick
