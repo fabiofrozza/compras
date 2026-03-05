@@ -2,30 +2,6 @@
 OTHER COMPONENTS AND BOOSTRAP CUSTOMIZATIONS
 ========================================================================== */
 
-/* Info Box (Preferências do Usuário) */
-.info-box {
-    background: var(--color-surface-1);
-    padding: 15px;
-    border-radius: 6px;
-    border-top: 4px solid var(--color-border-focus);
-    width: 50%;
-    gap: 10px;
-}
-
-.info-box .user-photo {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    font-size: 3rem;
-    color: var(--color-idle);
-}
-
-.info-box p {
-    margin: 8px 0;
-    color: var(--color-text-secondary);
-    text-align: center;
-}
-
 /* Aba Atas */
 
 #status-dados-atas,

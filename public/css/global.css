@@ -18,11 +18,9 @@ RESET, BASE, VARIÁVEIS GLOBAIS E TEMAS
 
     /* Cores do Tema Claro (Padrão) */
     --color-background: var(--bs-primary-bg-subtle);
-    /*--color-background: lightsteelblue*/
     --color-surface-1: ivory;
     --color-surface-2: var(--color-background);
     --color-text-primary: rgb(0, 56, 147);
-    /* Azul UFSC */
     --color-text-secondary: #555;
     --color-text-muted: #666;
     --color-border-focus: #667eea;
@@ -41,7 +39,6 @@ RESET, BASE, VARIÁVEIS GLOBAIS E TEMAS
 
     /* Variáveis Específicas: Console e Toasts */
     --running-timeout: .5s;
-    /* Duração total do ciclo de piscar do console */
 
     --toast-success: var(--color-success);
     --toast-error: var(--color-error);

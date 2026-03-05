@@ -143,4 +143,4 @@ ECHO:
 GOTO Fim
 
 :Fim
-rem PAUSE
+PAUSE
