@@ -1,49 +1,49 @@
 // Mapear extensões para ícones
 const FILE_ICON_MAP = {
     // Documentos Microsoft Office
-    'doc': '<i class="fas fa-file-word" style="color: #2B579A;"></i>',
-    'docx': '<i class="fas fa-file-word" style="color: #2B579A;"></i>',
-    'docm': '<i class="fas fa-file-word" style="color: #2B579A;"></i>',
+    'doc': '<i class="fa-solid fa-file-word" style="color: #2B579A;"></i>',
+    'docx': '<i class="fa-solid fa-file-word" style="color: #2B579A;"></i>',
+    'docm': '<i class="fa-solid fa-file-word" style="color: #2B579A;"></i>',
 
     // Planilhas Microsoft Excel
-    'xls': '<i class="fas fa-file-excel" style="color: #217346;"></i>',
-    'xlsx': '<i class="fas fa-file-excel" style="color: #217346;"></i>',
-    'xlsm': '<i class="fas fa-file-excel" style="color: #217346;"></i>',
-    'csv': '<i class="fas fa-file-csv" style="color: #217346;"></i>',
+    'xls': '<i class="fa-solid fa-file-excel" style="color: #217346;"></i>',
+    'xlsx': '<i class="fa-solid fa-file-excel" style="color: #217346;"></i>',
+    'xlsm': '<i class="fa-solid fa-file-excel" style="color: #217346;"></i>',
+    'csv': '<i class="fa-solid fa-file-csv" style="color: #217346;"></i>',
 
     // PDF
-    'pdf': '<i class="fas fa-file-pdf" style="color: #D30015;"></i>',
+    'pdf': '<i class="fa-solid fa-file-pdf" style="color: #D30015;"></i>',
 
     // Texto
-    'txt': '<i class="fas fa-file-text" style="color: #444;"></i>',
-    'rtf': '<i class="fas fa-file-alt" style="color: #444;"></i>',
+    'txt': '<i class="fa-solid fa-file-text" style="color: #444;"></i>',
+    'rtf': '<i class="fa-solid fa-file-alt" style="color: #444;"></i>',
 
     // Imagens
-    'jpg': '<i class="fas fa-file-image" style="color: #FF6B6B;"></i>',
-    'jpeg': '<i class="fas fa-file-image" style="color: #FF6B6B;"></i>',
-    'png': '<i class="fas fa-file-image" style="color: #FF6B6B;"></i>',
-    'gif': '<i class="fas fa-file-image" style="color: #FF6B6B;"></i>',
-    'bmp': '<i class="fas fa-file-image" style="color: #FF6B6B;"></i>',
+    'jpg': '<i class="fa-solid fa-file-image" style="color: #FF6B6B;"></i>',
+    'jpeg': '<i class="fa-solid fa-file-image" style="color: #FF6B6B;"></i>',
+    'png': '<i class="fa-solid fa-file-image" style="color: #FF6B6B;"></i>',
+    'gif': '<i class="fa-solid fa-file-image" style="color: #FF6B6B;"></i>',
+    'bmp': '<i class="fa-solid fa-file-image" style="color: #FF6B6B;"></i>',
 
     // Compactados
-    'zip': '<i class="fas fa-file-archive" style="color: #FF6B35;"></i>',
-    'rar': '<i class="fas fa-file-archive" style="color: #FF6B35;"></i>',
-    '7z': '<i class="fas fa-file-archive" style="color: #FF6B35;"></i>',
+    'zip': '<i class="fa-solid fa-file-archive" style="color: #FF6B35;"></i>',
+    'rar': '<i class="fa-solid fa-file-archive" style="color: #FF6B35;"></i>',
+    '7z': '<i class="fa-solid fa-file-archive" style="color: #FF6B35;"></i>',
 
     // R Scripts
-    'r': '<i class="fas fa-file-code" style="color: #276DC3;"></i>',
+    'r': '<i class="fa-solid fa-file-code" style="color: #276DC3;"></i>',
 };
 
 // Obter ícone personalizado baseado no tipo de arquivo/pasta
 function getFileIcon(fileName, isDirectory) {
-    if (isDirectory) return '<i class="fas fa-folder"></i>';
+    if (isDirectory) return '<i class="fa-solid fa-folder"></i>';
 
     // Verificar se é arquivo temporário (começa com ~)
-    if (fileName.startsWith('~')) return '<i class="fas fa-question"></i>';
+    if (fileName.startsWith('~')) return '<i class="fa-solid fa-question"></i>';
 
     const extension = fileName.split('.').pop().toLowerCase();
 
-    return FILE_ICON_MAP[extension] || '<i class="fas fa-file"></i>';
+    return FILE_ICON_MAP[extension] || '<i class="fa-solid fa-file"></i>';
 }
 
 // Abrir pasta no gerenciador de arquivos
@@ -109,7 +109,7 @@ async function clearFolderFiles(containerId, folderPath, scriptName, innerFolder
     const confirmed = await showConfirmationModal({
         title: 'Confirmar Exclusão',
         message: message,
-        detail: `<i class="fas fa-folder me-1"></i> ${safePath}`,
+        detail: `<i class="fa-solid fa-folder me-1"></i> ${safePath}`,
         confirmText: 'Excluir',
         confirmColor: 'btn-danger'
     });
@@ -236,7 +236,7 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
         if (data.error) {
             filesList.innerHTML = `
                 <div class="alert alert-danger" role="alert">
-                    <i class="fas fa-xmark"></i> Erro ao carregar arquivos: ${data.error}
+                    <i class="fa-solid fa-xmark"></i> Erro ao carregar arquivos: ${data.error}
                 </div>
             `;
             return;
@@ -245,11 +245,11 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
         let filesHTML = `
             <div class="folder-path-container">
                 <div class="icon-and-path">
-                    <i class="fas fa-folder"></i> 
+                    <i class="fa-solid fa-folder"></i> 
                     <span class="folder-path">${data.folderPath}</span>
                 </div>
                 <button data-bs-toggle="tooltip" data-bs-title="Clique para copiar o caminho da pasta" class="btn btn-outline-secondary btn-sm copy-icon"}>
-                    <i class="fas fa-copy"></i>
+                    <i class="fa-solid fa-copy"></i>
                 </button>
             </div>
         `;
@@ -263,14 +263,14 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
             <div class="folder-buttons-container">
                 ${canDelete ? `
                 <button data-bs-toggle="tooltip" data-bs-title="Excluir todos os arquivos da pasta" class="btn btn-outline-danger btn-sm btn-clear" data-container-id="${containerId}" data-folder-path="${data.folderPath}" data-script-name="${scriptName}" data-inner-folder="${innerFolder}" ${hasFiles ? '' : 'disabled'}>
-                    <i class="fas fa-trash"></i>
+                    <i class="fa-solid fa-trash"></i>
                 </button>
                 ` : ''}
                 <button data-bs-toggle="tooltip" data-bs-title="Abrir pasta" class="btn btn-outline-secondary btn-sm btn-open" data-folder-path="${data.folderPath}">
-                    <i class="fas fa-folder-open"></i>
+                    <i class="fa-solid fa-folder-open"></i>
                 </button>
                 <button data-bs-toggle="tooltip" data-bs-title="Atualizar lista de arquivos" class="btn btn-outline-secondary btn-sm btn-refresh" data-container-id="${containerId}" data-script-name="${scriptName}">
-                    <i class="fas fa-refresh"></i>
+                    <i class="fa-solid fa-refresh"></i>
                 </button>
             </div>
         `;
@@ -278,7 +278,7 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
         if (!data.files || data.files.length === 0) {
             filesHTML += `
                 <div class="alert alert-warning" role="alert">
-                    <i class="fas fa-exclamation-triangle"></i> Nenhum arquivo encontrado na pasta
+                    <i class="fa-solid fa-exclamation-triangle"></i> Nenhum arquivo encontrado na pasta
                 </div>
             `;
             filesHTML += filesHTMLButtons;
@@ -339,7 +339,7 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
         console.error('Erro ao carregar arquivos:', error);
         filesList.innerHTML = `
             <div class="alert alert-danger" role="alert">
-                <i class="fas fa-error"></i> Erro ao carregar arquivos: ${error.message}
+                <i class="fa-solid fa-error"></i> Erro ao carregar arquivos: ${error.message}
             </div>
         `;
     }

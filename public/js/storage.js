@@ -51,7 +51,7 @@ function populateFavoriteTabSelectList() {
         id: 'default',
         value: '',
         label: 'Abrir última aba visualizada',
-        icon: 'fas fa-clock'
+        icon: 'fa-solid fa-clock'
     }];
 
     // Buscar botões da sidebar para obter ícones e nomes
@@ -65,7 +65,7 @@ function populateFavoriteTabSelectList() {
         const name = nameElement ? nameElement.textContent.trim() : tabId;
 
         const icon = link.querySelector('i');
-        const iconClass = icon ? icon.className : 'fas fa-circle';
+        const iconClass = icon ? icon.className : 'fa-solid fa-circle';
 
         options.push({
             id: tabId,

@@ -42,10 +42,10 @@ function ensureConsoleDOM() {
             <div class="header-buttons">
                 <button class="btn-minimize" type="button" aria-label="Minimizar" data-bs-toggle="tooltip"
                     title="Minimizar">
-                    <i class="fas fa-window-minimize"></i>
+                    <i class="fa-solid fa-window-minimize"></i>
                 </button>
                 <button class="btn-close" type="button" aria-label="Fechar" data-bs-toggle="tooltip" title="Fechar">
-                    <i class="fas fa-window-close"></i>
+                    <i class="fa-solid fa-window-close"></i>
                 </button>
             </div>
         </div>
@@ -64,15 +64,15 @@ function ensureConsoleDOM() {
     <div id="logs-drawer" class="d-none shadow-lg collapsed">
         <div class="logs-drawer-header" onclick="toggleLogsDrawer()">
             <span id="logs-drawer-title">
-                <i class="fas fa-file-alt me-2" data-bs-toggle="tooltip" title="Exibir logs das últimas execuções"></i>
+                <i class="fa-solid fa-file-alt me-2" data-bs-toggle="tooltip" title="Exibir logs das últimas execuções"></i>
                 <span>Logs</span>
             </span>
             <div class="logs-drawer-actions">
                 <button id="btn-reopen-console" class="logs-drawer-action-btn" data-bs-toggle="tooltip"
                     title="Reabrir console" style="display:none" onclick="event.stopPropagation(); reopenConsole();">
-                    <i class="fas fa-terminal"></i>
+                    <i class="fa-solid fa-terminal"></i>
                 </button>
-                <i class="fas fa-window-minimize" id="logs-minimize-icon" data-bs-toggle="tooltip"
+                <i class="fa-solid fa-window-minimize" id="logs-minimize-icon" data-bs-toggle="tooltip"
                     title="Minimizar"></i>
             </div>
         </div>
@@ -111,10 +111,10 @@ function ensureConsoleDOM() {
     minimizeButton.addEventListener('click', () => {
         consoleContainer.classList.toggle('minimized');
         if (consoleContainer.classList.contains('minimized')) {
-            minimizeButton.innerHTML = '<i class="fas fa-window-restore"></i>';
+            minimizeButton.innerHTML = '<i class="fa-solid fa-window-restore"></i>';
             minimizeButton.setAttribute('title', 'Restaurar');
         } else {
-            minimizeButton.innerHTML = '<i class="fas fa-window-minimize"></i>';
+            minimizeButton.innerHTML = '<i class="fa-solid fa-window-minimize"></i>';
             minimizeButton.setAttribute('title', 'Minimizar');
         }
     });

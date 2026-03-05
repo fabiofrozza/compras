@@ -124,7 +124,7 @@ async function verificarStatusDadosAtas() {
             statusContainer.classList.add('alert-success', 'border-success');
             statusIcon.classList.remove('text-warning', 'text-muted');
             statusIcon.classList.add('text-success');
-            statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+            statusIcon.innerHTML = '<i class="fa-solid fa-check-circle"></i>';
             statusText.innerHTML = `Dados obtidos em ${dataModificacao}`;
         } else {
             statusContainer.dataset.dadosDisponiveis = 'false';
@@ -134,7 +134,7 @@ async function verificarStatusDadosAtas() {
             statusContainer.classList.add('alert-warning', 'border-warning');
             statusIcon.classList.remove('text-success', 'text-muted');
             statusIcon.classList.add('text-warning');
-            statusIcon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+            statusIcon.innerHTML = '<i class="fa-solid fa-exclamation-triangle"></i>';
             statusText.innerHTML = 'Arquivo de dados não encontrado. Execute "Obter dados dos SICAF" primeiro.';
         }
     } catch (error) {

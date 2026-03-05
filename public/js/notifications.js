@@ -19,7 +19,7 @@ function showToast(message, type = 'success', duration, source = 'origem não in
 
     const closeButton = document.createElement('button');
     closeButton.className = 'toast-close-btn';
-    closeButton.innerHTML = '<i class="fas fa-x fa-2xs"></i>';
+    closeButton.innerHTML = '<i class="fa-solid fa-x fa-2xs"></i>';
 
     const removeToast = () => {
         toast.classList.add('removing');
@@ -44,7 +44,7 @@ function createRequiredFieldsTooltip() {
         asteriskSpan.className = 'indicator-required';
         asteriskSpan.dataset.bsTitle = 'Campo obrigatório';
         asteriskSpan.dataset.bsToggle = 'tooltip';
-        asteriskSpan.innerHTML = '<i class="fas fa-asterisk"></i>'
+        asteriskSpan.innerHTML = '<i class="fa-solid fa-asterisk"></i>'
 
         field.appendChild(asteriskSpan);
     });
@@ -89,10 +89,10 @@ const notifications = [];
 let notificationIdCounter = 0;
 
 const notificationIcons = {
-    success: 'fas fa-circle-check',
-    error: 'fas fa-circle-xmark',
-    warning: 'fas fa-circle-exclamation',
-    info: 'fas fa-circle-info'
+    success: 'fa-solid fa-circle-check',
+    error: 'fa-solid fa-circle-xmark',
+    warning: 'fa-solid fa-circle-exclamation',
+    info: 'fa-solid fa-circle-info'
 };
 
 /**
@@ -157,7 +157,7 @@ function renderNotificationList() {
     if (notifications.length === 0) {
         list.innerHTML = `
             <div class="notification-empty">
-                <i class="fas fa-bell-slash"></i>
+                <i class="fa-solid fa-bell-slash"></i>
                 <span>Nenhuma notificação</span>
             </div>`;
         if (footer) footer.style.display = 'none';
@@ -179,12 +179,12 @@ function renderNotificationList() {
             <div class="notification-body">
                 <div class="notification-message">${notif.message}</div>
                 <div class="notification-meta">
-                    <span class="notification-time"><i class="fas fa-clock me-1"></i>${timeStr}</span>
+                    <span class="notification-time"><i class="fa-solid fa-clock me-1"></i>${timeStr}</span>
                     <span class="notification-source">${notif.source}</span>
                 </div>
             </div>
             <button class="notification-dismiss" aria-label="Dispensar" data-notif-id="${notif.id}">
-                <i class="fas fa-xmark"></i>
+                <i class="fa-solid fa-xmark"></i>
             </button>`;
 
         list.appendChild(item);
@@ -249,7 +249,7 @@ function showConfirmationModal({
     detail = null,
     confirmText = 'Confirmar',
     confirmColor = 'btn-danger',
-    icon = 'fas fa-exclamation-triangle'
+    icon = 'fa-solid fa-exclamation-triangle'
 } = {}) {
     return new Promise((resolve) => {
         const modalId = 'genericConfirmModal';

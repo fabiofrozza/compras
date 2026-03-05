@@ -150,7 +150,7 @@ function atualizarFeedbackPlanilha(tipo, mensagem, iconeClass) {
     statusIcon.classList.remove(...classesIcone);
 
     // Atualiza ícone
-    statusIcon.innerHTML = `<i class="fas ${iconeClass}"></i>`;
+    statusIcon.innerHTML = `<i class="fa-solid ${iconeClass}"></i>`;
     // Atualiza mensagem
     statusText.innerHTML = mensagem;
 

@@ -5,7 +5,7 @@ function applyDarkMode(darkModeEnabled = null) {
     const isDark = darkModeEnabled ?? !document.body.classList.contains('dark-mode');
 
     document.body.classList.toggle('dark-mode', isDark);
-    darkModeBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    darkModeBtn.innerHTML = isDark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
 
     if (isDark) {
         mainContent.setAttribute('data-bs-theme', 'dark');

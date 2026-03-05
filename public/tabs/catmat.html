@@ -3,10 +3,11 @@
     <div class="col">
         <!-- Itens do TR -->
         <div id="form-itens-tr" class="script-form shadow-sm">
-            <h4 class="form-label">
-                <i class="fa-solid fa-basket-shopping"></i> Itens do TR 
+            <h4>
+                <i class="fa-solid fa-basket-shopping"></i> Itens do TR
             </h4>
-            <div id="catmat-lista-itens-tr" class="files-list" data-field="lista-itens-tr" data-validate-rule="file-selectable" required data-folder="tr" data-selectable="true">
+            <div id="catmat-lista-itens-tr" class="files-list" data-field="lista-itens-tr"
+                data-validate-rule="file-selectable" required data-folder="tr" data-selectable="true">
             </div>
         </div>
     </div>
@@ -18,13 +19,15 @@
                 <label for="catmat-metodo" class="form-label">
                     Escolha a forma de consulta das margens de preferência:
                 </label>
-                <select class="form-select form-select-sm" id="catmat-metodo" aria-label="Forma de geração das listas prévias">
+                <select class="form-select form-select-sm" id="catmat-metodo"
+                    aria-label="Forma de geração das listas prévias">
                     <option selected value="lista">Lista de CATMATs - Consulta manual</option>
                     <option value="api">API - Consulta direta aos Dados Abertos</option>
                 </select>
             </div>
             <div class="form-buttons">
-                <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-form-itens-tr" data-script-name="catmat">
+                <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-form-itens-tr"
+                    data-script-name="catmat">
                     Verificar margens de preferência
                 </button>
             </div>
