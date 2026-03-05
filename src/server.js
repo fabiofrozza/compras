@@ -53,6 +53,58 @@ function matchFilePattern(filename, patterns) {
   });
 }
 
+// Caminho base dos scripts (usado em validações de path e rotas)
+const SCRIPTS_PATH = path.resolve(path.join(__dirname, '..', 'scripts'));
+
+// Abre uma pasta, arquivo ou URL no aplicativo padrão do sistema operacional
+function abrirNaInterface(targetPath, isFile = false) {
+  if (process.platform === 'win32') {
+    if (isFile) spawn('cmd', ['/c', 'start', '', targetPath]);
+    else spawn('explorer', [targetPath]);
+  } else if (process.platform === 'darwin') {
+    spawn('open', [targetPath]);
+  } else {
+    spawn('xdg-open', [targetPath]);
+  }
+}
+
+// Resolve e valida o caminho de uma subpasta de scripts.
+// Retorna o folderPath ou null (com o erro já enviado via res).
+async function resolverPastaScript(res, scriptName, innerFolder, context) {
+  const folderPath = path.join(SCRIPTS_PATH, scriptName, innerFolder);
+
+  if (!isPathSafe(folderPath, SCRIPTS_PATH)) {
+    res.status(403).json({ error: 'Acesso negado: fora do diretório permitido' });
+    return null;
+  }
+
+  try {
+    await fs.access(folderPath);
+  } catch {
+    logger.debug(`Pasta não encontrada: ${folderPath}`, context);
+    res.status(404).json({ error: 'Pasta não encontrada' });
+    return null;
+  }
+
+  return folderPath;
+}
+
+// Parseia os filtros de extensão e nome a partir dos query params
+function parsearFiltros(extensions, nameContains) {
+  return {
+    patterns: extensions ? extensions.split(',') : null,
+    filterNameContains: nameContains ? nameContains.toLowerCase().split('_') : []
+  };
+}
+
+// Verifica se um arquivo passa nos filtros de padrão e nome
+function arquivoPassaNoFiltro(file, patterns, filterNameContains) {
+  if (filterNameContains.length > 0) {
+    if (!filterNameContains.every(term => file.toLowerCase().includes(term.trim()))) return false;
+  }
+  return matchFilePattern(file, patterns);
+}
+
 // Variável para cachear o caminho do R
 let cachedRScriptPath = null;
 
@@ -136,7 +188,6 @@ app.post('/api/open-folder', async (req, res) => {
       return res.status(400).json({ error: 'Caminho da pasta não fornecido' });
     }
 
-    // Verificar existência preliminar
     try {
       await fs.access(folderPath);
     } catch {
@@ -144,24 +195,12 @@ app.post('/api/open-folder', async (req, res) => {
       return res.status(404).json({ error: `Pasta não encontrada: ${folderPath}` });
     }
 
-    const scriptsPath = path.resolve(path.join(__dirname, '..', 'scripts'));
-
-    if (!isPathSafe(folderPath, scriptsPath)) {
+    if (!isPathSafe(folderPath, SCRIPTS_PATH)) {
       return res.status(403).json({ error: 'Acesso negado: fora do diretório permitido' });
     }
 
-    // Abrir pasta no gerenciador de arquivos
     try {
-      if (process.platform === 'win32') {
-        // Windows
-        spawn('explorer', [folderPath]);
-      } else if (process.platform === 'darwin') {
-        // macOS
-        spawn('open', [folderPath]);
-      } else {
-        // Linux
-        spawn('xdg-open', [folderPath]);
-      }
+      abrirNaInterface(folderPath);
       logger.debug(`Pasta aberta: ${folderPath}`, 'API');
     } catch (spawnError) {
       logger.error(`Erro ao abrir pasta: ${spawnError.message}`, 'API', spawnError);
@@ -185,10 +224,8 @@ app.post('/api/open-file', async (req, res) => {
       return res.status(400).json({ error: 'Caminho do arquivo não fornecido' });
     }
 
-    // Verificar existência preliminar
-    let stats;
     try {
-      stats = await fs.stat(filePath);
+      const stats = await fs.stat(filePath);
       if (!stats.isFile()) {
         return res.status(400).json({ error: `O caminho fornecido não é um arquivo: ${filePath}` });
       }
@@ -197,21 +234,12 @@ app.post('/api/open-file', async (req, res) => {
       return res.status(404).json({ error: `Arquivo não encontrado: ${filePath}` });
     }
 
-    const scriptsPath = path.resolve(path.join(__dirname, '..', 'scripts'));
-
-    if (!isPathSafe(filePath, scriptsPath)) {
+    if (!isPathSafe(filePath, SCRIPTS_PATH)) {
       return res.status(403).json({ error: 'Acesso negado: fora do diretório permitido' });
     }
 
-    // Abrir arquivo nativamente
     try {
-      if (process.platform === 'win32') {
-        spawn('cmd', ['/c', 'start', '', filePath]);
-      } else if (process.platform === 'darwin') {
-        spawn('open', [filePath]);
-      } else {
-        spawn('xdg-open', [filePath]);
-      }
+      abrirNaInterface(filePath, true);
       logger.debug(`Arquivo aberto: ${filePath}`, 'API');
     } catch (spawnError) {
       logger.error(`Erro ao abrir arquivo: ${spawnError.message}`, 'API', spawnError);
@@ -250,34 +278,13 @@ app.get('/api/list-files/:scriptName/:innerFolder', async (req, res) => {
   try {
     const { scriptName, innerFolder } = req.params;
     const { extensions, nameContains, sort } = req.query;
-    const folderPath = path.join(__dirname, '..', 'scripts', scriptName, innerFolder);
-    const scriptsPath = path.resolve(path.join(__dirname, '..', 'scripts'));
 
-    if (!isPathSafe(folderPath, scriptsPath)) {
-      return res.status(403).json({ error: 'Acesso negado: fora do diretório permitido' });
-    }
+    const folderPath = await resolverPastaScript(res, scriptName, innerFolder, 'ListFiles');
+    if (!folderPath) return;
 
-    try {
-      await fs.access(folderPath);
-    } catch {
-      logger.debug(`Pasta não encontrada: ${folderPath}`, 'ListFiles');
-      return res.status(404).json({ error: 'Pasta não encontrada' });
-    }
-
+    const { patterns, filterNameContains } = parsearFiltros(extensions, nameContains);
     const files = await fs.readdir(folderPath);
-
-    // Filtrar arquivos se extensões foram fornecidas
-    const patterns = extensions ? extensions.split(',') : null;
-    const filterNameContains = nameContains ? nameContains.toLowerCase().split('_') : [];
-
-    const filteredFiles = files.filter(file => {
-      if (filterNameContains.length > 0) {
-        if (!filterNameContains.every(term => file.toLowerCase().includes(term.trim()))) {
-          return false;
-        }
-      }
-      return matchFilePattern(file, patterns);
-    });
+    const filteredFiles = files.filter(file => arquivoPassaNoFiltro(file, patterns, filterNameContains));
 
     const fileDetails = await Promise.all(
       filteredFiles.map(async (file) => {
@@ -300,7 +307,7 @@ app.get('/api/list-files/:scriptName/:innerFolder', async (req, res) => {
 
     logger.debug(`Listados ${filteredFiles.length} itens de ${scriptName}/${innerFolder}`, 'ListFiles');
     const canDelete = ALLOWED_DELETE_FOLDERS.includes(innerFolder.toLowerCase());
-    res.json({ files: fileDetails, folderPath: folderPath, canDelete });
+    res.json({ files: fileDetails, folderPath, canDelete });
   } catch (error) {
     logger.error(`Erro ao listar arquivos: ${error.message}`, 'ListFiles', error);
     res.status(500).json({ error: error.message });
@@ -312,52 +319,27 @@ app.delete('/api/clear-folder/:scriptName/:innerFolder', async (req, res) => {
   try {
     const { scriptName, innerFolder } = req.params;
     const { extensions, nameContains } = req.query;
-    const folderPath = path.join(__dirname, '..', 'scripts', scriptName, innerFolder);
-    const scriptsPath = path.resolve(path.join(__dirname, '..', 'scripts'));
-
-    if (!isPathSafe(folderPath, scriptsPath)) {
-      return res.status(403).json({ error: 'Acesso negado: fora do diretório permitido' });
-    }
-
-    try {
-      await fs.access(folderPath);
-    } catch {
-      logger.warn(`Pasta não encontrada: ${folderPath}`, 'ClearFolder');
-      return res.status(404).json({ error: 'Pasta não encontrada' });
-    }
 
     // Medida de segurança: Só permitir limpar pastas específicas de relatórios/saída
     if (!ALLOWED_DELETE_FOLDERS.includes(innerFolder.toLowerCase())) {
       return res.status(403).json({ error: 'A exclusão nesta pasta não é permitida por segurança.' });
     }
 
-    // Listar todos os arquivos da pasta
+    const folderPath = await resolverPastaScript(res, scriptName, innerFolder, 'ClearFolder');
+    if (!folderPath) return;
+
+    const { patterns, filterNameContains } = parsearFiltros(extensions, nameContains);
     const files = await fs.readdir(folderPath);
     let deletedCount = 0;
 
-    const patterns = extensions ? extensions.split(',') : null;
-    const filterNameContains = nameContains ? nameContains.toLowerCase().split('_') : [];
-
-    // Excluir cada arquivo
     for (const file of files) {
       // Dupla proteção: Nunca apagar scripts de código ou o próprio excel
-      if (file.endsWith('.R') || file.endsWith('.js') || file.toLowerCase() === 'dados_atas.xlsx') {
-        continue;
-      }
-
-      if (filterNameContains.length > 0) {
-        if (!filterNameContains.every(term => file.toLowerCase().includes(term.trim()))) {
-          continue;
-        }
-      }
-
-      // Verificar padrão de arquivo
-      if (!matchFilePattern(file, patterns)) continue;
+      if (file.endsWith('.R') || file.endsWith('.js') || file.toLowerCase() === 'dados_atas.xlsx') continue;
+      if (!arquivoPassaNoFiltro(file, patterns, filterNameContains)) continue;
 
       const filePath = path.join(folderPath, file);
       const stats = await fs.stat(filePath);
 
-      // Apenas deletar arquivos, não diretórios
       if (stats.isFile()) {
         await fs.unlink(filePath);
         deletedCount++;
@@ -367,7 +349,7 @@ app.delete('/api/clear-folder/:scriptName/:innerFolder', async (req, res) => {
     logger.info(`Excluído(s) ${deletedCount} arquivo(s) de ${scriptName}/${innerFolder}`, 'ClearFolder');
     res.json({
       message: `${deletedCount} arquivo(s) excluído(s) com sucesso!`,
-      deletedCount: deletedCount
+      deletedCount
     });
   } catch (error) {
     logger.error(`Erro ao limpar pasta: ${error.message}`, 'ClearFolder', error);
@@ -539,13 +521,7 @@ const server = app.listen(PORT, async () => {
   logger.info(`==============================================`);
   logger.debug(`Pasta: ${__dirname}`, 'Server');
 
-  if (process.platform === 'win32') {
-    spawn('explorer', [`http://localhost:${PORT}`]);
-  } else if (process.platform === 'darwin') {
-    spawn('open', [`http://localhost:${PORT}`]);
-  } else {
-    spawn('xdg-open', [`http://localhost:${PORT}`]);
-  }
+  abrirNaInterface(`http://localhost:${PORT}`);
 });
 
 // Configurar WebSocket e rastrear conexões
