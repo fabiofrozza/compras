@@ -23,7 +23,6 @@ FLOATING CONSOLE AND LOGS DRAWER
     display: flex;
 }
 
-/* Estado arrastando o console */
 body.dragging-console {
     user-select: none;
 }
@@ -91,7 +90,6 @@ body.dragging-console {
     pointer-events: all;
 }
 
-/* Pílula informativa no centro do overlay */
 #script-running-overlay .overlay-badge {
     position: absolute;
     bottom: var(--padding-screen);
@@ -176,7 +174,6 @@ body.dragging-console {
     }
 }
 
-/* Estado Minimizado do Console */
 #console-container.minimized {
     height: auto !important;
     resize: none;
@@ -187,7 +184,6 @@ body.dragging-console {
     display: none !important;
 }
 
-/* Resumo do Console */
 #console-summary {
     display: none;
     align-items: center;
@@ -306,7 +302,6 @@ body.dragging-console {
     /* x mark */
 }
 
-/* Output do Console */
 #console-output {
     flex: 1;
     padding: 15px;

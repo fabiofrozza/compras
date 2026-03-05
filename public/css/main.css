@@ -3,7 +3,6 @@ MAIN CONTENT
 ========================================================================== */
 
 body {
-    /* Ajuste para o conteúdo não ficar escondido atrás da Navbar Fixa */
     padding-top: calc(var(--top-nav-height) + var(--padding-main-container)) !important;
     padding-left: var(--padding-main-container) !important;
     padding-bottom: var(--padding-main-container) !important;
@@ -21,7 +20,6 @@ body {
     transition: var(--transition-time) ease-in-out;
 }
 
-/* Background da Home com imagem aleatória */
 #home {
     position: relative;
     overflow: hidden;
@@ -37,18 +35,15 @@ body {
     width: calc(100% + 8px) !important;
 }
 
-/* Grid de cards ocupa toda a altura disponível, ancorado no canto inferior direito */
 #home #cards-home-container {
     flex: 1;
     padding: 18px;
-    /* Espaço em branco ao alto e à esquerda para valorizar a foto */
     padding-top: 10%;
     padding-left: 20%;
     align-content: flex-end;
     justify-content: flex-end;
 }
 
-/* Cards ligeiramente menores */
 #home .card-body {
     padding: 1rem !important;
 }
@@ -72,7 +67,6 @@ body {
     flex-direction: column;
 }
 
-/* Botão discreto de crédito da foto */
 .home-bg-credit {
     position: absolute;
     bottom: 8px;
@@ -118,11 +112,9 @@ body.dark-mode .home-bg-credit:hover {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    /* A animação real é feita pelo pseudo-elemento abaixo */
     background-image: none !important;
 }
 
-/* Pseudo-elemento que contém a imagem e faz o panning */
 #home.home-bg-loaded::before {
     content: '';
     position: absolute;
@@ -136,7 +128,6 @@ body.dark-mode .home-bg-credit:hover {
     transition: background-image 0.4s ease;
 }
 
-/* Overlay de legibilidade sobre a imagem */
 #home.home-bg-loaded::after {
     content: '';
     position: absolute;
@@ -158,7 +149,6 @@ body.dark-mode #home.home-bg-loaded::after {
     z-index: 1;
 }
 
-/* Animação Ken Burns: panning suave entre cantos */
 @keyframes panBackground {
     0% {
         background-position: 0% 0%;
@@ -186,7 +176,6 @@ body.dark-mode #home.home-bg-loaded::after {
    ========================
    Inspired by https://codepen.io/daftplug/pen/QwbaYGO */
 
-/* Cards na Home */
 .card-link {
     cursor: pointer;
     text-decoration: none;
@@ -206,7 +195,6 @@ body.dark-mode #home.home-bg-loaded::after {
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* Borda interna brilhante (inset glow) */
 #cards-home-container .glassContainer::before {
     content: '';
     position: absolute;
@@ -221,7 +209,6 @@ body.dark-mode #home.home-bg-loaded::after {
 
 }
 
-/* Refraction / vidro líquido via SVG filter */
 #cards-home-container .glassContainer::after {
     content: '';
     position: absolute;
@@ -236,13 +223,11 @@ body.dark-mode #home.home-bg-loaded::after {
     isolation: isolate;
 }
 
-/* Corpo sobre o glass */
 #cards-home-container .glassContainer .card-body {
     position: relative;
     z-index: 1;
 }
 
-/* Sombra e profundidade externa */
 #cards-home-container .glassContainer {
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
 }
@@ -288,7 +273,6 @@ body.dark-mode #cards-home-container .glassContainer:hover::before {
         inset 0 0 50px 50px rgba(255, 255, 255, 0.5);
 }
 
-/* Cards não hoverados */
 #cards-home-container:has(.card-link:hover) .card-link:not(:hover) {
     filter: opacity(0.5);
     transition: all 0.4s ease;
@@ -298,7 +282,6 @@ body.dark-mode #cards-home-container .glassContainer:hover::before {
     box-shadow: none;
 }
 
-/* Icon Wrapper */
 .icon-wrapper {
     width: 70px;
     height: 70px;
@@ -319,7 +302,6 @@ body.dark-mode #cards-home-container .glassContainer:hover::before {
     background: linear-gradient(135deg, rgba(var(--icon-color), 0.2), rgba(var(--icon-color), 0.4));
 }
 
-/* Títulos e textos dos cards */
 #cards-home-container .card-title {
     color: rgba(255, 255, 255, 0.95) !important;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
@@ -338,7 +320,6 @@ body.dark-mode #cards-home-container .card-text {
     color: rgba(255, 255, 255, 0.6) !important;
 }
 
-/* Conteúdo das Abas */
 .tab-pane {
     padding: 18px;
     animation: fadeIn var(--transition-time) ease-in-out;

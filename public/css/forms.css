@@ -127,3 +127,36 @@ FORMS AND FILES
     flex-wrap: wrap;
     padding: 10px;
 }
+
+/* Status text dos formulários */
+#status-dados-atas,
+#importacao-sheet-status {
+    font-size: 12px;
+    margin-bottom: 0px;
+}
+
+/* Estilos de Abas de Importação no Formulário */
+#importacaoTabsForm {
+    padding: 0;
+    border-top-left-radius: 0;
+}
+
+#importacaoTabs {
+    gap: calc(var(--padding-buttons) * 2);
+    border: 0px;
+}
+
+#importacaoTabs .nav-link {
+    border: 0px;
+    color: var(--bs-secondary);
+}
+
+#importacaoTabs .nav-link:hover {
+    background-color: color-mix(in srgb, var(--color-background) 75%, white);
+    color: var(--bs-primary);
+}
+
+#importacaoTabs .nav-link.active {
+    background-color: color-mix(in srgb, var(--color-background) 75%, white);
+    color: var(--bs-headings-color);
+}

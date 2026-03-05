@@ -57,3 +57,19 @@ body.dark-mode {
     --color-text-secondary: #b0b0b0;
     --color-text-muted: #999;
 }
+
+/* Utilitários Bootstrap Personalizados */
+.custom-spinner {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+    gap: 10px;
+}
+
+.custom-tooltip {
+    --bs-tooltip-bg: var(--bs-warning-border-subtle);
+    --bs-tooltip-color: var(--bs-primary-text-emphasis);
+    --bs-tooltip-opacity: 1;
+    font-size: 75%;
+}

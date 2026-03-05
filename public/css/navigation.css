@@ -160,7 +160,6 @@ BARRAS DE NAVEGAÇÃO SUPERIOR E LATERAL
     overflow-y: auto;
 }
 
-/* Overlay (clique fora fecha o painel) */
 #header-panel-overlay {
     display: none;
     position: fixed;

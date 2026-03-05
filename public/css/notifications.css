@@ -35,7 +35,6 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
     font-size: 120% !important;
 }
 
-/* Cores e Estados dos Toasts */
 .app-toast.success {
     border-left: var(--toast-border-left) solid var(--toast-success);
     color: color-mix(in srgb, var(--toast-success) calc(100% - var(--toast-alpha)), black);
@@ -98,7 +97,6 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
     flex-shrink: 0;
 }
 
-/* Animações dos Toasts */
 .app-toast.removing {
     animation: slideOutRight 0.3s ease-out forwards !important;
 }
@@ -131,7 +129,6 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
 CENTRAL DE NOTIFICAÇÕES (Painel no Header)
 ========================================================================== */
 
-/* Badge de contagem no ícone do sino */
 .notification-badge {
     position: absolute;
     top: 2px;
@@ -151,7 +148,6 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     box-shadow: 0 0 0 2px var(--color-surface-1);
 }
 
-/* Animação de balanço do sino ao receber nova notificação */
 @keyframes bellShake {
     0% {
         transform: rotate(0deg);
@@ -223,7 +219,6 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     transform: scale(1.5);
 }
 
-/* Lista de notificações dentro do painel */
 .notification-list {
     display: flex;
     flex-direction: column;
@@ -242,7 +237,6 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     border-radius: 4px;
 }
 
-/* Item de notificação individual */
 .notification-item {
     display: flex;
     align-items: flex-start;
@@ -277,7 +271,6 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     }
 }
 
-/* Tipos/cores das notificações */
 .notification-item.success {
     border-left-color: var(--color-success);
 }
@@ -294,7 +287,6 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     border-left-color: var(--color-info);
 }
 
-/* Ícone do tipo da notificação */
 .notification-icon {
     flex-shrink: 0;
     width: 20px;
@@ -319,7 +311,6 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     color: var(--color-info);
 }
 
-/* Corpo da notificação (mensagem + metadados) */
 .notification-body {
     flex: 1;
     min-width: 0;
@@ -348,7 +339,6 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     font-weight: 500;
 }
 
-/* Botão para dispensar notificação individual */
 .notification-dismiss {
     flex-shrink: 0;
     background: none;
@@ -372,7 +362,6 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     color: var(--color-text-primary);
 }
 
-/* Estado vazio */
 .notification-empty {
     display: flex;
     flex-direction: column;
@@ -392,7 +381,6 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     font-size: 0.8rem;
 }
 
-/* Rodapé do painel com botão 'Limpar tudo' */
 .notification-footer {
     padding-top: 10px;
     margin-top: 6px;
