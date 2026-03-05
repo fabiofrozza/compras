@@ -1,16 +1,13 @@
-// server.js - Servidor Node.js
-
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 const express = require('express');
 const WebSocket = require('ws');
 const path = require('path');
 const fs = require('fs').promises;
 const os = require('os');
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 const Logger = require('./utils/logger');
 const { executarMailmerge } = require('./services/mailmerge');
 
-// Inicializar logger (use 'debug' para mais detalhes durante desenvolvimento)
 const logger = new Logger({ minLevel: 'debug' });
 
 const app = express();
@@ -42,7 +39,6 @@ function isPathSafe(targetPath, baseDir) {
   return realPath.toLowerCase().startsWith(safeBase.toLowerCase());
 }
 
-// Helper para correspondência de padrões de arquivo (wildcards e extensões)
 function matchFilePattern(filename, patterns) {
   if (!patterns || patterns.length === 0) return true;
 
@@ -55,12 +51,10 @@ function matchFilePattern(filename, patterns) {
       return filename.toLowerCase().endsWith('.' + p.toLowerCase());
     }
 
-    // Se começa com ponto, é extensão exata
     if (p.startsWith('.')) {
       return filename.toLowerCase().endsWith(p.toLowerCase());
     }
 
-    // Conversão simples de glob para regex
     const regexString = '^' + p.replace(/[.+^${}()|[\]\\]/g, '\\$&')
       .replace(/\*/g, '.*')
       .replace(/\?/g, '.') + '$';
@@ -68,7 +62,6 @@ function matchFilePattern(filename, patterns) {
   });
 }
 
-// Abre uma pasta, arquivo ou URL no aplicativo padrão do sistema operacional
 function abrirNaInterface(targetPath, isFile = false) {
   if (process.platform === 'win32') {
     if (isFile) spawn('cmd', ['/c', 'start', '', targetPath]);
@@ -80,8 +73,7 @@ function abrirNaInterface(targetPath, isFile = false) {
   }
 }
 
-// Resolve e valida o caminho de uma subpasta de scripts.
-// Retorna o folderPath ou null (com o erro já enviado via res).
+// Retorna null com o erro já respondido via res quando o caminho é inválido ou inexistente.
 async function resolverPastaScript(res, scriptName, innerFolder, context) {
   const folderPath = path.join(SCRIPTS_PATH, scriptName, innerFolder);
 
@@ -101,7 +93,6 @@ async function resolverPastaScript(res, scriptName, innerFolder, context) {
   return folderPath;
 }
 
-// Parseia os filtros de extensão e nome a partir dos query params
 function parsearFiltros(extensions, nameContains) {
   return {
     patterns: extensions ? extensions.split(',') : null,
@@ -109,7 +100,6 @@ function parsearFiltros(extensions, nameContains) {
   };
 }
 
-// Verifica se um arquivo passa nos filtros de padrão e nome
 function arquivoPassaNoFiltro(file, patterns, filterNameContains) {
   if (filterNameContains.length > 0) {
     if (!filterNameContains.every(term => file.toLowerCase().includes(term.trim()))) return false;
@@ -117,55 +107,103 @@ function arquivoPassaNoFiltro(file, patterns, filterNameContains) {
   return matchFilePattern(file, patterns);
 }
 
+// Compara versões no formato "x.y.z" — retorna negativo, zero ou positivo
+function compareVersions(a, b) {
+  const pa = a.split('.').map(Number);
+  const pb = b.split('.').map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const diff = (pa[i] || 0) - (pb[i] || 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}
+
 async function getRScriptPath() {
   if (cachedRScriptPath) return cachedRScriptPath;
 
-  let rscriptCmd = 'Rscript'; // Padrão
-
   if (process.platform === 'win32') {
     try {
-      const { execSync } = require('child_process');
-      const whereResult = execSync('where Rscript', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
-      if (whereResult) {
-        cachedRScriptPath = whereResult.split('\n')[0].trim();
+      const found = execSync('where Rscript', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).split('\n')[0].trim();
+      if (found) {
+        cachedRScriptPath = found;
         return cachedRScriptPath;
       }
-    } catch (e) { /* Não está no PATH */ }
+    } catch { }
 
-    // Busca em caminhos comuns
-    const possibleRPaths = [
-      'C:\\Program Files\\R\\R-4.4.2\\bin\\Rscript.exe',
-      'C:\\Program Files\\R\\R-4.4.1\\bin\\Rscript.exe',
-      'C:\\Program Files\\R\\R-4.3.3\\bin\\Rscript.exe',
-      // ... adicione as outras versões aqui ...
-    ];
-
-    for (const rPath of possibleRPaths) {
+    // Registro do Windows (HKLM e HKCU), versões ordenadas da mais nova para a mais antiga
+    const hives = ['HKLM\\SOFTWARE\\R-core\\R', 'HKCU\\SOFTWARE\\R-core\\R'];
+    for (const hive of hives) {
       try {
-        await fs.access(rPath);
-        cachedRScriptPath = rPath;
-        return cachedRScriptPath;
-      } catch (e) { /* Ignora e tenta o próximo */ }
+        const output = execSync(`reg query "${hive}"`, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
+        const versoes = output.split('\n')
+          .map(l => l.trim())
+          .filter(l => l.toLowerCase().startsWith(hive.toLowerCase() + '\\'))
+          .map(l => l.slice(hive.length + 1).trim())
+          .filter(v => v && !v.includes('\\'));
+
+        versoes.sort((a, b) => compareVersions(b, a));
+
+        for (const versao of versoes) {
+          try {
+            const instOutput = execSync(`reg query "${hive}\\${versao}" /v InstallPath`, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
+            const match = instOutput.match(/InstallPath\s+REG_SZ\s+(.+)/);
+            if (match) {
+              const rscriptPath = path.join(match[1].trim(), 'bin', 'Rscript.exe');
+              try {
+                await fs.access(rscriptPath);
+                cachedRScriptPath = rscriptPath;
+                return cachedRScriptPath;
+              } catch { }
+            }
+          } catch { }
+        }
+      } catch { }
     }
 
-    // Busca dinâmica no Program Files
-    try {
-      const programFiles = process.env['ProgramFiles'] || 'C:\\Program Files';
-      const rDir = path.join(programFiles, 'R');
-      await fs.access(rDir);
+    // Pastas comuns de instalação
+    const localAppData = process.env['LOCALAPPDATA'] || '';
+    const programFiles = process.env['ProgramFiles'] || 'C:\\Program Files';
+    const programFilesX86 = process.env['ProgramFiles(x86)'] || '';
+    const rDirs = [
+      localAppData && path.join(localAppData, 'Programs', 'R'),
+      path.join(programFiles, 'R'),
+      programFilesX86 && path.join(programFilesX86, 'R'),
+      'C:\\R',
+    ].filter(Boolean);
 
-      const rVersions = (await fs.readdir(rDir)).filter(f => f.startsWith('R-'));
-      if (rVersions.length > 0) {
-        rVersions.sort().reverse(); // Pega a mais recente
-        const rscriptPath = path.join(rDir, rVersions[0], 'bin', 'Rscript.exe');
-        await fs.access(rscriptPath);
-        cachedRScriptPath = rscriptPath;
-        return cachedRScriptPath;
+    for (const rDir of rDirs) {
+      try {
+        await fs.access(rDir);
+        const entries = await fs.readdir(rDir);
+        const versoes = entries.filter(f => f.startsWith('R-'));
+        versoes.sort((a, b) => compareVersions(b.slice(2), a.slice(2)));
+
+        for (const versao of versoes) {
+          const rscriptPath = path.join(rDir, versao, 'bin', 'Rscript.exe');
+          try {
+            await fs.access(rscriptPath);
+            cachedRScriptPath = rscriptPath;
+            return cachedRScriptPath;
+          } catch { }
+        }
+      } catch { }
+    }
+
+    // Entradas do PATH com padrão de versão do R (ex: R-4.x.x\bin)
+    const systemPath = process.env['PATH'] || '';
+    for (const dir of systemPath.split(';')) {
+      if (/[\\\/]R-[\d.]+[\\\/]bin$/i.test(dir)) {
+        const rscriptPath = path.join(dir, 'Rscript.exe');
+        try {
+          await fs.access(rscriptPath);
+          cachedRScriptPath = rscriptPath;
+          return cachedRScriptPath;
+        } catch { }
       }
-    } catch (e) { /* Falhou busca dinâmica */ }
+    }
   }
 
-  cachedRScriptPath = rscriptCmd; // Fallback para o comando genérico
+  cachedRScriptPath = 'Rscript';
   return cachedRScriptPath;
 }
 
@@ -360,7 +398,6 @@ app.post('/api/validate-link', async (req, res) => {
     });
   }
 
-  // Valida formato da URL
   try {
     new URL(url);
   } catch {
@@ -392,7 +429,6 @@ app.post('/api/validate-link', async (req, res) => {
     const htmlContent = await response.text();
 
     if (htmlContent.includes('LISTA FINAL')) {
-      // Extrair grupo de materiais dos campos input (value)
       const inputValueRegex = /<input[^>]*value="([^"]+)"[^>]*>/gi;
       const inputValues = [];
       let inputMatch;
@@ -403,7 +439,6 @@ app.post('/api/validate-link', async (req, res) => {
       }
       const grupoMateriais = inputValues.length > 0 ? inputValues.join(', ') : 'Grupo não identificado';
 
-      // Extrair processos SPA
       const regexSPA = /23080\.\d{6}\/\d{4}-\d{2}/g;
       const processosSPA = [...new Set(htmlContent.match(regexSPA) || [])].sort();
 
@@ -438,36 +473,27 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
-// Endpoint para verificar instalação do R
-app.get('/api/check-r', (req, res) => {
-  const rCheck = spawn('Rscript', ['--version']);
+app.get('/api/check-r', async (_req, res) => {
+  const rscriptCmd = await getRScriptPath();
+  const rCheck = spawn(rscriptCmd, ['--version']);
 
   let output = '';
-  rCheck.stdout.on('data', (data) => {
-    output += data.toString();
-  });
-
-  rCheck.stderr.on('data', (data) => {
-    output += data.toString();
-  });
+  rCheck.stdout.on('data', (data) => { output += data.toString(); });
+  rCheck.stderr.on('data', (data) => { output += data.toString(); });
 
   rCheck.on('close', (code) => {
     if (code === 0 || output.includes('R scripting')) {
-      res.json({
-        installed: true,
-        version: output.trim(),
-        message: 'R está instalado e pronto para uso'
-      });
+      res.json({ installed: true, version: output.trim(), path: rscriptCmd });
     } else {
-      res.json({
-        installed: false,
-        message: 'R não encontrado. Por favor, instale o R em seu sistema.'
-      });
+      res.json({ installed: false, message: 'R não encontrado. Por favor, instale o R em https://cran.r-project.org/bin/windows/base/' });
     }
+  });
+
+  rCheck.on('error', () => {
+    res.json({ installed: false, message: 'R não encontrado. Por favor, instale o R em https://cran.r-project.org/bin/windows/base/' });
   });
 });
 
-// Obter nome do computador
 function getComputerName() {
   return os.hostname() || 'Computador';
 }
@@ -495,7 +521,6 @@ app.get('/api/home-backgrounds', (req, res) => {
   }
 });
 
-// Criar servidor HTTP
 const server = app.listen(PORT, async () => {
 
   logger.section('Servidor iniciado');
@@ -509,7 +534,6 @@ const server = app.listen(PORT, async () => {
 
   abrirNaInterface(`http://localhost:${PORT}`);
 
-  // Configurar WebSocket e rastrear conexões
   const wss = new WebSocket.Server({ server });
   let clientCount = 0;
 
@@ -529,7 +553,6 @@ const server = app.listen(PORT, async () => {
 
   clientCount++;
 
-  // Capturar informações do cliente
   const ip = req.socket.remoteAddress;
   const userAgent = req.headers['user-agent'] || 'Desconhecido';
 
@@ -540,7 +563,6 @@ const server = app.listen(PORT, async () => {
     try {
       const data = JSON.parse(message);
       if (data.action === 'execute-r-script') {
-        // Verificar se é mailmerge de atas (usar versão JavaScript)
         if (data.scriptName === 'atas_mailmerge') {
           logger.section(`Executando mailmerge de atas (JavaScript): ${data.scriptName}`);
           executeMailmergeJS(ws, data.params);
@@ -559,7 +581,6 @@ const server = app.listen(PORT, async () => {
     logger.info(`Cliente desconectado (Total: ${clientCount})`, 'WebSocket');
     logger.debug(`IP: ${ip}`, 'WebSocket');
 
-    // Se não houver mais clientes, fechar o servidor após 2 segundos
     if (clientCount === 0) {
       logger.info('Nenhum cliente conectado. Encerrando servidor...', 'Server');
 
@@ -581,16 +602,13 @@ const server = app.listen(PORT, async () => {
   });
 });
 
-// Função para executar mailmerge de atas em JavaScript
 async function executeMailmergeJS(ws, params) {
   try {
-    // Enviar início da execução
     ws.send(JSON.stringify({
       type: 'start',
       message: 'Iniciando mailmerge de atas...'
     }));
 
-    // Criar função logger que envia mensagens via WebSocket
     const sendLog = (message, level = 'info') => {
       ws.send(JSON.stringify({
         type: 'output',
@@ -599,10 +617,8 @@ async function executeMailmergeJS(ws, params) {
       }));
     };
 
-    // Executar mailmerge
     const resultado = await executarMailmerge(params, sendLog);
 
-    // Enviar resultado final
     if (resultado.status === 'success' || resultado.status === 'warning') {
       logger.success(`Mailmerge concluído: ${resultado.message}`, 'Mailmerge');
       ws.send(JSON.stringify({
@@ -637,16 +653,13 @@ async function executeRScript(ws, scriptFolder, params) {
 
   const scriptsDir = path.resolve(path.join(__dirname, '..', 'scripts'));
   const workingDir = path.resolve(path.join(scriptsDir, scriptFolder));
-  //const workingDir = path.join(__dirname, '..', 'scripts', scriptFolder);
 
-  // Validar se o caminho não está tentando escapar da pasta raiz
   if (!isPathSafe(workingDir, scriptsDir)) {
     logger.error(`Tentativa de Path Traversal bloqueada: ${scriptFolder}`, 'Security');
     ws.send(JSON.stringify({ type: 'error', message: 'Acesso negado ao diretório.' }));
     return;
   }
 
-  // 1. Verifica se o script existe (de forma limpa)
   try {
     await fs.access(scriptPath);
   } catch (error) {
@@ -656,24 +669,20 @@ async function executeRScript(ws, scriptFolder, params) {
       scriptName: scriptFolder,
       message: 'Script R não encontrado: ' + scriptPath
     }));
-    return; // Sai da função cedo
+    return;
   }
 
-  // 2. Pega o caminho do R (com cache e await)
   const rscriptCmd = await getRScriptPath();
 
   if (rscriptCmd === 'Rscript' && process.platform === 'win32') {
-    // Se retornou o padrão no Windows e não encontrou, talvez não esteja instalado
     logger.warn('Caminho absoluto do R não encontrado no Windows, tentando via PATH...', 'RDetect');
   }
 
-  // 3. Preparar argumentos e ambiente
   const args = [scriptPath, ...Object.values(params), 'json-output'];
 
   const spawnOptions = {
     cwd: workingDir,
     windowsHide: true,
-    //shell: process.platform === 'win32' && !rscriptCmd.includes(' ')
   };
 
   ws.send(JSON.stringify({
@@ -681,7 +690,6 @@ async function executeRScript(ws, scriptFolder, params) {
     message: 'Iniciando execução do script R...'
   }));
 
-  // 4. Executar
   try {
     const rProcess = spawn(rscriptCmd, args, spawnOptions);
     let lineBuffer = '';
@@ -695,12 +703,11 @@ async function executeRScript(ws, scriptFolder, params) {
 
       lines.forEach(line => {
         if (line.trim()) {
-          // Detectar logs em JSON emitidos pelo utils.R
+          // Logs em JSON emitidos pelo utils.R
           if (line.trim().startsWith('{"json_log":true')) {
             try {
               const parsed = JSON.parse(line.trim());
 
-              // Se for um bloco de progresso
               if (parsed.type === 'progress') {
                 ws.send(JSON.stringify(parsed));
                 return;
@@ -714,7 +721,6 @@ async function executeRScript(ws, scriptFolder, params) {
 
           const lowerLine = line.toLowerCase();
 
-          // Change state if specific keywords are found inside a block
           if (lowerLine.includes('alerta')) currentLogState = 'warning';
           else if (lowerLine.includes('erro ') || lowerLine.includes('error')) currentLogState = 'error';
           else if (lowerLine.includes('sucesso') || lowerLine.includes('success')) currentLogState = 'success';
@@ -722,12 +728,12 @@ async function executeRScript(ws, scriptFolder, params) {
 
           let lineLevel = currentLogState;
 
-          // If the line is not drawn with box-drawing characters, reset to info and use stateless detection
+          // Linha sem caracteres de caixa: reinicia estado e faz detecção sem contexto
           if (!line.includes('│') && !line.includes('█') && !line.includes('╭') && !line.includes('╰') && !line.includes('├') && !line.includes('▄') && !line.includes('▀') && !line.includes('▒') && !line.includes('░')) {
             currentLogState = 'info';
             lineLevel = detectLogLevel(line);
           } else if (currentLogState === 'info') {
-            // Even if box-drawn, try stateless detection for the line if we are in 'info'
+            // Mesmo dentro de caixa, aplica detecção sem contexto quando estado é 'info'
             lineLevel = detectLogLevel(line);
           }
 
@@ -790,7 +796,6 @@ async function executeRScript(ws, scriptFolder, params) {
   }
 }
 
-// Detectar nível de log baseado no conteúdo da linha
 function detectLogLevel(line) {
   const lowerLine = line.toLowerCase();
 
