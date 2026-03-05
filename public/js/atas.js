@@ -118,7 +118,6 @@ function atualizarBotaoGerarAtas() {
 
 function setupAtasListeners() {
     const inputPrimeiraAta = document.getElementById('atas-primeira-ata');
-    const inputDataPregao = document.getElementById('atas-data-pregao');
     const inputProcessoSPA = document.getElementById('atas-processo-spa');
 
     if (inputPrimeiraAta) {
@@ -151,29 +150,6 @@ function setupAtasListeners() {
             atualizarBotaoGerarAtas();
         }
     });
-}
-
-function processarDadosAtas() {
-    const form = document.getElementById('form-info-pregao');
-    const dados = {};
-
-    if (!form) {
-        console.error('Formulário form-info-pregao não encontrado');
-        return dados;
-    }
-
-    const campos = form.querySelectorAll('[data-field]');
-
-    campos.forEach(campo => {
-        const fieldName = campo.dataset.field;
-        if (fieldName) {
-            // Se for campo de data, manter no formato ISO para o servidor (não converter)
-            // O servidor ou script R pode fazer a conversão se necessário
-            dados[fieldName] = campo.value;
-        }
-    });
-
-    return dados;
 }
 
 function executarMailmergeAtas() {

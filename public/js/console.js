@@ -321,16 +321,12 @@ function runRScript(scriptName, customParams = null) {
             return;
         }
 
-        if (scriptName === 'atas') {
-            dados = processarDadosAtas();
-        } else {
-            const campos = aba.querySelectorAll('input, select, textarea');
-            campos.forEach(campo => {
-                if (campo.id) {
-                    dados[campo.id] = (campo.type === 'checkbox' || campo.type === 'radio') ? campo.checked : campo.value;
-                }
-            });
-        }
+        const campos = aba.querySelectorAll('input, select, textarea');
+        campos.forEach(campo => {
+            if (campo.id) {
+                dados[campo.id] = (campo.type === 'checkbox' || campo.type === 'radio') ? campo.checked : campo.value;
+            }
+        });
 
         if (scriptName === 'catmat' && selectedFiles['catmat-lista-itens-tr']) {
             dados['arquivo_selecionado'] = selectedFiles['catmat-lista-itens-tr'];
