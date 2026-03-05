@@ -1,5 +1,6 @@
 let importacaoLinkValido = false;
 let importacaoInicializado = false;
+let importacaoLastValidatedLink = '';
 
 function inicializarImportacao() {
     if (importacaoInicializado) return;
@@ -18,7 +19,7 @@ function configurarValidacaoContinuaImportacao() {
     if (linkInput) {
         linkInput.addEventListener('change', validarLinkGoogle);
         linkInput.addEventListener('input', () => {
-            linkInput.dataset.currentLink = '';
+            importacaoLastValidatedLink = '';
             linkInput.classList.remove('is-valid', 'is-invalid');
             atualizarFeedbackPlanilha('info', 'Informe o link da aba LISTA FINAL e aguarde.', 'fa-circle-info');
             verificarLiberacaoBotoesImportacao();
@@ -44,10 +45,10 @@ async function validarLinkGoogle() {
 
     const url = linkInput.value.trim();
 
-    if (linkInput.dataset.currentLink === url && url !== '') return;
+    if (importacaoLastValidatedLink === url && url !== '') return;
 
     if (!url) {
-        linkInput.dataset.currentLink = '';
+        importacaoLastValidatedLink = '';
         atualizarFeedbackPlanilha('info', 'Informe o link da aba LISTA FINAL e aguarde.', 'fa-circle-info');
         popularComboProcessosSPA([]);
         return;
@@ -71,7 +72,7 @@ async function validarLinkGoogle() {
         });
 
         const result = await response.json();
-        linkInput.dataset.currentLink = url;
+        importacaoLastValidatedLink = url;
 
         switch (result.status) {
             case 'success':

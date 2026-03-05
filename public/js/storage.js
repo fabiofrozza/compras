@@ -1,6 +1,7 @@
 // ====== SISTEMA DE PREFERÊNCIAS E CONFIGURAÇÕES DO USUÁRIO ======
 
 const STORAGE_KEY = 'compras_web_state';
+const autoSaveBoundFields = new WeakSet();
 
 let appState = {
     preferences: {
@@ -177,8 +178,8 @@ let saveTimeout = null;
 function setupAutoSave(container) {
     const fields = container.querySelectorAll('[data-field]');
     fields.forEach(field => {
-        if (field.hasAttribute('data-autosave-bound')) return; // evita listeners duplicados
-        field.setAttribute('data-autosave-bound', 'true');
+        if (autoSaveBoundFields.has(field)) return;
+        autoSaveBoundFields.add(field);
         ['input', 'change'].forEach(eventType => {
             field.addEventListener(eventType, (e) => {
                 const target = e.target;

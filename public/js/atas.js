@@ -74,7 +74,6 @@ async function verificarStatusDadosAtas() {
         const data = await response.json();
 
         if (data.exists) {
-            statusContainer.dataset.dadosDisponiveis = 'true';
             atasData.dadosDisponiveis = true;
             const dataModificacao = new Date(data.modified).toLocaleString('pt-BR');
 
@@ -85,7 +84,6 @@ async function verificarStatusDadosAtas() {
             statusIcon.innerHTML = '<i class="fa-solid fa-check-circle"></i>';
             statusText.innerHTML = `Dados obtidos em ${dataModificacao}`;
         } else {
-            statusContainer.dataset.dadosDisponiveis = 'false';
             atasData.dadosDisponiveis = false;
 
             statusContainer.classList.remove('alert-success', 'border-success', 'alert-light', 'border');
@@ -97,7 +95,6 @@ async function verificarStatusDadosAtas() {
         }
     } catch (error) {
         console.error('Erro ao verificar status dos dados:', error);
-        statusContainer.dataset.dadosDisponiveis = 'false';
         atasData.dadosDisponiveis = false;
         statusText.textContent = 'Erro ao verificar status dos dados.';
     }
@@ -111,9 +108,8 @@ function atualizarBotaoGerarAtas() {
     if (!btnGerar || !statusContainer) return;
 
     const modeloSelecionado = selectedFiles['atas-modelos'];
-    const dadosOk = statusContainer.dataset.dadosDisponiveis === 'true';
 
-    if (dadosOk && modeloSelecionado) {
+    if (atasData.dadosDisponiveis && modeloSelecionado) {
         btnGerar.disabled = false;
     } else {
         btnGerar.disabled = true;
