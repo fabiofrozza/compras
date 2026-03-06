@@ -73,7 +73,7 @@ body.dragging-console {
     position: fixed;
     inset: 0;
     z-index: 1101;
-    /* acima da navbar (1100) e sidebar (1099); console fica em 1102 */
+    /* acima da navbar (1100); console fica em 1102 */
     background: rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);

@@ -33,8 +33,6 @@ RESET, BASE, VARIÁVEIS GLOBAIS E TEMAS
     --padding-main-container: 12px;
     --padding-buttons: 4px;
     --top-nav-height: 52px;
-    --sidebar-collapsed-width: 52px;
-    --sidebar-expanded-width: 160px;
     --transition-time: 0.25s;
 
     /* Variáveis Específicas: Console e Toasts */

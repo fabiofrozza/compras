@@ -7,14 +7,15 @@ function applyDarkMode(darkModeEnabled = null) {
     document.body.classList.toggle('dark-mode', isDark);
     darkModeBtn.innerHTML = isDark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
 
+    const mc = document.getElementById('mainContent');
     if (isDark) {
-        mainContent.setAttribute('data-bs-theme', 'dark');
+        mc.setAttribute('data-bs-theme', 'dark');
     } else {
-        mainContent.removeAttribute('data-bs-theme');
+        mc.removeAttribute('data-bs-theme');
     }
 
-    mainContent.classList.toggle('bg-dark', isDark);
-    mainContent.classList.toggle('bg-white', !isDark);
+    mc.classList.toggle('bg-dark', isDark);
+    mc.classList.toggle('bg-white', !isDark);
 
 }
 
@@ -162,9 +163,6 @@ function inicializarPreferenciasPanel() {
     const darkModeCheckbox = document.getElementById('darkMode');
     if (darkModeCheckbox) darkModeCheckbox.checked = prefs.darkMode;
 
-    const sidebarCheckbox = document.getElementById('sidebarExpanded');
-    if (sidebarCheckbox) sidebarCheckbox.checked = prefs.sidebarExpanded;
-
     const tabContainer = document.getElementById('preferredTab');
     if (tabContainer) {
         const val = prefs.preferredTab || '';
@@ -178,19 +176,30 @@ function inicializarPreferenciasPanel() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    const homeBtn = document.getElementById('homeBtn');
     const settingsBtn = document.getElementById('settingsBtn');
     const userBtn = document.getElementById('userBtn');
     const notificationsBtn = document.getElementById('notificationsBtn');
+    const appLauncherBtn = document.getElementById('appLauncherBtn');
     const settingsPanelClose = document.getElementById('settingsPanelClose');
     const userPanelClose = document.getElementById('userPanelClose');
     const notificationsPanelClose = document.getElementById('notificationsPanelClose');
+    const appLauncherPanelClose = document.getElementById('appLauncherPanelClose');
 
+    if (homeBtn) homeBtn.addEventListener('click', () => {
+        const tooltip = bootstrap.Tooltip.getInstance(homeBtn);
+        if (tooltip) tooltip.hide();
+        const homeTab = document.getElementById('home-tab');
+        if (homeTab) new bootstrap.Tab(homeTab).show();
+    });
     if (settingsBtn) settingsBtn.addEventListener('click', () => openPanel('settings-panel', settingsBtn));
     if (userBtn) userBtn.addEventListener('click', () => openPanel('user-panel', userBtn));
     if (notificationsBtn) notificationsBtn.addEventListener('click', () => openPanel('notifications-panel', notificationsBtn));
+    if (appLauncherBtn) appLauncherBtn.addEventListener('click', () => openPanel('app-launcher-panel', appLauncherBtn));
     if (settingsPanelClose) settingsPanelClose.addEventListener('click', closeAllPanels);
     if (userPanelClose) userPanelClose.addEventListener('click', closeAllPanels);
     if (notificationsPanelClose) notificationsPanelClose.addEventListener('click', closeAllPanels);
+    if (appLauncherPanelClose) appLauncherPanelClose.addEventListener('click', closeAllPanels);
 
     if (overlay) overlay.addEventListener('click', closeAllPanels);
     document.addEventListener('keydown', (e) => {

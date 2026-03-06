@@ -6,7 +6,6 @@ const autoSaveBoundFields = new WeakSet();
 let appState = {
     preferences: {
         darkMode: false,
-        sidebarExpanded: false,
         preferredTab: ''
     }
 };
@@ -41,7 +40,7 @@ function saveAppState() {
 
 function populateFavoriteTabSelectList() {
     const selectPreferredTab = document.getElementById('preferredTab');
-    if (!selectPreferredTab) return;
+    if (!selectPreferredTab || typeof TAB_LIST === 'undefined') return;
 
     const options = [{
         id: 'default',
@@ -50,24 +49,12 @@ function populateFavoriteTabSelectList() {
         icon: 'fa-solid fa-clock'
     }];
 
-    // Buscar botões da sidebar para obter ícones e nomes
-    const sidebarLinks = document.querySelectorAll('#sidebar .nav-link');
-
-    sidebarLinks.forEach(link => {
-        if (!link.id || !link.id.includes('-tab')) return;
-        const tabId = link.id.replace('-tab', '');
-
-        const nameElement = link.querySelector('.link-text');
-        const name = nameElement ? nameElement.textContent.trim() : tabId;
-
-        const icon = link.querySelector('i');
-        const iconClass = icon ? icon.className : 'fa-solid fa-circle';
-
+    TAB_LIST.forEach(tab => {
         options.push({
-            id: tabId,
-            value: tabId,
-            label: name,
-            icon: iconClass
+            id: tab.id,
+            value: tab.id,
+            label: tab.label,
+            icon: tab.icon
         });
     });
 
@@ -115,16 +102,6 @@ function applyUserPreferences(preferences) {
     } else {
         if (typeof applyDarkMode === 'function') applyDarkMode(false);
         const el = document.getElementById('darkMode');
-        if (el) el.checked = false;
-    }
-
-    if (preferences.sidebarExpanded) {
-        if (typeof expandSidebar === 'function') expandSidebar();
-        const el = document.getElementById('sidebarExpanded');
-        if (el) el.checked = true;
-    } else {
-        if (typeof collapseSidebar === 'function') collapseSidebar();
-        const el = document.getElementById('sidebarExpanded');
         if (el) el.checked = false;
     }
 
@@ -196,7 +173,7 @@ function setupAutoSave(container) {
                 }
 
                 // Preferências UI
-                if (['darkMode', 'sidebarExpanded', 'preferredTab'].includes(fieldName)) {
+                if (['darkMode', 'preferredTab'].includes(fieldName)) {
                     appState.preferences[fieldName] = value;
                     saveAppState();
                     applyUserPreferences(appState.preferences);
@@ -238,7 +215,7 @@ function loadConfig(container = document) {
             const fieldName = field.dataset.field;
 
             // Preferências são aplicadas por applyUserPreferences — não sobrescrever aqui
-            if (['darkMode', 'sidebarExpanded', 'preferredTab'].includes(fieldName)) return;
+            if (['darkMode', 'preferredTab'].includes(fieldName)) return;
 
             const tabPane = field.closest('.tab-pane');
             const tabId = tabPane ? tabPane.id : 'global';
@@ -268,7 +245,7 @@ function loadConfig(container = document) {
 // ==== STARTUP HOOKS ====
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Inicializa a UI (sidebar, modo escuro, e abre aba)
+    // Inicializa a UI (modo escuro e abre aba)
     initPreferencesPage();
 
     // Observador para detectar lazy load de abas

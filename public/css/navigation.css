@@ -1,67 +1,66 @@
 /* ==========================================================================
-BARRAS DE NAVEGAÇÃO SUPERIOR E LATERAL
+BARRA DE NAVEGAÇÃO SUPERIOR (Glassmorphism)
 ========================================================================== */
 
-.container-fluid.reduced,
-#navbar.reduced {
-    margin-left: var(--sidebar-expanded-width) !important;
-    width: calc(100% - var(--sidebar-expanded-width)) !important;
-}
-
-.container-fluid.full,
-#navbar.full {
-    margin-left: var(--sidebar-collapsed-width) !important;
-    width: calc(100% - var(--sidebar-collapsed-width)) !important;
-}
-
-/* Barra Superior Fixa */
 .top-nav {
     position: fixed;
     top: 0;
-    width: calc(100% - var(--sidebar-collapsed-width));
-    height: var(--top-nav-height);
-    background: var(--color-surface-1);
-    transition: var(--transition-time) ease-in-out;
-}
-
-.navbar-sombra {
-    position: fixed;
-    top: 0;
-    left: var(--sidebar-collapsed-width);
-    width: calc(100% - var(--sidebar-collapsed-width));
-    height: var(--top-nav-height);
-}
-
-.navbar-top-container {
-    height: var(--top-nav-height);
-}
-
-.navbar-top-container.collapsed {
-    width: var(--sidebar-collapsed-width);
-}
-
-.navbar-top-container.expanded {
-    width: var(--sidebar-expanded-width);
-}
-
-.nav-brand {
-    font-size: 160%;
-    color: var(--color-text-primary);
-}
-
-.nav-title-container {
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: center;
+    left: 0;
     width: 100%;
-    padding-left: var(--padding-screen);
+    height: var(--top-nav-height);
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    z-index: 1000;
     transition: var(--transition-time) ease-in-out;
+}
+
+body.dark-mode .top-nav {
+    background: rgba(2, 2, 58, 0.55);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.navbar-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    padding: 0 var(--padding-main-container);
+}
+
+/* Lado Esquerdo: Logos + Subtítulo */
+.navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.navbar-logo {
+    height: calc(var(--top-nav-height) - 16px);
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.navbar-logo-department {
+    transition: opacity 0.3s ease, width 0.3s ease, margin 0.3s ease;
+    opacity: 1;
+}
+
+.navbar-logo-department.logo-hidden {
+    opacity: 0;
+    width: 0 !important;
+    margin: 0 !important;
+    overflow: hidden;
 }
 
 .nav-subtitle {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     padding-inline: 8px;
-    margin-inline: 8px;
+    white-space: nowrap;
+    color: var(--color-text-primary);
 }
 
 .nav-subtitle span {
@@ -73,7 +72,7 @@ BARRAS DE NAVEGAÇÃO SUPERIOR E LATERAL
     display: flex;
     align-items: center;
     gap: 2px;
-    margin-right: 4px;
+    flex-shrink: 0;
 }
 
 .header-icon-btn {
@@ -103,21 +102,32 @@ BARRAS DE NAVEGAÇÃO SUPERIOR E LATERAL
     color: var(--color-surface-1);
 }
 
-/* Header Panels (Settings / User) */
+/* ==========================================================================
+HEADER PANELS (Settings / User / Notifications / App Launcher)
+========================================================================== */
+
 .header-panel {
     position: fixed;
     top: calc(var(--top-nav-height) + 6px);
     right: 12px;
     width: 300px;
-    background: var(--color-surface-1);
-    border: 1px solid rgba(128, 128, 128, 0.2);
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
     z-index: 1100;
     transform: translateY(-8px) scale(0.97);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+body.dark-mode .header-panel {
+    background: rgba(2, 2, 58, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
 }
 
 .header-panel.open {
@@ -171,7 +181,7 @@ BARRAS DE NAVEGAÇÃO SUPERIOR E LATERAL
     display: block;
 }
 
-/* User Panel internals */
+/* User Panel */
 .user-panel-avatar {
     display: flex;
     justify-content: center;
@@ -209,196 +219,72 @@ BARRAS DE NAVEGAÇÃO SUPERIOR E LATERAL
     word-break: break-all;
 }
 
-/* Barra Lateral (Sidebar) */
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    transition: var(--transition-time) ease-in-out;
-    overflow: hidden;
-    white-space: nowrap;
-    background: var(--color-surface-1);
+/* ==========================================================================
+APP LAUNCHER (Grid de Aplicativos)
+========================================================================== */
+
+.app-launcher-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+.app-launcher-item {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    z-index: 999;
-}
-
-.sidebar-sombra {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: var(--sidebar-collapsed-width);
-    height: 100vh;
-    transition: var(--transition-time) ease-in-out;
-}
-
-.sidebar.collapsed,
-.sidebar-sombra.collapsed {
-    width: var(--sidebar-collapsed-width);
-}
-
-.sidebar.expanded,
-.sidebar-sombra.expanded {
-    width: var(--sidebar-expanded-width);
-}
-
-.sidebar,
-#companyLogo,
-#toggleSidebarBtnClose {
-    cursor: w-resize !important;
-}
-
-/* Detalhe Arredondado da Navegação */
-.round-corner {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: calc(var(--sidebar-collapsed-width) * 1.5);
-    height: calc(var(--top-nav-height) * 1.5);
-    background: var(--color-surface-1);
-    corner-bottom-right-shape: scoop;
-    border-bottom-right-radius: 33%;
-    transition: var(--transition-time) ease-in-out;
-}
-
-.round-corner.collapsed {
-    left: 0;
-}
-
-.round-corner.expanded {
-    left: calc(var(--sidebar-expanded-width) - var(--sidebar-collapsed-width));
-}
-
-@supports not (corner-bottom-right-shape: scoop) {
-    .round-corner {
-        display: none;
-    }
-}
-
-/* Logos e Botões da Sidebar */
-.logo-container {
     align-items: center;
-    justify-content: space-between;
-    flex: 1 1 0;
-    min-width: 0;
-    overflow: hidden;
-    padding: var(--padding-buttons);
+    gap: 6px;
+    padding: 12px 4px;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition-time) ease;
+    color: var(--color-text-primary);
 }
 
-.logo-toggle-sidebar {
-    margin: 0;
-    padding: var(--padding-buttons);
-    flex-shrink: 0;
-    width: var(--sidebar-collapsed-width);
+.app-launcher-item:hover {
+    background: rgba(128, 128, 128, 0.12);
+    transform: scale(1.05);
+}
+
+.app-launcher-item.active {
+    background: rgba(var(--bs-primary-rgb), 0.12);
+}
+
+.app-launcher-item.active .app-launcher-icon {
+    box-shadow: 0 0 0 2px var(--color-text-primary);
+}
+
+.app-launcher-icon {
+    width: 42px;
+    height: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 50%;
+    background: rgba(128, 128, 128, 0.08);
+    font-size: 1.1rem;
+    transition: var(--transition-time) ease;
 }
 
-#companyLogo {
-    width: calc(var(--sidebar-collapsed-width) * 0.75);
-}
-
-#companyLogoExpanded {
-    width: calc(var(--sidebar-collapsed-width) * 0.75);
-    flex-shrink: 0;
-}
-
-.logo-department {
-    flex: 1 1 auto;
-    min-width: 0;
-    min-height: 0;
-    max-height: calc(var(--top-nav-height) - var(--padding-buttons) * 2);
-    width: auto;
-    max-width: calc(var(--sidebar-expanded-width) / 2) !important;
-    height: auto;
-    display: block;
-}
-
-.logo {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-}
-
-.toggle-sidebar-btn {
-    border: none;
-    font-size: 1rem;
-    padding: 0 var(--padding-buttons);
-    border-radius: var(--padding-buttons);
-    transition: var(--transition-time) ease-in-out;
-    margin: 0;
-    background-color: transparent;
-    color: var(--bs-primary-bg-subtle);
-    flex-shrink: 0;
-}
-
-.toggle-sidebar-btn:hover {
-    background-color: var(--color-text-primary);
+.app-launcher-item:hover .app-launcher-icon {
+    background: var(--color-text-primary);
     color: var(--color-surface-1);
 }
 
-/* Botões de Abas da Sidebar */
-#sidebar-tablist {
-    margin-top: var(--padding-main-container);
-    gap: var(--padding-buttons);
-}
-
-#sidebar-tablist a {
-    display: flex;
-    padding: var(--padding-buttons);
-    margin: 0 calc(var(--padding-buttons) * 2);
-    cursor: pointer;
-    transition: var(--transition-time) ease-in-out;
-    align-items: center;
-    height: 28px;
-    font-size: .9rem;
-}
-
-#sidebar-tablist a:hover {
-    background-color: var(--color-text-primary);
-    color: var(--color-surface-1);
-}
-
-#sidebar-tablist:has(a:hover) a:not(:hover) {
-    filter: blur(1px);
-}
-
-#sidebar-tablist i {
-    font-size: 1rem;
-    width: calc(var(--sidebar-collapsed-width) - var(--padding-buttons) * 6);
+.app-launcher-label {
+    font-size: 0.72rem;
     text-align: center;
+    line-height: 1.2;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.link-text {
-    padding-left: var(--padding-buttons);
-    transition: var(--transition-time) ease-in-out;
-}
-
-.nav-pills .nav-item {
-    color: var(--bs-primary-bg-subtle);
-}
-
-.nav-pills .nav-item.active {
-    color: var(--color-text-primary);
-    background-color: transparent;
-}
-
-.sidebar.collapsed .link-text {
-    display: none;
-}
-
-.sidebar.expanded .link-text {
-    display: inline-block;
-}
-
-/* Rodapé da Sidebar */
-.sidebar-footer {
-    width: 100%;
-    padding: var(--padding-buttons);
-    font-size: 0.5em;
-    color: var(--color-text-muted);
-    text-decoration: none;
+.app-launcher-separator {
+    grid-column: 1 / -1;
+    margin: 4px 0;
+    border-color: rgba(128, 128, 128, 0.2);
 }

@@ -33,114 +33,60 @@
 
 <body>
 
-    <!-- Sombra abaixo das barras de navegação -->
-    <div class="navbar-sombra shadow-sm"></div>
-    <div class="sidebar-sombra shadow-sm"></div>
-    <div class="round-corner shadow-sm"></div>
-
     <!-- Barra de navegação superior fixa -->
-    <header class="navbar top-nav fixed-top" id="navbar">
-        <div id="navbar-container" class="justify-content-left d-flex align-items-center w-100">
-            <div class="nav-title-container d-flex">
-                <div class="nav-subtitle" id="nav-subtitle">
-                </div>
-                <div class="header-actions">
-                    <button id="darkModeBtn" class="header-icon-btn" aria-label="Ativar/desativar modo escuro"
-                        data-bs-toggle="tooltip" data-bs-title="Ativar/desativar modo escuro" onclick="applyDarkMode()">
-                        <i class="fa-solid fa-sun"></i>
-                    </button>
-                    <button id="notificationsBtn" class="header-icon-btn" aria-label="Notificações"
-                        data-bs-toggle="tooltip" data-bs-title="Notificações">
-                        <i class="fa-solid fa-bell"></i>
-                    </button>
-                    <button id="settingsBtn" class="header-icon-btn" aria-label="Configurações" data-bs-toggle="tooltip"
-                        data-bs-title="Configurações">
-                        <i class="fa-solid fa-cog"></i>
-                    </button>
-                    <button id="userBtn" class="header-icon-btn" aria-label="Informações do usuário"
-                        data-bs-toggle="tooltip" data-bs-title="Informações do usuário">
-                        <i class="fa-solid fa-user-circle"></i>
-                    </button>
-                </div>
+    <header class="top-nav shadow" id="navbar">
+        <div class="navbar-content">
+            <div class="navbar-left">
+                <img src="img/company.svg" class="navbar-logo" id="companyLogo" alt="Logo da empresa">
+                <img src="img/department.png" class="navbar-logo navbar-logo-department" id="departmentLogo"
+                    alt="Logo do Departamento">
+                <button id="homeBtn" class="header-icon-btn" aria-label="Página inicial" data-bs-toggle="tooltip"
+                    data-bs-title="Página inicial" style="display: none;">
+                    <i class="fa-solid fa-home"></i>
+                </button>
+                <div class="nav-subtitle" id="nav-subtitle"></div>
+            </div>
+            <div class="header-actions">
+                <button id="darkModeBtn" class="header-icon-btn" aria-label="Ativar/desativar modo escuro"
+                    data-bs-toggle="tooltip" data-bs-title="Ativar/desativar modo escuro" onclick="applyDarkMode()">
+                    <i class="fa-solid fa-sun"></i>
+                </button>
+                <button id="userBtn" class="header-icon-btn" aria-label="Informações do usuário"
+                    data-bs-toggle="tooltip" data-bs-title="Informações do usuário">
+                    <i class="fa-solid fa-user-circle"></i>
+                </button>
+                <button id="settingsBtn" class="header-icon-btn" aria-label="Preferências" data-bs-toggle="tooltip"
+                    data-bs-title="Preferências">
+                    <i class="fa-solid fa-cog"></i>
+                </button>
+                <button id="notificationsBtn" class="header-icon-btn" aria-label="Notificações" data-bs-toggle="tooltip"
+                    data-bs-title="Notificações">
+                    <i class="fa-solid fa-bell"></i>
+                </button>
+                <button id="appLauncherBtn" class="header-icon-btn" aria-label="Aplicativos" data-bs-toggle="tooltip"
+                    data-bs-title="Aplicativos">
+                    <i class="fa-solid fa-grip-vertical"></i>
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- Barra lateral -->
-    <aside class="sidebar" id="sidebar">
-        <nav class="sidebar-nav">
-            <div class="navbar-top-container d-flex overflow-hidden" id="navbar-top-container">
-                <div class="logo-toggle-sidebar">
-                    <button class="toggle-sidebar-btn d-none" id="toggleSidebarBtnClose" data-bs-toggle="tooltip"
-                        data-bs-title="Fixar barra lateral">
-                        <i class="fa-solid fa-bars" id="toggleSidebarIcon"></i>
-                    </button>
-                    <img src="img/company.png" class="logo" id="companyLogo" alt="Logo da empresa">
-                </div>
+    <!-- Tab buttons ocultos (ativados via App Launcher) -->
+    <div class="d-none" id="hidden-tablist" role="tablist">
+        <a id="home-tab" data-bs-toggle="pill" data-bs-target="#home" role="tab" aria-controls="home"></a>
+        <a id="atas-tab" data-bs-toggle="pill" data-bs-target="#atas" role="tab" aria-controls="atas"></a>
+        <a id="catmat-tab" data-bs-toggle="pill" data-bs-target="#catmat" role="tab" aria-controls="catmat"></a>
+        <a id="fornecedores-tab" data-bs-toggle="pill" data-bs-target="#fornecedores" role="tab"
+            aria-controls="fornecedores"></a>
+        <a id="importacao-tab" data-bs-toggle="pill" data-bs-target="#importacao" role="tab"
+            aria-controls="importacao"></a>
+        <a id="mapas-tab" data-bs-toggle="pill" data-bs-target="#mapas" role="tab" aria-controls="mapas"></a>
+        <a id="powerbi-tab" data-bs-toggle="pill" data-bs-target="#powerbi" role="tab" aria-controls="powerbi"></a>
+        <a id="instalacao-tab" data-bs-toggle="pill" data-bs-target="#instalacao" role="tab"
+            aria-controls="instalacao"></a>
+    </div>
 
-                <div class="logo-container d-none" id="logo-department-container">
-                    <img src="img/company.png" class="logo d-none" id="companyLogoExpanded" alt="Logo da empresa">
-                    <img src="img/department.png" class="logo logo-department" alt="Logo do Departamento">
-                </div>
-            </div>
-
-            <div class="nav flex-column nav-pills" id="sidebar-tablist" role="tablist" aria-orientation="vertical">
-                <a class="nav-item nav-link" id="home-tab" data-bs-toggle="pill" data-bs-target="#home" role="tab"
-                    aria-controls="home" aria-selected="false">
-                    <i class="fa-solid fa-home"></i>
-                    <span class="link-text">Página inicial</span>
-                </a>
-                <hr role="separator">
-                <a class="nav-item nav-link" id="atas-tab" data-bs-toggle="pill" data-bs-target="#atas" role="tab"
-                    aria-controls="atas" aria-selected="false">
-                    <i class="fa-solid fa-file-alt"></i>
-                    <span class="link-text">Atas</span>
-                </a>
-                <a class="nav-item nav-link" id="catmat-tab" data-bs-toggle="pill" data-bs-target="#catmat" role="tab"
-                    aria-controls="catmat" aria-selected="false">
-                    <i class="fa-solid fa-list"></i>
-                    <span class="link-text">Catmat</span>
-                </a>
-                <a class="nav-item nav-link" id="fornecedores-tab" data-bs-toggle="pill" data-bs-target="#fornecedores"
-                    role="tab" aria-controls="fornecedores" aria-selected="false">
-                    <i class="fa-solid fa-building"></i>
-                    <span class="link-text">Fornecedores</span>
-                </a>
-                <a class="nav-item nav-link" id="importacao-tab" data-bs-toggle="pill" data-bs-target="#importacao"
-                    role="tab" aria-controls="importacao" aria-selected="false">
-                    <i class="fa-solid fa-gavel"></i>
-                    <span class="link-text">Importação</span>
-                </a>
-                <a class="nav-item nav-link" id="mapas-tab" data-bs-toggle="pill" data-bs-target="#mapas" role="tab"
-                    aria-controls="mapas" aria-selected="false">
-                    <i class="fa-solid fa-basket-shopping"></i>
-                    <span class="link-text">Mapas</span>
-                </a>
-                <a class="nav-item nav-link" id="powerbi-tab" data-bs-toggle="pill" data-bs-target="#powerbi" role="tab"
-                    aria-controls="powerbi" aria-selected="false">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <span class="link-text">Power BI</span>
-                </a>
-                <hr role="separator">
-                <a class="nav-item nav-link" id="instalacao-tab" data-bs-toggle="pill" data-bs-target="#instalacao"
-                    role="tab" aria-controls="instalacao" aria-selected="false">
-                    <i class="fa-solid fa-wrench"></i>
-                    <span class="link-text">Instalação</span>
-                </a>
-
-            </div>
-        </nav>
-
-        <a class="sidebar-footer" href="https://github.com/fabiofrozza/compras" target="_blank"
-            rel="noopener noreferrer">
-            v2.0
-            <br>
-            2026 ©
-        </a>
-
-    </aside>
-
-    <main class="container-fluid p-1 m-1 shadow-sm rounded-start-4" id="mainContent">
+    <main class="container-fluid p-1 m-1 shadow-sm rounded-4" id="mainContent">
 
         <div class="tab-content" id="tabContent">
 
@@ -239,15 +185,6 @@
                     <div class="form-text">Ativa o tema escuro ao abrir a página</div>
                 </div>
             </div>
-            <div class="form-group mb-3">
-                <div class="form-check form-switch">
-                    <input type="checkbox" id="sidebarExpanded" class="form-check-input" data-field="sidebarExpanded">
-                    <label for="sidebarExpanded" class="form-label">
-                        <i class="fa-solid fa-arrows-left-right"></i> Expandir barra lateral ao iniciar
-                    </label>
-                    <div class="form-text">A barra lateral começará expandida ao abrir a página</div>
-                </div>
-            </div>
             <div class="form-group">
                 <label class="form-label">
                     <i class="fa-solid fa-star"></i> Aba preferida ao iniciar:
@@ -292,12 +229,24 @@
         </div>
         <div class="header-panel-body" id="notifications-panel-body">
             <div class="notification-list" id="notification-list">
-                <!-- Itens de notificação serão inseridos aqui via JS -->
             </div>
             <div class="notification-footer" id="notification-footer" style="display: none;">
                 <button class="notification-clear-all" id="notification-clear-all">
                     <i class="fa-solid fa-trash-alt me-1"></i>Limpar tudo
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Painel App Launcher -->
+    <div id="app-launcher-panel" class="header-panel" role="dialog" aria-label="Aplicativos" aria-hidden="true">
+        <div class="header-panel-header">
+            <span><i class="fa-solid fa-grip-vertical me-2"></i>Aplicativos</span>
+            <button class="header-panel-close" id="appLauncherPanelClose" aria-label="Fechar"><i
+                    class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="header-panel-body">
+            <div class="app-launcher-grid" id="app-launcher-grid">
             </div>
         </div>
     </div>

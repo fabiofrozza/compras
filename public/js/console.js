@@ -110,8 +110,6 @@ function ensureConsoleDOM() {
         }
     });
     consoleResizeObserver.observe(consoleContainer);
-    const sidebarEl = document.getElementById('sidebar');
-    if (sidebarEl) consoleResizeObserver.observe(sidebarEl);
     window.addEventListener('resize', enforceConsoleConstraints);
 }
 
@@ -365,10 +363,9 @@ const enforceConsoleConstraints = () => {
     const rect = consoleContainer.getBoundingClientRect();
     if (rect.width === 0 && rect.height === 0) return;
 
-    const sidebar = document.getElementById('sidebar');
     const navbar = document.getElementById('navbar');
 
-    const minLeft = sidebar ? sidebar.offsetWidth : 0;
+    const minLeft = 0;
     const minTop = navbar ? navbar.offsetHeight : 0;
 
     let currentLeft = rect.left;
@@ -464,10 +461,9 @@ const onDragStart = (e) => {
 const onDragMove = (e) => {
     if (!isDragging) return;
 
-    const sidebar = document.getElementById('sidebar');
     const navbar = document.getElementById('navbar');
 
-    const minLeft = sidebar ? sidebar.offsetWidth : 0;
+    const minLeft = 0;
     const minTop = navbar ? navbar.offsetHeight : 0;
 
     const maxLeft = window.innerWidth - consoleContainer.offsetWidth;

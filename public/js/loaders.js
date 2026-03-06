@@ -1671,7 +1671,7 @@ function getLoader() {
   display: flex;
   align-items: center;
   justify-content: center;
-  translate: var(--sidebar-collapsed-width) calc(var(--padding-screen) * -4);
+  translate: 0 calc(var(--padding-screen) * -4);
 }
 
 .cube {

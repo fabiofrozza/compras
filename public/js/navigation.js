@@ -1,3 +1,15 @@
+// --- Constante centralizada de abas ---
+const TAB_LIST = [
+    { id: 'home', label: 'Página inicial', icon: 'fa-solid fa-home', hidden: true },
+    { id: 'atas', label: 'Atas', icon: 'fa-solid fa-file-alt' },
+    { id: 'catmat', label: 'Catmat', icon: 'fa-solid fa-list' },
+    { id: 'fornecedores', label: 'Fornecedores', icon: 'fa-solid fa-building' },
+    { id: 'importacao', label: 'Importação', icon: 'fa-solid fa-gavel' },
+    { id: 'mapas', label: 'Mapas', icon: 'fa-solid fa-basket-shopping' },
+    { id: 'powerbi', label: 'Power BI', icon: 'fa-solid fa-chart-line', separator: 'after' },
+    { id: 'instalacao', label: 'Instalação', icon: 'fa-solid fa-wrench' },
+];
+
 // --- Lazy Loading de Scripts sob demanda ---
 const _loadedScripts = new Set();
 function loadScript(src) {
@@ -18,125 +30,69 @@ const TAB_SCRIPTS = {
 };
 
 const mainContent = document.getElementById('mainContent');
-
 const navbar = document.getElementById('navbar');
-const sidebar = document.getElementById('sidebar');
 
-const sidebarShadow = document.querySelector('.sidebar-sombra');
-const roundCorner = document.querySelector('.round-corner');
+let globalComputerName = '';
 
-const toggleSidebarBtnClose = document.getElementById('toggleSidebarBtnClose');
-const toggleSidebarIcon = document.getElementById('toggleSidebarIcon');
+// --- App Launcher ---
 
-const companyLogo = document.getElementById('companyLogo');
-const companyLogoExpanded = document.getElementById('companyLogoExpanded');
-const navbarLogoContainer = document.getElementById('navbar-top-container');
-const logoDepartmentContainer = document.getElementById('logo-department-container');
+function buildAppLauncher() {
+    const grid = document.getElementById('app-launcher-grid');
+    if (!grid) return;
 
-// Estado: 
-// - false = colapsado permanente (hover expande temporariamente)
-// - true = expandido permanente (hover não tem efeito)
-let isPermanentlyExpanded = false;
-let globalComputerName = ''; // Armazena o nome do computador
+    grid.innerHTML = TAB_LIST.filter(tab => !tab.hidden).map(tab => {
+        const button = `<button class="app-launcher-item" data-tab-id="${tab.id}" aria-label="${tab.label}">
+            <div class="app-launcher-icon">
+                <i class="${tab.icon}"></i>
+            </div>
+            <span class="app-launcher-label">${tab.label}</span>
+        </button>`;
+        return tab.separator === 'after' ? button + '<hr class="app-launcher-separator">' : button;
+    }).join('');
 
-function setToggleIcon(isExpanded) {
-    if (!toggleSidebarIcon) return;
-    if (isExpanded) {
-        toggleSidebarIcon.classList.remove('fa-bars');
-        toggleSidebarIcon.classList.add('fa-close');
-    } else {
-        toggleSidebarIcon.classList.remove('fa-close');
-        toggleSidebarIcon.classList.add('fa-bars');
-    }
-}
+    grid.addEventListener('click', (e) => {
+        const item = e.target.closest('.app-launcher-item');
+        if (!item) return;
 
-function initializeNavigation() {
-    toggleSidebarBtnClose.addEventListener('click', () => {
-        if (isPermanentlyExpanded) {
-            collapsePermanently();
-        } else {
-            expandPermanently();
+        const tabId = item.dataset.tabId;
+        const tabButton = document.getElementById(`${tabId}-tab`);
+        if (tabButton) {
+            const tab = new bootstrap.Tab(tabButton);
+            tab.show();
         }
+        closeAllPanels();
     });
 }
 
-function toggleClasses(elements, classAdd, classRemove) {
-    const elementsArray = Array.isArray(elements) ? elements : [elements];
-    elementsArray.forEach(el => {
-        if (classRemove) el.classList.remove(classRemove);
-        if (classAdd) el.classList.add(classAdd);
-    });
-}
+// --- Scroll: esconder logo do departamento ---
 
-function expandPermanently() {
-    isPermanentlyExpanded = true;
+function initDepartmentLogoScroll() {
+    const departmentLogo = document.getElementById('departmentLogo');
+    if (!departmentLogo) return;
 
-    toggleClasses([sidebar, sidebarShadow, roundCorner], 'expanded', 'collapsed');
-    sidebar.classList.remove('hover-expand');
-    toggleClasses(navbar, 'reduced', 'full');
-    toggleClasses(mainContent, 'reduced', 'full');
-    toggleClasses(navbarLogoContainer, 'expanded', 'collapsed');
-    toggleClasses(logoDepartmentContainer, 'd-flex', 'd-none');
-    toggleClasses(toggleSidebarBtnClose, null, 'd-none');
-    toggleClasses(companyLogo, 'd-none');
-    toggleClasses(companyLogoExpanded, null, 'd-none');
-    setToggleIcon(true);
-    toggleSidebarBtnClose.setAttribute('data-bs-title', 'Fechar barra lateral');
-}
-
-function collapsePermanently() {
-    isPermanentlyExpanded = false;
-
-    toggleClasses([sidebar, sidebarShadow, roundCorner], 'collapsed', 'expanded');
-    sidebar.classList.remove('hover-expand');
-    toggleClasses(navbar, 'full', 'reduced');
-    toggleClasses(mainContent, 'full', 'reduced');
-    toggleClasses(navbarLogoContainer, 'collapsed', 'expanded');
-    toggleClasses(logoDepartmentContainer, 'd-none', 'd-flex');
-    toggleClasses(companyLogo, null, 'd-none');
-    toggleClasses(companyLogoExpanded, 'd-none');
-    toggleClasses(toggleSidebarBtnClose, 'd-none');
-    setToggleIcon(false);
-    toggleSidebarBtnClose.setAttribute('data-bs-title', 'Fixar barra lateral');
-}
-
-function expandSidebar() { expandPermanently(); }
-function collapseSidebar() { collapsePermanently(); }
-
-sidebar.addEventListener('mouseenter', () => {
-    if (!isPermanentlyExpanded) {
-        toggleClasses([sidebar, sidebarShadow, roundCorner], 'expanded', 'collapsed');
-        sidebar.classList.add('hover-expand');
-        toggleClasses(companyLogo, 'd-none');
-        toggleClasses(toggleSidebarBtnClose, null, 'd-none');
-        setToggleIcon(false); // no hover, ainda mostra hamburguer
-    }
-});
-
-sidebar.addEventListener('mouseleave', () => {
-    if (!isPermanentlyExpanded && sidebar.classList.contains('hover-expand')) {
-        toggleClasses([sidebar, sidebarShadow, roundCorner], 'collapsed', 'expanded');
-        sidebar.classList.remove('hover-expand');
-        toggleClasses(companyLogo, null, 'd-none');
-        toggleClasses(toggleSidebarBtnClose, 'd-none');
-    }
-});
-
-sidebar.addEventListener('click', (event) => {
-    const isInteractiveElement = event.target.closest('button, a, .nav-item, .nav-link');
-    if (!isInteractiveElement) {
-        if (isPermanentlyExpanded) {
-            collapsePermanently();
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 30) {
+            departmentLogo.classList.add('logo-hidden');
         } else {
-            expandPermanently();
+            departmentLogo.classList.remove('logo-hidden');
         }
-    }
-});
+    }, { passive: true });
+}
+
+// --- Navegação por abas ---
+
+function getTabLabel(tabId) {
+    const tab = TAB_LIST.find(t => t.id === tabId);
+    return tab ? tab.label : tabId;
+}
 
 document.addEventListener('shown.bs.tab', async (event) => {
     if (event.target) {
-        // --- Lazy Loading: Carregar conteúdo HTML se necessário ---
         const tabButton = event.target;
+
+        // Sub-tabs (ex: importação) não devem alterar título nem processar lógica de aba principal
+        const isMainTab = tabButton.closest('#hidden-tablist');
+
         const targetSelector = tabButton.getAttribute('data-bs-target');
         if (targetSelector) {
             const targetPane = document.querySelector(targetSelector);
@@ -148,10 +104,6 @@ document.addEventListener('shown.bs.tab', async (event) => {
                     const html = await response.text();
                     targetPane.innerHTML = html;
 
-                    // Lazy-load do script da aba ANTES de marcar data-loaded,
-                    // pois o MutationObserver do storage.js reage a data-loaded
-                    // e chama loadConfig() que precisa de funções do script da aba
-                    // (ex: popularAnosSelector definida em atas.js)
                     const tabIdForScript = tabButton.getAttribute('id')?.replace('-tab', '') || tabButton.getAttribute('aria-controls');
                     if (tabIdForScript && TAB_SCRIPTS[tabIdForScript]) {
                         await loadScript(TAB_SCRIPTS[tabIdForScript]);
@@ -174,26 +126,27 @@ document.addEventListener('shown.bs.tab', async (event) => {
             }
         }
 
+        if (!isMainTab) return;
+
         let tabId = tabButton.getAttribute('id')?.replace('-tab', '') || tabButton.getAttribute('aria-controls');
 
         if (tabId) {
-            // Salvar no localStorage apenas se for uma aba da sidebar
-            if (tabButton.closest('#sidebar')) {
-                localStorage.setItem('lastActiveTab', tabId);
-            }
+            localStorage.setItem('lastActiveTab', tabId);
 
             const navSubtitle = document.getElementById('nav-subtitle');
-            const sidebarTabButton = document.getElementById(`${tabId}-tab`);
+            const homeBtn = document.getElementById('homeBtn');
+            const isHome = tabId === 'home';
 
-            if (navSubtitle && sidebarTabButton) {
-                const nameText = sidebarTabButton.querySelector('.link-text')?.textContent || '';
-
-                if (tabId === 'home') {
-                    navSubtitle.innerHTML = `<span>Compras</span>`;
-                } else {
-                    navSubtitle.innerHTML = `<span>${nameText}</span>`;
-                }
+            if (navSubtitle) {
+                navSubtitle.innerHTML = isHome ? '' : `<span>${getTabLabel(tabId)}</span>`;
+                navSubtitle.style.display = isHome ? 'none' : '';
             }
+            if (homeBtn) homeBtn.style.display = isHome ? 'none' : '';
+
+            // Destacar item ativo no App Launcher
+            document.querySelectorAll('.app-launcher-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.tabId === tabId);
+            });
 
             await refreshScriptFileLists(tabId);
             setupLiveValidation(tabId);
@@ -208,7 +161,6 @@ document.addEventListener('shown.bs.tab', async (event) => {
                 inicializarImportacao();
             }
 
-
             if (globalComputerName && (tabId === 'atas' || tabId === 'catmat' || tabId === 'importacao' || tabId === 'mapas' || tabId === 'powerbi')) {
                 if (typeof ensureConsoleDOM === 'function') ensureConsoleDOM();
 
@@ -216,7 +168,6 @@ document.addEventListener('shown.bs.tab', async (event) => {
                 const logsDrawer = document.getElementById('logs-drawer');
 
                 if (logsList && logsDrawer) {
-                    // Formato esperado: "nomeScript_nomeComputador"
                     logsList.dataset.nameContains = `${tabId}_${globalComputerName}`.toLowerCase();
                     logsDrawer.classList.remove('d-none');
                     loadFiles('logs-file-list', '_common', 'log', false);
@@ -244,5 +195,8 @@ async function fetchComputerName() {
 }
 
 fetchComputerName();
-initializeNavigation();
-collapsePermanently();
+
+document.addEventListener('DOMContentLoaded', () => {
+    buildAppLauncher();
+    initDepartmentLogoScroll();
+});
