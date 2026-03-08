@@ -21,9 +21,27 @@
                 </button>
             </div>
         </form>
+        <!-- Formulário de manutenção -->
+        <form id="form-powerbi-manutencao" class="script-form shadow-sm">
+            <h4><i class="fa-solid fa-wrench"></i> Manutenção</h4>
+            <fieldset class="shadow-sm m-0 p-3 mb-3" form="form-powerbi-manutencao">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-renomear"
+                        value="renomear" checked>
+                    <label class="form-check-label" for="powerbi-renomear" data-bs-toggle="tooltip"
+                        data-bs-title="Os arquivos das pastas 'Mapa de licitações' e 'Execução AF Empenho' serão renomeados conforme o padrão TIPO - ANO - ETAPA - PROCESSO - PREGÃO.">
+                        Renomear arquivos
+                    </label>
+                </div>
+            </fieldset>
+            <div class="form-buttons">
+                <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"
+                    id="btn-run-powerbi-maintenance" onclick="executarPowerBI(this)">
+                    Executar
+                </button>
+            </div>
+        </form>
     </div>
-</div>
-<div class="row">
     <div class="col">
         <!-- Formulário de seleção do painel -->
         <form id="form-powerbi-panel" class="script-form shadow-sm">
@@ -77,26 +95,5 @@
             </div>
         </form>
     </div>
-    <div class="col-auto">
-        <!-- Formulário de manutenção -->
-        <form id="form-powerbi-manutencao" class="script-form shadow-sm">
-            <h4><i class="fa-solid fa-wrench"></i> Manutenção</h4>
-            <fieldset class="shadow-sm m-0 p-3 mb-3" form="form-powerbi-manutencao">
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="powerbi-tipo" id="powerbi-renomear"
-                        value="renomear" checked>
-                    <label class="form-check-label" for="powerbi-renomear" data-bs-toggle="tooltip"
-                        data-bs-title="Os arquivos das pastas 'Mapa de licitações' e 'Execução AF Empenho' serão renomeados conforme o padrão TIPO - ANO - ETAPA - PROCESSO - PREGÃO.">
-                        Renomear arquivos
-                    </label>
-                </div>
-            </fieldset>
-            <div class="form-buttons">
-                <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"
-                    id="btn-run-powerbi-maintenance" onclick="executarPowerBI(this)">
-                    Executar
-                </button>
-            </div>
-        </form>
-    </div>
+
 </div>
