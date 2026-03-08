@@ -3462,9 +3462,204 @@ function getLoader() {
   </style>
 `
 
+  const loader12 = `
+<!-- From Uiverse.io by https://uiverse.io/chase2k25/brown-dog-100 --> 
+<div class="loader-chase2k25">
+  <div class="cube">
+    <div class="face front">
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+    </div>
+    <div class="face back">
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+    </div>
+    <div class="face right">
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+    </div>
+    <div class="face left">
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+    </div>
+    <div class="face top">
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+    </div>
+    <div class="face bottom">
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+      <div class="sticker"></div>
+    </div>
+  </div>
+</div>
+<style>
+.loader-chase2k25 {
+  position: absolute;
+  bottom: 50px;
+  left: 50px;
+  width: 180px;
+  height: 180px;
+  transform-style: preserve-3d;
+  animation: rotate-cube 8s cubic-bezier(0.76, 0, 0.24, 1) infinite;
+  transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.loader:hover {
+  animation-play-state: paused;
+  transform: scale(1.15); /* Scaling only on hover */
+}
+
+.cube {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: rotateX(35.264deg) rotateY(45deg); /* Isometric angle for square consistency */
+}
+
+.face {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 6px;
+  padding: 6px;
+  box-sizing: border-box;
+  background: rgba(10, 20, 30, 0.9);
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  transition: box-shadow 0.4s cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.face:hover {
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
+}
+
+.sticker {
+  background: #fff;
+  border-radius: 8px;
+  animation: sticker-bounce 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+}
+
+/* Face positions */
+.front {
+  transform: translateZ(90px);
+}
+.back {
+  transform: translateZ(-90px) rotateY(180deg);
+}
+.right {
+  transform: translateX(90px) rotateY(90deg);
+}
+.left {
+  transform: translateX(-90px) rotateY(-90deg);
+}
+.top {
+  transform: translateY(-90px) rotateX(90deg);
+}
+.bottom {
+  transform: translateY(90px) rotateX(-90deg);
+}
+
+/* Unique gradient colors */
+.front .sticker {
+  background: linear-gradient(135deg, #ff1e56, #ff577f);
+}
+.back .sticker {
+  background: linear-gradient(135deg, #ff9f1c, #ffbf69);
+}
+.right .sticker {
+  background: linear-gradient(135deg, #2ecc71, #54e6a3);
+}
+.left .sticker {
+  background: linear-gradient(135deg, #1e90ff, #4ab8ff);
+}
+.top .sticker {
+  background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+}
+.bottom .sticker {
+  background: linear-gradient(135deg, #f1c40f, #f4d03f);
+}
+
+/* Cube rotation with consistent square shape */
+@keyframes rotate-cube {
+  0% {
+    transform: rotateX(35.264deg) rotateY(45deg) rotateZ(0deg);
+  }
+  25% {
+    transform: rotateX(35.264deg) rotateY(135deg) rotateZ(0deg);
+  }
+  50% {
+    transform: rotateX(35.264deg) rotateY(225deg) rotateZ(0deg);
+  }
+  75% {
+    transform: rotateX(35.264deg) rotateY(315deg) rotateZ(0deg);
+  }
+  100% {
+    transform: rotateX(35.264deg) rotateY(405deg) rotateZ(0deg);
+  }
+}
+
+/* Sticker bounce animation */
+@keyframes sticker-bounce {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(0) scale(1.04);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+</style>
+`
+
   const loaders = [
     loader1, loader2, loader3, loader4, loader5, loader6,
-    loader7, loader8, loader9, loader10, loader11
+    loader7, loader8, loader9, loader10, loader11, loader12
   ];
   const randomIndex = Math.floor(Math.random() * loaders.length);
   return loaders[randomIndex];

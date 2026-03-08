@@ -28,6 +28,9 @@ RESET, BASE, VARIÁVEIS GLOBAIS E TEMAS
     --color-shadow-accent: rgba(102, 126, 234, 0.4);
     --color-text-on-accent: white;
 
+    /* Glassmorphism blur level */
+    --blur-level: blur(2px);
+
     /* Dimensões e Layout */
     --padding-screen: 20px;
     --padding-main-container: 12px;

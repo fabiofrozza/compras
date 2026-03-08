@@ -216,6 +216,7 @@ body.dark-mode #home.home-bg-loaded::after {
     color: inherit;
     display: block;
     background: transparent !important;
+    transition: all .5s ease;
 }
 
 #cards-home-container .glassContainer {
@@ -226,7 +227,7 @@ body.dark-mode #home.home-bg-loaded::after {
     width: 100%;
     height: 100%;
     border-radius: 24px;
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all .5s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 #cards-home-container .glassContainer::before {
@@ -239,8 +240,7 @@ body.dark-mode #home.home-bg-loaded::after {
     box-shadow:
         inset 2px 2px 0px -2px rgba(255, 255, 255, 0.7),
         inset 0 0 3px 1px rgba(255, 255, 255, 0.7);
-    transition: all 0.4s ease;
-
+    transition: all .5s ease;
 }
 
 #cards-home-container .glassContainer::after {
@@ -249,12 +249,13 @@ body.dark-mode #home.home-bg-loaded::after {
     z-index: -1;
     inset: 0;
     border-radius: 24px;
-    backdrop-filter: blur(0px);
-    -webkit-backdrop-filter: blur(0px);
+    backdrop-filter: var(--blur-level);
+    -webkit-backdrop-filter: var(--blur-level);
     filter: url(#container-glass);
     -webkit-filter: url(#container-glass);
     overflow: hidden;
     isolation: isolate;
+    transition: all .5s ease;
 }
 
 #cards-home-container .glassContainer .card-body {
@@ -291,7 +292,7 @@ body.dark-mode #cards-home-container .glassContainer {
 #cards-home-container .glassContainer:hover::before {
     box-shadow:
         inset 2px 2px 0px -2px rgba(255, 255, 255, 0.95),
-        inset 0 0 50px 50px rgba(255, 255, 255, 0.5);
+        inset 0 0 5px 5px rgba(255, 255, 255, 0.5);
 }
 
 body.dark-mode #cards-home-container .glassContainer:hover {
@@ -304,12 +305,11 @@ body.dark-mode #cards-home-container .glassContainer:hover {
 body.dark-mode #cards-home-container .glassContainer:hover::before {
     box-shadow:
         inset 2px 2px 0px -2px rgba(255, 255, 255, 0.5),
-        inset 0 0 50px 50px rgba(255, 255, 255, 0.5);
+        inset 0 0 5px 5px rgba(255, 255, 255, 0.5);
 }
 
 #cards-home-container:has(.card-link:hover) .card-link:not(:hover) {
     filter: opacity(0.5);
-    transition: all 0.4s ease;
 }
 
 #cards-home-container:has(.card-link:hover) .glassContainer:not(:hover)::before {

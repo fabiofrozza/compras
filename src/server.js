@@ -1,4 +1,4 @@
-require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env'), quiet: true });
 const express = require('express');
 const WebSocket = require('ws');
 const path = require('path');
@@ -548,57 +548,57 @@ const server = app.listen(PORT, async () => {
   }, 30000);
 
   wss.on('connection', (ws, req) => {
-  ws.isAlive = true;
-  ws.on('pong', () => { ws.isAlive = true; });
+    ws.isAlive = true;
+    ws.on('pong', () => { ws.isAlive = true; });
 
-  clientCount++;
+    clientCount++;
 
-  const ip = req.socket.remoteAddress;
-  const userAgent = req.headers['user-agent'] || 'Desconhecido';
+    const ip = req.socket.remoteAddress;
+    const userAgent = req.headers['user-agent'] || 'Desconhecido';
 
-  logger.info(`Cliente conectado (Total: ${clientCount})`, 'WebSocket');
-  logger.debug(`IP: ${ip} | Navegador: ${userAgent}`, 'WebSocket');
+    logger.info(`Cliente conectado (Total: ${clientCount})`, 'WebSocket');
+    logger.debug(`IP: ${ip} | Navegador: ${userAgent}`, 'WebSocket');
 
-  ws.on('message', (message) => {
-    try {
-      const data = JSON.parse(message);
-      if (data.action === 'execute-r-script') {
-        if (data.scriptName === 'atas_mailmerge') {
-          logger.section(`Executando mailmerge de atas (JavaScript): ${data.scriptName}`);
-          executeMailmergeJS(ws, data.params);
-        } else {
-          logger.section(`Executando script R: ${data.scriptName}`);
-          executeRScript(ws, data.scriptName, data.params);
+    ws.on('message', (message) => {
+      try {
+        const data = JSON.parse(message);
+        if (data.action === 'execute-r-script') {
+          if (data.scriptName === 'atas_mailmerge') {
+            logger.section(`Executando mailmerge de atas (JavaScript): ${data.scriptName}`);
+            executeMailmergeJS(ws, data.params);
+          } else {
+            logger.section(`Executando script R: ${data.scriptName}`);
+            executeRScript(ws, data.scriptName, data.params);
+          }
         }
+      } catch (err) {
+        logger.error(`Erro ao processar mensagem: ${err.message}`, 'WebSocket', err);
       }
-    } catch (err) {
-      logger.error(`Erro ao processar mensagem: ${err.message}`, 'WebSocket', err);
-    }
-  });
+    });
 
-  ws.on('close', () => {
-    clientCount--;
-    logger.info(`Cliente desconectado (Total: ${clientCount})`, 'WebSocket');
-    logger.debug(`IP: ${ip}`, 'WebSocket');
+    ws.on('close', () => {
+      clientCount--;
+      logger.info(`Cliente desconectado (Total: ${clientCount})`, 'WebSocket');
+      logger.debug(`IP: ${ip}`, 'WebSocket');
 
-    if (clientCount === 0) {
-      logger.info('Nenhum cliente conectado. Encerrando servidor...', 'Server');
+      if (clientCount === 0) {
+        logger.info('Nenhum cliente conectado. Encerrando servidor...', 'Server');
 
-      // ENCERRAMENTO DESATIVADO TEMPORARIAMENTE
+        // ENCERRAMENTO DESATIVADO TEMPORARIAMENTE
 
-      //setTimeout(() => {
-      //    server.close(() => {
-      //        clearInterval(interval)
-      //        logger.info('Servidor encerrado.', 'Server');
-      //        process.exit(0);
-      //    });
-      //}, 500); // meio segundo de espera
-    }
-  });
+        //setTimeout(() => {
+        //    server.close(() => {
+        //        clearInterval(interval)
+        //        logger.info('Servidor encerrado.', 'Server');
+        //        process.exit(0);
+        //    });
+        //}, 500); // meio segundo de espera
+      }
+    });
 
-  ws.on('error', (error) => {
-    logger.error(`Erro WebSocket: ${error.message}`, 'WebSocket', error);
-  });
+    ws.on('error', (error) => {
+      logger.error(`Erro WebSocket: ${error.message}`, 'WebSocket', error);
+    });
   });
 });
 

@@ -1,24 +1,28 @@
 /* ==========================================================================
 BARRA DE NAVEGAÇÃO SUPERIOR (Glassmorphism)
 ========================================================================== */
-
 .top-nav {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: var(--top-nav-height);
-    background: rgba(255, 255, 255, 0.45);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.4);
     z-index: 1000;
     transition: var(--transition-time) ease-in-out;
 }
 
-body.dark-mode .top-nav {
-    background: rgba(2, 2, 58, 0.55);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+.top-nav.glassContainer::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    backdrop-filter: var(--blur-level);
+    -webkit-backdrop-filter: var(--blur-level);
+    filter: url(#container-glass);
+    -webkit-filter: url(#container-glass);
+    overflow: hidden;
+    isolation: isolate;
 }
 
 .navbar-content {
@@ -111,9 +115,6 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
     top: calc(var(--top-nav-height) + 6px);
     right: 12px;
     width: 300px;
-    background: rgba(255, 255, 255, 0.45);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 12px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
@@ -124,10 +125,18 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
     transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-body.dark-mode .header-panel {
-    background: rgba(2, 2, 58, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+.header-panel.glassContainer::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    backdrop-filter: var(--blur-level);
+    -webkit-backdrop-filter: var(--blur-level);
+    filter: url(#container-glass);
+    -webkit-filter: url(#container-glass);
+    overflow: hidden;
+    isolation: isolate;
+    border-radius: 12px;
 }
 
 .header-panel.open {
@@ -141,7 +150,7 @@ body.dark-mode .header-panel {
     justify-content: space-between;
     align-items: center;
     padding: 12px 16px 10px;
-    border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
     font-weight: 600;
     font-size: 0.9rem;
     color: var(--color-text-primary);
@@ -286,5 +295,5 @@ APP LAUNCHER (Grid de Aplicativos)
 .app-launcher-separator {
     grid-column: 1 / -1;
     margin: 4px 0;
-    border-color: rgba(128, 128, 128, 0.2);
+    border-color: rgba(255, 255, 255, 1);
 }
