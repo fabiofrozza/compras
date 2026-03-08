@@ -176,7 +176,7 @@ function inicializarPreferenciasPanel() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const homeBtn = document.getElementById('homeBtn');
+    const companyLogo = document.getElementById('companyLogo');
     const settingsBtn = document.getElementById('settingsBtn');
     const userBtn = document.getElementById('userBtn');
     const notificationsBtn = document.getElementById('notificationsBtn');
@@ -186,12 +186,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const notificationsPanelClose = document.getElementById('notificationsPanelClose');
     const appLauncherPanelClose = document.getElementById('appLauncherPanelClose');
 
-    if (homeBtn) homeBtn.addEventListener('click', () => {
-        const tooltip = bootstrap.Tooltip.getInstance(homeBtn);
-        if (tooltip) tooltip.hide();
-        const homeTab = document.getElementById('home-tab');
-        if (homeTab) new bootstrap.Tab(homeTab).show();
-    });
+    if (companyLogo) {
+        companyLogo.style.cursor = 'pointer';
+        companyLogo.addEventListener('click', () => {
+            const homeTab = document.getElementById('home-tab');
+            if (homeTab) new bootstrap.Tab(homeTab).show();
+        });
+    }
     if (settingsBtn) settingsBtn.addEventListener('click', () => openPanel('settings-panel', settingsBtn));
     if (userBtn) userBtn.addEventListener('click', () => openPanel('user-panel', userBtn));
     if (notificationsBtn) notificationsBtn.addEventListener('click', () => openPanel('notifications-panel', notificationsBtn));

@@ -1,13 +1,13 @@
 // --- Constante centralizada de abas ---
 const TAB_LIST = [
-    { id: 'home', label: 'Página inicial', icon: 'fa-solid fa-home', hidden: true },
-    { id: 'atas', label: 'Atas', icon: 'fa-solid fa-file-alt' },
-    { id: 'catmat', label: 'Catmat', icon: 'fa-solid fa-list' },
-    { id: 'fornecedores', label: 'Fornecedores', icon: 'fa-solid fa-building' },
-    { id: 'importacao', label: 'Importação', icon: 'fa-solid fa-gavel' },
-    { id: 'mapas', label: 'Mapas', icon: 'fa-solid fa-basket-shopping' },
-    { id: 'powerbi', label: 'Power BI', icon: 'fa-solid fa-chart-line', separator: 'after' },
-    { id: 'instalacao', label: 'Instalação', icon: 'fa-solid fa-wrench' },
+    { id: 'home', label: 'Página inicial', icon: 'fa-solid fa-home', color: '#3b82f6', hidden: true },
+    { id: 'atas', label: 'Atas', icon: 'fa-solid fa-file-alt', color: '#e11d48' },
+    { id: 'catmat', label: 'Catmat', icon: 'fa-solid fa-list', color: '#fb923c' },
+    { id: 'fornecedores', label: 'Fornecedores', icon: 'fa-solid fa-building', color: '#10b981' },
+    { id: 'importacao', label: 'Importação', icon: 'fa-solid fa-gavel', color: '#facc15' },
+    { id: 'mapas', label: 'Mapas', icon: 'fa-solid fa-basket-shopping', color: '#84cc16' },
+    { id: 'powerbi', label: 'Power BI', icon: 'fa-solid fa-chart-line', color: '#8b5cf6', separator: 'after' },
+    { id: 'instalacao', label: 'Instalação', icon: 'fa-solid fa-wrench', color: '#0ea5e9' },
 ];
 
 // --- Lazy Loading de Scripts sob demanda ---
@@ -33,6 +33,50 @@ const mainContent = document.getElementById('mainContent');
 const navbar = document.getElementById('navbar');
 
 let globalComputerName = '';
+
+// --- Navbar App Buttons ---
+
+function buildNavbarApps() {
+    const center = document.querySelector('.navbar-center');
+    if (!center) return;
+
+    center.innerHTML = '';
+
+    const container = document.createElement('div');
+    container.className = 'navbar-apps';
+
+    TAB_LIST.filter(tab => tab.id !== 'instalacao').forEach(tab => {
+        const btn = document.createElement('button');
+        btn.className = 'navbar-app-btn';
+        btn.dataset.tabId = tab.id;
+        btn.setAttribute('aria-label', tab.label);
+        btn.setAttribute('data-bs-toggle', 'tooltip');
+        btn.setAttribute('data-bs-placement', 'bottom');
+        btn.setAttribute('data-bs-title', tab.label);
+        btn.style.setProperty('--color', tab.color);
+        btn.innerHTML = `<i class="${tab.icon}"></i>`;
+        container.appendChild(btn);
+    });
+
+    center.appendChild(container);
+
+    container.addEventListener('click', (e) => {
+        const btn = e.target.closest('.navbar-app-btn');
+        if (!btn) return;
+
+        container.querySelectorAll('.navbar-app-btn').forEach(b => {
+            const t = bootstrap.Tooltip.getInstance(b);
+            if (t) t.hide();
+        });
+
+        const tabId = btn.dataset.tabId;
+        const tabButton = document.getElementById(`${tabId}-tab`);
+        if (tabButton) {
+            const tab = new bootstrap.Tab(tabButton);
+            tab.show();
+        }
+    });
+}
 
 // --- App Launcher ---
 
@@ -62,21 +106,6 @@ function buildAppLauncher() {
         }
         closeAllPanels();
     });
-}
-
-// --- Scroll: esconder logo do departamento ---
-
-function initDepartmentLogoScroll() {
-    const departmentLogo = document.getElementById('departmentLogo');
-    if (!departmentLogo) return;
-
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 30) {
-            departmentLogo.classList.add('logo-hidden');
-        } else {
-            departmentLogo.classList.remove('logo-hidden');
-        }
-    }, { passive: true });
 }
 
 // --- Navegação por abas ---
@@ -134,18 +163,19 @@ document.addEventListener('shown.bs.tab', async (event) => {
             localStorage.setItem('lastActiveTab', tabId);
 
             const navSubtitle = document.getElementById('nav-subtitle');
-            const homeBtn = document.getElementById('homeBtn');
             const isHome = tabId === 'home';
 
             if (navSubtitle) {
                 navSubtitle.innerHTML = isHome ? '' : `<span>${getTabLabel(tabId)}</span>`;
                 navSubtitle.style.display = isHome ? 'none' : '';
             }
-            if (homeBtn) homeBtn.style.display = isHome ? 'none' : '';
 
-            // Destacar item ativo no App Launcher
+            // Destacar item ativo no App Launcher e Navbar
             document.querySelectorAll('.app-launcher-item').forEach(item => {
                 item.classList.toggle('active', item.dataset.tabId === tabId);
+            });
+            document.querySelectorAll('.navbar-app-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tabId === tabId);
             });
 
             await refreshScriptFileLists(tabId);
@@ -197,6 +227,6 @@ async function fetchComputerName() {
 fetchComputerName();
 
 document.addEventListener('DOMContentLoaded', () => {
+    buildNavbarApps();
     buildAppLauncher();
-    initDepartmentLogoScroll();
 });
