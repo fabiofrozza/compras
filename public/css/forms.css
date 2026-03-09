@@ -89,9 +89,12 @@ FORMS AND FILES
 }
 
 .copy-icon {
-    --bs-btn-padding-y: .1rem;
+    --bs-btn-padding-y: 0;
     --bs-btn-padding-x: .25rem;
-    --bs-btn-font-size: .75rem;
+}
+
+.btn-sm.copy-icon .material-symbols-outlined {
+    font-size: .75rem;
 }
 
 .files-table {
@@ -125,6 +128,10 @@ FORMS AND FILES
     gap: 10px;
     flex-wrap: wrap;
     padding: 10px;
+}
+
+.btn-sm .material-symbols-outlined {
+    font-size: 20px;
 }
 
 /* Status text dos formulários */
