@@ -27,7 +27,7 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
     font-size: 12px;
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
 }
 
 .app-toast::before {
@@ -89,7 +89,7 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
     border: none;
     color: inherit;
     font-size: 12px;
-    padding: 0 8px;
+    padding-inline: 6px;
     flex-shrink: 0;
 }
 

@@ -17,7 +17,7 @@ function showToast(message, type = 'success', duration, source = 'origem não in
 
     const closeButton = document.createElement('button');
     closeButton.className = 'toast-close-btn';
-    closeButton.innerHTML = '<i class="material-symbols-outlined" style="font-size:.6em">close</i>';
+    closeButton.innerHTML = '<i class="material-symbols-outlined">close</i>';
 
     const removeToast = () => {
         toast.classList.add('removing');

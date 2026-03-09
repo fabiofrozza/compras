@@ -49,9 +49,9 @@ body.dragging-console {
     background: transparent;
     border: none;
     color: black;
-    font-size: .75rem;
     cursor: pointer;
     transition: color 0.2s;
+    font-size: 18px;
 }
 
 .console-header .btn-minimize:hover,
@@ -346,7 +346,7 @@ body.dragging-console {
    ========================================================================== */
 
 #logs-drawer {
-    --logs-drawer-header-height: 28px;
+    --logs-drawer-header-height: 30px;
     position: fixed;
     bottom: 0;
     right: var(--padding-main-container);
@@ -363,7 +363,7 @@ body.dragging-console {
 }
 
 #logs-drawer.collapsed {
-    width: 36px;
+    width: 48px;
     transform: translateY(calc(100% - var(--logs-drawer-header-height)));
 }
 
@@ -389,8 +389,8 @@ body.dragging-console {
     cursor: ns-resize;
 }
 
-#logs-drawer-title {
-    font-size: .9rem;
+.logs-drawer-header i {
+    font-size: 24px;
 }
 
 .logs-drawer-actions {
@@ -403,7 +403,6 @@ body.dragging-console {
     background: transparent;
     border: none;
     color: var(--color-surface-1);
-    font-size: .75rem;
     cursor: pointer;
     padding: 2px 4px;
     border-radius: 4px;
@@ -419,10 +418,6 @@ body.dragging-console {
 
 #logs-drawer.collapsed .logs-drawer-actions {
     display: none;
-}
-
-.logs-drawer-header #logs-minimize-icon {
-    font-size: .75rem;
 }
 
 .logs-drawer-content {

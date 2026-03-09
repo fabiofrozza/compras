@@ -13,6 +13,8 @@ FORMS AND FILES
     margin-bottom: .2rem;
     font-size: 87.5%;
     width: fit-content;
+    display: flex;
+    align-items: center;
 }
 
 .script-form {
