@@ -72,6 +72,7 @@ body.dark-mode {
 .material-symbols-outlined {
     font-size: inherit;
     vertical-align: middle;
+    font-variation-settings: 'wght' 250;
 }
 
 .custom-tooltip {

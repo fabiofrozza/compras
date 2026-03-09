@@ -3,7 +3,7 @@ MAIN CONTENT
 ========================================================================== */
 
 body {
-    padding-top: calc(var(--top-nav-height) + var(--padding-main-container)) !important;
+    padding-top: calc(var(--top-nav-height) + var(--padding-main-container) * 2) !important;
     padding-left: var(--padding-main-container) !important;
     padding-bottom: var(--padding-main-container) !important;
     padding-right: var(--padding-main-container) !important;

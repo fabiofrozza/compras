@@ -50,9 +50,7 @@ function buildNavbarApps() {
         btn.className = 'navbar-app-btn';
         btn.dataset.tabId = tab.id;
         btn.setAttribute('aria-label', tab.label);
-        btn.setAttribute('data-bs-toggle', 'tooltip');
-        btn.setAttribute('data-bs-placement', 'bottom');
-        btn.setAttribute('data-bs-title', tab.label);
+        btn.setAttribute('btn-title', tab.label);
         btn.style.setProperty('--color', tab.color);
         btn.innerHTML = `<i class="material-symbols-outlined">${tab.icon}</i>`;
         container.appendChild(btn);
