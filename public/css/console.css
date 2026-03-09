@@ -267,9 +267,8 @@ body.dragging-console {
 }
 
 #console-summary.summary-running .summary-icon::before {
-    font: var(--fa-font-solid);
-    content: '\f254';
-    /* hourglass */
+    font-family: 'Material Symbols Outlined';
+    content: 'hourglass_empty';
 }
 
 #console-summary.summary-success {
@@ -277,9 +276,8 @@ body.dragging-console {
 }
 
 #console-summary.summary-success .summary-icon::before {
-    font: var(--fa-font-solid);
-    content: '\f00c';
-    /* checkmark */
+    font-family: 'Material Symbols Outlined';
+    content: 'check';
 }
 
 #console-summary.summary-warning {
@@ -287,9 +285,8 @@ body.dragging-console {
 }
 
 #console-summary.summary-warning .summary-icon::before {
-    font: var(--fa-font-solid);
-    content: '\f071';
-    /* warning */
+    font-family: 'Material Symbols Outlined';
+    content: 'warning';
 }
 
 #console-summary.summary-error {
@@ -297,9 +294,8 @@ body.dragging-console {
 }
 
 #console-summary.summary-error .summary-icon::before {
-    font: var(--fa-font-solid);
-    content: '\f00d';
-    /* x mark */
+    font-family: 'Material Symbols Outlined';
+    content: 'close';
 }
 
 #console-output {

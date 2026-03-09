@@ -42,9 +42,8 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
 }
 
 .app-toast.success::before {
-    font: var(--fa-font-solid);
-    content: '\f058';
-    /* circle check */
+    font-family: 'Material Symbols Outlined';
+    content: 'check_circle';
 }
 
 .app-toast.error {
@@ -54,9 +53,8 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
 }
 
 .app-toast.error::before {
-    font: var(--fa-font-solid);
-    content: '\f057';
-    /* circle x mark */
+    font-family: 'Material Symbols Outlined';
+    content: 'cancel';
 }
 
 .app-toast.info {
@@ -66,9 +64,8 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
 }
 
 .app-toast.info::before {
-    font: var(--fa-font-solid);
-    content: '\f05a';
-    /* circle info */
+    font-family: 'Material Symbols Outlined';
+    content: 'info';
 }
 
 .app-toast.warning {
@@ -78,9 +75,8 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
 }
 
 .app-toast.warning::before {
-    font: var(--fa-font-solid);
-    content: '\f06a';
-    /* circle exclamation */
+    font-family: 'Material Symbols Outlined';
+    content: 'error';
 }
 
 .toast-message {

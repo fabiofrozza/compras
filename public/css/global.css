@@ -68,6 +68,12 @@ body.dark-mode {
     gap: 10px;
 }
 
+/* Material Symbols — utilities */
+.material-symbols-outlined {
+    font-size: inherit;
+    vertical-align: middle;
+}
+
 .custom-tooltip {
     --bs-tooltip-bg: var(--bs-warning-border-subtle);
     --bs-tooltip-color: var(--bs-primary-text-emphasis);

@@ -46,7 +46,7 @@ function populateFavoriteTabSelectList() {
         id: 'default',
         value: '',
         label: 'Abrir última aba visualizada',
-        icon: 'fa-solid fa-clock'
+        icon: 'schedule'
     }];
 
     TAB_LIST.forEach(tab => {
@@ -61,7 +61,7 @@ function populateFavoriteTabSelectList() {
     const html = options.map(opt => `
         <input type="radio" class="btn-check" name="preferredTabRadio" id="pref-tab-${opt.id}" value="${opt.value}" autocomplete="off" data-field="preferredTab">
         <label class="btn btn-sm btn-outline-secondary text-start text-nowrap" for="pref-tab-${opt.id}">
-            <i class="${opt.icon} fa-fw me-2"></i> ${opt.label}
+            <i class="material-symbols-outlined me-2">${opt.icon}</i> ${opt.label}
         </label>
     `).join('');
 

@@ -21,7 +21,7 @@ function configurarValidacaoContinuaImportacao() {
         linkInput.addEventListener('input', () => {
             importacaoLastValidatedLink = '';
             linkInput.classList.remove('is-valid', 'is-invalid');
-            atualizarFeedbackPlanilha('info', 'Informe o link da aba LISTA FINAL e aguarde.', 'fa-circle-info');
+            atualizarFeedbackPlanilha('info', 'Informe o link da aba LISTA FINAL e aguarde.', 'info');
             verificarLiberacaoBotoesImportacao();
         });
     }
@@ -49,7 +49,7 @@ async function validarLinkGoogle() {
 
     if (!url) {
         importacaoLastValidatedLink = '';
-        atualizarFeedbackPlanilha('info', 'Informe o link da aba LISTA FINAL e aguarde.', 'fa-circle-info');
+        atualizarFeedbackPlanilha('info', 'Informe o link da aba LISTA FINAL e aguarde.', 'info');
         popularComboProcessosSPA([]);
         return;
     }
@@ -57,12 +57,12 @@ async function validarLinkGoogle() {
     try {
         new URL(url);
     } catch {
-        atualizarFeedbackPlanilha('error', 'Link inválido.', 'fa-times-circle');
+        atualizarFeedbackPlanilha('error', 'Link inválido.', 'cancel');
         popularComboProcessosSPA([]);
         return;
     }
 
-    atualizarFeedbackPlanilha('loading', 'Aguarde... Acessando o link informado...', 'fa-spinner fa-spin');
+    atualizarFeedbackPlanilha('loading', 'Aguarde... Acessando o link informado...', 'hourglass_empty');
 
     try {
         const response = await fetch('/api/validate-link', {
@@ -76,17 +76,17 @@ async function validarLinkGoogle() {
 
         switch (result.status) {
             case 'success':
-                atualizarFeedbackPlanilha('success', result.msg, 'fa-check-circle');
+                atualizarFeedbackPlanilha('success', result.msg, 'check_circle');
                 break;
             case 'warning':
-                atualizarFeedbackPlanilha('warning', result.msg, 'fa-exclamation-triangle');
+                atualizarFeedbackPlanilha('warning', result.msg, 'warning');
                 break;
             case 'error':
-                atualizarFeedbackPlanilha('error', result.msg, 'fa-times-circle');
+                atualizarFeedbackPlanilha('error', result.msg, 'cancel');
                 if (result.error) console.error('Erro ao acessar link:', result.error);
                 break;
             default:
-                atualizarFeedbackPlanilha('info', result.msg, 'fa-circle-info');
+                atualizarFeedbackPlanilha('info', result.msg, 'info');
                 break;
         }
 
@@ -94,7 +94,7 @@ async function validarLinkGoogle() {
 
     } catch (error) {
         console.error('Erro ao validar link:', error);
-        atualizarFeedbackPlanilha('error', 'Erro ao acessar o link informado. Veja erro no console.', 'fa-times-circle');
+        atualizarFeedbackPlanilha('error', 'Erro ao acessar o link informado. Veja erro no console.', 'cancel');
         popularComboProcessosSPA([]);
     }
 }
@@ -105,7 +105,7 @@ async function validarLinkGoogle() {
  * 
  * @param {'success'|'error'|'warning'|'info'|'loading'} tipo - Tipo do feedback
  * @param {string} mensagem - Texto da mensagem (sem ícone)
- * @param {string} iconeClass - Classe Font Awesome do ícone (ex: 'fa-check-circle')
+ * @param {string} iconeClass - Classe Font Awesome do ícone (ex: 'check_circle')
  */
 function atualizarFeedbackPlanilha(tipo, mensagem, iconeClass) {
     const linkInput = document.getElementById('importacao-link');
@@ -124,7 +124,7 @@ function atualizarFeedbackPlanilha(tipo, mensagem, iconeClass) {
     statusIcon.classList.remove(...classesIcone);
 
     // Atualiza ícone
-    statusIcon.innerHTML = `<i class="fa-solid ${iconeClass}"></i>`;
+    statusIcon.innerHTML = `<i class="material-symbols-outlined">${iconeClass}</i>`;
     statusText.innerHTML = mensagem;
 
     switch (tipo) {

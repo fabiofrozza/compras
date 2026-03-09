@@ -1,13 +1,13 @@
 // --- Constante centralizada de abas ---
 const TAB_LIST = [
-    { id: 'home', label: 'Página inicial', icon: 'fa-solid fa-home', color: '#3b82f6', hidden: true },
-    { id: 'atas', label: 'Atas', icon: 'fa-solid fa-file-alt', color: '#e11d48' },
-    { id: 'catmat', label: 'Catmat', icon: 'fa-solid fa-list', color: '#fb923c' },
-    { id: 'fornecedores', label: 'Fornecedores', icon: 'fa-solid fa-building', color: '#10b981' },
-    { id: 'importacao', label: 'Importação', icon: 'fa-solid fa-gavel', color: '#facc15' },
-    { id: 'mapas', label: 'Mapas', icon: 'fa-solid fa-basket-shopping', color: '#84cc16' },
-    { id: 'powerbi', label: 'Power BI', icon: 'fa-solid fa-chart-line', color: '#8b5cf6', separator: 'after' },
-    { id: 'instalacao', label: 'Instalação', icon: 'fa-solid fa-wrench', color: '#0ea5e9' },
+    { id: 'home', label: 'Página inicial', icon: 'home', color: '#3b82f6', hidden: true },
+    { id: 'atas', label: 'Atas', icon: 'description', color: '#e11d48' },
+    { id: 'catmat', label: 'Catmat', icon: 'list', color: '#fb923c' },
+    { id: 'fornecedores', label: 'Fornecedores', icon: 'business', color: '#10b981' },
+    { id: 'importacao', label: 'Importação', icon: 'gavel', color: '#facc15' },
+    { id: 'mapas', label: 'Mapas', icon: 'shopping_basket', color: '#84cc16' },
+    { id: 'powerbi', label: 'Power BI', icon: 'show_chart', color: '#8b5cf6', separator: 'after' },
+    { id: 'instalacao', label: 'Instalação', icon: 'build', color: '#0ea5e9' },
 ];
 
 // --- Lazy Loading de Scripts sob demanda ---
@@ -54,7 +54,7 @@ function buildNavbarApps() {
         btn.setAttribute('data-bs-placement', 'bottom');
         btn.setAttribute('data-bs-title', tab.label);
         btn.style.setProperty('--color', tab.color);
-        btn.innerHTML = `<i class="${tab.icon}"></i>`;
+        btn.innerHTML = `<i class="material-symbols-outlined">${tab.icon}</i>`;
         container.appendChild(btn);
     });
 
@@ -87,7 +87,7 @@ function buildAppLauncher() {
     grid.innerHTML = TAB_LIST.filter(tab => !tab.hidden).map(tab => {
         const button = `<button class="app-launcher-item" data-tab-id="${tab.id}" aria-label="${tab.label}">
             <div class="app-launcher-icon">
-                <i class="${tab.icon}"></i>
+                <i class="material-symbols-outlined">${tab.icon}</i>
             </div>
             <span class="app-launcher-label">${tab.label}</span>
         </button>`;

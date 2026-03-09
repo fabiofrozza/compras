@@ -36,10 +36,10 @@ function ensureConsoleDOM() {
             <div class="header-buttons">
                 <button class="btn-minimize" type="button" aria-label="Minimizar" data-bs-toggle="tooltip"
                     title="Minimizar">
-                    <i class="fa-solid fa-window-minimize"></i>
+                    <i class="material-symbols-outlined">minimize</i>
                 </button>
                 <button class="btn-close" type="button" aria-label="Fechar" data-bs-toggle="tooltip" title="Fechar">
-                    <i class="fa-solid fa-window-close"></i>
+                    <i class="material-symbols-outlined">close</i>
                 </button>
             </div>
         </div>
@@ -58,16 +58,16 @@ function ensureConsoleDOM() {
     <div id="logs-drawer" class="d-none shadow-lg collapsed">
         <div class="logs-drawer-header" onclick="toggleLogsDrawer()">
             <span id="logs-drawer-title">
-                <i class="fa-solid fa-file-alt me-2" data-bs-toggle="tooltip" title="Exibir logs das últimas execuções"></i>
+                <i class="material-symbols-outlined me-2" data-bs-toggle="tooltip" title="Exibir logs das últimas execuções">description</i>
                 <span>Logs</span>
             </span>
             <div class="logs-drawer-actions">
                 <button id="btn-reopen-console" class="logs-drawer-action-btn" data-bs-toggle="tooltip"
                     title="Reabrir console" style="display:none" onclick="event.stopPropagation(); reopenConsole();">
-                    <i class="fa-solid fa-terminal"></i>
+                    <i class="material-symbols-outlined">terminal</i>
                 </button>
-                <i class="fa-solid fa-window-minimize" id="logs-minimize-icon" data-bs-toggle="tooltip"
-                    title="Minimizar"></i>
+                <i class="material-symbols-outlined" id="logs-minimize-icon" data-bs-toggle="tooltip"
+                    title="Minimizar">minimize</i>
             </div>
         </div>
         <div class="logs-drawer-content">
@@ -100,10 +100,10 @@ function ensureConsoleDOM() {
   minimizeButton.addEventListener('click', () => {
     consoleContainer.classList.toggle('minimized');
     if (consoleContainer.classList.contains('minimized')) {
-      minimizeButton.innerHTML = '<i class="fa-solid fa-window-restore"></i>';
+      minimizeButton.innerHTML = '<i class="material-symbols-outlined">open_in_full</i>';
       minimizeButton.setAttribute('title', 'Restaurar');
     } else {
-      minimizeButton.innerHTML = '<i class="fa-solid fa-window-minimize"></i>';
+      minimizeButton.innerHTML = '<i class="material-symbols-outlined">minimize</i>';
       minimizeButton.setAttribute('title', 'Minimizar');
     }
   });

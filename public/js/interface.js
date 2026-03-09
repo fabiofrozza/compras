@@ -5,7 +5,7 @@ function applyDarkMode(darkModeEnabled = null) {
     const isDark = darkModeEnabled ?? !document.body.classList.contains('dark-mode');
 
     document.body.classList.toggle('dark-mode', isDark);
-    darkModeBtn.innerHTML = isDark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+    darkModeBtn.innerHTML = isDark ? '<i class="material-symbols-outlined">light_mode</i>' : '<i class="material-symbols-outlined">dark_mode</i>';
 
     const mc = document.getElementById('mainContent');
     if (isDark) {
