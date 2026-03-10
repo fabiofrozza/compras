@@ -1,13 +1,13 @@
 // --- Constante centralizada de abas ---
 const TAB_LIST = [
-    { id: 'home', label: 'Página inicial', icon: 'home', color: '#3b82f6', hidden: true },
-    { id: 'atas', label: 'Atas', icon: 'description', color: '#e11d48' },
-    { id: 'catmat', label: 'Catmat', icon: 'list', color: '#fb923c' },
-    { id: 'fornecedores', label: 'Fornecedores', icon: 'business', color: '#10b981' },
-    { id: 'importacao', label: 'Importação', icon: 'gavel', color: '#facc15' },
-    { id: 'mapas', label: 'Mapas', icon: 'shopping_basket', color: '#84cc16' },
-    { id: 'powerbi', label: 'Power BI', icon: 'show_chart', color: '#8b5cf6', separator: 'after' },
-    { id: 'instalacao', label: 'Instalação', icon: 'build', color: '#0ea5e9' },
+    { id: 'home', label: 'Página inicial', icon: 'home', hidden: true },
+    { id: 'atas', label: 'Atas', icon: 'description' },
+    { id: 'catmat', label: 'Catmat', icon: 'list' },
+    { id: 'fornecedores', label: 'Fornecedores', icon: 'business' },
+    { id: 'importacao', label: 'Importação', icon: 'gavel' },
+    { id: 'mapas', label: 'Mapas', icon: 'shopping_basket' },
+    { id: 'powerbi', label: 'Power BI', icon: 'show_chart', separator: 'after' },
+    { id: 'instalacao', label: 'Instalação', icon: 'build' },
 ];
 
 // --- Lazy Loading de Scripts sob demanda ---

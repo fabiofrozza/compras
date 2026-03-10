@@ -8,6 +8,12 @@ RESET, BASE, VARIÁVEIS GLOBAIS E TEMAS
     box-sizing: border-box;
 }
 
+@property --icon-fill {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 1;
+}
+
 :root {
     /* Cores de Status */
     --color-success: limegreen;
