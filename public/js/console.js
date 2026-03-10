@@ -99,12 +99,15 @@ function ensureConsoleDOM() {
 
   minimizeButton.addEventListener('click', () => {
     consoleContainer.classList.toggle('minimized');
-    if (consoleContainer.classList.contains('minimized')) {
-      minimizeButton.innerHTML = '<i class="material-symbols-outlined">open_in_full</i>';
-      minimizeButton.setAttribute('title', 'Restaurar');
-    } else {
-      minimizeButton.innerHTML = '<i class="material-symbols-outlined">minimize</i>';
-      minimizeButton.setAttribute('title', 'Minimizar');
+    const isMinimized = consoleContainer.classList.contains('minimized');
+    const newTitle = isMinimized ? 'Restaurar' : 'Minimizar';
+    const newIcon = isMinimized ? 'open_in_full' : 'minimize';
+    minimizeButton.innerHTML = `<i class="material-symbols-outlined">${newIcon}</i>`;
+    minimizeButton.setAttribute('title', newTitle);
+    minimizeButton.setAttribute('aria-label', newTitle);
+    const tooltip = bootstrap.Tooltip.getInstance(minimizeButton);
+    if (tooltip) {
+      tooltip.setContent({ '.tooltip-inner': newTitle });
     }
   });
 

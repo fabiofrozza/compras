@@ -9,6 +9,7 @@ FLOATING CONSOLE AND LOGS DRAWER
     width: 700px;
     height: 400px;
     min-width: 350px;
+    min-height: 160px;
     background: #1e1e1e;
     border-radius: 8px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -16,7 +17,11 @@ FLOATING CONSOLE AND LOGS DRAWER
     flex-direction: column;
     z-index: 1102;
     resize: both;
-    overflow: auto;
+    overflow: hidden;
+}
+
+#console-container::-webkit-scrollbar {
+    display: none;
 }
 
 #console-container.show {
@@ -29,13 +34,15 @@ body.dragging-console {
 
 /* Header do Console */
 .console-header {
-    padding: 8px 12px;
+    min-height: 32px;
+    padding: 4px 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: move;
     background: linear-gradient(#f6f6f6, #d3d3d3 18%, #7e7e7e 87%, #7e7e7e 94%, #393456 100%);
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+    flex-shrink: 0;
 }
 
 .header-buttons {
@@ -176,6 +183,7 @@ body.dragging-console {
 
 #console-container.minimized {
     height: auto !important;
+    min-height: 0;
     resize: none;
 }
 
@@ -190,6 +198,7 @@ body.dragging-console {
     padding: 8px 8px 8px 0;
     color: white;
     transition: background-color 0.3s ease;
+    flex-shrink: 0;
 }
 
 #console-container.show #console-summary {
@@ -300,6 +309,7 @@ body.dragging-console {
 
 #console-output {
     flex: 1;
+    min-height: 60px;
     padding: 15px;
     line-height: normal;
     overflow-y: auto;
