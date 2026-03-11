@@ -128,7 +128,7 @@ FORMS AND FILES
 }
 
 .files-table tbody tr:hover {
-    background: #f9f9f9;
+    background: var(--bs-tertiary-bg);
 }
 
 .files-table tbody tr {
@@ -144,6 +144,14 @@ FORMS AND FILES
     vertical-align: baseline !important;
     font-variation-settings: 'opsz' 48;
 }
+
+.file-word { color: #2B579A; }
+.file-excel { color: #217346; }
+.file-pdf { color: #D30015; }
+.file-text { color: #777; }
+.file-image { color: #FF6B6B; }
+.file-archive { color: #FF6B35; }
+.file-code { color: #276DC3; }
 
 .folder-buttons-container {
     display: flex;

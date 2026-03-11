@@ -1,33 +1,39 @@
 const FILE_ICON_MAP = {
-    'doc': '<i class="material-symbols-outlined" style="color: #2B579A;">description</i>',
-    'docx': '<i class="material-symbols-outlined" style="color: #2B579A;">description</i>',
-    'docm': '<i class="material-symbols-outlined" style="color: #2B579A;">description</i>',
-    'log': '<i class="material-symbols-outlined" style="color: #2B579A;">fingerprint</i>',
-    'xls': '<i class="material-symbols-outlined" style="color: #217346;">table_chart</i>',
-    'xlsx': '<i class="material-symbols-outlined" style="color: #217346;">table_chart</i>',
-    'xlsm': '<i class="material-symbols-outlined" style="color: #217346;">table_chart</i>',
-    'csv': '<i class="material-symbols-outlined" style="color: #217346;">table_chart</i>',
-    'pdf': '<i class="material-symbols-outlined" style="color: #D30015;">picture_as_pdf</i>',
-    'txt': '<i class="material-symbols-outlined" style="color: #444;">article</i>',
-    'rtf': '<i class="material-symbols-outlined" style="color: #444;">description</i>',
-    'jpg': '<i class="material-symbols-outlined" style="color: #FF6B6B;">image</i>',
-    'jpeg': '<i class="material-symbols-outlined" style="color: #FF6B6B;">image</i>',
-    'png': '<i class="material-symbols-outlined" style="color: #FF6B6B;">image</i>',
-    'gif': '<i class="material-symbols-outlined" style="color: #FF6B6B;">image</i>',
-    'bmp': '<i class="material-symbols-outlined" style="color: #FF6B6B;">image</i>',
-    'zip': '<i class="material-symbols-outlined" style="color: #FF6B35;">folder_zip</i>',
-    'rar': '<i class="material-symbols-outlined" style="color: #FF6B35;">folder_zip</i>',
-    '7z': '<i class="material-symbols-outlined" style="color: #FF6B35;">folder_zip</i>',
-    'r': '<i class="material-symbols-outlined" style="color: #276DC3;">code</i>',
+    doc:  ['file-word', 'description'],
+    docx: ['file-word', 'description'],
+    docm: ['file-word', 'description'],
+    log:  ['file-word', 'fingerprint'],
+    xls:  ['file-excel', 'table_chart'],
+    xlsx: ['file-excel', 'table_chart'],
+    xlsm: ['file-excel', 'table_chart'],
+    csv:  ['file-excel', 'table_chart'],
+    pdf:  ['file-pdf', 'picture_as_pdf'],
+    txt:  ['file-text', 'article'],
+    rtf:  ['file-text', 'description'],
+    jpg:  ['file-image', 'image'],
+    jpeg: ['file-image', 'image'],
+    png:  ['file-image', 'image'],
+    gif:  ['file-image', 'image'],
+    bmp:  ['file-image', 'image'],
+    zip:  ['file-archive', 'folder_zip'],
+    rar:  ['file-archive', 'folder_zip'],
+    '7z': ['file-archive', 'folder_zip'],
+    r:    ['file-code', 'code'],
 };
 
+function fileIcon(icon, colorClass = '') {
+    const cls = `material-symbols-outlined${colorClass ? ` ${colorClass}` : ''}`;
+    return `<i class="${cls}">${icon}</i>`;
+}
+
 function getFileIcon(fileName, isDirectory) {
-    if (isDirectory) return '<i class="material-symbols-outlined">folder</i>';
-    if (fileName.startsWith('~')) return '<i class="material-symbols-outlined">help</i>';
+    if (isDirectory) return fileIcon('folder');
+    if (fileName.startsWith('~')) return fileIcon('help');
 
     const extension = fileName.split('.').pop().toLowerCase();
+    const entry = FILE_ICON_MAP[extension];
 
-    return FILE_ICON_MAP[extension] || '<i class="material-symbols-outlined">insert_drive_file</i>';
+    return entry ? fileIcon(entry[1], entry[0]) : fileIcon('insert_drive_file');
 }
 
 async function openFolder(folderPath) {
