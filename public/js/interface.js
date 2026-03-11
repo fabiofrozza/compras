@@ -69,7 +69,18 @@ async function setHomeBackground() {
     img.src = imageUrl;
 }
 
-document.addEventListener('DOMContentLoaded', setHomeBackground);
+// ====== FILTRO SVG ALEATÓRIO (Liquid Glass) ======
+
+function randomizeGlassFilter() {
+    const totalFilters = 6;
+    const randomIndex = Math.floor(Math.random() * totalFilters) + 1;
+    document.documentElement.style.setProperty('--filter-name', `url(#container-glass-${randomIndex})`);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    setHomeBackground();
+    randomizeGlassFilter();
+});
 
 // Event delegation para .card-link — funciona mesmo em conteúdo carregado dinamicamente
 document.addEventListener('click', (e) => {

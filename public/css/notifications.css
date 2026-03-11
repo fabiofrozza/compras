@@ -144,53 +144,30 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     box-shadow: 0 0 0 2px var(--color-surface-1);
 }
 
-@keyframes bellShake {
+#header-actions.bell-bump {
+    animation: bellBump 0.4s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@keyframes bellBump {
     0% {
-        transform: rotate(0deg);
-    }
-
-    10% {
-        transform: rotate(18deg);
-    }
-
-    20% {
-        transform: rotate(-16deg);
+        transform: translateY(0);
     }
 
     30% {
-        transform: rotate(14deg);
-    }
-
-    40% {
-        transform: rotate(-10deg);
+        transform: translateY(-6px);
     }
 
     50% {
-        transform: rotate(7deg);
-    }
-
-    60% {
-        transform: rotate(-4deg);
+        transform: translateY(-2px);
     }
 
     70% {
-        transform: rotate(2deg);
+        transform: translateY(-4px);
     }
 
-    80% {
-        transform: rotate(-1deg);
-    }
-
-    90%,
     100% {
-        transform: rotate(0deg);
+        transform: translateY(0);
     }
-}
-
-#notificationsBtn.bell-shake i {
-    display: inline-block;
-    transform-origin: top center;
-    animation: bellShake 0.7s ease-out;
 }
 
 @keyframes badgePop {
@@ -399,4 +376,21 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
 .notification-clear-all:hover {
     background: rgba(128, 128, 128, 0.12);
     color: var(--color-text-primary);
+}
+
+/* ==========================================================================
+MARIO HEADBUTT (Easter Egg: Mario bate a cabeça no sino)
+========================================================================== */
+
+.mario-headbutt-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    pointer-events: none;
+}
+
+#notificationsBtn {
+    overflow: visible;
 }

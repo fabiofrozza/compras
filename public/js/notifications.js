@@ -96,7 +96,7 @@ const notificationIcons = {
  * @param {'success'|'error'|'warning'|'info'} [options.type='info'] - Tipo da notificação
  * @param {string} [options.source='Sistema'] - Aba ou serviço de origem
  */
-function addNotification({ message, type = 'info', source = 'Sistema' }) {
+async function addNotification({ message, type = 'info', source = 'Sistema' }) {
     const notification = {
         id: ++notificationIdCounter,
         message,
@@ -106,20 +106,45 @@ function addNotification({ message, type = 'info', source = 'Sistema' }) {
     };
 
     notifications.unshift(notification); // Mais recente no topo
+    marioHeadbutt();
+
+    const delay = (ms) => new Promise(res => setTimeout(res, ms));
+    await delay(500);
+
     updateNotificationBadge();
-    shakeBell();
     renderNotificationList();
 }
 
-/** Dispara a animação de balanço no ícone do sino */
-function shakeBell() {
+/** Faz o Mario aparecer embaixo do ícone de notificações e "cabecear" o sino */
+let _marioLoadersReady = false;
+async function marioHeadbutt() {
     const btn = document.getElementById('notificationsBtn');
+    const headerActions = document.getElementById('header-actions');
     if (!btn) return;
-    btn.classList.remove('bell-shake');
-    // forçar reflow para reiniciar a animação caso chegue outra notificação imediatamente
-    void btn.offsetWidth;
-    btn.classList.add('bell-shake');
-    setTimeout(() => btn.classList.remove('bell-shake'), 700);
+
+    // Lazy-load do loaders.js se ainda não carregado
+    if (!_marioLoadersReady && typeof getMario !== 'function') {
+        try {
+            await loadScript('js/loaders.js');
+            _marioLoadersReady = true;
+        } catch (e) {
+            return;
+        }
+    }
+
+    const container = document.createElement('div');
+    container.className = 'mario-headbutt-container';
+    container.innerHTML = getMario();
+    btn.appendChild(container);
+
+    // Sincronizar o "pulo" do sino com a cabeçada do Mario
+    setTimeout(() => {
+        headerActions.classList.add('bell-bump');
+        setTimeout(() => headerActions.classList.remove('bell-bump'), 400);
+    }, 500);
+
+    // Remover após um ciclo da animação original (2s)
+    setTimeout(() => container.remove(), 2000);
 }
 
 /** Atualiza o badge vermelho no botão do sino */
