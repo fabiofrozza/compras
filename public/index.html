@@ -34,23 +34,70 @@
 </head>
 
 <body>
-    <!-- SVG Filters para efeito Liquid Glass (iOS 26 style) -->
-    <svg style="display: none">
-        <filter id="container-glass" x="0%" y="0%" width="100%" height="100%">
+    <!-- SVG Filters para efeito Liquid Glass -->
+    <svg style="display: none;">
+        <!-- https://codepen.io/daftplug/pen/QwbaYGO -->
+        <filter id="container-glass-1" x="0%" y="0%" width="100%" height="100%">
             <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92" result="noise" />
             <feGaussianBlur in="noise" stdDeviation="0.02" result="blur" />
             <feDisplacementMap in="SourceGraphic" in2="blur" scale="77" xChannelSelector="R" yChannelSelector="G" />
         </filter>
-        <filter id="btn-glass" primitiveUnits="objectBoundingBox">
+        <filter id="container-glass-2" primitiveUnits="objectBoundingBox">
             <feImage href="" x="0" y="0" width="1" height="1" result="map"></feImage>
             <feGaussianBlur in="SourceGraphic" stdDeviation="0.02" result="blur"></feGaussianBlur>
             <feDisplacementMap id="disp" in="blur" in2="map" scale="1" xChannelSelector="R" yChannelSelector="G">
             </feDisplacementMap>
         </filter>
+        <!-- https://codepen.io/iamryanyu/pen/gbpzgqX -->
+        <filter id="container-glass-3" x="0" y="0" width="100%" height="100%" filterUnits="objectBoundingBox">
+            <feTurbulence type="fractalNoise" baseFrequency="0.003 0.007" numOctaves="1" result="turbulence" />
+            <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="200" xChannelSelector="R"
+                yChannelSelector="G" />
+        </filter>
+        <!-- https://codepen.io/Esther-k/pen/XJbxKQq -->
+        <filter id="container-glass-4" x="-50%" y="-50%" width="200%" height="200%" primitiveUnits="objectBoundingBox">
+            <feImage x="-50%" y="-50%" width="200%" height="200%" result="map" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="0.02" result="blur" />
+            <feDisplacementMap id="disp" in="blur" in2="map" scale="0.8" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+        <!-- https://codepen.io/lassiterda/pen/vEOpqMa -->
+        <filter id="container-glass-5" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
+            <feTurbulence type="fractalNoise" baseFrequency="0.01 0.01" numOctaves="1" seed="5" result="turbulence" />
+            <!-- Seeds: 14, 17,  -->
+            <feComponentTransfer in="turbulence" result="mapped">
+                <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
+                <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
+                <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
+            </feComponentTransfer>
+            <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
+            <feSpecularLighting in="softMap" surfaceScale="5" specularConstant="1" specularExponent="100"
+                lighting-color="white" result="specLight">
+                <fePointLight x="-200" y="-200" z="300" />
+            </feSpecularLighting>
+            <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage" />
+            <feDisplacementMap in="SourceGraphic" in2="softMap" scale="150" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+        <!-- https://codepen.io/alexerlandsson/pen/GgJQEKE -->
+        <filter id="container-glass-6" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
+            <feTurbulence type="fractalNoise" baseFrequency="0.001 0.005" numOctaves="1" seed="17"
+                result="turbulence" />
+            <feComponentTransfer in="turbulence" result="mapped">
+                <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
+                <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
+                <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
+            </feComponentTransfer>
+            <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
+            <feSpecularLighting in="softMap" surfaceScale="5" specularConstant="1" specularExponent="100"
+                lighting-color="white" result="specLight">
+                <fePointLight x="-200" y="-200" z="300" />
+            </feSpecularLighting>
+            <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage" />
+            <feDisplacementMap in="SourceGraphic" in2="softMap" scale="200" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
     </svg>
 
     <!-- Barra de navegação superior fixa -->
-    <header class="top-nav shadow glassContainer" id="navbar">
+    <header class="top-nav shadow" id="navbar">
         <div class="navbar-content">
             <div class="navbar-left">
                 <img src="img/company.png" class="navbar-logo" id="companyLogo" alt="Logo da empresa">
@@ -183,8 +230,7 @@
     <div id="toast-container"></div>
 
     <!-- Painel de Configurações (Settings Panel) -->
-    <div id="settings-panel" class="header-panel glassContainer" role="dialog" aria-label="Configurações"
-        aria-hidden="true">
+    <div id="settings-panel" class="header-panel" role="dialog" aria-label="Configurações" aria-hidden="true">
         <div class="header-panel-header">
             <span><i class="material-symbols-outlined me-2">settings_heart</i>Preferências</span>
             <button class="header-panel-close" id="settingsPanelClose" aria-label="Fechar"><i
@@ -213,7 +259,7 @@
     </div>
 
     <!-- Painel do Usuário (User Panel) -->
-    <div id="user-panel" class="header-panel glassContainer" role="dialog" aria-label="Usuário" aria-hidden="true">
+    <div id="user-panel" class="header-panel" role="dialog" aria-label="Usuário" aria-hidden="true">
         <div class="header-panel-header">
             <span><i class="material-symbols-outlined me-2">account_circle</i>Usuário</span>
             <button class="header-panel-close" id="userPanelClose" aria-label="Fechar"><i
@@ -239,8 +285,7 @@
     </div>
 
     <!-- Painel de Notificações (Notifications Panel) -->
-    <div id="notifications-panel" class="header-panel glassContainer" role="dialog" aria-label="Notificações"
-        aria-hidden="true">
+    <div id="notifications-panel" class="header-panel" role="dialog" aria-label="Notificações" aria-hidden="true">
         <div class="header-panel-header">
             <span><i class="material-symbols-outlined me-2">notifications</i>Notificações</span>
             <button class="header-panel-close" id="notificationsPanelClose" aria-label="Fechar"><i
@@ -258,8 +303,7 @@
     </div>
 
     <!-- Painel App Launcher -->
-    <div id="app-launcher-panel" class="header-panel glassContainer" role="dialog" aria-label="Aplicativos"
-        aria-hidden="true">
+    <div id="app-launcher-panel" class="header-panel" role="dialog" aria-label="Aplicativos" aria-hidden="true">
         <div class="header-panel-header">
             <span><i class="material-symbols-outlined me-2">apps</i>Aplicativos</span>
             <button class="header-panel-close" id="appLauncherPanelClose" aria-label="Fechar"><i

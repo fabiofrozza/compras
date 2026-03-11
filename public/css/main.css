@@ -178,8 +178,7 @@ body.dark-mode #home.home-bg-loaded::after {
 /* ========================
    Cards
    ========================
-   Inspired by https://codepen.io/daftplug/pen/QwbaYGO and
-   https://codepen.io/vinocrazy/pen/mdrxYOL */
+   Inspired by https://codepen.io/vinocrazy/pen/mdrxYOL */
 
 .card-link {
     cursor: pointer;
@@ -216,9 +215,9 @@ body.dark-mode #home.home-bg-loaded::after {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    width: 210px;
-    height: 300px;
-    border-radius: 30px;
+    width: 200px;
+    height: 275px;
+    border-radius: 24px;
     padding: 24px 12px;
     z-index: 2;
     transform-origin: bottom;
@@ -243,7 +242,7 @@ body.dark-mode #home.home-bg-loaded::after {
 .card-glass-container:hover::before {
     box-shadow:
         12px 20px 24px 8px color-mix(in srgb, var(--color-text-primary), transparent 50%),
-        inset 25px 0px 50px 0px rgba(255, 255, 255, .75),
+        /*inset 25px 0px 50px 0px rgba(255, 255, 255, .75),*/
         inset 2px 2px 0px -2px rgba(255, 255, 255, 0.7),
         inset 0 0 3px 1px rgba(255, 255, 255, 0.7);
 }
@@ -262,9 +261,9 @@ body.dark-mode #home.home-bg-loaded::after {
     inset: 0;
     z-index: 0;
     overflow: hidden;
-    border-radius: 30px;
+    border-radius: 24px;
     box-shadow:
-        inset 25px 0px 50px 0px rgba(255, 255, 255, .75),
+        /*inset 25px 0px 50px 0px rgba(255, 255, 255, .75),*/
         inset 2px 2px 0px -2px rgba(255, 255, 255, 0.7),
         inset 0 0 3px 1px rgba(255, 255, 255, 0.7);
     transition: all 5s ease-in-out;
@@ -277,8 +276,7 @@ body.dark-mode #home.home-bg-loaded::after {
     inset: 0;
     -webkit-backdrop-filter: blur(0px);
     backdrop-filter: blur(0px);
-    -webkit-filter: url(#container-glass);
-    filter: url(#container-glass);
+    filter: var(--filter-name);
     overflow: hidden;
     isolation: isolate;
     border-radius: 30px;
@@ -326,8 +324,6 @@ body.dark-mode #home.home-bg-loaded::after {
     border-radius: 9999px;
     backdrop-filter: blur(10px);
     background-color: rgb(255 255 255 / 25%);
-    -webkit-filter: url(#btn-glass);
-    filter: url(#btn-glass);
     overflow: hidden;
     isolation: isolate;
 }
@@ -363,8 +359,6 @@ body.dark-mode #home.home-bg-loaded::after {
     border-radius: 6px;
     backdrop-filter: blur(10px);
     background: radial-gradient(circle, rgb(255 255 255 / 25%), transparent);
-    -webkit-filter: url(#btn-glass);
-    filter: url(#btn-glass);
     overflow: hidden;
     isolation: isolate;
 }

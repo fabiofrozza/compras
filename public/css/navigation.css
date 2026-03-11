@@ -10,18 +10,17 @@ BARRA DE NAVEGAÇÃO SUPERIOR (Glassmorphism)
     border-bottom: 1px solid rgba(255, 255, 255, 0.25);
     z-index: 1000;
     transition: var(--transition-time) ease-in-out;
-    background-color: rgb(255, 255, 255, 0.5);
+    background: linear-gradient(175grad, white, transparent 15%) !important;
 }
 
-.top-nav.glassContainer::before {
+.top-nav::before {
     content: '';
     position: absolute;
     z-index: -1;
     inset: 0;
-    backdrop-filter: var(--blur-level);
-    -webkit-backdrop-filter: var(--blur-level);
-    filter: url(#container-glass);
-    -webkit-filter: url(#container-glass);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    filter: var(--filter-name);
     overflow: hidden;
     isolation: isolate;
 }
@@ -48,6 +47,10 @@ BARRA DE NAVEGAÇÃO SUPERIOR (Glassmorphism)
     height: calc(var(--top-nav-height) - 16px);
     object-fit: contain;
     flex-shrink: 0;
+}
+
+body.dark-mode .navbar-logo {
+    filter: invert(1) grayscale(1);
 }
 
 .navbar-logo-department {
@@ -89,12 +92,12 @@ NAVBAR APP BUTTONS (botões de aplicativos no header)
     align-items: center;
 }
 
-.navbar-apps {
+.navbar-apps,
+.header-actions {
     display: flex;
     align-items: stretch;
     gap: 2px;
-    padding: 8px;
-    border-radius: 12px;
+    border-radius: 8px;
     transition: 300ms ease-in-out;
     background: linear-gradient(to right,
             transparent,
@@ -119,15 +122,15 @@ NAVBAR APP BUTTONS (botões de aplicativos no header)
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
-    gap: 1px;
-    padding: 3px 8px 2px;
+    flex-direction: row;
+    gap: 4px;
+    padding: 5px 10px;
     color: var(--color-text-primary);
-    opacity: 0.55;
+    opacity: 1;
 }
 
 .navbar-app-btn i {
-    font-size: 1.35rem;
+    font-size: 1.6rem;
     font-variation-settings: 'FILL' 0, 'wght' 300;
     transition: all 300ms ease-in-out;
 }
@@ -247,15 +250,14 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
     transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-.header-panel.glassContainer::before {
+.header-panel::before {
     content: '';
     position: absolute;
     z-index: -1;
     inset: 0;
     backdrop-filter: var(--blur-level);
     -webkit-backdrop-filter: var(--blur-level);
-    filter: url(#container-glass);
-    -webkit-filter: url(#container-glass);
+    filter: var(--filter-name);
     overflow: hidden;
     isolation: isolate;
     border-radius: 12px;
