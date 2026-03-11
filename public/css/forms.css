@@ -34,6 +34,12 @@ FORMS AND FILES
     color: var(--color-text-primary);
 }
 
+.script-form h4>i {
+    font-size: 1.25rem;
+    vertical-align: top;
+    font-variation-settings: 'opsz' 48;
+}
+
 .script-form h4 {
     margin-bottom: 14px;
     border-bottom: 1px solid var(--color-border-focus);
@@ -72,6 +78,11 @@ FORMS AND FILES
     border-color: var(--bs-form-invalid-border-color);
 }
 
+.files-list .alert i {
+    font-size: 1.25rem;
+    vertical-align: sub;
+}
+
 .folder-path-container {
     border-bottom: var(--bs-border-color) solid 1px;
     padding: 5px;
@@ -83,12 +94,15 @@ FORMS AND FILES
     align-items: flex-start;
     justify-content: space-between;
     word-break: break-all;
+    flex-wrap: nowrap;
 }
 
-.icon-and-path {
-    display: flex;
-    gap: 6px;
-    align-items: baseline;
+.folder-path {
+    flex-grow: 1;
+}
+
+.folder-path-container i:first-child {
+    font-size: 1.25rem;
 }
 
 .copy-icon {
@@ -110,6 +124,7 @@ FORMS AND FILES
 .files-table td {
     padding: 2px;
     vertical-align: top;
+    word-break: break-all;
 }
 
 .files-table tbody tr:hover {
@@ -122,6 +137,12 @@ FORMS AND FILES
 
 .file-icon {
     margin-left: 6px;
+    font-size: 1rem;
+}
+
+.file-icon i {
+    vertical-align: baseline !important;
+    font-variation-settings: 'opsz' 48;
 }
 
 .folder-buttons-container {
@@ -135,6 +156,7 @@ FORMS AND FILES
 
 .btn-sm .material-symbols-outlined {
     font-size: 20px;
+    font-variation-settings: 'opsz' 48;
 }
 
 /* Status text dos formulários */
@@ -142,6 +164,12 @@ FORMS AND FILES
 #importacao-sheet-status {
     font-size: 12px;
     margin-bottom: 0px;
+}
+
+#status-dados-atas i,
+#importacao-sheet-status i {
+    font-size: 1.25rem;
+    vertical-align: top;
 }
 
 /* Estilos de Abas de Importação no Formulário */
@@ -158,6 +186,11 @@ FORMS AND FILES
 #importacaoTabs .nav-link {
     border: 0px;
     color: var(--bs-secondary);
+}
+
+#importacaoTabs .nav-link i {
+    font-size: 1.25rem;
+    vertical-align: sub;
 }
 
 #importacaoTabs .nav-link:hover {

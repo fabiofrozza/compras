@@ -1,23 +1,24 @@
 const FILE_ICON_MAP = {
-    'doc':  '<i class="material-symbols-outlined" style="color: #2B579A;">description</i>',
+    'doc': '<i class="material-symbols-outlined" style="color: #2B579A;">description</i>',
     'docx': '<i class="material-symbols-outlined" style="color: #2B579A;">description</i>',
     'docm': '<i class="material-symbols-outlined" style="color: #2B579A;">description</i>',
-    'xls':  '<i class="material-symbols-outlined" style="color: #217346;">table_chart</i>',
+    'log': '<i class="material-symbols-outlined" style="color: #2B579A;">fingerprint</i>',
+    'xls': '<i class="material-symbols-outlined" style="color: #217346;">table_chart</i>',
     'xlsx': '<i class="material-symbols-outlined" style="color: #217346;">table_chart</i>',
     'xlsm': '<i class="material-symbols-outlined" style="color: #217346;">table_chart</i>',
-    'csv':  '<i class="material-symbols-outlined" style="color: #217346;">table_chart</i>',
-    'pdf':  '<i class="material-symbols-outlined" style="color: #D30015;">picture_as_pdf</i>',
-    'txt':  '<i class="material-symbols-outlined" style="color: #444;">article</i>',
-    'rtf':  '<i class="material-symbols-outlined" style="color: #444;">description</i>',
-    'jpg':  '<i class="material-symbols-outlined" style="color: #FF6B6B;">image</i>',
+    'csv': '<i class="material-symbols-outlined" style="color: #217346;">table_chart</i>',
+    'pdf': '<i class="material-symbols-outlined" style="color: #D30015;">picture_as_pdf</i>',
+    'txt': '<i class="material-symbols-outlined" style="color: #444;">article</i>',
+    'rtf': '<i class="material-symbols-outlined" style="color: #444;">description</i>',
+    'jpg': '<i class="material-symbols-outlined" style="color: #FF6B6B;">image</i>',
     'jpeg': '<i class="material-symbols-outlined" style="color: #FF6B6B;">image</i>',
-    'png':  '<i class="material-symbols-outlined" style="color: #FF6B6B;">image</i>',
-    'gif':  '<i class="material-symbols-outlined" style="color: #FF6B6B;">image</i>',
-    'bmp':  '<i class="material-symbols-outlined" style="color: #FF6B6B;">image</i>',
-    'zip':  '<i class="material-symbols-outlined" style="color: #FF6B35;">folder_zip</i>',
-    'rar':  '<i class="material-symbols-outlined" style="color: #FF6B35;">folder_zip</i>',
-    '7z':   '<i class="material-symbols-outlined" style="color: #FF6B35;">folder_zip</i>',
-    'r':    '<i class="material-symbols-outlined" style="color: #276DC3;">code</i>',
+    'png': '<i class="material-symbols-outlined" style="color: #FF6B6B;">image</i>',
+    'gif': '<i class="material-symbols-outlined" style="color: #FF6B6B;">image</i>',
+    'bmp': '<i class="material-symbols-outlined" style="color: #FF6B6B;">image</i>',
+    'zip': '<i class="material-symbols-outlined" style="color: #FF6B35;">folder_zip</i>',
+    'rar': '<i class="material-symbols-outlined" style="color: #FF6B35;">folder_zip</i>',
+    '7z': '<i class="material-symbols-outlined" style="color: #FF6B35;">folder_zip</i>',
+    'r': '<i class="material-symbols-outlined" style="color: #276DC3;">code</i>',
 };
 
 function getFileIcon(fileName, isDirectory) {
@@ -218,10 +219,8 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
 
         let filesHTML = `
             <div class="folder-path-container">
-                <div class="icon-and-path">
-                    <i class="material-symbols-outlined">folder</i>
-                    <span class="folder-path">${data.folderPath}</span>
-                </div>
+                <i class="material-symbols-outlined">folder</i>
+                <span class="folder-path">${data.folderPath}</span>
                 <button data-bs-toggle="tooltip" data-bs-title="Clique para copiar o caminho da pasta" class="btn btn-outline-secondary btn-sm copy-icon"}>
                     <i class="material-symbols-outlined">content_copy</i>
                 </button>
