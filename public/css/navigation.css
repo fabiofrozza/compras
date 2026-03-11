@@ -11,6 +11,9 @@ BARRA DE NAVEGAÇÃO SUPERIOR (Glassmorphism)
     z-index: 1000;
     transition: var(--transition-time) ease-in-out;
     background: linear-gradient(175grad, white, transparent 15%) !important;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--padding-main-container);
 }
 
 .top-nav::before {
@@ -23,15 +26,6 @@ BARRA DE NAVEGAÇÃO SUPERIOR (Glassmorphism)
     filter: var(--filter-name);
     overflow: hidden;
     isolation: isolate;
-}
-
-.navbar-content {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 100%;
-    padding: 0 var(--padding-main-container);
 }
 
 /* Lado Esquerdo: Logos + Subtítulo */
@@ -81,7 +75,6 @@ body.dark-mode .navbar-logo {
 /* ==========================================================================
 NAVBAR APP BUTTONS (botões de aplicativos no header)
 ========================================================================== */
-
 /* Center */
 .navbar-center {
     position: absolute;
@@ -97,19 +90,37 @@ NAVBAR APP BUTTONS (botões de aplicativos no header)
     display: flex;
     align-items: stretch;
     gap: 2px;
-    border-radius: 8px;
-    transition: 300ms ease-in-out;
-    background: linear-gradient(to right,
-            transparent,
-            rgb(255, 255, 255, .5) 25%,
-            rgb(255, 255, 255, .5) 75%,
-            transparent);
-    box-shadow: inset 0px 25px 16px -10px rgb(255, 255, 255, .75);
+    box-sizing: border-box;
+    padding: 2px;
+    margin: 0 auto;
+    border: none;
+    border-radius: 99em;
+    background-color: color-mix(in srgb, var(--c-glass) 12%, transparent);
+    backdrop-filter: blur(8px) saturate(var(--saturation));
+    box-shadow:
+        inset 0 0 0 1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 10%), transparent),
+        inset 1.8px 3px 0px -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 90%), transparent),
+        inset -2px -2px 0px -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 80%), transparent),
+        inset -3px -8px 1px -6px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 60%), transparent),
+        inset -0.3px -1px 4px 0px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 12%), transparent),
+        inset -1.5px 2.5px 0px -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
+        inset 0px 3px 4px -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
+        inset 2px -6.5px 1px -4px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
+        0px 1px 5px 0px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
+        0px 6px 16px 0px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 8%), transparent);
+    transition: all 400ms cubic-bezier(1, 0.0, 0.4, 1);
 }
 
-.navbar-apps:hover {
-    box-shadow: inset 0px -25px 16px -10px rgb(255, 255, 255, .75),
-        0px 12px 10px rgba(0, 0, 0, 0.2);
+.navbar-app-btn.active {
+    z-index: -1;
+    box-shadow:
+        inset 0 0 0 1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 10%), transparent),
+        inset 2px 1px 0px -1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 90%), transparent),
+        inset -1.5px -1px 0px -1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 80%), transparent),
+        inset -2px -6px 1px -5px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 60%), transparent),
+        inset -1px 2px 3px -1px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
+        inset 0px -4px 1px -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
+        0px 3px 6px 0px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 8%), transparent);
 }
 
 .navbar-app-btn {
@@ -117,7 +128,7 @@ NAVBAR APP BUTTONS (botões de aplicativos no header)
     border: none;
     outline: none;
     background: transparent;
-    border-radius: 8px;
+    border-radius: 1.5rem;
     transition: all 300ms ease-in-out;
     display: flex;
     align-items: center;
@@ -130,15 +141,14 @@ NAVBAR APP BUTTONS (botões de aplicativos no header)
 }
 
 .navbar-app-btn i {
-    font-size: 1.6rem;
+    font-size: 2rem;
     font-variation-settings: 'FILL' 0, 'wght' 300;
     transition: all 300ms ease-in-out;
 }
 
 .navbar-app-btn .navbar-app-label {
-    font-size: 0.6rem;
+    font-size: .8rem;
     font-weight: 500;
-    line-height: 1;
     white-space: nowrap;
     letter-spacing: 0.01em;
     max-width: 0;
@@ -155,19 +165,9 @@ NAVBAR APP BUTTONS (botões de aplicativos no header)
 
 .navbar-app-btn:hover {
     opacity: 1;
-    background: rgba(255, 255, 255, 0.5);
 }
 
-.navbar-app-btn.active {
-    opacity: 1;
-    background: var(--color-text-primary);
-    color: var(--color-surface-1);
-}
-
-.navbar-app-btn:hover i {
-    font-variation-settings: 'FILL' 1, 'wght' 300;
-}
-
+.navbar-app-btn:hover i,
 .navbar-app-btn.active i {
     font-variation-settings: 'FILL' 1, 'wght' 400;
 }
@@ -196,8 +196,8 @@ body.dark-mode .navbar-app-btn:hover::after {
 
 /* Header Actions Group */
 .header-actions {
-    display: flex;
-    align-items: center;
+    position: absolute;
+    right: var(--padding-main-container);
     flex-shrink: 0;
 }
 
@@ -209,7 +209,7 @@ body.dark-mode .navbar-app-btn:hover::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: 1rem;
     transition: var(--transition-time) ease-in-out;
     background-color: transparent;
     color: var(--color-text-primary);
@@ -220,14 +220,19 @@ body.dark-mode .navbar-app-btn:hover::after {
     font-variation-settings: 'wght' 250;
 }
 
-.header-icon-btn:hover {
-    background-color: var(--color-text-primary);
-    color: var(--color-surface-1);
-}
-
+.header-icon-btn:hover,
 .header-icon-btn.active {
-    background-color: var(--color-text-primary);
     color: var(--color-surface-1);
+    background-color: color-mix(in srgb, var(--color-text-primary) 60%, transparent);
+    z-index: -1;
+    box-shadow:
+        inset 0 0 0 1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 10%), transparent),
+        inset 2px 1px 0px -1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 90%), transparent),
+        inset -1.5px -1px 0px -1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 80%), transparent),
+        inset -2px -6px 1px -5px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 60%), transparent),
+        inset -1px 2px 3px -1px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
+        inset 0px -4px 1px -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
+        0px 3px 6px 0px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 8%), transparent);
 }
 
 /* ==========================================================================

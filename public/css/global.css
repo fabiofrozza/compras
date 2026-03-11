@@ -38,6 +38,15 @@ RESET, BASE, VARIÁVEIS GLOBAIS E TEMAS
     --filter-name: url(#container-glass-5);
     --blur-level: blur(2px);
 
+    --c-glass: #bbbbbc;
+    --c-light: #fff;
+    --c-dark: #000;
+
+    --glass-reflex-dark: 1;
+    --glass-reflex-light: 1;
+
+    --saturation: 150%;
+
     /* Dimensões e Layout */
     --padding-screen: 20px;
     --padding-main-container: 12px;
