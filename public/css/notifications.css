@@ -202,11 +202,11 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
 }
 
 .notification-list::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
 }
 
 .notification-list::-webkit-scrollbar-thumb {
-    background: rgba(128, 128, 128, 0.3);
+    background: var(--color-text-primary);
     border-radius: 4px;
 }
 

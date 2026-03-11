@@ -43,7 +43,7 @@ function ensureConsoleDOM() {
                 </button>
             </div>
         </div>
-        <div id="console-output" class="dark-circuit-background"></div>
+        <div id="console-output"></div>
         <div id="console-summary">
             <div class="summary-icon"></div>
             <div class="summary-text">

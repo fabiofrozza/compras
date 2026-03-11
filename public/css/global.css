@@ -63,6 +63,8 @@ RESET, BASE, VARIÁVEIS GLOBAIS E TEMAS
     --toast-warning: var(--color-warning);
     --toast-alpha: 25%;
     --toast-border-left: 6px;
+
+    --cat-fill: #212121;
 }
 
 /* Tema Escuro */
@@ -73,6 +75,7 @@ body.dark-mode {
     --color-text-primary: ivory;
     --color-text-secondary: #b0b0b0;
     --color-text-muted: #999;
+    --cat-fill: ivory;
 }
 
 /* Utilitários Bootstrap Personalizados */
