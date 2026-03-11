@@ -17,6 +17,13 @@ FORMS AND FILES
     align-items: center;
 }
 
+.form-check .form-label i,
+.form-group .form-label>i {
+    font-size: 1rem;
+    font-variation-settings: 'opsz' 48;
+    vertical-align: sub;
+}
+
 .script-form {
     background-color: color-mix(in srgb, var(--color-background) 75%, white);
     padding: 16px;
@@ -145,13 +152,33 @@ FORMS AND FILES
     font-variation-settings: 'opsz' 48;
 }
 
-.file-word { color: #2B579A; }
-.file-excel { color: #217346; }
-.file-pdf { color: #D30015; }
-.file-text { color: #777; }
-.file-image { color: #FF6B6B; }
-.file-archive { color: #FF6B35; }
-.file-code { color: #276DC3; }
+.file-word {
+    color: #2B579A;
+}
+
+.file-excel {
+    color: #217346;
+}
+
+.file-pdf {
+    color: #D30015;
+}
+
+.file-text {
+    color: #777;
+}
+
+.file-image {
+    color: #FF6B6B;
+}
+
+.file-archive {
+    color: #FF6B35;
+}
+
+.file-code {
+    color: #276DC3;
+}
 
 .folder-buttons-container {
     display: flex;

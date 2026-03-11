@@ -60,7 +60,7 @@ function populateFavoriteTabSelectList() {
 
     const html = options.map(opt => `
         <input type="radio" class="btn-check" name="preferredTabRadio" id="pref-tab-${opt.id}" value="${opt.value}" autocomplete="off" data-field="preferredTab">
-        <label class="btn btn-sm btn-outline-secondary text-start text-nowrap" for="pref-tab-${opt.id}">
+        <label class="btn btn-sm btn-outline-primary text-start text-nowrap" for="pref-tab-${opt.id}">
             <i class="material-symbols-outlined me-2">${opt.icon}</i> ${opt.label}
         </label>
     `).join('');

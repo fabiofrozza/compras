@@ -86,7 +86,8 @@ NAVBAR APP BUTTONS (botões de aplicativos no header)
 }
 
 .navbar-apps,
-.header-actions {
+.header-actions,
+.header-panel {
     display: flex;
     align-items: stretch;
     gap: 2px;
@@ -241,36 +242,22 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
 
 .header-panel {
     position: fixed;
-    top: calc(var(--top-nav-height) + 6px);
+    top: calc(var(--top-nav-height) - 6px);
     right: 12px;
     width: 300px;
-    background-color: rgb(255, 255, 255, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-    z-index: 1100;
-    transform: translateY(-8px) scale(0.97);
-    opacity: 0;
+    transform-origin: top right;
+    transform: translateY(-12px) scale(.01);
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.18s ease, transform 0.18s ease;
-}
-
-.header-panel::before {
-    content: '';
-    position: absolute;
-    z-index: -1;
-    inset: 0;
-    backdrop-filter: var(--blur-level);
-    -webkit-backdrop-filter: var(--blur-level);
-    filter: var(--filter-name);
-    overflow: hidden;
-    isolation: isolate;
-    border-radius: 12px;
+    border-radius: 1em;
+    display: flex;
+    flex-direction: column;
+    z-index: 1010;
 }
 
 .header-panel.open {
     transform: translateY(0) scale(1);
-    opacity: 1;
+    visibility: visible;
     pointer-events: all;
 }
 
@@ -310,15 +297,38 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
     overflow-y: auto;
 }
 
-#header-panel-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 1099;
+/* Help Panel */
+.help-link-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-#header-panel-overlay.active {
-    display: block;
+.help-link-list li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px;
+    border-radius: 8px;
+    color: var(--color-text-primary);
+    text-decoration: none;
+    font-size: small;
+    transition: background-color 0.15s;
+}
+
+.help-link-list li a:hover {
+    background-color: rgba(128, 128, 128, 0.1);
+}
+
+.help-link-list li a i {
+    font-size: 20px;
+    color: var(--color-text-muted);
+}
+
+.help-link-list hr {
+    margin: 6px 12px;
+    border-color: var(--bs-border-color);
+    opacity: 0.5;
 }
 
 /* User Panel */
@@ -366,55 +376,62 @@ APP LAUNCHER (Grid de Aplicativos)
 .app-launcher-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
+    gap: 4px;
 }
 
 .app-launcher-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    padding: 12px 4px;
+    gap: 8px;
+    padding: 14px 8px;
     border: none;
     background: transparent;
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
-    transition: var(--transition-time) ease;
+    transition: all 300ms ease-in-out;
     color: var(--color-text-primary);
 }
 
 .app-launcher-item:hover {
-    background: rgba(128, 128, 128, 0.12);
-    transform: scale(1.05);
+    background: color-mix(in srgb, var(--c-glass) 12%, transparent);
 }
 
 .app-launcher-item.active {
-    background: rgba(var(--bs-primary-rgb), 0.12);
-}
-
-.app-launcher-item.active .app-launcher-icon {
-    box-shadow: 0 0 0 2px var(--color-text-primary);
+    background: color-mix(in srgb, var(--c-glass) 18%, transparent);
 }
 
 .app-launcher-icon {
-    width: 42px;
-    height: 42px;
+    width: 52px;
+    height: 52px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgba(128, 128, 128, 0.08);
-    font-size: 1.1rem;
-    transition: var(--transition-time) ease;
+    background: color-mix(in srgb, var(--c-glass) 10%, transparent);
+    transition: all 300ms ease-in-out;
 }
 
-.app-launcher-item:hover .app-launcher-icon {
+.app-launcher-icon i {
+    font-size: 1.7rem;
+    font-variation-settings: 'FILL' 0, 'wght' 300;
+    transition: all 300ms ease-in-out;
+}
+
+.app-launcher-item:hover .app-launcher-icon,
+.app-launcher-item.active .app-launcher-icon {
     background: var(--color-text-primary);
     color: var(--color-surface-1);
 }
 
+.app-launcher-item:hover .app-launcher-icon i,
+.app-launcher-item.active .app-launcher-icon i {
+    font-variation-settings: 'FILL' 1, 'wght' 400;
+}
+
 .app-launcher-label {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
+    font-weight: 500;
     text-align: center;
     line-height: 1.2;
     max-width: 100%;
@@ -426,5 +443,5 @@ APP LAUNCHER (Grid de Aplicativos)
 .app-launcher-separator {
     grid-column: 1 / -1;
     margin: 4px 0;
-    border-color: rgba(255, 255, 255, 1);
+    border-color: color-mix(in srgb, var(--c-glass) 15%, transparent);
 }
