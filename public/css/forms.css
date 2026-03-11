@@ -82,6 +82,7 @@ FORMS AND FILES
     gap: 10px;
     align-items: flex-start;
     justify-content: space-between;
+    word-break: break-all;
 }
 
 .icon-and-path {
