@@ -105,13 +105,7 @@ function toggleLogsDrawer() {
 
 // ====== PAINÉIS DO HEADER (Settings / User) ======
 
-const overlay = document.getElementById('header-panel-overlay');
-
 function openPanel(panelId, triggerBtn) {
-    document.querySelectorAll('.header-panel.open').forEach(p => {
-        if (p.id !== panelId) closeAllPanels();
-    });
-
     const panel = document.getElementById(panelId);
     if (!panel) return;
 
@@ -122,10 +116,8 @@ function openPanel(panelId, triggerBtn) {
     if (!isOpen) {
         panel.classList.add('open');
         panel.setAttribute('aria-hidden', 'false');
-        overlay.classList.add('active');
         if (triggerBtn) triggerBtn.classList.add('active');
 
-        // Callbacks específicos por painel
         if (panelId === 'settings-panel') {
             inicializarPreferenciasPanel();
         } else if (panelId === 'user-panel') {
@@ -141,7 +133,6 @@ function closeAllPanels() {
         p.classList.remove('open');
         p.setAttribute('aria-hidden', 'true');
     });
-    overlay.classList.remove('active');
     document.querySelectorAll('.header-icon-btn').forEach(b => b.classList.remove('active'));
 }
 
@@ -191,10 +182,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsBtn = document.getElementById('settingsBtn');
     const userBtn = document.getElementById('userBtn');
     const notificationsBtn = document.getElementById('notificationsBtn');
+    const helpBtn = document.getElementById('helpBtn');
     const appLauncherBtn = document.getElementById('appLauncherBtn');
     const settingsPanelClose = document.getElementById('settingsPanelClose');
     const userPanelClose = document.getElementById('userPanelClose');
     const notificationsPanelClose = document.getElementById('notificationsPanelClose');
+    const helpPanelClose = document.getElementById('helpPanelClose');
     const appLauncherPanelClose = document.getElementById('appLauncherPanelClose');
 
     if (companyLogo) {
@@ -207,17 +200,58 @@ document.addEventListener('DOMContentLoaded', () => {
     if (settingsBtn) settingsBtn.addEventListener('click', () => openPanel('settings-panel', settingsBtn));
     if (userBtn) userBtn.addEventListener('click', () => openPanel('user-panel', userBtn));
     if (notificationsBtn) notificationsBtn.addEventListener('click', () => openPanel('notifications-panel', notificationsBtn));
+    if (helpBtn) helpBtn.addEventListener('click', () => openPanel('help-panel', helpBtn));
     if (appLauncherBtn) appLauncherBtn.addEventListener('click', () => openPanel('app-launcher-panel', appLauncherBtn));
     if (settingsPanelClose) settingsPanelClose.addEventListener('click', closeAllPanels);
     if (userPanelClose) userPanelClose.addEventListener('click', closeAllPanels);
     if (notificationsPanelClose) notificationsPanelClose.addEventListener('click', closeAllPanels);
+    if (helpPanelClose) helpPanelClose.addEventListener('click', closeAllPanels);
     if (appLauncherPanelClose) appLauncherPanelClose.addEventListener('click', closeAllPanels);
 
-    if (overlay) overlay.addEventListener('click', closeAllPanels);
+    document.addEventListener('click', (e) => {
+        if (!document.querySelector('.header-panel.open')) return;
+        if (e.target.closest('.header-panel') || e.target.closest('.header-icon-btn')) return;
+        closeAllPanels();
+    });
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeAllPanels();
     });
+
+    buildHelpPanel();
 });
+
+const HELP_LINKS = [
+    { icon: 'business', label: 'Site da Empresa', url: '#' },
+    { icon: 'store', label: 'Site do Departamento', url: '#' },
+    { icon: 'article', label: 'Manual do Departamento', url: '#' },
+    { separator: true },
+    { icon: 'code', label: 'Repositório', url: 'https://github.com/fabiofrozza/compras' },
+];
+
+function buildHelpPanel() {
+    const body = document.getElementById('help-panel-body');
+    if (!body) return;
+
+    const ul = document.createElement('ul');
+    ul.className = 'help-link-list';
+
+    for (const item of HELP_LINKS) {
+        const li = document.createElement('li');
+        if (item.separator) {
+            li.innerHTML = '<hr>';
+        } else {
+            const a = document.createElement('a');
+            a.href = item.url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.innerHTML = `<i class="material-symbols-outlined">${item.icon}</i>${item.label}`;
+            li.appendChild(a);
+        }
+        ul.appendChild(li);
+    }
+
+    body.appendChild(ul);
+}
 
 function limparFormulario(formId) {
     const form = document.getElementById(formId);
