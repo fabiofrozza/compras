@@ -88,7 +88,7 @@ function buildAppLauncher() {
             </div>
             <span class="app-launcher-label">${tab.label}</span>
         </button>`;
-        return tab.separator === 'after' ? button + '<hr class="app-launcher-separator">' : button;
+        return tab.separator === 'after' ? button + '<hr>' : button;
     }).join('');
 
     grid.addEventListener('click', (e) => {

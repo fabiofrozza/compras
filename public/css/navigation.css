@@ -310,6 +310,13 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
     border-radius: 4px;
 }
 
+.header-panel-body hr {
+    grid-column: 1 / -1;
+    margin: 6px 12px;
+    border-color: var(--bs-border-color);
+    opacity: 0.5;
+}
+
 /* Help Panel */
 .help-link-list {
     list-style: none;
@@ -338,12 +345,6 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
     color: var(--color-text-muted);
 }
 
-.help-link-list hr {
-    margin: 6px 12px;
-    border-color: var(--bs-border-color);
-    opacity: 0.5;
-}
-
 /* User Panel */
 .user-panel-avatar {
     display: flex;
@@ -370,9 +371,14 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
 
 .user-panel-label {
     font-size: 0.75rem;
-    color: var(--color-text-muted);
+    color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
+}
+
+.user-panel-label i {
+    font-size: 1rem;
+    vertical-align: sub;
 }
 
 .user-panel-value {
@@ -451,10 +457,4 @@ APP LAUNCHER (Grid de Aplicativos)
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.app-launcher-separator {
-    grid-column: 1 / -1;
-    margin: 4px 0;
-    border-color: color-mix(in srgb, var(--c-glass) 15%, transparent);
 }
