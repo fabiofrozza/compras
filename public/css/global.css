@@ -8,6 +8,11 @@ RESET, BASE, VARIÁVEIS GLOBAIS E TEMAS
     box-sizing: border-box;
 }
 
+:root {
+    scrollbar-color: var(--color-text-primary) lightblue;
+    scrollbar-width: thin;
+}
+
 @property --icon-fill {
     syntax: '<number>';
     inherits: true;
