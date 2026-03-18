@@ -1,5 +1,7 @@
-// logger.js - Sistema de logging com níveis e filtros
-// Níveis: 'debug', 'info', 'warn', 'error'
+const fs = require('fs');
+const path = require('path');
+
+const MAX_LOG_FILES = 20;
 
 class Logger {
     constructor(options = {}) {
@@ -11,23 +13,62 @@ class Logger {
             warn: 2,
             error: 3
         };
+        this.fileStream = null;
+
+        if (options.logDir) {
+            this._initFileLogging(options.logDir);
+        }
     }
 
-    /**
-     * Verifica se a mensagem deve ser logada baseado no nível
-     */
+    _initFileLogging(logDir) {
+        try {
+            fs.mkdirSync(logDir, { recursive: true });
+
+            const now = new Date();
+            const ts = now.getFullYear()
+                + '-' + String(now.getMonth() + 1).padStart(2, '0')
+                + '-' + String(now.getDate()).padStart(2, '0')
+                + '_' + String(now.getHours()).padStart(2, '0')
+                + '-' + String(now.getMinutes()).padStart(2, '0')
+                + '-' + String(now.getSeconds()).padStart(2, '0');
+
+            const logPath = path.join(logDir, `session_${ts}.log`);
+            this.fileStream = fs.createWriteStream(logPath, { flags: 'a', encoding: 'utf8' });
+
+            this._pruneOldLogs(logDir);
+        } catch (err) {
+            console.error('Failed to initialize file logging:', err.message);
+        }
+    }
+
+    _pruneOldLogs(logDir) {
+        try {
+            const files = fs.readdirSync(logDir)
+                .filter(f => f.startsWith('session_') && f.endsWith('.log'))
+                .map(f => ({ name: f, time: fs.statSync(path.join(logDir, f)).mtimeMs }))
+                .sort((a, b) => b.time - a.time);
+
+            for (const file of files.slice(MAX_LOG_FILES)) {
+                fs.unlinkSync(path.join(logDir, file.name));
+            }
+        } catch { /* best-effort cleanup */ }
+    }
+
+    _writeToFile(formatted, extra) {
+        if (!this.fileStream) return;
+        this.fileStream.write(formatted + '\n');
+        if (extra) this.fileStream.write(extra + '\n');
+    }
+
     shouldLog(level) {
         return this.levels[level] >= this.levels[this.minLevel];
     }
 
-    /**
-     * Formata a mensagem com timestamp e nível
-     */
     formatMessage(level, message, context = '') {
-        const timestamp = this.showTimestamp 
-            ? new Date().toLocaleTimeString('pt-BR') 
+        const timestamp = this.showTimestamp
+            ? new Date().toLocaleTimeString('pt-BR')
             : '';
-        
+
         const levelSymbols = {
             debug: '[debug]',
             info:  '[info ]',
@@ -42,39 +83,41 @@ class Logger {
         return `${timeStr} ${prefix}${ctxStr} ${message}`;
     }
 
-    /**
-     * Log de debug (desenvolvimento)
-     */
     debug(message, context = '') {
+        const formatted = this.formatMessage('debug', message, context);
+        this._writeToFile(formatted);
         if (this.shouldLog('debug')) {
-            console.log(this.formatMessage('debug', message, context));
+            console.log(formatted);
         }
     }
 
-    /**
-     * Log de informação (eventos normais)
-     */
     info(message, context = '') {
+        const formatted = this.formatMessage('info', message, context);
+        this._writeToFile(formatted);
         if (this.shouldLog('info')) {
-            console.log(this.formatMessage('info', message, context));
+            console.log(formatted);
         }
     }
 
-    /**
-     * Log de aviso (possíveis problemas)
-     */
     warn(message, context = '') {
+        const formatted = this.formatMessage('warn', message, context);
+        this._writeToFile(formatted);
         if (this.shouldLog('warn')) {
-            console.warn(this.formatMessage('warn', message, context));
+            console.warn(formatted);
         }
     }
 
-    /**
-     * Log de erro (problemas críticos)
-     */
     error(message, context = '', errorObj = null) {
+        const formatted = this.formatMessage('error', message, context);
+        let extra = null;
+        if (errorObj instanceof Error) {
+            extra = '  Stack: ' + errorObj.stack;
+        } else if (errorObj) {
+            extra = '  Details: ' + JSON.stringify(errorObj);
+        }
+        this._writeToFile(formatted, extra);
         if (this.shouldLog('error')) {
-            console.error(this.formatMessage('error', message, context));
+            console.error(formatted);
             if (errorObj instanceof Error) {
                 console.error('  Stack:', errorObj.stack);
             } else if (errorObj) {
@@ -83,25 +126,18 @@ class Logger {
         }
     }
 
-    /**
-     * Seção de início (comando importante)
-     */
     section(title) {
         this.info('►►► ' + title);
     }
 
-    /**
-     * Seção de sucesso
-     */
     success(message, context = '') {
+        const formatted = this.formatMessage('info', '✓ ' + message, context);
+        this._writeToFile(formatted);
         if (this.shouldLog('info')) {
-            console.log(this.formatMessage('info', '✓ ' + message, context));
+            console.log(formatted);
         }
     }
 
-    /**
-     * Definir nível mínimo de log
-     */
     setLevel(level) {
         if (this.levels[level] !== undefined) {
             this.minLevel = level;
