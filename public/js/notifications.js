@@ -28,6 +28,7 @@ function showToast(message, type = 'success', duration, source = 'origem não in
 
     closeButton.addEventListener('click', removeToast);
 
+    toast.style.setProperty('--toast-duration', `${duration}ms`);
     toast.appendChild(messageContainer);
     toast.appendChild(closeButton);
     container.appendChild(toast);
@@ -68,10 +69,10 @@ function removeTooltip(element) {
 initializeTooltips();
 
 function testToasts() {
-    showToast('Testando toast de sucesso', 'success', 500000)
-    showToast('Testando toast de erro', 'error', 500000)
-    showToast('Testando toast de aviso', 'warning', 500000)
-    showToast('Testando toast de informação', 'info', 500000)
+    showToast('Testando toast de sucesso', 'success', 15000)
+    showToast('Testando toast de erro', 'error', 11000)
+    showToast('Testando toast de aviso', 'warning', 12000)
+    showToast('Testando toast de informação', 'info', 10000)
 }
 
 // ==========================================================================
