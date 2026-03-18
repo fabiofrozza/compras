@@ -185,7 +185,6 @@ function prepareConsoleForExecution(scriptName) {
   consoleHeader.addEventListener('mousedown', onDragStart);
 }
 
-/** @param {{status: 'success'|'warning'|'error', message: string, log: string, scriptName: string}} result */
 function handleScriptResult(result) {
   consoleContainer.classList.remove('running');
   hideScriptRunningOverlay();

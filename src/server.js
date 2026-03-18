@@ -8,7 +8,10 @@ const { spawn, execSync } = require('child_process');
 const Logger = require('./utils/logger');
 const { executarMailmerge } = require('./services/mailmerge');
 
-const logger = new Logger({ minLevel: 'debug' });
+const logger = new Logger({
+  minLevel: 'debug',
+  logDir: path.join(__dirname, '..', 'logs')
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -619,29 +622,31 @@ async function executeMailmergeJS(ws, params) {
 
     const resultado = await executarMailmerge(params, sendLog);
 
-    if (resultado.status === 'success' || resultado.status === 'warning') {
-      logger.success(`Mailmerge concluído: ${resultado.message}`, 'Mailmerge');
-      ws.send(JSON.stringify({
-        type: 'success',
-        message: resultado.message,
-        scriptName: 'atas_mailmerge',
-        detalhes: resultado
-      }));
+    const mailmergeType = (resultado.status === 'success' || resultado.status === 'warning') ? resultado.status : 'error';
+    const notificationMessage = buildNotificationMessage('atas_mailmerge', mailmergeType, null, resultado.message);
+
+    if (mailmergeType === 'error') {
+      logger.warn(notificationMessage, 'Mailmerge');
     } else {
-      logger.warn(`Erro no mailmerge: ${resultado.message}`, 'Mailmerge');
-      ws.send(JSON.stringify({
-        type: 'error',
-        message: resultado.message,
-        scriptName: 'atas_mailmerge',
-        detalhes: resultado
-      }));
+      logger.success(notificationMessage, 'Mailmerge');
     }
 
+    ws.send(JSON.stringify({
+      type: mailmergeType,
+      message: resultado.message,
+      notificationMessage,
+      scriptName: 'atas_mailmerge',
+      detalhes: resultado
+    }));
+
   } catch (err) {
-    logger.error(`Erro ao executar mailmerge: ${err.message}`, 'Mailmerge', err);
+    const errorMsg = `Erro ao executar mailmerge: ${err.message}`;
+    const notificationMessage = buildNotificationMessage('atas_mailmerge', 'error', null, errorMsg);
+    logger.error(notificationMessage, 'Mailmerge', err);
     ws.send(JSON.stringify({
       type: 'error',
-      message: `Erro ao executar mailmerge: ${err.message}`,
+      message: errorMsg,
+      notificationMessage,
       scriptName: 'atas_mailmerge'
     }));
   }
@@ -695,6 +700,7 @@ async function executeRScript(ws, scriptFolder, params) {
     let lineBuffer = '';
 
     let currentLogState = 'info';
+    let finalMessage = null;
 
     rProcess.stdout.on('data', (data) => {
       lineBuffer += data.toString();
@@ -710,6 +716,11 @@ async function executeRScript(ws, scriptFolder, params) {
 
               if (parsed.type === 'progress') {
                 ws.send(JSON.stringify(parsed));
+                return;
+              }
+
+              if (parsed.type === 'final_message') {
+                finalMessage = parsed.message;
                 return;
               }
 
@@ -757,28 +768,36 @@ async function executeRScript(ws, scriptFolder, params) {
       }
 
       let logType = 'success';
-      let logMsg = 'Script R executado com sucesso!';
+      let logMsg = '';
 
       if (code === 1) {
         logType = 'error';
-        logMsg = `Script R finalizou com código de erro: ${code}`;
+        logMsg = `código de erro: ${code}`;
       } else if (code === 2) {
         logType = 'warning';
-        logMsg = 'Script R finalizou com alertas (código: 2)';
+        logMsg = 'código: 2';
       } else if (code !== 0) {
         logType = 'error';
-        logMsg = `Script R finalizou com código inesperado: ${code}`;
+        logMsg = `código inesperado: ${code}`;
       }
+
+      const notificationMessage = buildNotificationMessage(scriptFolder, logType, finalMessage, logMsg);
 
       if (logType === 'success') {
-        logger.success(logMsg, 'RScript');
+        logger.success(notificationMessage, 'RScript');
       } else if (logType === 'warning') {
-        logger.warn(logMsg, 'RScript');
+        logger.warn(notificationMessage, 'RScript');
       } else {
-        logger.error(logMsg, 'RScript');
+        logger.error(notificationMessage, 'RScript');
       }
 
-      ws.send(JSON.stringify({ type: logType, message: logMsg, exitCode: code, scriptName: scriptFolder }));
+      ws.send(JSON.stringify({
+        type: logType,
+        message: logMsg,
+        notificationMessage,
+        exitCode: code,
+        scriptName: scriptFolder
+      }));
     });
 
     rProcess.on('error', (err) => {
@@ -794,6 +813,25 @@ async function executeRScript(ws, scriptFolder, params) {
       message: `Erro ao iniciar Rscript. O R está instalado? Detalhe: ${err.message}`
     }));
   }
+}
+
+const TAB_NAMES = {
+  atas: 'Atas', atas_mailmerge: 'Atas (Mailmerge)', catmat: 'Catmat',
+  fornecedores: 'Fornecedores', importacao: 'Importação',
+  mapas: 'Mapas', powerbi: 'Power BI', instalacao: 'Instalação'
+};
+
+const TYPE_LABELS = {
+  success: 'concluído com sucesso',
+  warning: 'concluído com alertas',
+  error: 'falhou'
+};
+
+function buildNotificationMessage(scriptName, type, finalMessage, message) {
+  const sourceName = TAB_NAMES[scriptName] || scriptName;
+  const label = TYPE_LABELS[type] || 'finalizado';
+  const detail = finalMessage || message || '';
+  return `Script "${sourceName}" ${label}${detail ? ': ' + detail : ''}`;
 }
 
 function detectLogLevel(line) {

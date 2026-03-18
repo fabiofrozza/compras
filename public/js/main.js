@@ -18,7 +18,7 @@ function connectWebSocket() {
                     // Escolher a formatação baseada no nível do log
                     let colorStyle = '';
                     switch (data.level) {
-                        case 'error':   colorStyle = 'color: #ff6b6b; font-weight: bold;'; break;
+                        case 'error': colorStyle = 'color: #ff6b6b; font-weight: bold;'; break;
                         case 'warning': colorStyle = 'color: #ffc107; font-weight: bold;'; break;
                         case 'success': colorStyle = 'color: #20c997; font-weight: bold;'; break;
                         case 'command': colorStyle = 'color: #0dcaf0;'; break;
@@ -38,25 +38,19 @@ function connectWebSocket() {
             // Finalização do script: SEMPRE processar, independente do console estar visível
             // Isso garante que isScriptRunning seja resetado e o overlay seja removido
             if (data.type === 'success' || data.type === 'warning' || data.type === 'error') {
-                const result = {
+
+                const notificationMessage = data.notificationMessage || data.message;
+                addNotification({
+                    message: notificationMessage,
+                    type: data.type,
+                    source: data.scriptName
+                });
+
+                handleScriptResult({
                     status: data.type,
-                    message: data.message,
+                    message: notificationMessage,
                     log: consoleOutput ? consoleOutput.innerHTML : '',
                     scriptName: data.scriptName
-                };
-                handleScriptResult(result);
-
-                const tabNames = {
-                    atas: 'Atas', atas_mailmerge: 'Atas (Mailmerge)', catmat: 'Catmat',
-                    fornecedores: 'Fornecedores', importacao: 'Importação',
-                    mapas: 'Mapas', powerbi: 'Power BI', instalacao: 'Instalação'
-                };
-                const sourceName = tabNames[data.scriptName] || data.scriptName;
-                const typeLabels = { success: 'concluído com sucesso', warning: 'concluído com alertas', error: 'falhou' };
-                addNotification({
-                    message: `Script "${sourceName}" ${typeLabels[data.type] || 'finalizado'}${data.message ? ': ' + data.message : ''}`,
-                    type: data.type,
-                    source: sourceName
                 });
 
                 if (data.scriptName) {
