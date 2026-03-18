@@ -347,7 +347,8 @@ atas_verificar_duplicados <- function(dados_atas) {
     )
 
     status <- get_config("status")
-    status$final_message <- "Há arquivos duplicados."
+    status$final_message <-
+      sprintf("há %s arquivo(s) duplicado(s).", nrow(duplicados))
     set_config(status = status)
 
     duplicados
