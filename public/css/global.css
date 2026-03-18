@@ -63,7 +63,7 @@ RESET, BASE, VARIÁVEIS GLOBAIS E TEMAS
     --color-background: var(--bs-primary-bg-subtle);
     --color-surface-1: ivory;
     --color-surface-2: var(--color-background);
-    --color-text-primary: rgb(0, 56, 147);
+    --color-text-primary: color-mix(in srgb, rgb(0, 56, 147) 50%, black 50%);
     --color-text-secondary: #555;
     --color-text-muted: #666;
     --color-border-focus: #667eea;
