@@ -185,7 +185,7 @@ atas_sicaf_ler <- function(sicaf_arquivos, dados_pregao) {
             )
           )
         estado_previo <- str_extract(estado_previo, "(?<=/ )(.+)")
-        estado[i] <- case_match(
+        estado[i] <- recode_values(
           estado_previo,
           "Acre" ~ "AC",
           "Alagoas" ~ "AL",
