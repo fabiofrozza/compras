@@ -220,22 +220,30 @@ document.addEventListener('DOMContentLoaded', () => {
     buildHelpPanel();
 });
 
-const HELP_LINKS = [
-    { icon: 'business', label: 'Site da Empresa', url: '#' },
-    { icon: 'store', label: 'Site do Departamento', url: '#' },
-    { icon: 'article', label: 'Manual do Departamento', url: '#' },
-    { separator: true },
-    { icon: 'code', label: 'Repositório', url: 'https://github.com/fabiofrozza/compras' },
-];
-
-function buildHelpPanel() {
+async function buildHelpPanel() {
     const body = document.getElementById('help-panel-body');
     if (!body) return;
+
+    let cfg = {};
+    try {
+        const res = await fetch('/api/app-config');
+        cfg = await res.json();
+    } catch (err) {
+        console.error('Erro ao buscar configurações:', err);
+    }
+
+    const links = [
+        { icon: 'business', label: cfg.companyName    || 'Site da Empresa',        url: cfg.companySite    || '#' },
+        { icon: 'store',    label: cfg.departmentName || 'Site do Departamento',    url: cfg.departmentSite || '#' },
+        { icon: 'article',  label: 'Manual do Departamento',                        url: cfg.manualSite     || '#' },
+        { separator: true },
+        { icon: 'code',     label: 'Repositório', url: 'https://github.com/fabiofrozza/compras' },
+    ];
 
     const ul = document.createElement('ul');
     ul.className = 'help-link-list';
 
-    for (const item of HELP_LINKS) {
+    for (const item of links) {
         const li = document.createElement('li');
         if (item.separator) {
             li.innerHTML = '<hr>';
