@@ -5,7 +5,7 @@ power_bi_main <- function() {
 
   pacotes <- c(
     "openxlsx2", "googlesheets4", "readxl",
-    "dplyr", "stringr", "purrr", "tidyr"
+    "dplyr", "stringr", "purrr", "tidyr", "zip", "httr"
   )
 
   config_inicializar("POWERBI", pacotes)
