@@ -120,10 +120,6 @@
                 data-bs-title="Preferências" data-bs-placement="bottom">
                 <i class="material-symbols-outlined">settings_heart</i>
             </button>
-            <button id="userBtn" class="header-icon-btn" aria-label="Informações do usuário" data-bs-toggle="tooltip"
-                data-bs-title="Informações do usuário" data-bs-placement="bottom">
-                <i class="material-symbols-outlined">account_circle</i>
-            </button>
             <button id="helpBtn" class="header-icon-btn" aria-label="Ajuda" data-bs-toggle="tooltip"
                 data-bs-title="Ajuda" data-bs-placement="bottom">
                 <i class="material-symbols-outlined">help</i>
@@ -239,49 +235,44 @@
                     class="material-symbols-outlined">close</i></button>
         </div>
         <div class="header-panel-body" id="settings-panel-body">
-            <!-- Preferências de Interface -->
+            <!-- Informações do usuário -->
+            <div class="settings-user-row mb-3">
+                <i class="material-symbols-outlined settings-user-avatar">account_circle</i>
+                <div class="settings-user-info">
+                    <span class="settings-user-name" id="userComputerName">Carregando...</span>
+                    <span class="settings-user-sync">
+                        <i class="material-symbols-outlined">schedule</i>
+                        <span id="lastSyncTime">—</span>
+                    </span>
+                </div>
+            </div>
+            <hr class="my-2">
+            <!-- Tema -->
             <div class="form-group mb-3">
                 <div class="form-check form-switch">
                     <input type="checkbox" role="switch" id="darkMode" class="form-check-input" data-field="darkMode">
                     <label for="darkMode" class="form-label">
                         <i class="material-symbols-outlined">dark_mode</i> Modo Escuro
                     </label>
-                    <div class="form-text">Ativa o tema escuro ao abrir a página</div>
                 </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="material-symbols-outlined">star</i> Aba preferida ao iniciar:
+            <!-- Foto de fundo -->
+            <div class="mb-3">
+                <label for="bgSource" class="form-label">
+                    <i class="material-symbols-outlined">image</i> Foto de fundo
                 </label>
-                <div class="btn-group-vertical d-grid justify-content-start" id="preferredTab" role="group"
-                    aria-label="Preferred Tab">
-                </div>
+                <select id="bgSource" class="form-select form-select-sm" data-field="bgSource">
+                    <option value="random">Aleatório (locais + Bing)</option>
+                    <option value="bing">Fotos do dia (Bing)</option>
+                    <option value="local">Fotos locais</option>
+                </select>
             </div>
-        </div>
-    </div>
-
-    <!-- Painel do Usuário (User Panel) -->
-    <div id="user-panel" class="header-panel" role="dialog" aria-label="Usuário" aria-hidden="true">
-        <div class="header-panel-header">
-            <span><i class="material-symbols-outlined me-2">account_circle</i>Usuário</span>
-            <button class="header-panel-close" id="userPanelClose" aria-label="Fechar"><i
-                    class="material-symbols-outlined">close</i></button>
-        </div>
-        <div class="header-panel-body">
-            <div class="user-panel-avatar">
-                <i class="material-symbols-outlined">account_circle</i>
-            </div>
-            <div class="user-panel-info">
-                <div class="user-panel-row">
-                    <span class="user-panel-label"><i class="material-symbols-outlined me-1">computer</i>
-                        Computador</span>
-                    <span class="user-panel-value" id="userComputerName">Carregando...</span>
-                </div>
-                <div class="user-panel-row">
-                    <span class="user-panel-label"><i class="material-symbols-outlined me-1">schedule</i> Última
-                        sincronização</span>
-                    <span class="user-panel-value" id="lastSyncTime">—</span>
-                </div>
+            <!-- Aba preferida -->
+            <div class="mb-0">
+                <label for="preferredTab" class="form-label">
+                    <i class="material-symbols-outlined">star</i> Aba ao iniciar
+                </label>
+                <select id="preferredTab" class="form-select form-select-sm" data-field="preferredTab"></select>
             </div>
         </div>
     </div>

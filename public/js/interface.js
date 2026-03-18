@@ -21,25 +21,50 @@ function applyDarkMode(darkModeEnabled = null) {
 
 // ====== BACKGROUND ALEATÓRIO DA HOME ======
 
-async function setHomeBackground() {
+// bgSource: 'local' | 'bing' | 'random'
+async function setHomeBackground(bgSource) {
     const homePane = document.getElementById('home');
     if (!homePane) return;
 
-    // Buscar URLs das imagens do servidor (.env)
-    let homeBackgroundImages = [];
-    try {
-        const response = await fetch('/api/home-backgrounds');
-        const data = await response.json();
-        homeBackgroundImages = data.images || [];
-    } catch (err) {
-        console.error('Erro ao buscar imagens de fundo:', err);
-        return;
+    if (bgSource === undefined) {
+        loadAppState();
+        bgSource = appState.preferences.bgSource || 'random';
     }
 
-    if (homeBackgroundImages.length === 0) return;
+    const [localImages, bingImages] = await Promise.all([
+        bgSource !== 'bing'
+            ? fetch('/api/home-backgrounds').then(r => r.json()).then(d => d.images || []).catch(() => [])
+            : Promise.resolve([]),
+        bgSource !== 'local'
+            ? fetch('https://peapix.com/bing/feed?country=br').then(r => r.json()).then(d => Array.isArray(d) ? d : []).catch(() => [])
+            : Promise.resolve([])
+    ]);
 
-    const randomIndex = Math.floor(Math.random() * homeBackgroundImages.length);
-    const imageUrl = homeBackgroundImages[randomIndex];
+    const hasLocal = localImages.length > 0;
+    const hasBing = bingImages.length > 0;
+
+    let imageUrl, creditHref, creditTooltip;
+
+    const pickLocal = () => {
+        const url = localImages[Math.floor(Math.random() * localImages.length)];
+        return { imageUrl: url, creditHref: url, creditTooltip: 'Ver foto original' };
+    };
+
+    const pickBing = () => {
+        const item = bingImages[Math.floor(Math.random() * bingImages.length)];
+        return { imageUrl: item.fullUrl, creditHref: item.pageUrl, creditTooltip: `${item.title} — ${item.copyright}` };
+    };
+
+    if (bgSource === 'local' || (bgSource === 'random' && !hasBing)) {
+        if (!hasLocal) return;
+        ({ imageUrl, creditHref, creditTooltip } = pickLocal());
+    } else if (bgSource === 'bing' || (bgSource === 'random' && !hasLocal)) {
+        if (!hasBing) return;
+        ({ imageUrl, creditHref, creditTooltip } = pickBing());
+    } else {
+        // random com ambas as fontes disponíveis
+        ({ imageUrl, creditHref, creditTooltip } = Math.random() < 0.5 ? pickBing() : pickLocal());
+    }
 
     // Pré-carregar a imagem antes de aplicar
     const img = new Image();
@@ -48,18 +73,24 @@ async function setHomeBackground() {
         homePane.style.setProperty('--home-bg-url', `url('${imageUrl}')`);
         homePane.classList.add('home-bg-loaded');
 
-        // Atualizar o link de crédito da foto (pode carrregar após lazy load)
-        const setCredit = () => {
+        // Atualizar o link e tooltip de crédito da foto (pode carregar após lazy load)
+        const applyCredit = () => {
             const credit = document.getElementById('home-bg-credit');
-            if (credit) credit.href = imageUrl;
+            if (!credit) return;
+            credit.href = creditHref;
+            credit.setAttribute('data-bs-title', creditTooltip);
+            const bsTooltip = bootstrap.Tooltip.getInstance(credit);
+            if (bsTooltip) {
+                bsTooltip.dispose();
+                new bootstrap.Tooltip(credit);
+            }
         };
 
-        setCredit();
-        // Observar inserção do elemento caso ainda não exista (lazy load)
+        applyCredit();
         if (!document.getElementById('home-bg-credit')) {
             const observer = new MutationObserver(() => {
                 if (document.getElementById('home-bg-credit')) {
-                    setCredit();
+                    applyCredit();
                     observer.disconnect();
                 }
             });
@@ -120,8 +151,6 @@ function openPanel(panelId, triggerBtn) {
 
         if (panelId === 'settings-panel') {
             inicializarPreferenciasPanel();
-        } else if (panelId === 'user-panel') {
-            popularUserPanel();
         } else if (panelId === 'notifications-panel') {
             renderNotificationList();
         }
@@ -136,25 +165,7 @@ function closeAllPanels() {
     document.querySelectorAll('.header-icon-btn').forEach(b => b.classList.remove('active'));
 }
 
-async function popularUserPanel() {
-    const nameEl = document.getElementById('userComputerName');
-    const syncEl = document.getElementById('lastSyncTime');
-
-    if (nameEl && nameEl.textContent === 'Carregando...') {
-        try {
-            const response = await fetch('/api/user-info');
-            const data = await response.json();
-            nameEl.textContent = data.computerName || 'Desconhecido';
-        } catch {
-            nameEl.textContent = 'Local (Navegador)';
-        }
-    }
-    if (syncEl) {
-        syncEl.textContent = new Date().toLocaleString('pt-BR');
-    }
-}
-
-function inicializarPreferenciasPanel() {
+async function inicializarPreferenciasPanel() {
     if (typeof populateFavoriteTabSelectList === 'function') {
         populateFavoriteTabSelectList();
     }
@@ -165,11 +176,24 @@ function inicializarPreferenciasPanel() {
     const darkModeCheckbox = document.getElementById('darkMode');
     if (darkModeCheckbox) darkModeCheckbox.checked = prefs.darkMode;
 
-    const tabContainer = document.getElementById('preferredTab');
-    if (tabContainer) {
-        const val = prefs.preferredTab || '';
-        const radio = tabContainer.querySelector(`input[name="preferredTabRadio"][value="${val}"]`);
-        if (radio) radio.checked = true;
+    const bgSourceSelect = document.getElementById('bgSource');
+    if (bgSourceSelect) bgSourceSelect.value = prefs.bgSource || 'random';
+
+    const preferredTabSelect = document.getElementById('preferredTab');
+    if (preferredTabSelect) preferredTabSelect.value = prefs.preferredTab || '';
+
+    const syncEl = document.getElementById('lastSyncTime');
+    if (syncEl) syncEl.textContent = new Date().toLocaleString('pt-BR');
+
+    const nameEl = document.getElementById('userComputerName');
+    if (nameEl && nameEl.textContent === 'Carregando...') {
+        try {
+            const res = await fetch('/api/user-info');
+            const data = await res.json();
+            nameEl.textContent = data.computerName || 'Desconhecido';
+        } catch {
+            nameEl.textContent = 'Local (Navegador)';
+        }
     }
 
     if (typeof setupAutoSave === 'function') {
@@ -180,12 +204,10 @@ function inicializarPreferenciasPanel() {
 document.addEventListener('DOMContentLoaded', () => {
     const companyLogo = document.getElementById('companyLogo');
     const settingsBtn = document.getElementById('settingsBtn');
-    const userBtn = document.getElementById('userBtn');
     const notificationsBtn = document.getElementById('notificationsBtn');
     const helpBtn = document.getElementById('helpBtn');
     const appLauncherBtn = document.getElementById('appLauncherBtn');
     const settingsPanelClose = document.getElementById('settingsPanelClose');
-    const userPanelClose = document.getElementById('userPanelClose');
     const notificationsPanelClose = document.getElementById('notificationsPanelClose');
     const helpPanelClose = document.getElementById('helpPanelClose');
     const appLauncherPanelClose = document.getElementById('appLauncherPanelClose');
@@ -198,12 +220,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     if (settingsBtn) settingsBtn.addEventListener('click', () => openPanel('settings-panel', settingsBtn));
-    if (userBtn) userBtn.addEventListener('click', () => openPanel('user-panel', userBtn));
     if (notificationsBtn) notificationsBtn.addEventListener('click', () => openPanel('notifications-panel', notificationsBtn));
     if (helpBtn) helpBtn.addEventListener('click', () => openPanel('help-panel', helpBtn));
     if (appLauncherBtn) appLauncherBtn.addEventListener('click', () => openPanel('app-launcher-panel', appLauncherBtn));
     if (settingsPanelClose) settingsPanelClose.addEventListener('click', closeAllPanels);
-    if (userPanelClose) userPanelClose.addEventListener('click', closeAllPanels);
     if (notificationsPanelClose) notificationsPanelClose.addEventListener('click', closeAllPanels);
     if (helpPanelClose) helpPanelClose.addEventListener('click', closeAllPanels);
     if (appLauncherPanelClose) appLauncherPanelClose.addEventListener('click', closeAllPanels);
@@ -233,11 +253,11 @@ async function buildHelpPanel() {
     }
 
     const links = [
-        { icon: 'business', label: cfg.companyName    || 'Site da Empresa',        url: cfg.companySite    || '#' },
-        { icon: 'store',    label: cfg.departmentName || 'Site do Departamento',    url: cfg.departmentSite || '#' },
-        { icon: 'article',  label: 'Manual do Departamento',                        url: cfg.manualSite     || '#' },
+        { icon: 'business', label: cfg.companyName || 'Site da Empresa', url: cfg.companySite || '#' },
+        { icon: 'store', label: cfg.departmentName || 'Site do Departamento', url: cfg.departmentSite || '#' },
+        { icon: 'article', label: 'Manual do Departamento', url: cfg.manualSite || '#' },
         { separator: true },
-        { icon: 'code',     label: 'Repositório', url: 'https://github.com/fabiofrozza/compras' },
+        { icon: 'code', label: 'Repositório', url: 'https://github.com/fabiofrozza/compras' },
     ];
 
     const ul = document.createElement('ul');

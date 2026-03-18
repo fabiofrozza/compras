@@ -6,7 +6,8 @@ const autoSaveBoundFields = new WeakSet();
 let appState = {
     preferences: {
         darkMode: false,
-        preferredTab: ''
+        preferredTab: '',
+        bgSource: 'random'
     }
 };
 
@@ -39,33 +40,17 @@ function saveAppState() {
 // ==== PREFERÊNCIAS DE UI ====
 
 function populateFavoriteTabSelectList() {
-    const selectPreferredTab = document.getElementById('preferredTab');
-    if (!selectPreferredTab || typeof TAB_LIST === 'undefined') return;
+    const selectEl = document.getElementById('preferredTab');
+    if (!selectEl || typeof TAB_LIST === 'undefined') return;
 
-    const options = [{
-        id: 'default',
-        value: '',
-        label: 'Abrir última aba visualizada',
-        icon: 'schedule'
-    }];
+    const options = [
+        { value: '', label: 'Abrir última aba visualizada' },
+        ...TAB_LIST.map(tab => ({ value: tab.id, label: tab.label }))
+    ];
 
-    TAB_LIST.forEach(tab => {
-        options.push({
-            id: tab.id,
-            value: tab.id,
-            label: tab.label,
-            icon: tab.icon
-        });
-    });
-
-    const html = options.map(opt => `
-        <input type="radio" class="btn-check" name="preferredTabRadio" id="pref-tab-${opt.id}" value="${opt.value}" autocomplete="off" data-field="preferredTab">
-        <label class="btn btn-sm btn-outline-primary text-start text-nowrap" for="pref-tab-${opt.id}">
-            <i class="material-symbols-outlined me-2">${opt.icon}</i> ${opt.label}
-        </label>
-    `).join('');
-
-    selectPreferredTab.innerHTML = html;
+    selectEl.innerHTML = options.map(opt =>
+        `<option value="${opt.value}">${opt.label}</option>`
+    ).join('');
 }
 
 function showPreferencesSaveIndicator() {
@@ -105,12 +90,11 @@ function applyUserPreferences(preferences) {
         if (el) el.checked = false;
     }
 
-    const tabContainer = document.getElementById('preferredTab');
-    if (tabContainer) {
-        const val = preferences.preferredTab || '';
-        const radio = tabContainer.querySelector(`input[name="preferredTabRadio"][value="${val}"]`);
-        if (radio) radio.checked = true;
-    }
+    const bgSourceSelect = document.getElementById('bgSource');
+    if (bgSourceSelect) bgSourceSelect.value = preferences.bgSource || 'random';
+
+    const preferredTabSelect = document.getElementById('preferredTab');
+    if (preferredTabSelect) preferredTabSelect.value = preferences.preferredTab || '';
 
     // Aplicar navegação (abrir a aba) se estivermos na inicialização
     if (!window.navigationInitialized) {
@@ -173,7 +157,7 @@ function setupAutoSave(container) {
                 }
 
                 // Preferências UI
-                if (['darkMode', 'preferredTab'].includes(fieldName)) {
+                if (['darkMode', 'preferredTab', 'bgSource'].includes(fieldName)) {
                     appState.preferences[fieldName] = value;
                     saveAppState();
                     applyUserPreferences(appState.preferences);
@@ -215,7 +199,7 @@ function loadConfig(container = document) {
             const fieldName = field.dataset.field;
 
             // Preferências são aplicadas por applyUserPreferences — não sobrescrever aqui
-            if (['darkMode', 'preferredTab'].includes(fieldName)) return;
+            if (['darkMode', 'preferredTab', 'bgSource'].includes(fieldName)) return;
 
             const tabPane = field.closest('.tab-pane');
             const tabId = tabPane ? tabPane.id : 'global';
