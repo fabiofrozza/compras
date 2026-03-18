@@ -258,7 +258,7 @@ get_config <- function(item = NULL) {
   }
 
   if (item %in% names(config)) {
-    return(config[[item]])
+    config[[item]]
   }
 }
 
@@ -557,6 +557,7 @@ config_ambiente <- function(script_nome, pasta = NULL) {
       script_nome = script_nome,
       # registra a hora de início do script
       tempo_inicio_script = Sys.time(),
+      log_level = Sys.getenv("COMPRAS_LOG_LEVEL"),
       config_centralizado = file.path(pasta$common, "config.json")
     )
 
@@ -698,11 +699,30 @@ config_finalizar <- function(sucesso = FALSE) {
 
   log_secao("LOG FINALIZADO", "CONFIG")
 
+  # Emite mensagem final personalizada para o painel de notificações, se houver
+  if (!is.null(status$final_message)) {
+    log_info(status$final_message)
+
+    if (utils_json_output()) {
+      msg_esc <- gsub("\\\\", "\\\\\\\\", status$final_message)
+      msg_esc <- gsub('"', '\\\\"', msg_esc)
+      cat(sprintf(
+        '{"json_log":true,"type":"final_message","message":"%s"}\n',
+        msg_esc
+      ))
+    }
+  }
+
   if (!utils_is_interactive()) {
     sink(type = "message")
     sink()
 
     close(log_r$con)
+
+    if (codigo_saida == 0 & config$geral$log_level == "error-warning") {
+      log_path <- file.path(get_config("pasta")$log, log_r$nome)
+      suppressWarnings(file.remove(log_path))
+    }
 
     quit(status = codigo_saida)
   }

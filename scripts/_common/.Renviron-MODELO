@@ -40,3 +40,7 @@ COMPRAS_SKIN_STYLE = default
 COMPRAS_SKIN_BORDER = round
 COMPRAS_SKIN_SIZE_MESSAGE = 100
 COMPRAS_SKIN_SIZE_PADDING = 1
+
+# Log
+# all, error-warning
+COMPRAS_LOG_LEVEL = error-warning

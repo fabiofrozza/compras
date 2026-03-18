@@ -346,6 +346,10 @@ atas_verificar_duplicados <- function(dados_atas) {
       alerta = TRUE
     )
 
+    status <- get_config("status")
+    status$final_message <- "Há arquivos duplicados."
+    set_config(status = status)
+
     duplicados
   } else {
     NULL
