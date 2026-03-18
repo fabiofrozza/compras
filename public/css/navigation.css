@@ -297,18 +297,6 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
     overflow-y: auto;
 }
 
-.header-panel-body::-webkit-scrollbar {
-    width: 6px;
-}
-
-.header-panel-body::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.header-panel-body::-webkit-scrollbar-thumb {
-    background: var(--color-text-primary);
-    border-radius: 4px;
-}
 
 .header-panel-body hr {
     grid-column: 1 / -1;

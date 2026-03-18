@@ -201,14 +201,6 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     padding-right: 2px;
 }
 
-.notification-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.notification-list::-webkit-scrollbar-thumb {
-    background: var(--color-text-primary);
-    border-radius: 4px;
-}
 
 .notification-item {
     display: flex;

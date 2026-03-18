@@ -2,15 +2,47 @@
 RESET, BASE, VARIÁVEIS GLOBAIS E TEMAS
 ========================================================================== */
 
-* {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-:root {
-    scrollbar-color: var(--color-text-primary) lightblue;
-    scrollbar-width: thin;
+/* Chrome, Safari, Edge — webkit scrollbar API */
+@supports selector(::-webkit-scrollbar) {
+    *::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    *::-webkit-scrollbar-button {
+        width: 0;
+        height: 0;
+        display: none;
+    }
+
+    *::-webkit-scrollbar-corner {
+        background: transparent;
+    }
+
+    *::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    *::-webkit-scrollbar-thumb {
+        background: var(--color-text-primary);
+        border-radius: 3px;
+    }
+}
+
+/* Firefox — standard scrollbar properties */
+@supports not selector(::-webkit-scrollbar) {
+    * {
+        scrollbar-color: var(--color-text-primary) transparent;
+        scrollbar-width: thin;
+    }
 }
 
 @property --icon-fill {

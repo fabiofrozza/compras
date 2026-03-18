@@ -20,9 +20,6 @@ FLOATING CONSOLE AND LOGS DRAWER
     overflow: hidden;
 }
 
-#console-container::-webkit-scrollbar {
-    display: none;
-}
 
 #console-container.show {
     display: flex;
@@ -326,18 +323,6 @@ body.dragging-console {
     background-size: 100% .3rem;
 }
 
-#console-output::-webkit-scrollbar {
-    width: 10px;
-}
-
-#console-output::-webkit-scrollbar-track {
-    background: #2d2d2d;
-}
-
-#console-output::-webkit-scrollbar-thumb {
-    background: #555;
-    border-radius: 4px;
-}
 
 .error-text {
     color: var(--color-error);
