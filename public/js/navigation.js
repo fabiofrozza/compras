@@ -1,12 +1,12 @@
 // --- Constante centralizada de abas ---
 const TAB_LIST = [
     { id: 'home', label: 'Página inicial', icon: 'home', hidden: true },
-    { id: 'atas', label: 'Atas', icon: 'description' },
-    { id: 'catmat', label: 'Catmat', icon: 'list' },
-    { id: 'fornecedores', label: 'Fornecedores', icon: 'business' },
-    { id: 'importacao', label: 'Importação', icon: 'gavel' },
-    { id: 'mapas', label: 'Mapas', icon: 'shopping_basket' },
-    { id: 'powerbi', label: 'Power BI', icon: 'show_chart', separator: 'after' },
+    { id: 'atas', label: 'Atas', icon: 'description', description: 'Gere as Atas de Registro de Preços', color: 'text-primary' },
+    { id: 'catmat', label: 'Catmat', icon: 'list', description: 'Verifique as margens de preferência dos itens do TR', color: 'text-info' },
+    { id: 'fornecedores', label: 'Fornecedores', icon: 'business', description: 'Atualize os dados dos fornecedores', color: 'text-success' },
+    { id: 'importacao', label: 'Importação', icon: 'gavel', description: 'Gere os arquivos para importação dos pedidos e relatórios gerenciais', color: 'text-warning' },
+    { id: 'mapas', label: 'Mapas', icon: 'shopping_basket', description: 'Transforme Mapas de licitação em listas prévias' },
+    { id: 'powerbi', label: 'Power BI', icon: 'show_chart', description: 'Gere os dados para o Observatório', color: 'text-danger', separator: 'after' },
     { id: 'instalacao', label: 'Instalação', icon: 'build' },
 ];
 
@@ -75,6 +75,27 @@ function buildNavbarApps() {
     });
 }
 
+// --- Home Cards ---
+
+function buildHomeCards() {
+    const grid = document.getElementById('home-cards-grid');
+    if (!grid) return;
+
+    grid.innerHTML = TAB_LIST
+        .filter(tab => !tab.hidden && tab.id !== 'instalacao')
+        .map(tab => {
+            const colorClass = tab.color ? ` ${tab.color}` : '';
+            return `<a class="card-link card-glass-container" data-bs-toggle="pill" data-bs-target="#${tab.id}" role="tab"
+                aria-controls="${tab.id}" aria-selected="false">
+                <div class="card-glass-title">${tab.label}</div>
+                <div class="card-glass-text">${tab.description || ''}</div>
+                <div class="card-glass-icon">
+                    <i class="material-symbols-outlined${colorClass}">${tab.icon}</i>
+                </div>
+            </a>`;
+        }).join('');
+}
+
 // --- App Launcher ---
 
 function buildAppLauncher() {
@@ -134,6 +155,8 @@ document.addEventListener('shown.bs.tab', async (event) => {
                     if (tabIdForScript && TAB_SCRIPTS[tabIdForScript]) {
                         await loadScript(TAB_SCRIPTS[tabIdForScript]);
                     }
+
+                    if (tabIdForScript === 'home') buildHomeCards();
 
                     targetPane.setAttribute('data-loaded', 'true');
                 } catch (error) {
