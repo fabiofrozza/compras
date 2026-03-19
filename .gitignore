@@ -1,4 +1,5 @@
 .env
+.claude/
 CLAUDE.md
 .vscode
 node_modules/
