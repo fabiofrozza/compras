@@ -1,11 +1,20 @@
 let ws;
 let selectedFiles = {}; // Armazena arquivos selecionados por containerId
+let wsDisconnectedAlertShown = false;
+let wsDisconnectedNotifId = null;
 
 function connectWebSocket() {
     ws = new WebSocket('ws://localhost:3000');
 
     ws.onopen = () => {
-        showToast('Conectado ao servidor', 'success', 3000, 'inicialização');
+        if (wsDisconnectedAlertShown) {
+            showToast('Reconectado ao servidor', 'success', 3000, 'inicialização');
+            if (wsDisconnectedNotifId !== null) {
+                dismissNotification(wsDisconnectedNotifId);
+                wsDisconnectedNotifId = null;
+            }
+        }
+        wsDisconnectedAlertShown = false;
     };
 
     ws.onmessage = (event) => {
@@ -79,8 +88,12 @@ function connectWebSocket() {
 
     ws.onclose = () => {
         if (isScriptRunning) hideScriptRunningOverlay();
-        showToast('Desconectado do servidor. Tentando reconectar...', 'error', 2000, 'inicialização');
-        addNotification({ message: 'Desconectado do servidor. Tentando reconectar...', type: 'warning', source: 'Sistema' });
+        if (!wsDisconnectedAlertShown) {
+            wsDisconnectedAlertShown = true;
+            showToast('Desconectado. Execute novamente o arquivo start.cmd para reiniciar o servidor.', 'error', 10000, 'inicialização');
+            addNotification({ message: 'Desconectado. Execute novamente o arquivo start.cmd para reiniciar o servidor.', type: 'error', source: 'Sistema' })
+                .then(id => { wsDisconnectedNotifId = id; });
+        }
         setTimeout(connectWebSocket, 3000);
     };
 
@@ -88,7 +101,6 @@ function connectWebSocket() {
         console.error('Erro WebSocket:', error);
     };
 }
-
 
 window.addEventListener('load', async () => {
     connectWebSocket();

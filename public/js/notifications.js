@@ -114,6 +114,8 @@ async function addNotification({ message, type = 'info', source = 'Sistema' }) {
 
     updateNotificationBadge();
     renderNotificationList();
+
+    return notification.id;
 }
 
 /** Faz o Mario aparecer embaixo do ícone de notificações e "cabecear" o sino */
