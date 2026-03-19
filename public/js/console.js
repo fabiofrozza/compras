@@ -55,19 +55,21 @@ function ensureConsoleDOM() {
 
   // --- Drawer flutuante de logs ---
   const logsDrawerHTML = `
-    <div id="logs-drawer" class="d-none shadow-lg collapsed">
+    <div id="logs-drawer" class="logs-drawer d-none shadow-lg collapsed">
         <div class="logs-drawer-header" onclick="toggleLogsDrawer()">
-            <span id="logs-drawer-title">
-                <i class="material-symbols-outlined me-2" data-bs-toggle="tooltip" title="Exibir logs das últimas execuções">description</i>
+            <span class="logs-drawer-title">
+                <i class="material-symbols-outlined me-2" data-bs-toggle="tooltip" data-bs-title="Exibir logs das últimas execuções">description</i>
                 <span>Logs</span>
             </span>
             <div class="logs-drawer-actions">
                 <button id="btn-reopen-console" class="logs-drawer-action-btn" data-bs-toggle="tooltip"
-                    title="Reabrir console" style="display:none" onclick="event.stopPropagation(); reopenConsole();">
+                    data-bs-title="Reabrir console" style="display:none" onclick="event.stopPropagation(); reopenConsole();">
                     <i class="material-symbols-outlined">terminal</i>
                 </button>
-                <i class="material-symbols-outlined" id="logs-minimize-icon" data-bs-toggle="tooltip"
-                    title="Minimizar">minimize</i>
+                <button class="logs-drawer-action-btn btn-minimize-logs-drawer" data-bs-toggle="tooltip"
+                    data-bs-title="Minimizar" onclick="event.stopPropagation(); toggleLogsDrawer();">
+                    <i class="material-symbols-outlined">minimize</i>
+                </button>
             </div>
         </div>
         <div class="logs-drawer-content">
@@ -108,6 +110,17 @@ function ensureConsoleDOM() {
     const tooltip = bootstrap.Tooltip.getInstance(minimizeButton);
     if (tooltip) {
       tooltip.setContent({ '.tooltip-inner': newTitle });
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    const path = e.composedPath();
+    if (consoleContainer.classList.contains('show') && !consoleContainer.classList.contains('running')) {
+      if (!path.includes(consoleContainer)) consoleContainer.classList.remove('show');
+    }
+    const logsDrawer = document.getElementById('logs-drawer');
+    if (logsDrawer && !logsDrawer.classList.contains('d-none') && !logsDrawer.classList.contains('collapsed')) {
+      if (!path.includes(logsDrawer)) logsDrawer.classList.add('collapsed');
     }
   });
 
