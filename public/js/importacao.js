@@ -39,6 +39,16 @@ function configurarValidacaoContinuaImportacao() {
     });
 }
 
+function revalidarLinkGoogle() {
+    importacaoLastValidatedLink = '';
+    validarLinkGoogle();
+}
+
+function abrirLinkPlanilha() {
+    const url = document.getElementById('importacao-link')?.value.trim();
+    if (url) window.open(url, '_blank');
+}
+
 async function validarLinkGoogle() {
     const linkInput = document.getElementById('importacao-link');
     if (!linkInput) return;
@@ -114,6 +124,9 @@ function atualizarFeedbackPlanilha(tipo, mensagem, iconeClass) {
     const statusText = document.getElementById('texto-status-link');
 
     if (!linkInput || !statusContainer || !statusIcon || !statusText) return;
+
+    const btnAbrir = document.getElementById('btn-abrir-link');
+    if (btnAbrir) btnAbrir.disabled = !linkInput.value.trim();
 
     // Remove todas as classes de estado anteriores
     const classesEstado = ['alert-success', 'alert-danger', 'alert-warning', 'alert-light',
