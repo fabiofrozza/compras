@@ -261,6 +261,7 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
             filesHTML += filesHTMLButtons;
             filesList.innerHTML = filesHTML;
             setupFileListButtons(filesList);
+            initializeTooltips();
             return;
         }
 
