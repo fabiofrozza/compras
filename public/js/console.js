@@ -327,9 +327,18 @@ function runRScript(scriptName, customParams = null) {
     }
 
     const campos = aba.querySelectorAll('input, select, textarea');
+    const processedRadioNames = new Set();
     campos.forEach(campo => {
+      if (campo.type === 'radio') {
+        if (!processedRadioNames.has(campo.name)) {
+          processedRadioNames.add(campo.name);
+          const checked = aba.querySelector(`input[type="radio"][name="${campo.name}"]:checked`);
+          if (checked) dados[campo.name] = checked.value;
+        }
+        return;
+      }
       if (campo.id) {
-        dados[campo.id] = (campo.type === 'checkbox' || campo.type === 'radio') ? campo.checked : campo.value;
+        dados[campo.id] = campo.type === 'checkbox' ? campo.checked : campo.value;
       }
     });
 

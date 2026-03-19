@@ -13,13 +13,22 @@
         <form id="form-mapas" class="script-form shadow-sm">
             <h4><i class="material-symbols-outlined">filter_alt</i> Forma de geração</h4>
             <div class="form-group">
-                <label for="mapas-estilo" class="form-label">
-                    Escolha a forma de geração das listas prévias:
-                </label>
-                <select class="form-select form-select-sm" id="mapas-estilo" aria-label="Forma de geração das listas prévias">
-                    <option selected value="grupo">Agrupada: lista única com todos os itens</option>
-                    <option value="processo">Por processo: listas separadas por processo</option>
-                </select>
+                <div class="option-card-group">
+                    <label class="option-card">
+                        <div>
+                            <div class="option-card-title">Agrupada</div>
+                            <div class="option-card-description">Lista única com todos os itens</div>
+                        </div>
+                        <input class="form-check-input" type="radio" name="mapas-estilo" value="grupo" checked>
+                    </label>
+                    <label class="option-card">
+                        <div>
+                            <div class="option-card-title">Por processo</div>
+                            <div class="option-card-description">Listas separadas por processo</div>
+                        </div>
+                        <input class="form-check-input" type="radio" name="mapas-estilo" value="processo">
+                    </label>
+                </div>
             </div>
             <div class="form-buttons">
                 <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-run-mapas" data-script-name="mapas">

@@ -16,14 +16,22 @@
         <form id="form-catmat" class="script-form shadow-sm">
             <h4><i class="material-symbols-outlined">filter_alt</i> Forma de consulta</h4>
             <div class="form-group">
-                <label for="catmat-metodo" class="form-label">
-                    Escolha a forma de consulta das margens de preferência:
-                </label>
-                <select class="form-select form-select-sm" id="catmat-metodo"
-                    aria-label="Forma de geração das listas prévias">
-                    <option selected value="lista">Lista de CATMATs - Consulta manual</option>
-                    <option value="api">API - Consulta direta aos Dados Abertos</option>
-                </select>
+                <div class="option-card-group">
+                    <label class="option-card">
+                        <div>
+                            <div class="option-card-title">Lista de CATMATs</div>
+                            <div class="option-card-description">Consulta ao arquivo local</div>
+                        </div>
+                        <input class="form-check-input" type="radio" name="catmat-metodo" value="lista" checked>
+                    </label>
+                    <label class="option-card">
+                        <div>
+                            <div class="option-card-title">API</div>
+                            <div class="option-card-description">Consulta direta aos Dados Abertos</div>
+                        </div>
+                        <input class="form-check-input" type="radio" name="catmat-metodo" value="api">
+                    </label>
+                </div>
             </div>
             <div class="form-buttons">
                 <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-form-itens-tr"

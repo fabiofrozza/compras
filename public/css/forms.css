@@ -67,6 +67,58 @@ FORMS AND FILES
     gap: 10px;
 }
 
+/* Option card radio group */
+
+.option-card-group {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.option-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: var(--color-surface-1);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    margin-bottom: 0;
+    flex-grow: 1;
+    flex-basis: 0;
+}
+
+.option-card:hover {
+    background-color: var(--bs-tertiary-bg);
+}
+
+.option-card:has(input:checked) {
+    border-color: var(--bs-primary);
+    background-color: var(--bs-primary-bg-subtle);
+}
+
+.option-card-title {
+    font-size: 87.5%;
+    font-weight: 500;
+    min-width: max-content;
+}
+
+.option-card-description {
+    font-size: 75%;
+    color: var(--bs-secondary-color);
+}
+
+.option-card .form-check-input {
+    flex-shrink: 0;
+    margin-left: 0.75rem;
+    margin-top: 0;
+}
+
 /* File Manager */
 
 .files-list {
