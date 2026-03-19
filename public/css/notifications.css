@@ -222,9 +222,9 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     gap: 6px;
     max-height: 50vh;
     overflow-y: auto;
+    overflow-x: hidden;
     padding-right: 2px;
 }
-
 
 .notification-item {
     display: flex;

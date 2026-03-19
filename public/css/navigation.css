@@ -10,7 +10,7 @@ BARRA DE NAVEGAÇÃO SUPERIOR (Glassmorphism)
     border-bottom: 1px solid rgba(255, 255, 255, 0.25);
     z-index: 1000;
     transition: var(--transition-time) ease-in-out;
-    background: linear-gradient(175grad, white, transparent 15%) !important;
+    background: linear-gradient(175grad, var(--color-surface-1), transparent 15%) !important;
     display: flex;
     align-items: center;
     padding: 0 var(--padding-main-container);
@@ -109,19 +109,22 @@ NAVBAR APP BUTTONS (botões de aplicativos no header)
         inset 2px -6.5px 1px -4px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
         0px 1px 5px 0px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
         0px 6px 16px 0px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 8%), transparent);
-    transition: all 400ms cubic-bezier(1, 0.0, 0.4, 1);
+}
+
+.navbar-apps {
+    transition: all 200ms cubic-bezier(1, 0.0, 0.4, 1) 1s;
 }
 
 .navbar-app-btn.active {
-    z-index: -1;
+    background:
+        linear-gradient(135deg,
+            color-mix(in srgb, var(--color-surface-1), transparent 80%),
+            color-mix(in srgb, var(--color-surface-1), transparent 90%));
+    color: var(--color-text-primary);
     box-shadow:
-        inset 0 0 0 1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 10%), transparent),
-        inset 2px 1px 0px -1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 90%), transparent),
-        inset -1.5px -1px 0px -1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 80%), transparent),
-        inset -2px -6px 1px -5px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 60%), transparent),
-        inset -1px 2px 3px -1px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
-        inset 0px -4px 1px -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
-        0px 3px 6px 0px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 8%), transparent);
+        inset 0 1px 0 color-mix(in srgb, var(--color-surface-1), transparent 70%),
+        0 4px 12px color-mix(in srgb, var(--color-text-primary), transparent 90%);
+    ;
 }
 
 .navbar-app-btn {
@@ -135,9 +138,10 @@ NAVBAR APP BUTTONS (botões de aplicativos no header)
     align-items: center;
     justify-content: center;
     flex-direction: row;
-    gap: 4px;
-    padding: 5px 10px;
-    color: var(--color-text-primary);
+    gap: 2px;
+    padding: 0px 6px 0px 10px;
+    margin: 2px;
+    color: var(--color-surface-1);
     opacity: 1;
 }
 
@@ -155,17 +159,22 @@ NAVBAR APP BUTTONS (botões de aplicativos no header)
     max-width: 0;
     overflow: hidden;
     opacity: 0;
-    transition: all 300ms ease-in-out;
+    transition: max-width 300ms ease-in-out 1s,
+        opacity 300ms ease-in-out 1s;
 }
 
 .navbar-app-btn.active .navbar-app-label,
-.navbar-app-btn:hover .navbar-app-label {
+.navbar-apps:hover .navbar-app-label {
     max-width: 80px;
     opacity: 1;
+    transition-delay: 0s;
 }
 
 .navbar-app-btn:hover {
-    opacity: 1;
+    color: var(--color-text-primary);
+    box-shadow:
+        inset -12px -12px 12px -12px color-mix(in srgb, var(--color-text-primary), transparent 85%),
+        0 4px 12px color-mix(in srgb, var(--color-text-primary), transparent 90%);
 }
 
 .navbar-app-btn:hover i,
@@ -181,18 +190,6 @@ NAVBAR APP BUTTONS (botões de aplicativos no header)
     .nav-subtitle {
         display: block;
     }
-}
-
-body.dark-mode .navbar-apps {
-    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.1) 30%, transparent 80%);
-}
-
-body.dark-mode .navbar-app-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-}
-
-body.dark-mode .navbar-app-btn:hover::after {
-    background: rgba(30, 30, 30, 0.9);
 }
 
 /* Header Actions Group */
@@ -253,6 +250,7 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
     display: flex;
     flex-direction: column;
     z-index: 1010;
+    transition: all 200ms cubic-bezier(1, 0.0, 0.4, 1);
 }
 
 .header-panel.open {
@@ -295,8 +293,8 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
     padding: 16px;
     max-height: 70vh;
     overflow-y: auto;
+    overflow-x: hidden;
 }
-
 
 .header-panel-body hr {
     grid-column: 1 / -1;

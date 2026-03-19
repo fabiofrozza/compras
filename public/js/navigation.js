@@ -88,6 +88,7 @@ function buildHomeCards() {
             return `<a class="card-link card-glass-container" data-bs-toggle="pill" data-bs-target="#${tab.id}" role="tab"
                 aria-controls="${tab.id}" aria-selected="false">
                 <div class="card-glass-title">${tab.label}</div>
+                <hr>
                 <div class="card-glass-text">${tab.description || ''}</div>
                 <div class="card-glass-icon">
                     <i class="material-symbols-outlined${colorClass}">${tab.icon}</i>
