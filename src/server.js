@@ -422,10 +422,18 @@ app.post('/api/validate-link', async (req, res) => {
     clearTimeout(timeout);
 
     if (!response.ok) {
+      const httpMessages = {
+        401: 'Sem permissão para acessar a planilha. Verifique se o link é público.',
+        403: 'Acesso negado à planilha. Verifique as permissões de compartilhamento.',
+        404: 'Planilha não encontrada. Verifique se o link está correto.',
+        429: 'Muitas requisições ao servidor. Aguarde um momento e tente novamente.',
+      };
+      const msg = httpMessages[response.status]
+        || (response.status >= 500 ? 'Erro no servidor do Google. Tente novamente mais tarde.' : `Erro ao acessar o link (HTTP ${response.status}).`);
       return res.json({
         isValid: false,
         status: 'error',
-        msg: `Erro ao acessar o link (HTTP ${response.status}).`,
+        msg,
       });
     }
 
@@ -462,10 +470,13 @@ app.post('/api/validate-link', async (req, res) => {
 
   } catch (error) {
     logger.error(`Erro ao validar link: ${error.message}`, 'ValidateLink');
+    const isTimeout = error.name === 'AbortError';
     return res.json({
       isValid: false,
       status: 'error',
-      msg: 'Erro ao acessar o link informado.',
+      msg: isTimeout
+        ? 'A requisição excedeu o tempo limite. Verifique sua conexão ou tente novamente.'
+        : 'Não foi possível acessar o link informado. Verifique sua conexão.',
       error: error.message,
     });
   }
