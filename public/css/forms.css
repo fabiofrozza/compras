@@ -121,6 +121,13 @@ FORMS AND FILES
 
 /* File Manager */
 
+.files-list-loading {
+    min-height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .files-list {
     background-color: color-mix(in srgb, var(--color-background) 50%, white);
     border: 1px solid var(--bs-border-color);

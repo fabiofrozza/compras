@@ -1,24 +1,24 @@
 const FILE_ICON_MAP = {
-    doc:  ['file-word', 'description'],
+    doc: ['file-word', 'description'],
     docx: ['file-word', 'description'],
     docm: ['file-word', 'description'],
-    log:  ['file-word', 'fingerprint'],
-    xls:  ['file-excel', 'table_chart'],
+    log: ['file-word', 'fingerprint'],
+    xls: ['file-excel', 'table_chart'],
     xlsx: ['file-excel', 'table_chart'],
     xlsm: ['file-excel', 'table_chart'],
-    csv:  ['file-excel', 'table_chart'],
-    pdf:  ['file-pdf', 'picture_as_pdf'],
-    txt:  ['file-text', 'article'],
-    rtf:  ['file-text', 'description'],
-    jpg:  ['file-image', 'image'],
+    csv: ['file-excel', 'table_chart'],
+    pdf: ['file-pdf', 'picture_as_pdf'],
+    txt: ['file-text', 'article'],
+    rtf: ['file-text', 'description'],
+    jpg: ['file-image', 'image'],
     jpeg: ['file-image', 'image'],
-    png:  ['file-image', 'image'],
-    gif:  ['file-image', 'image'],
-    bmp:  ['file-image', 'image'],
-    zip:  ['file-archive', 'folder_zip'],
-    rar:  ['file-archive', 'folder_zip'],
+    png: ['file-image', 'image'],
+    gif: ['file-image', 'image'],
+    bmp: ['file-image', 'image'],
+    zip: ['file-archive', 'folder_zip'],
+    rar: ['file-archive', 'folder_zip'],
     '7z': ['file-archive', 'folder_zip'],
-    r:    ['file-code', 'code'],
+    r: ['file-code', 'code'],
 };
 
 function fileIcon(icon, colorClass = '') {
@@ -190,9 +190,11 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
 
     try {
         filesList.innerHTML = `
-            <div class="custom-spinner text-primary">
-                <div class="spinner-border"></div>
-                <span role="status">Atualizando lista de arquivos...</span>
+            <div class="files-list-loading">
+                <div class="custom-spinner text-primary">
+                    <div class="spinner-border"></div>
+                    <span role="status">Atualizando lista de arquivos...</span>
+                </div>
             </div>
         `;
 
