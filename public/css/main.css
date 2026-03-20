@@ -127,6 +127,18 @@ body.dark-mode #home.home-bg-loaded::after {
     background: rgba(0, 0, 0, 0.55);
 }
 
+body.no-animated-bg #home.home-bg-loaded::before {
+    animation: none;
+    background-size: cover;
+    background-position: center;
+}
+
+body.no-animated-bg .home-title {
+    animation: none;
+    background: none;
+    -webkit-text-fill-color: var(--color-surface-1);
+}
+
 /* Garante que o conteúdo fique acima do overlay */
 #home.home-bg-loaded>* {
     position: relative;

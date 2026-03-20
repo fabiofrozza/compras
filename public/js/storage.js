@@ -6,6 +6,7 @@ const autoSaveBoundFields = new WeakSet();
 let appState = {
     preferences: {
         darkMode: false,
+        animatedBg: true,
         preferredTab: '',
         bgSource: 'random'
     }
@@ -90,6 +91,11 @@ function applyUserPreferences(preferences) {
         if (el) el.checked = false;
     }
 
+    const animatedBg = preferences.animatedBg !== false;
+    document.body.classList.toggle('no-animated-bg', !animatedBg);
+    const animatedBgEl = document.getElementById('animatedBg');
+    if (animatedBgEl) animatedBgEl.checked = animatedBg;
+
     const bgSourceSelect = document.getElementById('bgSource');
     if (bgSourceSelect) bgSourceSelect.value = preferences.bgSource || 'random';
 
@@ -157,7 +163,7 @@ function setupAutoSave(container) {
                 }
 
                 // Preferências UI
-                if (['darkMode', 'preferredTab', 'bgSource'].includes(fieldName)) {
+                if (['darkMode', 'animatedBg', 'preferredTab', 'bgSource'].includes(fieldName)) {
                     appState.preferences[fieldName] = value;
                     saveAppState();
                     applyUserPreferences(appState.preferences);
@@ -199,7 +205,7 @@ function loadConfig(container = document) {
             const fieldName = field.dataset.field;
 
             // Preferências são aplicadas por applyUserPreferences — não sobrescrever aqui
-            if (['darkMode', 'preferredTab', 'bgSource'].includes(fieldName)) return;
+            if (['darkMode', 'animatedBg', 'preferredTab', 'bgSource'].includes(fieldName)) return;
 
             const tabPane = field.closest('.tab-pane');
             const tabId = tabPane ? tabPane.id : 'global';
