@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <div class="row">
-    <div class="col-5">
+    <div class="col-sm-5">
         <!-- Form link planilha -->
         <form id="form-importacao-link" class="script-form shadow-sm">
             <h4><i class="material-symbols-outlined">add_to_drive</i> Link da Lista</h4>
@@ -12,8 +12,8 @@
                         Link da Planilha do Google Drive
                     </label>
                     <div class="input-group input-group-sm">
-                        <input type="url" class="form-control" id="importacao-link"
-                            data-field="planilha_link" placeholder="https://docs.google.com/spreadsheets/d/..." required>
+                        <input type="url" class="form-control" id="importacao-link" data-field="planilha_link"
+                            placeholder="https://docs.google.com/spreadsheets/d/..." required>
                         <button type="button" class="btn btn-outline-secondary" id="btn-atualizar-link"
                             onclick="revalidarLinkGoogle()" data-bs-toggle="tooltip"
                             data-bs-title="Atualizar informações da planilha">
@@ -121,7 +121,8 @@
             </div>
         </form>
     </div>
-    <div class="col-7">
+    <!-- Tabs Importação, Pedidos e Relatório -->
+    <div class="col-sm-7">
         <ul class="nav nav-tabs" id="importacaoTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="tab-arquivos-importacao" data-bs-toggle="tab"
@@ -190,7 +191,7 @@
 
                 <div class="tab-pane fade" id="content-relatorio-gerencial" role="tabpanel">
                     <div class="row mb-3">
-                        <div class="col-6">
+                        <div class="col-sm-6">
                             <label for="importacao-combo-spa" class="form-label" data-bs-toggle="tooltip"
                                 data-bs-title="Selecione o processo para geração do relatório (ou consolidado)">
                                 Processo SPA
@@ -220,7 +221,6 @@
                         </button>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>

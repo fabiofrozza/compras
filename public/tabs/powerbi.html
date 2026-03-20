@@ -1,6 +1,61 @@
 <!DOCTYPE html>
-<div class="row">
-    <div class="col-8">
+<div class="row row-cols-1">
+    <div class="col-sm-12">
+        <!-- Formulário de seleção do painel -->
+        <form id="form-powerbi-panel" class="script-form shadow-sm">
+            <h4><i class="material-symbols-outlined">show_chart</i> Painel do Observatório</h4>
+            <div class="form-group">
+                <div class="option-card-group">
+                    <label class="option-card">
+                        <div>
+                            <div class="option-card-title">Planejamento</div>
+                            <div class="option-card-description">Será acessada a planilha de controle para recuperar os
+                                dados dos processos, Unidades requerentes e situação do envio da documentação.</div>
+                        </div>
+                        <input class="form-check-input" type="radio" name="powerbi-tipo" value="planejamento" checked>
+                    </label>
+                    <label class="option-card">
+                        <div>
+                            <div class="option-card-title">Licitação</div>
+                            <div class="option-card-description">Serão obtidos os dados dos Mapas de Licitação da pasta
+                                'Mapa de licitações'.</div>
+                        </div>
+                        <input class="form-check-input" type="radio" name="powerbi-tipo" value="licitacao">
+                    </label>
+                    <label class="option-card">
+                        <div>
+                            <div class="option-card-title">Execução</div>
+                            <div class="option-card-description">Serão obtidos os dados dos relatórios de execução das
+                                AFs/Empenhos da pasta 'Execução AF Empenho'.</div>
+                        </div>
+                        <input class="form-check-input" type="radio" name="powerbi-tipo" value="execucao">
+                    </label>
+                    <label class="option-card">
+                        <div>
+                            <div class="option-card-title">Processos Administrativos e Alterações Contratuais</div>
+                            <div class="option-card-description">Será acessada a planilha de controle para recuperar os
+                                dados dos processos administrativos, trocas de marca, cancelamentos e reequilíbrios.
+                            </div>
+                        </div>
+                        <input class="form-check-input" type="radio" name="powerbi-tipo" value="paalteracoes">
+                    </label>
+                    <label class="option-card">
+                        <div>
+                            <div class="option-card-title">Todos os Painéis</div>
+                        </div>
+                        <input class="form-check-input" type="radio" name="powerbi-tipo" value="todos">
+                    </label>
+                </div>
+            </div>
+            <div class="form-buttons">
+                <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-run-powerbi-panel"
+                    onclick="executarPowerBI(this)">
+                    Gerar dados
+                </button>
+            </div>
+        </form>
+    </div>
+    <div class="col-sm-6">
         <!-- Pasta da base de dados -->
         <form id="form-powerbi-path" class="script-form shadow-sm">
             <h4><i class="material-symbols-outlined">table_chart</i> Base de dados</h4>
@@ -22,7 +77,8 @@
             </div>
         </form>
     </div>
-    <div class="col-4">
+
+    <div class="col-sm-6">
         <!-- Formulário de manutenção -->
         <form id="form-powerbi-manutencao" class="script-form shadow-sm">
             <h4><i class="material-symbols-outlined">build</i> Manutenção</h4>
@@ -47,58 +103,4 @@
             </div>
         </form>
     </div>
-</div>
-<div class="row">
-    <!-- Formulário de seleção do painel -->
-    <form id="form-powerbi-panel" class="script-form shadow-sm">
-        <h4><i class="material-symbols-outlined">show_chart</i> Painel do Observatório</h4>
-        <div class="form-group">
-            <div class="option-card-group">
-                <label class="option-card">
-                    <div>
-                        <div class="option-card-title">Planejamento</div>
-                        <div class="option-card-description">Será acessada a planilha de controle para recuperar os
-                            dados dos processos, Unidades requerentes e situação do envio da documentação.</div>
-                    </div>
-                    <input class="form-check-input" type="radio" name="powerbi-tipo" value="planejamento" checked>
-                </label>
-                <label class="option-card">
-                    <div>
-                        <div class="option-card-title">Licitação</div>
-                        <div class="option-card-description">Serão obtidos os dados dos Mapas de Licitação da pasta
-                            'Mapa de licitações'.</div>
-                    </div>
-                    <input class="form-check-input" type="radio" name="powerbi-tipo" value="licitacao">
-                </label>
-                <label class="option-card">
-                    <div>
-                        <div class="option-card-title">Execução</div>
-                        <div class="option-card-description">Serão obtidos os dados dos relatórios de execução das
-                            AFs/Empenhos da pasta 'Execução AF Empenho'.</div>
-                    </div>
-                    <input class="form-check-input" type="radio" name="powerbi-tipo" value="execucao">
-                </label>
-                <label class="option-card">
-                    <div>
-                        <div class="option-card-title">Processos Administrativos e Alterações Contratuais</div>
-                        <div class="option-card-description">Será acessada a planilha de controle para recuperar os
-                            dados dos processos administrativos, trocas de marca, cancelamentos e reequilíbrios.</div>
-                    </div>
-                    <input class="form-check-input" type="radio" name="powerbi-tipo" value="paalteracoes">
-                </label>
-                <label class="option-card">
-                    <div>
-                        <div class="option-card-title">Todos os Painéis</div>
-                    </div>
-                    <input class="form-check-input" type="radio" name="powerbi-tipo" value="todos">
-                </label>
-            </div>
-        </div>
-        <div class="form-buttons">
-            <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-run-powerbi-panel"
-                onclick="executarPowerBI(this)">
-                Gerar dados
-            </button>
-        </div>
-    </form>
 </div>
