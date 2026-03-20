@@ -537,11 +537,11 @@ app.get('/api/home-backgrounds', (req, res) => {
 
 app.get('/api/app-config', (_req, res) => {
   res.json({
-    companyName:    process.env.COMPRAS_COMPANY_NAME    || '',
+    companyName: process.env.COMPRAS_COMPANY_NAME || '',
     departmentName: process.env.COMPRAS_DEPARTMENT_NAME || '',
-    companySite:    process.env.COMPRAS_COMPANY_SITE    || '',
+    companySite: process.env.COMPRAS_COMPANY_SITE || '',
     departmentSite: process.env.COMPRAS_DEPARTMENT_SITE || '',
-    manualSite:     process.env.COMPRAS_MANUAL_SITE     || '',
+    manualSite: process.env.COMPRAS_MANUAL_SITE || '',
   });
 });
 
@@ -606,17 +606,18 @@ const server = app.listen(PORT, async () => {
       logger.debug(`IP: ${ip}`, 'WebSocket');
 
       if (clientCount === 0) {
-        logger.info('Nenhum cliente conectado. Encerrando servidor...', 'Server');
+        logger.info('Nenhum cliente conectado. Aguardando reconexão...', 'Server');
 
-        // ENCERRAMENTO DESATIVADO TEMPORARIAMENTE
-
-        //setTimeout(() => {
-        //    server.close(() => {
-        //        clearInterval(interval)
-        //        logger.info('Servidor encerrado.', 'Server');
-        //        process.exit(0);
-        //    });
-        //}, 500); // meio segundo de espera
+        // Timeout maior que o intervalo de reconexão do frontend (3s) para tolerar reloads
+        setTimeout(() => {
+          if (clientCount === 0) {
+            server.close(() => {
+              clearInterval(interval)
+              logger.info('Servidor encerrado.', 'Server');
+              process.exit(0);
+            });
+          }
+        }, 4000);
       }
     });
 
