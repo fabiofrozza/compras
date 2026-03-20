@@ -1,255 +1,3 @@
-function catLoader() {
-  return `
-        <!-- From Uiverse.io by vinodjangid07 --> 
-        <div class="loader">
-        <div class="wrapper">
-            <div class="catContainer">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 733 673"
-                class="catbody"
-            >
-                <path
-                fill=var(--cat-fill)
-                d="M111.002 139.5C270.502 -24.5001 471.503 2.4997 621.002 139.5C770.501 276.5 768.504 627.5 621.002 649.5C473.5 671.5 246 687.5 111.002 649.5C-23.9964 611.5 -48.4982 303.5 111.002 139.5Z"
-                ></path>
-                <path fill=var(--cat-fill) d="M184 9L270.603 159H97.3975L184 9Z"></path>
-                <path fill=var(--cat-fill) d="M541 0L627.603 150H454.397L541 0Z"></path>
-            </svg>
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 158 564"
-                class="tail"
-            >
-                <path
-                fill=var(--cat-fill)
-                d="M5.97602 76.066C-11.1099 41.6747 12.9018 0 51.3036 0V0C71.5336 0 89.8636 12.2558 97.2565 31.0866C173.697 225.792 180.478 345.852 97.0691 536.666C89.7636 553.378 73.0672 564 54.8273 564V564C16.9427 564 -5.4224 521.149 13.0712 488.085C90.2225 350.15 87.9612 241.089 5.97602 76.066Z"
-                ></path>
-            </svg>
-            <div class="text">
-                <span class="bigzzz">Z</span>
-                <span class="zzz">Z</span>
-            </div>
-            </div>
-            <div class="wallContainer">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 500 126"
-                class="wall"
-            >
-                <line
-                stroke-width="6"
-                stroke="#7C7C7C"
-                y2="3"
-                x2="450"
-                y1="3"
-                x1="50"
-                ></line>
-                <line
-                stroke-width="6"
-                stroke="#7C7C7C"
-                y2="85"
-                x2="400"
-                y1="85"
-                x1="100"
-                ></line>
-                <line
-                stroke-width="6"
-                stroke="#7C7C7C"
-                y2="122"
-                x2="375"
-                y1="122"
-                x1="125"
-                ></line>
-                <line stroke-width="6" stroke="#7C7C7C" y2="43" x2="500" y1="43"></line>
-                <line
-                stroke-width="6"
-                stroke="#7C7C7C"
-                y2="1.99391"
-                x2="115.5"
-                y1="43.0061"
-                x1="115.5"
-                ></line>
-                <line
-                stroke-width="6"
-                stroke="#7C7C7C"
-                y2="2.00002"
-                x2="189"
-                y1="43.0122"
-                x1="189"
-                ></line>
-                <line
-                stroke-width="6"
-                stroke="#7C7C7C"
-                y2="2.00612"
-                x2="262.5"
-                y1="43.0183"
-                x1="262.5"
-                ></line>
-                <line
-                stroke-width="6"
-                stroke="#7C7C7C"
-                y2="2.01222"
-                x2="336"
-                y1="43.0244"
-                x1="336"
-                ></line>
-                <line
-                stroke-width="6"
-                stroke="#7C7C7C"
-                y2="2.01833"
-                x2="409.5"
-                y1="43.0305"
-                x1="409.5"
-                ></line>
-                <line
-                stroke-width="6"
-                stroke="#7C7C7C"
-                y2="43"
-                x2="153"
-                y1="84.0122"
-                x1="153"
-                ></line>
-                <line
-                stroke-width="6"
-                stroke="#7C7C7C"
-                y2="43"
-                x2="228"
-                y1="84.0122"
-                x1="228"
-                ></line>
-                <line
-                stroke-width="6"
-                stroke="#7C7C7C"
-                y2="43"
-                x2="303"
-                y1="84.0122"
-                x1="303"
-                ></line>
-                <line
-                stroke-width="6"
-                stroke="#7C7C7C"
-                y2="43"
-                x2="378"
-                y1="84.0122"
-                x1="378"
-                ></line>
-                <line
-                stroke-width="6"
-                stroke="#7C7C7C"
-                y2="84"
-                x2="192"
-                y1="125.012"
-                x1="192"
-                ></line>
-                <line
-                stroke-width="6"
-                stroke="#7C7C7C"
-                y2="84"
-                x2="267"
-                y1="125.012"
-                x1="267"
-                ></line>
-                <line
-                stroke-width="6"
-                stroke="#7C7C7C"
-                y2="84"
-                x2="342"
-                y1="125.012"
-                x1="342"
-                ></line>
-            </svg>
-            </div>
-        </div>
-        </div>
-        <style>
-        /* From Uiverse.io by vinodjangid07 */ 
-        .loader {
-        width: 100%;
-        height: fit-content;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        }
-        .wrapper {
-        width: fit-content;
-        height: fit-content;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        }
-        .catContainer {
-        width: 100%;
-        height: fit-content;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        }
-        .catbody {
-        width: 80px;
-        }
-        .tail {
-        position: absolute;
-        width: 17px;
-        top: 50%;
-        animation: tail 0.5s ease-in infinite alternate-reverse;
-        transform-origin: top;
-        }
-        @keyframes tail {
-        0% {
-            transform: rotateZ(60deg);
-        }
-        50% {
-            transform: rotateZ(0deg);
-        }
-        100% {
-            transform: rotateZ(-20deg);
-        }
-        }
-        .wall {
-        width: 300px;
-        }
-        .text {
-        display: flex;
-        flex-direction: column;
-        width: 50px;
-        position: absolute;
-        margin: 0px 0px 100px 120px;
-        }
-        .zzz {
-        color: black;
-        font-weight: 700;
-        font-size: 15px;
-        animation: zzz 2s linear infinite;
-        }
-        .bigzzz {
-        color: black;
-        font-weight: 700;
-        font-size: 25px;
-        margin-left: 10px;
-        animation: zzz 2.3s linear infinite;
-        }
-        @keyframes zzz {
-        0% {
-            color: transparent;
-        }
-        50% {
-            color: var(--cat-fill);
-        }
-        100% {
-            color: transparent;
-        }
-        }
-        </style>
-
-    `;
-}
-
 function getMario() {
   return `
   <!-- From Uiverse.io by https://uiverse.io/vikramsinghnegi/dangerous-fireant-25 --> 
@@ -389,7 +137,7 @@ function getMario() {
   `;
 }
 
-function getLoader() {
+function getLoader(index) {
 
   const loader1 = `
 <!-- https://codepen.io/florian-gropp/pen/BOMyae -->
@@ -1547,9 +1295,518 @@ function getLoader() {
   </style>
 `;
 
+  const loader4 = `
+<!-- https://codepen.io/tommyho/pen/abMZadK -->
+<div class="container-cat">
+  <div class="cat">
+    <div class="whiskers"></div>
+    <div class="face">
+      <div class="eyes">
+        <div class="pupils" id="pupils"></div>
+      </div>
+      <div class="ear-l"></div>
+      <div class="ear-r"></div>
+    </div>
+    <div class="tag"></div>
+    <div class="tail-cat-1"></div>
+  </div>
+</div>
+<style>
+  :root {
+    --catColor: #000;
+    --tagColor: #fb0;
+    --earColor: #f30;
+    --colColor: #f00;
+    --pupColor: #fff;
+  }
+
+  .container-cat {
+    height: 100px;
+    width: 100px;
+    font-size: 9px;
+  }
+
+  .cat {
+    background-color: var(--catColor);
+    height: 5em;
+    width: 12.5em;
+    position: absolute;
+    left: 8em;
+    bottom: 4em;
+    border-radius: 0 2.18em 0 0;
+
+    &:before {
+      content: "";
+      position: absolute;
+      height: 1.87em;
+      width: 1.75em;
+      background-color: var(--catColor);
+      border-radius: 0 0 1.25em 1.25em;
+      bottom: -1.18em;
+      box-shadow: 3.75em 0 var(--catColor), 7.18em 0 var(--catColor), 10.75em 0 var(--catColor);
+    }
+
+    &:after {
+      content: "";
+      position: absolute;
+      height: 3.25em;
+      width: 7.5em;
+      background: linear-gradient(var(--colColor) 1.87em, var(--catColor) 1.87em);
+      bottom: 4.93em;
+    }
+
+    animation: rotateAnimation 2s infinite alternate;
+    transform-origin: bottom;
+  }
+
+  .face {
+    position: absolute;
+    background-color: var(--catColor);
+    height: 7.5em;
+    width: 15em;
+    bottom: 8.18em;
+    left: -3.62em;
+    border-radius: 3.75em;
+
+    &:before {
+      position: absolute;
+      content: "";
+      height: 3.75em;
+      width: 5em;
+      background-color: var(--pupColor);
+      border-radius: 1.87em;
+      left: 1.87em;
+      top: 1.56em;
+      box-shadow: 6.25em 0 var(--pupColor);
+    }
+  }
+
+  .eyes {
+    height: 2em;
+  }
+
+  .pupils {
+    position: absolute;
+    top: 3.48em;
+    left: 4.36em;
+    transform: translate(-50%, -50%);
+    height: 2.5em;
+    width: 1.56em;
+    border-radius: 0.93em;
+    box-shadow: 6.25em 0 #000;
+    background-color: #000;
+    border-radius: 50%;
+  }
+
+  .whiskers,
+  .whiskers:before,
+  .whiskers:after {
+    position: absolute;
+    height: 0.62em;
+    width: 18.75em;
+    background-color: var(--catColor);
+    border-radius: 0.31em;
+  }
+
+  .whiskers {
+    bottom: 12em;
+    left: -5.5em;
+
+    &:before {
+      position: absolute;
+      content: "";
+      transform: rotate(14deg);
+    }
+
+    &:after {
+      position: absolute;
+      content: "";
+      transform: rotate(-14deg);
+    }
+  }
+
+  .ear-l {
+    height: 0;
+    width: 0;
+    border-bottom: 3.12em solid var(--catColor);
+    border-left: 1.56em solid transparent;
+    border-right: 1.56em solid transparent;
+    position: absolute;
+    bottom: 7.37em;
+    left: 3.12em;
+  }
+
+  .ear-r {
+    height: 0;
+    width: 0;
+    border-bottom: 3.12em solid var(--catColor);
+    border-right: 1.56em solid transparent;
+    border-left: 1.56em solid transparent;
+    position: absolute;
+    bottom: 7.37em;
+    left: 8.75em;
+  }
+
+  .ear-l:before,
+  .ear-r:before {
+    position: absolute;
+    content: "";
+    height: 0;
+    width: 0;
+    border-bottom: 1.37em solid var(--earColor);
+    border-left: 0.75em solid transparent;
+    border-right: 0.75em solid transparent;
+    left: -0.68em;
+    top: 1.56em;
+  }
+
+  .tag {
+    position: absolute;
+    height: 1.87em;
+    width: 1.87em;
+    background-color: var(--tagColor);
+    border-radius: 50%;
+    z-index: 1;
+    bottom: 4.43em;
+    left: 2.81em;
+  }
+
+  .tail-cat-1:before,
+  .tail-cat-1:after {
+    position: absolute;
+    content: "";
+    height: 4.29em;
+    width: 2.5em;
+    border: 1.25em solid var(--catColor);
+  }
+
+  .tail-cat-1 {
+    width: 3.75em;
+    height: 1.25em;
+    background-color: var(--catColor);
+    position: absolute;
+    left: 10.62em;
+    top: 1.87em;
+
+    &:before {
+      border-left: none;
+      bottom: 0;
+      left: 3.12em;
+      border-radius: 0 3.12em 3.12em 0;
+    }
+
+    &:after {
+      border-right: none;
+      bottom: 3.12em;
+      left: 1.25em;
+      border-radius: 3.12em 0 0 3.12em;
+    }
+  }
+
+  @keyframes rotateAnimation {
+    0% {
+      transform: rotateZ(0deg) translateY(2px);
+    }
+
+    25% {
+      transform: rotateZ(1deg);
+    }
+
+    50% {
+      transform: rotateZ(0deg) translateY(-2px);
+    }
+
+    75% {
+      transform: rotateZ(-1deg);
+    }
+
+    100% {
+      transform: rotateZ(0deg) translateY(2px);
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener("mousemove", (event) => {
+    const eyes = document.querySelector(".eyes");
+    const pupil = document.getElementById("pupils");
+
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
+
+    const eyesRect = eyes.getBoundingClientRect();
+    const eyesX = eyesRect.left + eyesRect.width / 2;
+    const eyesY = eyesRect.top + eyesRect.height / 2;
+    const angle = Math.atan2(mouseY - eyesY, mouseX - eyesX);
+    const distance = Math.min(eyesRect.width / 4, eyesRect.height / 4);
+
+    const pupilX = Math.cos(angle) * distance;
+    const pupilY = Math.sin(angle) * distance;
+
+    pupil.style.transform = "translate(-50%, -50%) translate(" + pupilX + "px, " + pupilY + "px)";
+  });
+
+</script>
+ `;
+
+  const loader5 = `
+        <!-- From Uiverse.io by vinodjangid07 --> 
+        <div class="loader">
+        <div class="wrapper">
+            <div class="catContainer">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 733 673"
+                class="catbody"
+            >
+                <path
+                fill=var(--cat-fill)
+                d="M111.002 139.5C270.502 -24.5001 471.503 2.4997 621.002 139.5C770.501 276.5 768.504 627.5 621.002 649.5C473.5 671.5 246 687.5 111.002 649.5C-23.9964 611.5 -48.4982 303.5 111.002 139.5Z"
+                ></path>
+                <path fill=var(--cat-fill) d="M184 9L270.603 159H97.3975L184 9Z"></path>
+                <path fill=var(--cat-fill) d="M541 0L627.603 150H454.397L541 0Z"></path>
+            </svg>
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 158 564"
+                class="tail"
+            >
+                <path
+                fill=var(--cat-fill)
+                d="M5.97602 76.066C-11.1099 41.6747 12.9018 0 51.3036 0V0C71.5336 0 89.8636 12.2558 97.2565 31.0866C173.697 225.792 180.478 345.852 97.0691 536.666C89.7636 553.378 73.0672 564 54.8273 564V564C16.9427 564 -5.4224 521.149 13.0712 488.085C90.2225 350.15 87.9612 241.089 5.97602 76.066Z"
+                ></path>
+            </svg>
+            <div class="text">
+                <span class="bigzzz">Z</span>
+                <span class="zzz">Z</span>
+            </div>
+            </div>
+            <div class="wallContainer">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 500 126"
+                class="wall"
+            >
+                <line
+                stroke-width="6"
+                stroke="#7C7C7C"
+                y2="3"
+                x2="450"
+                y1="3"
+                x1="50"
+                ></line>
+                <line
+                stroke-width="6"
+                stroke="#7C7C7C"
+                y2="85"
+                x2="400"
+                y1="85"
+                x1="100"
+                ></line>
+                <line
+                stroke-width="6"
+                stroke="#7C7C7C"
+                y2="122"
+                x2="375"
+                y1="122"
+                x1="125"
+                ></line>
+                <line stroke-width="6" stroke="#7C7C7C" y2="43" x2="500" y1="43"></line>
+                <line
+                stroke-width="6"
+                stroke="#7C7C7C"
+                y2="1.99391"
+                x2="115.5"
+                y1="43.0061"
+                x1="115.5"
+                ></line>
+                <line
+                stroke-width="6"
+                stroke="#7C7C7C"
+                y2="2.00002"
+                x2="189"
+                y1="43.0122"
+                x1="189"
+                ></line>
+                <line
+                stroke-width="6"
+                stroke="#7C7C7C"
+                y2="2.00612"
+                x2="262.5"
+                y1="43.0183"
+                x1="262.5"
+                ></line>
+                <line
+                stroke-width="6"
+                stroke="#7C7C7C"
+                y2="2.01222"
+                x2="336"
+                y1="43.0244"
+                x1="336"
+                ></line>
+                <line
+                stroke-width="6"
+                stroke="#7C7C7C"
+                y2="2.01833"
+                x2="409.5"
+                y1="43.0305"
+                x1="409.5"
+                ></line>
+                <line
+                stroke-width="6"
+                stroke="#7C7C7C"
+                y2="43"
+                x2="153"
+                y1="84.0122"
+                x1="153"
+                ></line>
+                <line
+                stroke-width="6"
+                stroke="#7C7C7C"
+                y2="43"
+                x2="228"
+                y1="84.0122"
+                x1="228"
+                ></line>
+                <line
+                stroke-width="6"
+                stroke="#7C7C7C"
+                y2="43"
+                x2="303"
+                y1="84.0122"
+                x1="303"
+                ></line>
+                <line
+                stroke-width="6"
+                stroke="#7C7C7C"
+                y2="43"
+                x2="378"
+                y1="84.0122"
+                x1="378"
+                ></line>
+                <line
+                stroke-width="6"
+                stroke="#7C7C7C"
+                y2="84"
+                x2="192"
+                y1="125.012"
+                x1="192"
+                ></line>
+                <line
+                stroke-width="6"
+                stroke="#7C7C7C"
+                y2="84"
+                x2="267"
+                y1="125.012"
+                x1="267"
+                ></line>
+                <line
+                stroke-width="6"
+                stroke="#7C7C7C"
+                y2="84"
+                x2="342"
+                y1="125.012"
+                x1="342"
+                ></line>
+            </svg>
+            </div>
+        </div>
+        </div>
+        <style>
+        /* From Uiverse.io by vinodjangid07 */ 
+        .loader {
+        width: 100%;
+        height: fit-content;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        }
+        .wrapper {
+        width: fit-content;
+        height: fit-content;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        }
+        .catContainer {
+        width: 100%;
+        height: fit-content;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        }
+        .catbody {
+        width: 80px;
+        }
+        .tail {
+        position: absolute;
+        width: 17px;
+        top: 50%;
+        animation: tail 0.5s ease-in infinite alternate-reverse;
+        transform-origin: top;
+        }
+        @keyframes tail {
+        0% {
+            transform: rotateZ(60deg);
+        }
+        50% {
+            transform: rotateZ(0deg);
+        }
+        100% {
+            transform: rotateZ(-20deg);
+        }
+        }
+        .wall {
+        width: 300px;
+        }
+        .text {
+        display: flex;
+        flex-direction: column;
+        width: 50px;
+        position: absolute;
+        margin: 0px 0px 100px 120px;
+        }
+        .zzz {
+        color: black;
+        font-weight: 700;
+        font-size: 15px;
+        animation: zzz 2s linear infinite;
+        }
+        .bigzzz {
+        color: black;
+        font-weight: 700;
+        font-size: 25px;
+        margin-left: 10px;
+        animation: zzz 2.3s linear infinite;
+        }
+        @keyframes zzz {
+        0% {
+            color: transparent;
+        }
+        50% {
+            color: var(--cat-fill);
+        }
+        100% {
+            color: transparent;
+        }
+        }
+        </style>
+
+    `;
+
   const loaders = [
-    loader1, loader2, loader3
+    loader1, loader2, loader3, loader4, loader5
   ];
-  const randomIndex = Math.floor(Math.random() * loaders.length);
+
+  if (index !== undefined && index >= 0 && index < loaders.length) {
+    return loaders[index];
+  }
+
+  const randomIndex = Math.floor(Math.random() * (loaders.length - 1));
   return loaders[randomIndex];
 }

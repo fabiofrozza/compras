@@ -143,7 +143,18 @@ async function showScriptRunningOverlay() {
     if (typeof getLoader !== 'function' && typeof loadScript === 'function') {
       try { await loadScript('js/loaders.js'); } catch (e) { /* fallback */ }
     }
-    overlayLoader.innerHTML = typeof getLoader === 'function' ? getLoader() : '';
+    overlayLoader.innerHTML = typeof getLoader === 'function' ? getLoader(3) : '';
+    // Scripts inseridos via innerHTML não são executados pelo browser;
+    // é preciso recriá-los como elementos DOM reais.
+    overlayLoader.querySelectorAll('script').forEach(oldScript => {
+      const newScript = document.createElement('script');
+      if (oldScript.src) {
+        newScript.src = oldScript.src;
+      } else {
+        newScript.textContent = oldScript.textContent;
+      }
+      oldScript.replaceWith(newScript);
+    });
   }
 }
 
