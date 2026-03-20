@@ -537,11 +537,11 @@ app.get('/api/home-backgrounds', (req, res) => {
 
 app.get('/api/app-config', (_req, res) => {
   res.json({
-    companyName: process.env.COMPRAS_COMPANY_NAME || '',
+    companyName:    process.env.COMPRAS_COMPANY_NAME    || '',
     departmentName: process.env.COMPRAS_DEPARTMENT_NAME || '',
-    companySite: process.env.COMPRAS_COMPANY_SITE || '',
+    companySite:    process.env.COMPRAS_COMPANY_SITE    || '',
     departmentSite: process.env.COMPRAS_DEPARTMENT_SITE || '',
-    manualSite: process.env.COMPRAS_MANUAL_SITE || '',
+    manualSite:     process.env.COMPRAS_MANUAL_SITE     || '',
   });
 });
 
@@ -556,19 +556,12 @@ const server = app.listen(PORT, async () => {
   logger.info(`==============================================`);
   logger.debug(`Pasta: ${__dirname}`, 'Server');
 
+  abrirNaInterface(`http://localhost:${PORT}`);
+
   const wss = new WebSocket.Server({ server });
   let clientCount = 0;
 
   logger.section('WebSocket Server iniciado');
-
-  // Aguarda brevemente para ver se a página já está aberta (reconexão WebSocket)
-  let browserOpened = false;
-  const browserOpenTimer = setTimeout(() => {
-    if (clientCount === 0) {
-      browserOpened = true;
-      abrirNaInterface(`http://localhost:${PORT}`);
-    }
-  }, 3500);
 
   const interval = setInterval(() => {
     wss.clients.forEach((ws) => {
@@ -613,19 +606,17 @@ const server = app.listen(PORT, async () => {
       logger.debug(`IP: ${ip}`, 'WebSocket');
 
       if (clientCount === 0) {
-        logger.info('Nenhum cliente conectado. Aguardando reconexão...', 'Server');
+        logger.info('Nenhum cliente conectado. Encerrando servidor...', 'Server');
 
-        // CLOSE WHEN THERE´S NO USER CONNECTED
-        // Timeout maior que o intervalo de reconexão do frontend (3s) para tolerar reloads
-        setTimeout(() => {
-          if (clientCount === 0) {
-            server.close(() => {
-              clearInterval(interval)
-              logger.info('Servidor encerrado.', 'Server');
-              process.exit(0);
-            });
-          }
-        }, 4000);
+        // ENCERRAMENTO DESATIVADO TEMPORARIAMENTE
+
+        //setTimeout(() => {
+        //    server.close(() => {
+        //        clearInterval(interval)
+        //        logger.info('Servidor encerrado.', 'Server');
+        //        process.exit(0);
+        //    });
+        //}, 500); // meio segundo de espera
       }
     });
 
