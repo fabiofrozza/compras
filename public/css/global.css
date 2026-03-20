@@ -116,6 +116,14 @@ body.dark-mode {
 }
 
 /* Utilitários Bootstrap Personalizados */
+.custom-spinner-container {
+    min-height: 100px;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .custom-spinner {
     display: flex;
     align-items: center;

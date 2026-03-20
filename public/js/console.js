@@ -143,7 +143,7 @@ async function showScriptRunningOverlay() {
     if (typeof getLoader !== 'function' && typeof loadScript === 'function') {
       try { await loadScript('js/loaders.js'); } catch (e) { /* fallback */ }
     }
-    overlayLoader.innerHTML = typeof getLoader === 'function' ? getLoader(3) : '';
+    overlayLoader.innerHTML = typeof getLoader === 'function' ? getLoader() : '';
     // Scripts inseridos via innerHTML não são executados pelo browser;
     // é preciso recriá-los como elementos DOM reais.
     overlayLoader.querySelectorAll('script').forEach(oldScript => {

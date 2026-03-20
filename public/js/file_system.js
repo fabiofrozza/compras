@@ -105,9 +105,11 @@ async function clearFolderFiles(containerId, folderPath, scriptName, innerFolder
 
     try {
         filesList.innerHTML = `
-            <div class="custom-spinner text-danger">
-                <div class="spinner-border"></div>
-                <span role="status">Excluindo arquivos...</span>
+            <div class="custom-spinner-container">
+                <div class="custom-spinner text-danger">
+                    <div class="spinner-border"></div>
+                    <span role="status">Excluindo arquivos...</span>
+                </div>
             </div>
         `;
 
@@ -190,7 +192,7 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
 
     try {
         filesList.innerHTML = `
-            <div class="files-list-loading">
+            <div class="custom-spinner-container">
                 <div class="custom-spinner text-primary">
                     <div class="spinner-border"></div>
                     <span role="status">Atualizando lista de arquivos...</span>
