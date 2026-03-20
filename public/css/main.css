@@ -337,7 +337,3 @@ body.dark-mode #home.home-bg-loaded::after {
         transform: translateY(0);
     }
 }
-
-.tab-pane.show.active {
-    display: block;
-}

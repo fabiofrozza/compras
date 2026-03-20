@@ -36,6 +36,36 @@ let globalComputerName = '';
 
 // --- Navbar App Buttons ---
 
+function buildHiddenTablist() {
+    const tablist = document.getElementById('hidden-tablist');
+    if (!tablist) return;
+
+    tablist.innerHTML = TAB_LIST.map(tab =>
+        `<a id="${tab.id}-tab" data-bs-toggle="pill" data-bs-target="#${tab.id}" role="tab" aria-controls="${tab.id}"></a>`
+    ).join('');
+}
+
+function buildTabPanes() {
+    const tabContent = document.getElementById('tabContent');
+    if (!tabContent) return;
+
+    const defaultTab = localStorage.getItem('lastActiveTab') || 'home';
+
+    tabContent.innerHTML = TAB_LIST.map(tab => {
+        const isDefault = tab.id === defaultTab;
+        const activeClass = isDefault ? ' show active' : ' fade';
+        return `
+            <div class="tab-pane${activeClass}" id="${tab.id}" role="tabpanel" aria-labelledby="${tab.id}-tab" data-load-url="tabs/${tab.id}.html">
+                <div class="custom-spinner-container">
+                    <div class="custom-spinner text-primary">
+                        <div class="spinner-border"></div>
+                        <span role="status">Carregando aba...</span>
+                    </div>
+                </div>
+            </div>`;
+    }).join('');
+}
+
 function buildNavbarApps() {
     const center = document.querySelector('.navbar-center');
     if (!center) return;
@@ -163,12 +193,12 @@ document.addEventListener('shown.bs.tab', async (event) => {
                 } catch (error) {
                     console.error('Erro no lazy loading:', error);
                     let msgError = `<div class="alert alert-danger">Erro ao carregar aba: ${error.message}</div>`;
-                    if (typeof catLoader === 'function') {
-                        msgError += catLoader();
+                    if (typeof getLoader === 'function') {
+                        msgError += getLoader(4);
                     } else {
                         try {
                             await loadScript('js/loaders.js');
-                            if (typeof catLoader === 'function') msgError += catLoader();
+                            if (typeof getLoader === 'function') msgError += getLoader(4);
                         } catch (e) { /* fallback: sem animação */ }
                     }
                     targetPane.innerHTML = msgError;
@@ -246,6 +276,11 @@ async function fetchComputerName() {
 }
 
 fetchComputerName();
+
+// Executados imediatamente (o DOM já está parseado com defer) para que
+// outros scripts com DOMContentLoaded encontrem os tab-panes existentes
+buildTabPanes();
+buildHiddenTablist();
 
 document.addEventListener('DOMContentLoaded', () => {
     buildNavbarApps();

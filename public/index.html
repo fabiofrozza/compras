@@ -15,7 +15,7 @@
 
     <!-- Material Symbols Outlined (ícones) -->
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,add_to_drive,apps,article,assignment_turned_in,build,business,cancel,check,check_circle,close,code,computer,contact_page,content_copy,dark_mode,delete,description,emergency,error,filter_alt,fingerprint,folder,folder_open,folder_zip,gavel,help,home,hourglass_empty,image,info,ink_eraser,insert_drive_file,light_mode,list,minimize,notifications,notifications_off,open_in_full,open_in_new,percent,photo_camera,picture_as_pdf,pie_chart,receipt_long,refresh,schedule,settings,settings_heart,shopping_basket,show_chart,star,storage,store,table_chart,terminal,text_snippet,warning&display=block">
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,add_to_drive,apps,article,assignment_turned_in,build,business,cancel,check,check_circle,close,code,computer,contact_page,content_copy,dark_mode,delete,description,emergency,error,filter_alt,fingerprint,folder,folder_open,folder_zip,gavel,help,home,hourglass_empty,image,info,ink_eraser,insert_drive_file,light_mode,list,minimize,notifications,notifications_off,open_in_full,open_in_new,percent,photo_camera,picture_as_pdf,pie_chart,receipt_long,refresh,schedule,settings,settings_heart,shopping_basket,show_chart,star,storage,store,table_chart,terminal,text_snippet,warning&display=swap">
 
     <!-- Popper.js (dependência do Bootstrap para tooltips) -->
     <script defer src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
@@ -131,97 +131,10 @@
         </div>
     </header>
 
-    <!-- Tab buttons ocultos (ativados via App Launcher) -->
-    <div class="d-none" id="hidden-tablist" role="tablist">
-        <a id="home-tab" data-bs-toggle="pill" data-bs-target="#home" role="tab" aria-controls="home"></a>
-        <a id="atas-tab" data-bs-toggle="pill" data-bs-target="#atas" role="tab" aria-controls="atas"></a>
-        <a id="catmat-tab" data-bs-toggle="pill" data-bs-target="#catmat" role="tab" aria-controls="catmat"></a>
-        <a id="fornecedores-tab" data-bs-toggle="pill" data-bs-target="#fornecedores" role="tab"
-            aria-controls="fornecedores"></a>
-        <a id="importacao-tab" data-bs-toggle="pill" data-bs-target="#importacao" role="tab"
-            aria-controls="importacao"></a>
-        <a id="mapas-tab" data-bs-toggle="pill" data-bs-target="#mapas" role="tab" aria-controls="mapas"></a>
-        <a id="powerbi-tab" data-bs-toggle="pill" data-bs-target="#powerbi" role="tab" aria-controls="powerbi"></a>
-        <a id="instalacao-tab" data-bs-toggle="pill" data-bs-target="#instalacao" role="tab"
-            aria-controls="instalacao"></a>
-    </div>
+    <div class="d-none" id="hidden-tablist" role="tablist"></div>
 
     <main class="container-fluid p-1 m-1 shadow-sm rounded-4" id="mainContent">
-
-        <div class="tab-content" id="tabContent">
-
-            <!-- Aba Home -->
-            <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab"
-                data-load-url="tabs/home.html">
-                <div class="custom-spinner text-primary">
-                    <div class="spinner-border"></div>
-                    <span role="status">Carregando aba...</span>
-                </div>
-            </div>
-
-            <!-- Aba Atas -->
-            <div class="tab-pane fade" id="atas" role="tabpanel" aria-labelledby="atas-tab"
-                data-load-url="tabs/atas.html">
-                <div class="custom-spinner text-primary">
-                    <div class="spinner-border"></div>
-                    <span role="status">Carregando aba...</span>
-                </div>
-            </div>
-
-            <!-- Aba CATMAT -->
-            <div class="tab-pane fade" id="catmat" role="tabpanel" aria-labelledby="catmat-tab"
-                data-load-url="tabs/catmat.html">
-                <div class="custom-spinner text-primary">
-                    <div class="spinner-border"></div>
-                    <span role="status">Carregando aba...</span>
-                </div>
-            </div>
-
-            <!-- Aba Mapas -->
-            <div class="tab-pane fade" id="mapas" role="tabpanel" aria-labelledby="mapas-tab"
-                data-load-url="tabs/mapas.html">
-                <div class="custom-spinner text-primary">
-                    <div class="spinner-border"></div>
-                    <span role="status">Carregando aba...</span>
-                </div>
-            </div>
-
-            <!-- Aba Fornecedores -->
-            <div class="tab-pane fade" id="fornecedores" role="tabpanel" aria-labelledby="fornecedores-tab"
-                data-load-url="tabs/fornecedores.html">
-                <div class="custom-spinner text-primary">
-                    <div class="spinner-border"></div>
-                    <span role="status">Carregando aba...</span>
-                </div>
-            </div>
-
-            <!-- Aba Importação -->
-            <div class="tab-pane fade" id="importacao" role="tabpanel" aria-labelledby="importacao-tab"
-                data-load-url="tabs/importacao.html">
-                <div class="custom-spinner text-primary">
-                    <div class="spinner-border"></div>
-                    <span role="status">Carregando aba...</span>
-                </div>
-            </div>
-
-            <!-- Aba Power BI -->
-            <div class="tab-pane fade" id="powerbi" role="tabpanel" aria-labelledby="powerbi-tab"
-                data-load-url="tabs/powerbi.html">
-                <div class="custom-spinner text-primary">
-                    <div class="spinner-border"></div>
-                    <span role="status">Carregando aba...</span>
-                </div>
-            </div>
-
-            <!-- Aba Primeiro Uso -->
-            <div class="tab-pane fade" id="instalacao" role="tabpanel" aria-labelledby="instalacao-tab"
-                data-load-url="tabs/instalacao.html">
-                <div class="custom-spinner text-primary">
-                    <div class="spinner-border"></div>
-                    <span role="status">Carregando aba...</span>
-                </div>
-            </div>
-        </div>
+        <div class="tab-content" id="tabContent"></div>
     </main>
 
     <!-- Toast Notifications -->
