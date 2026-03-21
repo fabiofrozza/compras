@@ -719,7 +719,7 @@ config_finalizar <- function(sucesso = FALSE) {
 
     close(log_r$con)
 
-    if (codigo_saida == 0 & config$geral$log_level == "error-warning") {
+    if (codigo_saida == 0 && config$geral$log_level == "error-warning") {
       log_path <- file.path(get_config("pasta")$log, log_r$nome)
       suppressWarnings(file.remove(log_path))
     }
@@ -965,6 +965,177 @@ config_pacotes <- function(pacotes) {
   )
 
   log_info(estilo = "fim")
+}
+
+config_atualizar_pacotes <- function(pacotes) {
+  #' Atualiza pacotes R para a versão mais recente
+  #'
+  #' @description
+  #' Utiliza \code{update.packages()} para comparar versões instaladas com
+  #' as disponíveis no CRAN e atualizar apenas os pacotes desatualizados.
+  #' Pacotes não instalados são instalados normalmente.
+  #'
+  #' @param pacotes Character vector. Lista de pacotes R a serem verificados.
+
+  log_secao("ATUALIZAR PACOTES", "CONFIG")
+
+  pasta_pacotes <- Sys.getenv("R_LIBS_USER")
+  repo <- "https://cloud.r-project.org/"
+
+  log_info(
+    estilo = "inicio",
+    "PACOTES A VERIFICAR", pacotes,
+    "-"
+  )
+
+  # Identifica pacotes ainda não instalados
+  instalados <- rownames(installed.packages(lib.loc = pasta_pacotes))
+  nao_instalados <- pacotes[!pacotes %in% instalados]
+  pacotes_instalados_ok <- c()
+  pacotes_atualizados <- c()
+
+  # ---- Instalar pacotes ausentes ----
+  if (length(nao_instalados) > 0) {
+    log_info(
+      estilo = "meio",
+      "Pacotes não instalados (serão instalados agora):", nao_instalados
+    )
+
+    pb <- log_barra_progresso("Instalando...", length(nao_instalados))
+
+    for (pacote in nao_instalados) {
+      tryCatch(
+        {
+          log_barra_progresso(
+            sprintf("Instalando pacote %s", pacote),
+            pb = pb
+          )
+          install.packages(pacote,
+            lib = pasta_pacotes,
+            dependencies = TRUE,
+            repos = repo
+          )
+          pacotes_instalados_ok <- c(pacotes_instalados_ok, pacote)
+        },
+        error = function(e) {
+          log_erro(
+            sprintf("Falha ao instalar o pacote '%s'", pacote),
+            e$message
+          )
+        }
+      )
+    }
+
+    log_barra_progresso(pb = pb)
+  }
+
+  # ---- Atualizar pacotes já instalados ----
+  pacotes_ja_instalados <- pacotes[pacotes %in% instalados]
+
+  if (length(pacotes_ja_instalados) > 0) {
+    log_info(
+      estilo = "meio",
+      "Verificando atualizações para pacotes instalados..."
+    )
+
+    tryCatch(
+      {
+        # Identifica quais pacotes têm versão mais recente no CRAN
+        desatualizados <- old.packages(
+          lib.loc = pasta_pacotes,
+          repos = repo
+        )
+
+        if (!is.null(desatualizados)) {
+          nomes_desatualizados <- rownames(desatualizados)
+          alvo <- intersect(nomes_desatualizados, pacotes_ja_instalados)
+        } else {
+          alvo <- character(0)
+        }
+
+        if (length(alvo) > 0) {
+          versoes_antes <- desatualizados[alvo, "Installed", drop = FALSE]
+
+          log_info(
+            estilo = "meio",
+            sprintf(
+              "Pacotes com atualização disponível: %s",
+              paste(alvo, collapse = ", ")
+            )
+          )
+
+          update.packages(
+            lib.loc = pasta_pacotes,
+            instlib = pasta_pacotes,
+            oldPkgs = alvo,
+            ask = FALSE,
+            repos = repo
+          )
+
+          # Verifica quais realmente foram atualizados
+          novos_instalados <- installed.packages(lib.loc = pasta_pacotes)
+          for (pkg in alvo) {
+            versao_nova <- novos_instalados[pkg, "Version"]
+            versao_antiga <- versoes_antes[pkg, "Installed"]
+            if (versao_nova != versao_antiga) {
+              pacotes_atualizados <- c(
+                pacotes_atualizados,
+                sprintf("%s (%s -> %s)", pkg, versao_antiga, versao_nova)
+              )
+            }
+          }
+        }
+      },
+      error = function(e) {
+        log_erro("Falha ao atualizar pacotes.", e$message)
+      }
+    )
+  }
+
+  # ---- Resumo final ----
+  resumo <- c()
+
+  if (length(nao_instalados) == 0) {
+    resumo <- c(resumo, "Todos os pacotes já estavam instalados.")
+  } else if (length(pacotes_instalados_ok) > 0) {
+    resumo <- c(
+      resumo,
+      sprintf(
+        "Pacotes instalados: %s",
+        paste(pacotes_instalados_ok, collapse = ", ")
+      )
+    )
+    falhas <- setdiff(nao_instalados, pacotes_instalados_ok)
+    if (length(falhas) > 0) {
+      resumo <- c(
+        resumo,
+        sprintf(
+          "Falha ao instalar: %s",
+          paste(falhas, collapse = ", ")
+        )
+      )
+    }
+  }
+
+  if (length(pacotes_atualizados) > 0) {
+    resumo <- c(
+      resumo,
+      sprintf(
+        "Pacotes atualizados: %s",
+        paste(pacotes_atualizados, collapse = ", ")
+      )
+    )
+  } else if (length(pacotes_ja_instalados) > 0) {
+    resumo <- c(
+      resumo,
+      "Todos os pacotes já estão na versão mais recente."
+    )
+  }
+
+  log_info(estilo = "fim", "RESUMO", resumo)
+
+  # Carrega todos os pacotes após a atualização
+  config_pacotes(pacotes)
 }
 
 config_pasta <- function(...) {
