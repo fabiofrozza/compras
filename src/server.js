@@ -125,15 +125,7 @@ async function getRScriptPath() {
   if (cachedRScriptPath) return cachedRScriptPath;
 
   if (process.platform === 'win32') {
-    try {
-      const found = execSync('where Rscript', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).split('\n')[0].trim();
-      if (found) {
-        cachedRScriptPath = found;
-        return cachedRScriptPath;
-      }
-    } catch { }
-
-    // Registro do Windows (HKLM e HKCU), versões ordenadas da mais nova para a mais antiga
+    // Registro do Windows primeiro (HKLM e HKCU), versões ordenadas da mais nova para a mais antiga
     const hives = ['HKLM\\SOFTWARE\\R-core\\R', 'HKCU\\SOFTWARE\\R-core\\R'];
     for (const hive of hives) {
       try {
@@ -192,22 +184,37 @@ async function getRScriptPath() {
       } catch { }
     }
 
-    // Entradas do PATH com padrão de versão do R (ex: R-4.x.x\bin)
+    // Entradas do PATH com padrão de versão do R (ex: R-4.x.x\bin), ordenadas pela mais recente
     const systemPath = process.env['PATH'] || '';
+    const pathCandidates = [];
     for (const dir of systemPath.split(';')) {
-      if (/[\\\/]R-[\d.]+[\\\/]bin$/i.test(dir)) {
-        const rscriptPath = path.join(dir, 'Rscript.exe');
+      const vMatch = dir.match(/[\\\/]R-([\d.]+)[\\\/]bin$/i);
+      if (vMatch) pathCandidates.push({ dir, version: vMatch[1] });
+    }
+    pathCandidates.sort((a, b) => compareVersions(b.version, a.version));
+    for (const { dir } of pathCandidates) {
+      const rscriptPath = path.join(dir, 'Rscript.exe');
+      try {
+        await fs.access(rscriptPath);
+        cachedRScriptPath = rscriptPath;
+        return cachedRScriptPath;
+      } catch { }
+    }
+
+    // Fallback: where Rscript (pega o que estiver no PATH, verifica existência)
+    try {
+      const lines = execSync('where Rscript', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).split('\n').map(l => l.trim()).filter(Boolean);
+      for (const found of lines) {
         try {
-          await fs.access(rscriptPath);
-          cachedRScriptPath = rscriptPath;
+          await fs.access(found);
+          cachedRScriptPath = found;
           return cachedRScriptPath;
         } catch { }
       }
-    }
+    } catch { }
   }
 
-  cachedRScriptPath = 'Rscript';
-  return cachedRScriptPath;
+  return null;
 }
 
 // API - Open folder
@@ -488,14 +495,23 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/check-r', async (_req, res) => {
+  cachedRScriptPath = null;
   const rscriptCmd = await getRScriptPath();
+
+  if (!rscriptCmd) {
+    return res.json({ installed: false, message: 'R não encontrado. Por favor, instale o R em https://cran.r-project.org/bin/windows/base/' });
+  }
+
   const rCheck = spawn(rscriptCmd, ['--version']);
 
   let output = '';
+  let responded = false;
   rCheck.stdout.on('data', (data) => { output += data.toString(); });
   rCheck.stderr.on('data', (data) => { output += data.toString(); });
 
   rCheck.on('close', (code) => {
+    if (responded) return;
+    responded = true;
     if (code === 0 || output.includes('R scripting')) {
       res.json({ installed: true, version: output.trim(), path: rscriptCmd });
     } else {
@@ -504,8 +520,34 @@ app.get('/api/check-r', async (_req, res) => {
   });
 
   rCheck.on('error', () => {
+    if (responded) return;
+    responded = true;
     res.json({ installed: false, message: 'R não encontrado. Por favor, instale o R em https://cran.r-project.org/bin/windows/base/' });
   });
+});
+
+app.get('/api/check-r-latest', async (_req, res) => {
+  try {
+    const response = await fetch('https://cran.r-project.org/bin/windows/base/');
+    const html = await response.text();
+
+    // The page heading is "R-X.X.X for Windows"
+    const versionMatch = html.match(/R-(\d+\.\d+\.\d+)\s+for\s+Windows/);
+    // The download link is "R-X.X.X-win.exe"
+    const exeMatch = html.match(/href=["']?(R-[\d.]+-win\.exe)["']?/i);
+
+    if (versionMatch) {
+      const latestVersion = versionMatch[1];
+      const exeFile = exeMatch ? exeMatch[1] : `R-${latestVersion}-win.exe`;
+      const downloadUrl = `https://cran.r-project.org/bin/windows/base/${exeFile}`;
+      res.json({ latest: latestVersion, downloadUrl });
+    } else {
+      res.json({ error: 'Não foi possível identificar a versão mais recente.' });
+    }
+  } catch (err) {
+    logger.error(`Erro ao consultar versão do R no CRAN: ${err.message}`, 'RLatest');
+    res.json({ error: 'Não foi possível consultar o CRAN.' });
+  }
 });
 
 function getComputerName() {
@@ -701,8 +743,16 @@ async function executeRScript(ws, scriptFolder, params) {
 
   const rscriptCmd = await getRScriptPath();
 
-  if (rscriptCmd === 'Rscript' && process.platform === 'win32') {
-    logger.warn('Caminho absoluto do R não encontrado no Windows, tentando via PATH...', 'RDetect');
+  if (!rscriptCmd) {
+    const notFoundMsg = 'R não encontrado. Instale o R pela aba Instalação antes de executar scripts.';
+    logger.error(notFoundMsg, 'RDetect');
+    ws.send(JSON.stringify({
+      type: 'error',
+      scriptName: scriptFolder,
+      message: notFoundMsg,
+      notificationMessage: `${TAB_NAMES[scriptFolder] || scriptFolder}: ${notFoundMsg}`
+    }));
+    return;
   }
 
   const args = [scriptPath, ...Object.values(params), 'json-output'];
