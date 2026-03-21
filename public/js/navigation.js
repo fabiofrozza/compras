@@ -26,7 +26,8 @@ function loadScript(src) {
 const TAB_SCRIPTS = {
     atas: 'js/atas.js',
     importacao: 'js/importacao.js',
-    powerbi: 'js/powerbi.js'
+    powerbi: 'js/powerbi.js',
+    instalacao: 'js/instalacao.js'
 };
 
 const mainContent = document.getElementById('mainContent');
@@ -242,7 +243,7 @@ document.addEventListener('shown.bs.tab', async (event) => {
                 inicializarImportacao();
             }
 
-            if (globalComputerName && (tabId === 'atas' || tabId === 'catmat' || tabId === 'importacao' || tabId === 'mapas' || tabId === 'powerbi')) {
+            if (globalComputerName && (tabId === 'atas' || tabId === 'catmat' || tabId === 'importacao' || tabId === 'mapas' || tabId === 'powerbi' || tabId === 'instalacao')) {
                 if (typeof ensureConsoleDOM === 'function') ensureConsoleDOM();
 
                 const logsList = document.getElementById('logs-file-list');
