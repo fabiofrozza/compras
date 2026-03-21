@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<div class="row row-cols-2">
-    <div class="col-sm-6">
+<div class="row">
+    <div class="col">
         <!-- Informações do R -->
         <div id="r-info-panel" class="script-form shadow-sm">
             <h4><i class="material-symbols-outlined">info</i> Informações do R</h4>
@@ -45,42 +45,38 @@
             </div>
         </div>
     </div>
-    <div class="col-sm-6">
-        <div class="col-sm">
-            <!-- Instalar pacotes -->
-            <form id="form-instalacao-instalar" class="script-form shadow-sm">
-                <h4><i class="material-symbols-outlined">build</i> Instalar pacotes</h4>
-                <div class="form-group">
-                    <p class="text-body-secondary small mb-0">
-                        Instala todos os pacotes R necessários para o funcionamento da aplicação.
-                        Execute esta opção no primeiro uso.
-                    </p>
-                </div>
-                <div class="form-buttons">
-                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"
-                        id="btn-run-instalacao-instalar" onclick="executarInstalacao('instalar')">
-                        Instalar
-                    </button>
-                </div>
-            </form>
-        </div>
-        <div class="col-sm">
-            <!-- Atualizar pacotes -->
-            <form id="form-instalacao-atualizar" class="script-form shadow-sm">
-                <h4><i class="material-symbols-outlined">refresh</i> Atualizar pacotes</h4>
-                <div class="form-group">
-                    <p class="text-body-secondary small mb-0">
-                        Atualiza os pacotes R para a versão mais recente disponível.
-                        Utilize quando os scripts apresentarem erros relacionados a versões desatualizadas.
-                    </p>
-                </div>
-                <div class="form-buttons">
-                    <button type="button" class="btn btn-sm btn-warning btn-run text-nowrap"
-                        id="btn-run-instalacao-atualizar" onclick="executarInstalacao('atualizar')">
-                        Atualizar
-                    </button>
-                </div>
-            </form>
-        </div>
+    <div class="col">
+        <!-- Instalar pacotes -->
+        <form id="form-instalacao-instalar" class="script-form shadow-sm">
+            <h4><i class="material-symbols-outlined">build</i> Instalar pacotes</h4>
+            <div class="form-group">
+                <p class="text-body-secondary small mb-0">
+                    Instala todos os pacotes R necessários para o funcionamento da aplicação.
+                    Execute esta opção no primeiro uso.
+                </p>
+            </div>
+            <div class="form-buttons">
+                <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"
+                    id="btn-run-instalacao-instalar" onclick="executarInstalacao('instalar')">
+                    Instalar
+                </button>
+            </div>
+        </form>
+        <!-- Atualizar pacotes -->
+        <form id="form-instalacao-atualizar" class="script-form shadow-sm">
+            <h4><i class="material-symbols-outlined">refresh</i> Atualizar pacotes</h4>
+            <div class="form-group">
+                <p class="text-body-secondary small mb-0">
+                    Atualiza os pacotes R para a versão mais recente disponível.
+                    Utilize quando os scripts apresentarem erros relacionados a versões desatualizadas.
+                </p>
+            </div>
+            <div class="form-buttons">
+                <button type="button" class="btn btn-sm btn-warning btn-run text-nowrap"
+                    id="btn-run-instalacao-atualizar" onclick="executarInstalacao('atualizar')">
+                    Atualizar
+                </button>
+            </div>
+        </form>
     </div>
 </div>
