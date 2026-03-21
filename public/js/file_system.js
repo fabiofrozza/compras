@@ -230,7 +230,7 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
         let filesHTML = `
             <div class="folder-path-container">
                 <i class="material-symbols-outlined">folder</i>
-                <span class="folder-path">${data.folderPath}</span>
+                <span class="folder-path" data-bs-toggle="tooltip" data-bs-title="${data.folderPath}">${data.folderPath}</span>
                 <button data-bs-toggle="tooltip" data-bs-title="Clique para copiar o caminho da pasta" class="btn btn-outline-secondary btn-sm copy-icon"}>
                     <i class="material-symbols-outlined">content_copy</i>
                 </button>

@@ -158,6 +158,9 @@ FORMS AND FILES
 
 .folder-path {
     flex-grow: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .folder-path-container i:first-child {
@@ -167,10 +170,17 @@ FORMS AND FILES
 .copy-icon {
     --bs-btn-padding-y: 0;
     --bs-btn-padding-x: .25rem;
+    display: none;
+    height: 20px;
+}
+
+.folder-path-container:hover .copy-icon {
+    display: block;
 }
 
 .btn-sm.copy-icon .material-symbols-outlined {
     font-size: .75rem;
+    vertical-align: baseline;
 }
 
 .files-table {
