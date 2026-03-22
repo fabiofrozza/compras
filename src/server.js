@@ -559,6 +559,7 @@ app.get('/api/user-info', (req, res) => {
   try {
     res.json({
       computerName: getComputerName(),
+      userName: process.env.USERNAME || os.userInfo().username || '',
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

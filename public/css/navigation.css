@@ -333,7 +333,7 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
 /* Settings Panel — User row */
 .settings-user-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
 }
 
@@ -351,9 +351,16 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
 }
 
 .settings-user-name {
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
-    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.settings-user-computer {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

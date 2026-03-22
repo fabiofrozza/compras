@@ -188,14 +188,16 @@ async function inicializarPreferenciasPanel() {
     const syncEl = document.getElementById('lastSyncTime');
     if (syncEl) syncEl.textContent = new Date().toLocaleString('pt-BR');
 
-    const nameEl = document.getElementById('userComputerName');
-    if (nameEl && nameEl.textContent === 'Carregando...') {
+    const userNameEl = document.getElementById('userName');
+    const computerNameEl = document.getElementById('userComputerName');
+    if (userNameEl && userNameEl.textContent === 'Carregando...') {
         try {
             const res = await fetch('/api/user-info');
             const data = await res.json();
-            nameEl.textContent = data.computerName || 'Desconhecido';
+            userNameEl.textContent = data.userName || 'Desconhecido';
+            if (computerNameEl) computerNameEl.textContent = data.computerName || '';
         } catch {
-            nameEl.textContent = 'Local (Navegador)';
+            userNameEl.textContent = 'Local (Navegador)';
         }
     }
 
