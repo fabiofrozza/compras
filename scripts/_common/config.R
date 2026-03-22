@@ -699,16 +699,15 @@ config_finalizar <- function(sucesso = FALSE) {
 
   log_secao("LOG FINALIZADO", "CONFIG")
 
-  # Emite mensagem final personalizada para o painel de notificações, se houver
-  if (!is.null(status$final_message)) {
-    log_info(status$final_message)
+  # Emite config_json ao servidor para uso no painel de notificações
+  if (utils_json_output()) {
+    config_data <- config_json(opcao = "all")
 
-    if (utils_json_output()) {
-      msg_esc <- gsub("\\\\", "\\\\\\\\", status$final_message)
-      msg_esc <- gsub('"', '\\\\"', msg_esc)
+    if (!is.null(config_data) && length(config_data) > 0) {
+      config_str <- toJSON(config_data, auto_unbox = TRUE)
       cat(sprintf(
-        '{"json_log":true,"type":"final_message","message":"%s"}\n',
-        msg_esc
+        '{"json_log":true,"type":"config_data","data":%s}\n',
+        config_str
       ))
     }
   }

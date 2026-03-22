@@ -792,8 +792,10 @@ async function executeRScript(ws, scriptFolder, params) {
                 return;
               }
 
-              if (parsed.type === 'final_message') {
-                finalMessage = parsed.message;
+              if (parsed.type === 'config_data') {
+                if (parsed.data && parsed.data.final_message) {
+                  finalMessage = parsed.data.final_message;
+                }
                 return;
               }
 
