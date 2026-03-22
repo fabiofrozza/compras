@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 const MAX_LOG_FILES = 20;
 
@@ -25,14 +26,17 @@ class Logger {
             fs.mkdirSync(logDir, { recursive: true });
 
             const now = new Date();
-            const ts = now.getFullYear()
+            const date = now.getFullYear()
                 + '-' + String(now.getMonth() + 1).padStart(2, '0')
-                + '-' + String(now.getDate()).padStart(2, '0')
-                + '_' + String(now.getHours()).padStart(2, '0')
+                + '-' + String(now.getDate()).padStart(2, '0');
+            const time = String(now.getHours()).padStart(2, '0')
                 + '-' + String(now.getMinutes()).padStart(2, '0')
                 + '-' + String(now.getSeconds()).padStart(2, '0');
+            const user = (process.env.USERNAME || os.userInfo().username).toUpperCase();
+            const node = os.hostname().toUpperCase();
 
-            const logPath = path.join(logDir, `session_${ts}.log`);
+            const logName = `Log_NODEJS_${date}_${time}_${user}-${node}.log`;
+            const logPath = path.join(logDir, logName);
             this.fileStream = fs.createWriteStream(logPath, { flags: 'a', encoding: 'utf8' });
 
             this._pruneOldLogs(logDir);
@@ -44,7 +48,7 @@ class Logger {
     _pruneOldLogs(logDir) {
         try {
             const files = fs.readdirSync(logDir)
-                .filter(f => f.startsWith('session_') && f.endsWith('.log'))
+                .filter(f => f.startsWith('Log_NODEJS_') && f.endsWith('.log'))
                 .map(f => ({ name: f, time: fs.statSync(path.join(logDir, f)).mtimeMs }))
                 .sort((a, b) => b.time - a.time);
 
