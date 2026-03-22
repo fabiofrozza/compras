@@ -17,11 +17,11 @@ FORMS AND FILES
     align-items: center;
 }
 
-.form-check .form-label i,
-.form-group .form-label>i {
+.form-label>i {
     font-size: 1rem;
     font-variation-settings: 'opsz' 48;
     vertical-align: sub;
+    padding-right: 4px;
 }
 
 .script-form {
@@ -94,7 +94,7 @@ FORMS AND FILES
 }
 
 .option-card:hover {
-    background-color: var(--bs-tertiary-bg);
+    background-color: var(--bs-secondary-bg);
 }
 
 .option-card:has(input:checked) {
