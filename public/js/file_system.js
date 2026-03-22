@@ -231,7 +231,7 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
             <div class="folder-path-container">
                 <i class="material-symbols-outlined">folder</i>
                 <span class="folder-path" data-bs-toggle="tooltip" data-bs-title="${data.folderPath}">${data.folderPath}</span>
-                <button data-bs-toggle="tooltip" data-bs-title="Clique para copiar o caminho da pasta" class="btn btn-outline-secondary btn-sm copy-icon"}>
+                <button data-bs-toggle="tooltip" data-bs-title="Clique para copiar o caminho da pasta" class="btn btn-outline-primary btn-sm copy-icon"}>
                     <i class="material-symbols-outlined">content_copy</i>
                 </button>
             </div>
@@ -247,10 +247,10 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
                     <i class="material-symbols-outlined">delete</i>
                 </button>
                 ` : ''}
-                <button data-bs-toggle="tooltip" data-bs-title="Abrir pasta" class="btn btn-outline-secondary btn-sm btn-open" data-folder-path="${data.folderPath}">
+                <button data-bs-toggle="tooltip" data-bs-title="Abrir pasta" class="btn btn-outline-primary btn-sm btn-open" data-folder-path="${data.folderPath}">
                     <i class="material-symbols-outlined">folder_open</i>
                 </button>
-                <button data-bs-toggle="tooltip" data-bs-title="Atualizar lista de arquivos" class="btn btn-outline-secondary btn-sm btn-refresh" data-container-id="${containerId}" data-script-name="${scriptName}">
+                <button data-bs-toggle="tooltip" data-bs-title="Atualizar lista de arquivos" class="btn btn-outline-primary btn-sm btn-refresh" data-container-id="${containerId}" data-script-name="${scriptName}">
                     <i class="material-symbols-outlined">refresh</i>
                 </button>
             </div>
