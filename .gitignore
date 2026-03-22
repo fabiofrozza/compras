@@ -1,6 +1,7 @@
 .env
 .claude/
 CLAUDE.md
+postman/
 .vscode
 node_modules/
 doc/
