@@ -68,8 +68,10 @@ function matchFilePattern(filename, patterns) {
 
 function abrirNaInterface(targetPath, isFile = false) {
   if (process.platform === 'win32') {
-    if (isFile) spawn('cmd', ['/c', 'start', '', targetPath]);
-    else spawn('explorer', [targetPath]);
+    const isUrl = /^https?:\/\//i.test(targetPath);
+    const winPath = isUrl ? targetPath : path.normalize(targetPath);
+    if (isFile) spawn('cmd', ['/c', 'start', '', winPath]);
+    else spawn('explorer', [winPath]);
   } else if (process.platform === 'darwin') {
     spawn('open', [targetPath]);
   } else {
@@ -990,14 +992,14 @@ const server = app.listen(PORT, async () => {
       logger.debug(`IP: ${ip}`, 'WebSocket');
 
       if (clientCount === 0) {
-        logger.info('Nenhum cliente conectado. Aguardando reconexão...', 'Server');
+        logger.info('Nenhum cliente conectado. Aguardando reconexão durante 4 segundos...', 'Server');
 
         // Timeout maior que o intervalo de reconexão do frontend (3s) para tolerar reloads
         setTimeout(() => {
           if (clientCount === 0) {
             server.close(() => {
               clearInterval(interval)
-              logger.info('Servidor encerrado.', 'Server');
+              logger.info('Nenhum cliente reconectado. Servidor encerrado.', 'Server');
               process.exit(0);
             });
           }
