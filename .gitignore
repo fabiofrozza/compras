@@ -8,7 +8,7 @@ doc/
 scripts/_common/log
 scripts/_common/.Renviron
 scripts/_common/config.json
-scripts/instalacao/*.exe
+scripts/**/*.json
 **/*.csv
 !scripts/fornecedores/_fontes/*.csv
 **/*.xls*
