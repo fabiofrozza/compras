@@ -656,7 +656,9 @@ fornecedores_main <- function() {
   log_secao("SALVANDO ARQUIVOS")
 
   arquivo_a_importar_salvar(dados_a_importar, pregao)
-  arquivo_comparacao_salvar(dados, dados_a_importar, pregao)
+  if (nrow(dados_a_importar) > 0) {
+    arquivo_comparacao_salvar(dados, dados_a_importar, pregao)
+  }
 
   # Salvar PE_XXX_STATUS.json final com resultado
   todos_erros <- get_config("status_erros")

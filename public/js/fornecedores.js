@@ -481,8 +481,8 @@ async function carregarImportar() {
 
         data.arquivos.forEach(file => {
             const iconColor = file.hasError ? 'text-danger' : '';
-            const erroText = file.hasError ? 'Sim' : 'Não';
-            const erroClass = file.hasError ? 'text-danger fw-bold' : 'text-success';
+            const erroText = file.hasError === null ? '—' : (file.hasError ? 'Sim' : 'Não');
+            const erroClass = file.hasError === null ? '' : (file.hasError ? 'text-danger fw-bold' : 'text-success');
             const safeFilePath = file.fullPath.replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
             const safeConfPath = file.conferenciaPath ? file.conferenciaPath.replace(/\\/g, '\\\\').replace(/"/g, '&quot;') : '';
 

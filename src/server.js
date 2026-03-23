@@ -676,12 +676,12 @@ app.get('/api/fornecedores/importar', async (_req, res) => {
 
       // Verificar se há erro usando o STATUS.json da pasta do pregão
       const statusName = `PE_${pregao}_STATUS.json`;
-      let hasError = false;
+      let hasError = null;
       try {
         const statusContent = await fs.readFile(path.join(FORNECEDORES_DADOS, pregao, statusName), 'utf-8');
         const statusData = JSON.parse(statusContent);
         hasError = statusData.resultado === 'parcial';
-      } catch { /* fallback silencioso */ }
+      } catch { /* fallback silencioso: pasta do pregão não existe */ }
 
       // Verificar se há arquivo de conferência
       const confName = `PE_${pregao}_CONFERENCIA.xlsx`;
