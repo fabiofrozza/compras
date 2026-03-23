@@ -590,7 +590,7 @@ app.get('/api/fornecedores/pregoes', async (_req, res) => {
       };
     }));
 
-    pregoes.sort((a, b) => b.nome.localeCompare(a.nome));
+    pregoes.sort((a, b) => a.nome.localeCompare(b.nome));
     res.json({ pregoes, folderPath: FORNECEDORES_DADOS });
   } catch (error) {
     logger.error(`Erro ao listar pregões: ${error.message}`, 'Fornecedores', error);
@@ -684,10 +684,10 @@ app.get('/api/fornecedores/importar', async (_req, res) => {
       } catch { /* fallback silencioso: pasta do pregão não existe */ }
 
       // Verificar se há arquivo de conferência
-      const confName = `PE_${pregao}_CONFERENCIA.xlsx`;
+      const confName = path.join(FORNECEDORES_DADOS, pregao, `PE_${pregao}_CONFERENCIA.xlsx`);
       let hasConferencia = false;
       try {
-        await fs.access(path.join(FORNECEDORES_IMPORTAR, confName));
+        await fs.access(confName);
         hasConferencia = true;
       } catch { /* sem conferência */ }
 
@@ -699,7 +699,7 @@ app.get('/api/fornecedores/importar', async (_req, res) => {
         hasError,
         hasConferencia,
         fullPath: filePath,
-        conferenciaPath: hasConferencia ? path.join(FORNECEDORES_IMPORTAR, confName) : null
+        conferenciaPath: hasConferencia ? confName : null
       };
     }));
 

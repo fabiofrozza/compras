@@ -116,12 +116,12 @@ async function carregarPregoes() {
                             ${statusIcon}
                         </i>
                     </div>
-                    <button class="pregao-card-open btn btn-sm" data-bs-toggle="tooltip"
+                    <button class="pregao-card-open btn btn-sm text-primary file-row-btn" data-bs-toggle="tooltip"
                         data-bs-title="Abrir pasta ${pregao.nome}"
                         data-bs-placement="right">
                         <i class="material-symbols-outlined">folder_open</i>
                     </button>
-                    <button class="pregao-card-delete btn btn-sm" data-bs-toggle="tooltip"
+                    <button class="pregao-card-delete btn btn-sm text-danger file-row-btn" data-bs-toggle="tooltip"
                         data-bs-title="Excluir pregão ${pregao.nome}"
                         data-bs-placement="right"
                         onclick="event.stopPropagation(); excluirPregao('${pregao.nome}')">
@@ -606,8 +606,8 @@ async function limparPastaImportar() {
 async function moverArquivos(pregao) {
     const confirmed = await showConfirmationModal({
         title: 'Mover Arquivos',
-        message: `Mover os arquivos do pregão <strong>${pregao}</strong> para a pasta Documentos?`,
-        detail: '<i class="material-symbols-outlined me-1">folder</i> Os arquivos CSV e XLSX de conferência serão movidos.',
+        message: `Mover o arquivo para importação dos dados dos fornecedores do pregão <strong>${pregao}</strong> para a pasta Documentos?`,
+        detail: '<i class="material-symbols-outlined me-1">folder</i> Os arquivos auxiliares (conferência e status) continuarão na pasta do pregão e poderão ser excluídos posteriormente com segurança.',
         confirmText: 'Mover',
         confirmColor: 'btn-success'
     });

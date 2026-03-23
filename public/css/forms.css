@@ -163,7 +163,7 @@ FORMS AND FILES
     text-overflow: ellipsis;
 }
 
-.folder-path-container i:first-child {
+.folder-path-container>i {
     font-size: 1.25rem;
 }
 
@@ -353,15 +353,9 @@ FORMS AND FILES
     text-align: center;
 }
 
-.pregao-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
 .pregao-card.pregao-selected {
     border-color: var(--bs-primary);
     background-color: var(--bs-primary-bg-subtle);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--bs-primary) 25%, transparent);
 }
 
 .pregao-card-icon {
@@ -399,12 +393,13 @@ FORMS AND FILES
 
 .pregao-card-status {
     position: absolute;
-    top: 4px;
-    right: 4px;
+    top: 6px;
+    right: 6px;
 }
 
 .pregao-card-status i {
     font-size: 14px;
+    vertical-align: top;
 }
 
 .pregao-card.status-pendente .pregao-card-status i {
@@ -426,37 +421,20 @@ FORMS AND FILES
 .pregao-card-delete,
 .pregao-card-open {
     position: absolute;
-    left: 2px;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    --bs-btn-padding-y: 0;
-    --bs-btn-padding-x: 0;
-    border: none;
-    background: none;
+    left: 6px;
 }
 
 .pregao-card-delete {
-    top: 24px;
-    color: var(--bs-danger);
+    top: 20px;
 }
 
 .pregao-card-open {
-    top: 2px;
-    color: var(--bs-primary);
+    top: 0px;
 }
 
-.pregao-card:hover .pregao-card-delete,
-.pregao-card:hover .pregao-card-open {
-    opacity: 0.7;
-}
-
-.pregao-card-delete:hover {
+.pregao-card-delete:hover,
+.pregao-card-open:hover {
     opacity: 1 !important;
-}
-
-.pregao-card-delete i,
-.pregao-card-open i {
-    font-size: 16px;
 }
 
 /* Informações do pregão */
@@ -493,7 +471,7 @@ FORMS AND FILES
     text-align: right;
 }
 
-.files-table .file-row-btn {
+.file-row-btn {
     --bs-btn-padding-y: 0;
     --bs-btn-padding-x: 0;
     border: none;
@@ -502,14 +480,15 @@ FORMS AND FILES
     transition: opacity 0.2s ease;
 }
 
-.files-table .file-row-btn i {
-    font-size: 16px;
+.file-row-btn i {
+    font-size: 16px !important;
 }
 
-.files-table tbody tr:hover .file-row-btn {
+.files-table tbody tr:hover .file-row-btn,
+.pregao-card:hover .file-row-btn {
     opacity: 0.7;
 }
 
-.files-table .file-row-btn:hover {
+.file-row-btn:hover {
     opacity: 1 !important;
 }
