@@ -86,7 +86,7 @@ async function carregarPregoes() {
 
         let html = buildFolderPathHTML(displayPath) + '<div class="fornecedores-pregoes-grid">';
         data.pregoes.forEach(pregao => {
-                const statusClass = {
+            const statusClass = {
                 sucesso: 'status-sucesso',
                 parcial: 'status-parcial',
                 sem_saida: 'status-sem_saida'
@@ -234,6 +234,9 @@ async function carregarConteudoPasta(pregao) {
         `;
 
         data.arquivos.forEach(file => {
+            // Don´t show CONFERENCIA file
+            if (file.name === 'PE_' + pregao + '_CONFERENCIA.xlsx') return;
+
             const notProcessed = !data.resultado || data.resultado === 'sem_saida';
             const iconColor = file.hasError ? 'text-danger' : '';
             const erroText = file.hasError ? (file.errorType || 'Sim') : (notProcessed ? '—' : 'Não');

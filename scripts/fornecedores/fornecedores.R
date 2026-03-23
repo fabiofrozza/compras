@@ -164,7 +164,7 @@ arquivo_comparacao_salvar <- function(
 
       saveWorkbook(wb,
         file = file.path(
-          pasta$importar,
+          pasta$pregao,
           paste0("PE_", pregao, "_CONFERENCIA.xlsx")
         ),
         overwrite = TRUE
@@ -241,8 +241,8 @@ excel_fornecedores_obter <- function(pregao) {
   tryCatch(
     {
       excel_fornecedores <- list.files(
-        path = file.path(pasta$dados, pregao),
-        pattern = "^[^~]*.xls*",
+        path = pasta$pregao,
+        pattern = "^[^~|^PE_]*.xls*", # Don't get ~ (temp) and PE_ (conferência)
         full.names = TRUE
       )
 
@@ -617,9 +617,14 @@ fornecedores_main <- function() {
   config_inicializar("FORNECEDORES", pacotes, pasta)
 
   pregao <- commandArgs(trailingOnly = TRUE)[1]
+
+  pasta <- get_config("pasta")
+  pasta$pregao <- file.path(pasta$dados, pregao)
+
   arquivo_status <-
-    file.path(pasta$dados, pregao, paste0("PE_", pregao, "_STATUS.json"))
+    file.path(pasta$pregao, paste0("PE_", pregao, "_STATUS.json"))
   set_config(
+    pasta = pasta,
     arquivo_status = arquivo_status,
     pregao = pregao,
     status_erros = list()
