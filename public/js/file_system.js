@@ -36,6 +36,46 @@ function getFileIcon(fileName, isDirectory) {
     return entry ? fileIcon(entry[1], entry[0]) : fileIcon('insert_drive_file');
 }
 
+function buildFolderPathHTML(folderPath) {
+    return `
+        <div class="folder-path-container">
+            <i class="material-symbols-outlined">folder</i>
+            <span class="folder-path">${folderPath}</span>
+            <button data-bs-toggle="tooltip" data-bs-title="Copiar caminho" class="folder-path-btn copy-icon">
+                <i class="material-symbols-outlined">content_copy</i>
+            </button>
+            <button data-bs-toggle="tooltip" data-bs-title="Abrir pasta" class="folder-path-btn btn-open" data-folder-path="${folderPath}">
+                <i class="material-symbols-outlined">folder_open</i>
+            </button>
+        </div>
+    `;
+}
+
+function setupFolderPathButtons(container) {
+    const folderPathSpan = container.querySelector('.folder-path');
+    const copyIcon = container.querySelector('.copy-icon');
+    const btnOpen = container.querySelector('.folder-path-container .btn-open');
+
+    if (copyIcon) {
+        copyIcon.addEventListener('click', () => {
+            navigator.clipboard.writeText(folderPathSpan.textContent).then(() => {
+                showToast('Caminho copiado para a área de transferência', 'success');
+            }).catch((err) => {
+                console.error('Erro ao copiar para área de transferência:', err);
+                showToast('Erro ao copiar o caminho para a área de transferência', 'error');
+            });
+        });
+    }
+
+    if (btnOpen) {
+        btnOpen.addEventListener('click', (e) => {
+            e.preventDefault();
+            openFolder(btnOpen.dataset.folderPath);
+            showToast('Abrindo pasta. Verifique na barra de tarefas...', 'info', 5000);
+        });
+    }
+}
+
 async function openFolder(folderPath) {
     try {
         const response = await fetch('/api/open-folder', {
@@ -149,6 +189,39 @@ async function clearFolderFiles(containerId, folderPath, scriptName, innerFolder
     }
 }
 
+async function deleteFile(containerId, scriptName, innerFolder, fileName) {
+    const confirmed = await showConfirmationModal({
+        title: 'Excluir Arquivo',
+        message: `Tem certeza que deseja excluir o arquivo <strong>${fileName}</strong>?`,
+        confirmText: 'Excluir',
+        confirmColor: 'btn-danger'
+    });
+
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch(`/api/delete-file/${scriptName}/${innerFolder}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fileName })
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+            showToast(`Erro ao excluir: ${data.error}`, 'error');
+            return;
+        }
+
+        showToast(data.message, 'success');
+        await refreshFileList(containerId, scriptName);
+
+        const filesList = document.getElementById(containerId);
+        if (filesList) validateSingleField(filesList);
+    } catch (error) {
+        showToast(`Erro ao excluir arquivo: ${error.message}`, 'error');
+    }
+}
+
 async function refreshScriptFileLists(scriptName) {
     const aba = document.getElementById(scriptName);
     const fileLists = aba.querySelectorAll('.files-list');
@@ -227,15 +300,7 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
             return;
         }
 
-        let filesHTML = `
-            <div class="folder-path-container">
-                <i class="material-symbols-outlined">folder</i>
-                <span class="folder-path" data-bs-toggle="tooltip" data-bs-title="${data.folderPath}">${data.folderPath}</span>
-                <button data-bs-toggle="tooltip" data-bs-title="Clique para copiar o caminho da pasta" class="btn btn-outline-primary btn-sm copy-icon"}>
-                    <i class="material-symbols-outlined">content_copy</i>
-                </button>
-            </div>
-        `;
+        let filesHTML = buildFolderPathHTML(data.folderPath);
 
         const hasFiles = data.files && data.files.length > 0;
         const canDelete = data.canDelete;
@@ -247,9 +312,6 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
                     <i class="material-symbols-outlined">delete</i>
                 </button>
                 ` : ''}
-                <button data-bs-toggle="tooltip" data-bs-title="Abrir pasta" class="btn btn-outline-primary btn-sm btn-open" data-folder-path="${data.folderPath}">
-                    <i class="material-symbols-outlined">folder_open</i>
-                </button>
                 <button data-bs-toggle="tooltip" data-bs-title="Atualizar lista de arquivos" class="btn btn-outline-primary btn-sm btn-refresh" data-container-id="${containerId}" data-script-name="${scriptName}">
                     <i class="material-symbols-outlined">refresh</i>
                 </button>
@@ -295,9 +357,25 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
                     <tr data-filepath="${fileFullPath}" ondblclick='openFile(this.dataset.filepath)'>
                 `;
             }
+
+            let rowButtons = `
+                <button class="btn btn-sm text-primary file-row-btn" onclick="event.stopPropagation(); openFile(this.closest('tr').dataset.filepath)"
+                    data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">
+                    <i class="material-symbols-outlined">open_in_new</i>
+                </button>`;
+
+            if (canDelete && !file.isDirectory) {
+                rowButtons += `
+                <button class="btn btn-sm text-danger file-row-btn" onclick="event.stopPropagation(); deleteFile('${containerId}', '${scriptName}', '${innerFolder}', '${safeFileName}')"
+                    data-bs-toggle="tooltip" data-bs-title="Excluir arquivo">
+                    <i class="material-symbols-outlined">delete</i>
+                </button>`;
+            }
+
             filesHTML += `
                     <td><span class="file-icon">${icon}</span></td><td>${file.name}</td>
                     <td>${modDate}</td>
+                    <td class="table-btn-column text-nowrap">${rowButtons}</td>
                 </tr>
             `;
         });
@@ -327,23 +405,9 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
 
 function setupFileListButtons(filesList) {
     const btnRefresh = filesList.querySelector('.btn-refresh');
-    const btnOpen = filesList.querySelector('.btn-open');
     const btnClear = filesList.querySelector('.btn-clear');
-    const folderPathSpan = filesList.querySelector('.folder-path');
-    const copyIcon = filesList.querySelector('.copy-icon');
 
-    if (copyIcon) {
-        copyIcon.addEventListener('click', () => {
-            const textToCopy = folderPathSpan.textContent;
-
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                showToast('Caminho copiado para a área de transferência', 'success');
-            }).catch((err) => {
-                console.error('Erro ao copiar para área de transferência:', err);
-                showToast('Erro ao copiar o caminho para a área de transferência', 'error');
-            });
-        });
-    }
+    setupFolderPathButtons(filesList);
 
     if (btnRefresh) {
         btnRefresh.addEventListener('click', async (e) => {
@@ -358,15 +422,6 @@ function setupFileListButtons(filesList) {
             filesList = document.getElementById(containerId);
             validateSingleField(filesList);
             colorSelectedRow(containerId);
-        });
-    }
-
-    if (btnOpen) {
-        btnOpen.addEventListener('click', (e) => {
-            e.preventDefault();
-            const folderPath = btnOpen.dataset.folderPath;
-            openFolder(folderPath);
-            showToast('Abrindo pasta. Verifique na barra de tarefas...', 'info', 5000);
         });
     }
 
