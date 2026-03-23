@@ -61,9 +61,8 @@ FORMS AND FILES
 
 .form-buttons {
     display: flex;
-    justify-content: space-between;
     flex-direction: row-reverse;
-    align-items: flex-start;
+    align-items: flex-end;
     gap: 10px;
 }
 
@@ -121,7 +120,8 @@ FORMS AND FILES
 
 /* File Manager */
 
-.files-list {
+.files-list,
+.files-list-style {
     background-color: color-mix(in srgb, var(--color-background) 50%, white);
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;
@@ -167,20 +167,28 @@ FORMS AND FILES
     font-size: 1.25rem;
 }
 
-.copy-icon {
-    --bs-btn-padding-y: 0;
-    --bs-btn-padding-x: .25rem;
+.folder-path-btn {
     display: none;
-    height: 20px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--bs-primary);
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    line-height: 1;
 }
 
-.folder-path-container:hover .copy-icon {
-    display: block;
+.folder-path-btn:hover {
+    opacity: 1;
 }
 
-.btn-sm.copy-icon .material-symbols-outlined {
-    font-size: .75rem;
-    vertical-align: baseline;
+.folder-path-container:hover .folder-path-btn {
+    display: flex;
+}
+
+.folder-path-btn .material-symbols-outlined {
+    font-size: 1rem;
 }
 
 .files-table {
@@ -298,4 +306,202 @@ FORMS AND FILES
 #importacaoTabs .nav-link.active {
     background-color: color-mix(in srgb, var(--color-background) 75%, white);
     color: var(--bs-headings-color);
+}
+
+/* ==========================================================================
+   FORNECEDORES TAB
+   ========================================================================== */
+
+.fornecedores-grid-list {
+    background-color: color-mix(in srgb, var(--color-background) 50%, white);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 6px;
+    min-height: 100px;
+    max-height: 350px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+    padding: 8px;
+}
+
+.fornecedores-importar-list {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.fornecedores-grid-list .folder-path-container {
+    margin: -8px -8px 8px;
+    border-radius: 5px 5px 0 0;
+}
+
+.fornecedores-pregoes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+}
+
+.pregao-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 8px 6px;
+    border: 2px solid var(--bs-border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: var(--color-surface-1);
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.pregao-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pregao-card.pregao-selected {
+    border-color: var(--bs-primary);
+    background-color: var(--bs-primary-bg-subtle);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--bs-primary) 25%, transparent);
+}
+
+.pregao-card-icon {
+    font-size: 2rem;
+    margin-bottom: 4px;
+}
+
+.pregao-card-icon i {
+    font-size: 2rem;
+    font-variation-settings: 'FILL' 1;
+}
+
+.pregao-card.status-pendente .pregao-card-icon i {
+    color: #ffc107;
+}
+
+.pregao-card.status-sucesso .pregao-card-icon i {
+    color: #198754;
+}
+
+.pregao-card.status-erro .pregao-card-icon i {
+    color: #dc3545;
+}
+
+.pregao-card-name {
+    font-size: 11px;
+    font-weight: 600;
+    word-break: break-all;
+    line-height: 1.2;
+}
+
+.pregao-card-status {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+}
+
+.pregao-card-status i {
+    font-size: 14px;
+}
+
+.pregao-card.status-pendente .pregao-card-status i {
+    color: #ffc107;
+}
+
+.pregao-card.status-sucesso .pregao-card-status i {
+    color: #198754;
+}
+
+.pregao-card.status-erro .pregao-card-status i {
+    color: #dc3545;
+}
+
+.pregao-card-delete,
+.pregao-card-open {
+    position: absolute;
+    left: 2px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    --bs-btn-padding-y: 0;
+    --bs-btn-padding-x: 0;
+    border: none;
+    background: none;
+}
+
+.pregao-card-delete {
+    top: 24px;
+    color: var(--bs-danger);
+}
+
+.pregao-card-open {
+    top: 2px;
+    color: var(--bs-primary);
+}
+
+.pregao-card:hover .pregao-card-delete,
+.pregao-card:hover .pregao-card-open {
+    opacity: 0.7;
+}
+
+.pregao-card-delete:hover {
+    opacity: 1 !important;
+}
+
+.pregao-card-delete i,
+.pregao-card-open i {
+    font-size: 16px;
+}
+
+/* Informações do pregão */
+#fornecedores-info-pregao .table td:first-child {
+    width: 50%;
+}
+
+#fornecedores-info-pregao .table td:first-child i {
+    font-size: 1rem;
+    vertical-align: sub;
+}
+
+/* Tabela do conteúdo da pasta com cabeçalho */
+#fornecedores-conteudo-list .files-table thead th {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 4px;
+    border-bottom: 1px solid var(--bs-border-color);
+    color: var(--bs-secondary-color);
+}
+
+/* Importar table header */
+.fornecedores-importar-list .files-table thead th {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 4px;
+    border-bottom: 1px solid var(--bs-border-color);
+    color: var(--bs-secondary-color);
+}
+
+/* Botões auxiliares das tabelas (conteúdo da pasta e importar) */
+
+.table-btn-column {
+    text-align: right;
+}
+
+.files-table .file-row-btn {
+    --bs-btn-padding-y: 0;
+    --bs-btn-padding-x: 0;
+    border: none;
+    background: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.files-table .file-row-btn i {
+    font-size: 16px;
+}
+
+.files-table tbody tr:hover .file-row-btn {
+    opacity: 0.7;
+}
+
+.files-table .file-row-btn:hover {
+    opacity: 1 !important;
 }

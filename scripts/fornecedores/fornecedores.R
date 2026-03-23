@@ -1,3 +1,23 @@
+status_registrar_erro <- function(arquivo, tipo, razao_social = NULL) {
+  erros <- get_config("status_erros")
+  erro <- list(arquivo = arquivo, tipo = tipo)
+  if (!is.null(razao_social)) erro$razao_social <- razao_social
+  erros[[length(erros) + 1]] <- erro
+  set_config(status_erros = erros)
+
+  status_pregao <- list(
+    pregao = get_config("pregao"),
+    processado = FALSE,
+    com_erros = TRUE,
+    data_processamento = format(Sys.time(), "%Y-%m-%dT%H:%M:%S")
+  )
+  status_pregao$erros <- erros
+  write_json(
+    status_pregao, get_config("arquivo_status"),
+    pretty = TRUE, auto_unbox = TRUE
+  )
+}
+
 arquivo_a_importar_montar <- function(dados, municipios) {
   # vincular código município na coluna cod_mun
   tryCatch(
@@ -205,6 +225,10 @@ excel_fornecedores_ler <- function(excel_fornecedores) {
           e,
           alerta = TRUE
         )
+        status_registrar_erro(
+          basename(excel_fornecedores[i]),
+          "Erro de leitura ou formato inv\u00e1lido"
+        )
       }
     )
   }
@@ -283,29 +307,25 @@ cnpj_verificar <- function(dados, arquivo_alerta) {
       mensagem_cnpj_errado <- NULL
     }
 
-    tryCatch(
-      {
-        con <- file(arquivo_alerta, "w")
-        if (!is.null(mensagem_sem_cnpj)) writeLines(mensagem_sem_cnpj, con)
-        if (
-          !is.null(mensagem_sem_cnpj) & !is.null(mensagem_cnpj_errado)
-        ) {
-          writeLines(" ", con)
-        }
-        if (
-          !is.null(mensagem_cnpj_errado)
-        ) {
-          writeLines(mensagem_cnpj_errado, con)
-        }
-        close(con)
-      },
-      error = function(e) {
-        log_erro("Não foi possível salvar o arquivo de alerta",
-          e,
-          alerta = TRUE
+    # Registrar erros no STATUS.json
+    if (nrow(sem_cnpj) > 0) {
+      for (j in seq_len(nrow(sem_cnpj))) {
+        status_registrar_erro(
+          basename(sem_cnpj[j, 1]),
+          "CNPJ ausente",
+          as.character(sem_cnpj[j, 3])
         )
       }
-    )
+    }
+    if (nrow(cnpj_errado) > 0) {
+      for (j in seq_len(nrow(cnpj_errado))) {
+        status_registrar_erro(
+          basename(cnpj_errado[j, 1]),
+          paste0("CNPJ inv\u00e1lido (", cnpj_errado[j, 2], ")"),
+          as.character(cnpj_errado[j, 3])
+        )
+      }
+    }
 
     dados$fornecedores <- dados$fornecedores[!is.na(dados$fornecedores$cnpj), ]
     dados$fornecedores <-
@@ -597,12 +617,14 @@ fornecedores_main <- function() {
 
   config_inicializar("FORNECEDORES", pacotes, pasta)
 
-  pregao <- commandArgs(trailingOnly = TRUE)
-  arquivo_alerta <-
-    file.path(pasta$importar, paste0("PE_", pregao, "_ERRO.txt"))
-  if (file.exists(arquivo_alerta)) {
-    unlink(arquivo_alerta, recursive = TRUE)
-  }
+  pregao <- commandArgs(trailingOnly = TRUE)[1]
+  arquivo_status <-
+    file.path(pasta$importar, paste0("PE_", pregao, "_STATUS.json"))
+  set_config(
+    arquivo_status = arquivo_status,
+    pregao = pregao,
+    status_erros = list()
+  )
 
   log_secao("OBTENDO LISTA DE ARQUIVOS")
 
@@ -626,7 +648,7 @@ fornecedores_main <- function() {
 
   log_secao("VERIFICANDO CNPJs")
 
-  dados <- cnpj_verificar(dados, arquivo_alerta)
+  dados <- cnpj_verificar(dados)
 
   log_secao("MONTANDO ARQUIVO")
 
@@ -636,6 +658,21 @@ fornecedores_main <- function() {
 
   arquivo_a_importar_salvar(dados_a_importar, pregao)
   arquivo_comparacao_salvar(dados, dados_a_importar, pregao)
+
+  # Salvar PE_XXX_STATUS.json final com processado = TRUE
+  todos_erros <- get_config("status_erros")
+  has_errors <- length(todos_erros) > 0
+  status_pregao <- list(
+    pregao = pregao,
+    processado = TRUE,
+    com_erros = has_errors,
+    qtd_arquivos = length(excel_fornecedores),
+    data_processamento = format(Sys.time(), "%Y-%m-%dT%H:%M:%S")
+  )
+  if (has_errors) {
+    status_pregao$erros <- todos_erros
+  }
+  write_json(status_pregao, arquivo_status, pretty = TRUE, auto_unbox = TRUE)
 
   config_finalizar()
 }

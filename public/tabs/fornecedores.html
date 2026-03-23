@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<div class="row">
+    <div class="col-sm-6">
+        <!-- Quadro Pregões -->
+        <div class="script-form shadow-sm">
+            <h4><i class="material-symbols-outlined">folder</i> Pregões</h4>
+            <div id="fornecedores-pregoes-list" class="fornecedores-grid-list">
+                <div class="custom-spinner-container">
+                    <div class="custom-spinner text-primary">
+                        <div class="spinner-border"></div>
+                        <span role="status">Carregando pregões...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-buttons">
+                <button type="button" class="btn btn-outline-primary btn-sm" id="btn-refresh-pregoes"
+                    data-bs-toggle="tooltip" data-bs-title="Atualizar lista de pregões">
+                    <i class="material-symbols-outlined">refresh</i>
+                </button>
+            </div>
+        </div>
+        <!-- Quadro Conteúdo da Pasta -->
+        <div class="script-form shadow-sm">
+            <h4><i class="material-symbols-outlined">folder_open</i> <span id="conteudo-pasta-titulo">Conteúdo
+                    da pasta</span></h4>
+            <div id="fornecedores-conteudo-list" class="files-list-style">
+                <div class="alert alert-info" role="alert">
+                    <i class="material-symbols-outlined">info</i> Selecione um pregão para ver os arquivos
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-sm-6">
+        <!-- Quadro Informações do Pregão -->
+        <div class="script-form shadow-sm">
+            <h4><i class="material-symbols-outlined">info</i> Informações do Pregão</h4>
+            <div id="fornecedores-info-pregao">
+                <table class="table table-sm table-borderless">
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold text-nowrap"><i class="material-symbols-outlined me-1">gavel</i>
+                                Pregão:</td>
+                            <td id="info-pregao-numero">—</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-nowrap"><i class="material-symbols-outlined me-1">description</i>
+                                Qtde de Fornecedores:</td>
+                            <td id="info-pregao-qtd">—</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-nowrap"><i class="material-symbols-outlined me-1">check_circle</i>
+                                Gerado?</td>
+                            <td id="info-pregao-gerado">—</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-nowrap"><i class="material-symbols-outlined me-1">error</i>
+                                Com erros?</td>
+                            <td id="info-pregao-erros">—</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-buttons">
+                <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"
+                    id="btn-obter-dados-fornecedores" disabled>
+                    Obter dados dos fornecedores
+                </button>
+            </div>
+        </div>
+
+        <!-- Quadro Arquivos a Importar -->
+        <div class="script-form shadow-sm">
+            <h4><i class="material-symbols-outlined">table_chart</i> Arquivos a importar</h4>
+            <div id="fornecedores-importar-list" class="files-list-style fornecedores-importar-list">
+                <div class="custom-spinner-container">
+                    <div class="custom-spinner text-primary">
+                        <div class="spinner-border"></div>
+                        <span role="status">Carregando arquivos...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

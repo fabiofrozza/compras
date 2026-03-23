@@ -75,6 +75,15 @@ function connectWebSocket() {
                             verificarStatusDadosAtas();
                         }
 
+                        if (data.scriptName === 'fornecedores') {
+                            if (typeof carregarPregoes === 'function') carregarPregoes();
+                            if (typeof carregarImportar === 'function') carregarImportar();
+                            if (typeof atualizarInfoPregao === 'function' && pregaoSelecionado) {
+                                atualizarInfoPregao(pregaoSelecionado);
+                                carregarConteudoPasta(pregaoSelecionado);
+                            }
+                        }
+
                         if (document.getElementById('logs-file-list')) {
                             loadFiles('logs-file-list', '_common', 'log', false);
                         }

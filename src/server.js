@@ -27,7 +27,8 @@ const ALLOWED_DELETE_FOLDERS = [
   'relatorios',
   'resumo_pedidos',
   'log',
-  'temp'
+  'temp',
+  'para_importar'
 ];
 let cachedRScriptPath = null;
 
@@ -396,6 +397,57 @@ app.delete('/api/clear-folder/:scriptName/:innerFolder', async (req, res) => {
   }
 });
 
+// API - DELETE single file from allowed folder
+app.delete('/api/delete-file/:scriptName/:innerFolder', async (req, res) => {
+  try {
+    const { scriptName, innerFolder } = req.params;
+    const { fileName } = req.body;
+
+    if (!fileName) {
+      return res.status(400).json({ error: 'Nome do arquivo não fornecido' });
+    }
+
+    if (!ALLOWED_DELETE_FOLDERS.includes(innerFolder.toLowerCase())) {
+      return res.status(403).json({ error: 'A exclusão nesta pasta não é permitida por segurança.' });
+    }
+
+    const folderPath = await resolverPastaScript(res, scriptName, innerFolder, 'DeleteFile');
+    if (!folderPath) return;
+
+    // Prevent path traversal via fileName
+    if (fileName.includes('/') || fileName.includes('\\') || fileName === '..' || fileName === '.') {
+      return res.status(400).json({ error: 'Nome de arquivo inválido' });
+    }
+
+    // Never delete scripts or protected files
+    if (fileName.endsWith('.R') || fileName.endsWith('.js') || fileName.toLowerCase() === 'dados_atas.xlsx') {
+      return res.status(403).json({ error: 'Este tipo de arquivo não pode ser excluído.' });
+    }
+
+    const filePath = path.join(folderPath, fileName);
+
+    if (!isPathSafe(filePath, folderPath)) {
+      return res.status(403).json({ error: 'Acesso negado' });
+    }
+
+    try { await fs.access(filePath); } catch {
+      return res.status(404).json({ error: 'Arquivo não encontrado' });
+    }
+
+    const stats = await fs.stat(filePath);
+    if (!stats.isFile()) {
+      return res.status(400).json({ error: 'O caminho não é um arquivo' });
+    }
+
+    await fs.unlink(filePath);
+    logger.info(`Arquivo excluído: ${fileName} de ${scriptName}/${innerFolder}`, 'DeleteFile');
+    res.json({ success: true, message: 'Arquivo excluído com sucesso' });
+  } catch (error) {
+    logger.error(`Erro ao excluir arquivo: ${error.message}`, 'DeleteFile', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // API - Validate Link (proxy server-side para evitar CORS)
 app.post('/api/validate-link', async (req, res) => {
   const { url } = req.body;
@@ -486,6 +538,295 @@ app.post('/api/validate-link', async (req, res) => {
         : 'Não foi possível acessar o link informado. Verifique sua conexão.',
       error: error.message,
     });
+  }
+});
+
+// =============================================
+// API - Fornecedores
+// =============================================
+
+const FORNECEDORES_DADOS = path.join(SCRIPTS_PATH, 'fornecedores', 'DADOS');
+const FORNECEDORES_IMPORTAR = path.join(SCRIPTS_PATH, 'fornecedores', 'PARA_IMPORTAR');
+
+// Lista pregões (pastas em DADOS) com status de processamento
+app.get('/api/fornecedores/pregoes', async (_req, res) => {
+  try {
+    try { await fs.access(FORNECEDORES_DADOS); } catch {
+      await fs.mkdir(FORNECEDORES_DADOS, { recursive: true });
+    }
+
+    const entries = await fs.readdir(FORNECEDORES_DADOS, { withFileTypes: true });
+    const folders = entries.filter(e => e.isDirectory()).map(e => e.name);
+
+    // Para cada pregão, verificar se já foi processado e se há erros
+    const pregoes = await Promise.all(folders.map(async (nome) => {
+      const pastaPath = path.join(FORNECEDORES_DADOS, nome);
+      const arquivos = await fs.readdir(pastaPath);
+      const xlsxFiles = arquivos.filter(f => /^[^~].*\.xlsx?$/i.test(f));
+
+      // Ler status.json para verificação precisa de erros
+      const statusName = `PE_${nome}_STATUS.json`;
+      let processado = false;
+      let comErros = false;
+
+      try {
+        const statusContent = await fs.readFile(path.join(FORNECEDORES_IMPORTAR, statusName), 'utf-8');
+        const statusData = JSON.parse(statusContent);
+        processado = statusData.processado || false;
+        comErros = statusData.com_erros || false;
+      } catch {
+        // Fallback: se não achar o JSON, tenta achar o CSV de qualquer forma 
+        try {
+          await fs.access(path.join(FORNECEDORES_IMPORTAR, `PE_${nome}.csv`));
+          processado = true;
+        } catch { /* não processado */ }
+      }
+
+      // Status: 'pendente' (amarelo), 'sucesso' (verde), 'erro' (vermelho)
+      let status = 'pendente';
+      if (processado && comErros) status = 'erro';
+      else if (processado) status = 'sucesso';
+
+      return {
+        nome,
+        qtdArquivos: xlsxFiles.length,
+        processado,
+        comErros,
+        status
+      };
+    }));
+
+    pregoes.sort((a, b) => b.nome.localeCompare(a.nome));
+    res.json({ pregoes, folderPath: FORNECEDORES_DADOS });
+  } catch (error) {
+    logger.error(`Erro ao listar pregões: ${error.message}`, 'Fornecedores', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Lista arquivos de um pregão específico
+app.get('/api/fornecedores/pregao/:pregao/arquivos', async (req, res) => {
+  try {
+    const { pregao } = req.params;
+    const pastaPath = path.join(FORNECEDORES_DADOS, pregao);
+
+    if (!isPathSafe(pastaPath, SCRIPTS_PATH)) {
+      return res.status(403).json({ error: 'Acesso negado' });
+    }
+
+    try { await fs.access(pastaPath); } catch {
+      return res.status(404).json({ error: 'Pasta do pregão não encontrada' });
+    }
+
+    const arquivos = await fs.readdir(pastaPath);
+    const xlsxFiles = arquivos.filter(f => /^[^~].*\.xlsx?$/i.test(f));
+
+    // Verificar erros por arquivo lendo o _STATUS.json
+    const statusName = `PE_${pregao}_STATUS.json`;
+    let errosPorArquivo = [];
+    let processado = false;
+    try {
+      const statusContent = await fs.readFile(path.join(FORNECEDORES_IMPORTAR, statusName), 'utf-8');
+      const statusData = JSON.parse(statusContent);
+      processado = statusData.processado || false;
+      if (statusData.com_erros && Array.isArray(statusData.erros)) {
+        errosPorArquivo = statusData.erros;
+      }
+    } catch { /* sem arquivo de status ou erro de parse */ }
+
+    const fileDetails = await Promise.all(xlsxFiles.map(async (file) => {
+      const filePath = path.join(pastaPath, file);
+      const stats = await fs.stat(filePath);
+      const upperFileName = file.toUpperCase();
+      const erro = errosPorArquivo.find(e => upperFileName === e.arquivo?.toUpperCase());
+
+      return {
+        name: file,
+        size: stats.size,
+        modifiedDate: stats.mtime,
+        hasError: !!erro,
+        errorType: erro?.tipo || null,
+        fullPath: filePath
+      };
+    }));
+
+    res.json({
+      arquivos: fileDetails,
+      folderPath: pastaPath,
+      pregao,
+      processado
+    });
+  } catch (error) {
+    logger.error(`Erro ao listar arquivos do pregão: ${error.message}`, 'Fornecedores', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Lista arquivos para importar (PARA_IMPORTAR)
+app.get('/api/fornecedores/importar', async (_req, res) => {
+  try {
+    try { await fs.access(FORNECEDORES_IMPORTAR); } catch {
+      await fs.mkdir(FORNECEDORES_IMPORTAR, { recursive: true });
+    }
+
+    const arquivos = await fs.readdir(FORNECEDORES_IMPORTAR);
+    const csvFiles = arquivos.filter(f => f.endsWith('.csv'));
+
+    const fileDetails = await Promise.all(csvFiles.map(async (file) => {
+      const filePath = path.join(FORNECEDORES_IMPORTAR, file);
+      const stats = await fs.stat(filePath);
+
+      // Extrair número do pregão do nome: PE_XXXXX.csv
+      const match = file.match(/^PE_(.+)\.csv$/i);
+      const pregao = match ? match[1] : '';
+
+      // Verificar se há erro usando o STATUS.json
+      const statusName = `PE_${pregao}_STATUS.json`;
+      let hasError = false;
+      try {
+        const statusContent = await fs.readFile(path.join(FORNECEDORES_IMPORTAR, statusName), 'utf-8');
+        const statusData = JSON.parse(statusContent);
+        hasError = statusData.com_erros || false;
+      } catch { /* fallback silencioso */ }
+
+      // Verificar se há arquivo de conferência
+      const confName = `PE_${pregao}_CONFERENCIA.xlsx`;
+      let hasConferencia = false;
+      try {
+        await fs.access(path.join(FORNECEDORES_IMPORTAR, confName));
+        hasConferencia = true;
+      } catch { /* sem conferência */ }
+
+      return {
+        name: file,
+        pregao,
+        size: stats.size,
+        modifiedDate: stats.mtime,
+        hasError,
+        hasConferencia,
+        fullPath: filePath,
+        conferenciaPath: hasConferencia ? path.join(FORNECEDORES_IMPORTAR, confName) : null
+      };
+    }));
+
+    fileDetails.sort((a, b) => b.name.localeCompare(a.name));
+    res.json({ arquivos: fileDetails, folderPath: FORNECEDORES_IMPORTAR });
+  } catch (error) {
+    logger.error(`Erro ao listar arquivos importar: ${error.message}`, 'Fornecedores', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Deletar pasta do pregão
+app.delete('/api/fornecedores/pregao/:pregao', async (req, res) => {
+  try {
+    const { pregao } = req.params;
+    const pastaPath = path.join(FORNECEDORES_DADOS, pregao);
+
+    if (!isPathSafe(pastaPath, SCRIPTS_PATH)) {
+      return res.status(403).json({ error: 'Acesso negado' });
+    }
+
+    try { await fs.access(pastaPath); } catch {
+      return res.status(404).json({ error: 'Pasta do pregão não encontrada' });
+    }
+
+    await fs.rm(pastaPath, { recursive: true, force: true });
+    logger.info(`Pasta do pregão ${pregao} excluída`, 'Fornecedores');
+    res.json({ success: true, message: `Pregão ${pregao} excluído com sucesso` });
+  } catch (error) {
+    logger.error(`Erro ao excluir pregão: ${error.message}`, 'Fornecedores', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Deletar arquivo individual
+app.delete('/api/fornecedores/arquivo', async (req, res) => {
+  try {
+    const { filePath } = req.body;
+
+    if (!filePath) {
+      return res.status(400).json({ error: 'Caminho do arquivo não fornecido' });
+    }
+
+    if (!isPathSafe(filePath, SCRIPTS_PATH)) {
+      return res.status(403).json({ error: 'Acesso negado' });
+    }
+
+    try { await fs.access(filePath); } catch {
+      return res.status(404).json({ error: 'Arquivo não encontrado' });
+    }
+
+    await fs.unlink(filePath);
+    logger.info(`Arquivo excluído: ${filePath}`, 'Fornecedores');
+    res.json({ success: true, message: 'Arquivo excluído com sucesso' });
+  } catch (error) {
+    logger.error(`Erro ao excluir arquivo: ${error.message}`, 'Fornecedores', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Mover arquivos para pasta Documentos do usuário
+app.post('/api/fornecedores/mover', async (req, res) => {
+  try {
+    const { pregao } = req.body;
+
+    if (!pregao) {
+      return res.status(400).json({ error: 'Número do pregão não fornecido' });
+    }
+
+    const csvName = `PE_${pregao}.csv`;
+    const confName = `PE_${pregao}_CONFERENCIA.xlsx`;
+    const docsPath = path.join(os.homedir(), 'Documents');
+
+    try { await fs.access(docsPath); } catch {
+      await fs.mkdir(docsPath, { recursive: true });
+    }
+
+    let movedFiles = [];
+
+    // Mover CSV
+    const csvSrc = path.join(FORNECEDORES_IMPORTAR, csvName);
+    try {
+      await fs.access(csvSrc);
+      const csvDest = path.join(docsPath, csvName);
+      await fs.copyFile(csvSrc, csvDest);
+      await fs.unlink(csvSrc);
+      movedFiles.push(csvName);
+    } catch { /* CSV não encontrado */ }
+
+    // Mover CONFERENCIA
+    const confSrc = path.join(FORNECEDORES_IMPORTAR, confName);
+    try {
+      await fs.access(confSrc);
+      const confDest = path.join(docsPath, confName);
+      await fs.copyFile(confSrc, confDest);
+      await fs.unlink(confSrc);
+      movedFiles.push(confName);
+    } catch { /* Conferência não encontrada */ }
+
+    // Limpar STATUS.json (metadado interno, não precisa ir para Documentos)
+    const statusName = `PE_${pregao}_STATUS.json`;
+    const statusSrc = path.join(FORNECEDORES_IMPORTAR, statusName);
+    try {
+      await fs.access(statusSrc);
+      await fs.unlink(statusSrc);
+    } catch { /* Status não encontrado */ }
+
+    if (movedFiles.length === 0) {
+      return res.status(404).json({ error: 'Nenhum arquivo encontrado para mover' });
+    }
+
+    logger.info(`Arquivos movidos para Documentos: ${movedFiles.join(', ')}`, 'Fornecedores');
+    res.json({
+      success: true,
+      message: `${movedFiles.length} arquivo(s) movido(s) para Documentos`,
+      movedFiles,
+      destination: docsPath
+    });
+  } catch (error) {
+    logger.error(`Erro ao mover arquivos: ${error.message}`, 'Fornecedores', error);
+    res.status(500).json({ error: error.message });
   }
 });
 

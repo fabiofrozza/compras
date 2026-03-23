@@ -25,6 +25,7 @@ function loadScript(src) {
 
 const TAB_SCRIPTS = {
     atas: 'js/atas.js',
+    fornecedores: 'js/fornecedores.js',
     importacao: 'js/importacao.js',
     powerbi: 'js/powerbi.js',
     instalacao: 'js/instalacao.js'
@@ -243,7 +244,11 @@ document.addEventListener('shown.bs.tab', async (event) => {
                 inicializarImportacao();
             }
 
-            if (globalComputerName && (tabId === 'atas' || tabId === 'catmat' || tabId === 'importacao' || tabId === 'mapas' || tabId === 'powerbi' || tabId === 'instalacao')) {
+            if (tabId === 'fornecedores' && typeof inicializarFornecedores === 'function') {
+                inicializarFornecedores();
+            }
+
+            if (globalComputerName && (tabId === 'atas' || tabId === 'catmat' || tabId === 'fornecedores' || tabId === 'importacao' || tabId === 'mapas' || tabId === 'powerbi' || tabId === 'instalacao')) {
                 if (typeof ensureConsoleDOM === 'function') ensureConsoleDOM();
 
                 const logsList = document.getElementById('logs-file-list');
