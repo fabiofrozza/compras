@@ -3,20 +3,25 @@
     <div class="col">
         <!-- Formulário com Informações do Pregão -->
         <form id="form-info-pregao" class="script-form shadow-sm">
-            <h4><i class="material-symbols-outlined">gavel</i> Informações do Pregão</h4>
+            <h4 class="d-flex justify-content-between align-items-center">
+                <span><i class="material-symbols-outlined">gavel</i> Informações do Pregão</span>
+                <button type="button" class="btn btn-sm btn-link text-secondary p-0" data-bs-toggle="collapse"
+                    data-bs-target="#form-info-pregao-collapse" aria-expanded="true"
+                    aria-controls="form-info-pregao-collapse">
+                    <i class="material-symbols-outlined">unfold_more</i>
+                </button>
+            </h4>
 
-            <div class="row">
-                <div class="col">
-                    <div class="form-group">
+            <div class="collapse show" id="form-info-pregao-collapse">
+                <div class="form-sub-container form-info-pregao-grid">
+                    <div class="form-group grid-1">
                         <label for="atas-numero-pregao" class="form-label">
                             Número do pregão
                         </label>
                         <input type="number" class="form-control form-control-sm" id="atas-numero-pregao"
                             data-field="n_pregao" min="1" data-validate-rule="numeric" required>
                     </div>
-                </div>
-                <div class="col">
-                    <div class="form-group">
+                    <div class="form-group grid-2">
                         <label for="atas-ano-pregao" class="form-label">
                             Ano do pregão
                         </label>
@@ -25,12 +30,7 @@
                             <option value="">-- Selecione --</option>
                         </select>
                     </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col">
-                    <div class="form-group">
+                    <div class="form-group grid-3">
                         <label for="atas-processo-spa" class="form-label" data-bs-toggle="tooltip"
                             data-bs-title="Informe o número completo do processo SPA. Digite somente os números, sem pontuação.">
                             Processo SPA
@@ -39,9 +39,7 @@
                             data-field="processo" data-validate-rule="pattern"
                             data-regex-pattern="23080\.\d{6}/\d{4}-\d{2}" required>
                     </div>
-                </div>
-                <div class="col">
-                    <div class="form-group">
+                    <div class="form-group grid-4">
                         <label for="atas-data-pregao" class="form-label" data-bs-toggle="tooltip"
                             data-bs-title="Informe a data da publicação do pregão no DOU.">
                             Data Pregão DOU
@@ -49,12 +47,7 @@
                         <input type="date" class="form-control form-control-sm" id="atas-data-pregao" data-field="data"
                             required>
                     </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col">
-                    <div class="form-group">
+                    <div class="form-group grid-5">
                         <label for="atas-primeira-ata" class="form-label" data-bs-toggle="tooltip"
                             data-bs-title="Informe o número da primeira Ata a ser gerada. As próximas serão numeradas automaticamente, conforme os relatórios SICAF presentes na pasta.">
                             Primeira Ata
@@ -62,9 +55,7 @@
                         <input type="number" class="form-control form-control-sm" id="atas-primeira-ata"
                             data-field="n_ata" min="1" data-validate-rule="numeric" required>
                     </div>
-                </div>
-                <div class="col">
-                    <div class="form-group">
+                    <div class="form-group grid-6">
                         <label for="atas-ano-ata" class="form-label">
                             Ano Ata
                         </label>
@@ -73,27 +64,27 @@
                             <option value="">-- Selecione --</option>
                         </select>
                     </div>
+                    <div class="form-group grid-7">
+                        <label for="atas-objeto" class="form-label" data-bs-toggle="tooltip"
+                            data-bs-title="Informe o objeto do pregão conforme o Edital. Na Ata, esta informação será incluída após o trecho 'REGISTRAR PREÇO...'.">
+                            Objeto
+                        </label>
+                        <textarea id="atas-objeto" class="form-control form-control-sm" data-field="objeto" rows="4"
+                            required></textarea>
+                    </div>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
+                        class="btn btn-outline-danger btn-sm" onclick="limparFormulario('form-info-pregao')">
+                        <i class="material-symbols-outlined">ink_eraser</i>
+                    </button>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="atas-objeto" class="form-label" data-bs-toggle="tooltip"
-                    data-bs-title="Informe o objeto do pregão conforme o Edital. Na Ata, esta informação será incluída após o trecho 'REGISTRAR PREÇO...'.">
-                    Objeto
-                </label>
-                <textarea id="atas-objeto" class="form-control form-control-sm" data-field="objeto" rows="3"
-                    required></textarea>
-            </div>
-
-            <div class="form-buttons">
-                <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
-                    class="btn btn-outline-danger btn-sm" onclick="limparFormulario('form-info-pregao')">
-                    <i class="material-symbols-outlined">ink_eraser</i>
-                </button>
-            </div>
-
         </form>
     </div>
-
+</div>
+<div class="row">
     <div class="col">
         <!-- Lista de Relatórios SICAF -->
         <div class="script-form shadow-sm">
@@ -108,8 +99,59 @@
             </div>
         </div>
     </div>
+    <div class="col">
+        <!-- Status Dados -->
+        <div class="script-form shadow-sm">
+            <h4><i class="material-symbols-outlined">analytics</i> Dados obtidos</h4>
+            <div id="status-dados-atas">
+                <div class="dashboard-widget-grid">
+                    <div class="dashboard-widget">
+                        <div id="atas-widget-icon-status" class="widget-icon bg-secondary-subtle text-secondary">
+                            <i class="material-symbols-outlined">storage</i>
+                        </div>
+                        <div class="widget-content">
+                            <span class="widget-label">Última atualização</span>
+                            <span class="widget-value fs-6 text-break"
+                                id="atas-widget-text-status">Verificando...</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-widget">
+                        <div id="atas-widget-icon-resultado" class="widget-icon bg-secondary-subtle text-secondary">
+                            <i class="material-symbols-outlined">analytics</i>
+                        </div>
+                        <div class="widget-content">
+                            <span class="widget-label">Status</span>
+                            <span class="widget-value fs-6 text-break" id="atas-widget-text-resultado">—</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-widget">
+                        <div class="widget-icon bg-info-subtle text-info">
+                            <i class="material-symbols-outlined">description</i>
+                        </div>
+                        <div class="widget-content">
+                            <span class="widget-label">Fornecedores</span>
+                            <span class="widget-value" id="atas-widget-text-lidos">—</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-widget border border-warning" id="atas-widget-duplicados"
+                        style="display: none">
+                        <div class="widget-icon bg-warning-subtle text-warning-emphasis">
+                            <i class="material-symbols-outlined">warning</i>
+                        </div>
+                        <div class="widget-content">
+                            <span class="widget-label" id="atas-widget-text-duplicados-label">Alertas</span>
+                            <span class="widget-value fs-6 text-break text-warning-emphasis"
+                                id="atas-widget-text-duplicados">—</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="atas-dados-arquivo" class="files-list" data-folder="RAIZ" data-name-contains="dados_atas.xlsx"
+                data-selectable="false">
+            </div>
+        </div>
+    </div>
 </div>
-
 <div class="row">
     <div class="col">
         <!-- Modelos de Ata -->
@@ -128,14 +170,6 @@
                     onclick="executarMailmergeAtas()" disabled>
                     Gerar Atas
                 </button>
-
-                <!-- Status dos Dados -->
-                <div id="status-dados-atas" class="alert alert-light border d-flex align-items-start p-1" role="alert">
-                    <div id="icon-status-dados" class="me-2 text-muted">
-                        <i class="material-symbols-outlined">storage</i>
-                    </div>
-                    <span id="texto-status-dados" class="text-primary-emphasis">Verificando disponibilidade...</span>
-                </div>
             </div>
         </div>
     </div>

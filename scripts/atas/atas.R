@@ -377,6 +377,7 @@ atas_main <- function() {
   log_secao("ANALISANDO PASTA SICAF POR RELATÓRIOS")
 
   sicaf_arquivos <- atas_sicaf_obter()
+  config_json("qtd_sicaf", length(sicaf_arquivos))
 
   log_secao("CARREGANDO DADOS DOS RELATÓRIOS EM PDF")
 

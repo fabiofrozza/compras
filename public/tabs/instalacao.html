@@ -12,25 +12,38 @@
                     </div>
                 </div>
                 <div id="r-info-content" class="d-none">
-                    <table class="table table-sm table-borderless mb-0 small">
-                        <tbody>
-                            <tr>
-                                <td class="text-body-secondary" style="width: 160px;">Versão instalada</td>
-                                <td><span id="r-info-version">—</span></td>
-                            </tr>
-                            <tr>
-                                <td class="text-body-secondary">Local de instalação</td>
-                                <td><span id="r-info-path" class="text-break">—</span></td>
-                            </tr>
-                            <tr>
-                                <td class="text-body-secondary">Versão mais recente</td>
-                                <td>
+                    <div class="dashboard-widget-grid">
+                        <div class="dashboard-widget">
+                            <div class="widget-icon bg-primary-subtle text-primary">
+                                <i class="material-symbols-outlined">terminal</i>
+                            </div>
+                            <div class="widget-content">
+                                <span class="widget-label">Versão Instalada</span>
+                                <span class="widget-value" id="r-info-version">—</span>
+                            </div>
+                        </div>
+                        <div class="dashboard-widget">
+                            <div class="widget-icon bg-info-subtle text-info">
+                                <i class="material-symbols-outlined">update</i>
+                            </div>
+                            <div class="widget-content">
+                                <span class="widget-label">Versão Mais Recente</span>
+                                <span class="widget-value fs-6">
                                     <span id="r-info-latest">—</span>
                                     <span id="r-info-status" class="badge ms-2"></span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="dashboard-widget" style="grid-column: 1 / -1;">
+                            <div class="widget-icon bg-secondary-subtle text-secondary">
+                                <i class="material-symbols-outlined">folder</i>
+                            </div>
+                            <div class="widget-content">
+                                <span class="widget-label">Local de Instalação</span>
+                                <span class="widget-value fs-6 text-break" id="r-info-path">—</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="form-buttons">

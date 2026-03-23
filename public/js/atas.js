@@ -64,8 +64,13 @@ function numerarAtas() {
 
 async function verificarStatusDadosAtas() {
     const statusContainer = document.getElementById('status-dados-atas');
-    const statusText = document.getElementById('texto-status-dados');
-    const statusIcon = document.getElementById('icon-status-dados');
+    const statusText = document.getElementById('atas-widget-text-status');
+    const statusIcon = document.getElementById('atas-widget-icon-status');
+    const resultText = document.getElementById('atas-widget-text-resultado');
+    const resultIcon = document.getElementById('atas-widget-icon-resultado');
+    const lidosText = document.getElementById('atas-widget-text-lidos');
+    const dupContainer = document.getElementById('atas-widget-duplicados');
+    const dupText = document.getElementById('atas-widget-text-duplicados');
 
     if (!statusContainer) return;
 
@@ -76,27 +81,54 @@ async function verificarStatusDadosAtas() {
         if (data.exists) {
             atasData.dadosDisponiveis = true;
             const dataModificacao = new Date(data.modified).toLocaleString('pt-BR');
+            const conf = data.atasConfig || {};
 
-            statusContainer.classList.remove('alert-warning', 'alert-light', 'border-warning', 'border');
-            statusContainer.classList.add('alert-success', 'border-success');
-            statusIcon.classList.remove('text-warning', 'text-muted');
-            statusIcon.classList.add('text-success');
+            statusIcon.className = 'widget-icon bg-success-subtle text-success';
             statusIcon.innerHTML = '<i class="material-symbols-outlined">check_circle</i>';
-            statusText.innerHTML = `Dados obtidos em ${dataModificacao}`;
+            statusText.innerHTML = `${dataModificacao}`;
+
+            lidosText.innerHTML = conf.qtd_sicaf !== undefined ? conf.qtd_sicaf : '—';
+
+            if (conf.resultado_geracao === 'sucesso') {
+                resultIcon.className = 'widget-icon bg-success-subtle text-success';
+                resultIcon.innerHTML = '<i class="material-symbols-outlined">check_circle</i>';
+                resultText.innerHTML = 'Sucesso';
+                dupContainer.style.display = 'none';
+            } else if (conf.resultado_geracao === 'ambos') {
+                resultIcon.className = 'widget-icon bg-warning-subtle text-warning-emphasis';
+                resultIcon.innerHTML = '<i class="material-symbols-outlined">warning</i>';
+                resultText.innerHTML = 'Alertas';
+                if (conf.final_message) {
+                    dupContainer.style.display = 'flex';
+                    dupText.innerHTML = conf.final_message;
+                }
+            } else if (conf.resultado_geracao === 'erro') {
+                resultIcon.className = 'widget-icon bg-danger-subtle text-danger';
+                resultIcon.innerHTML = '<i class="material-symbols-outlined">error</i>';
+                resultText.innerHTML = 'Erros';
+                dupContainer.style.display = 'none';
+            } else {
+                resultIcon.className = 'widget-icon bg-primary-subtle text-primary';
+                resultIcon.innerHTML = '<i class="material-symbols-outlined">analytics</i>';
+                resultText.innerHTML = 'Gerado';
+                dupContainer.style.display = 'none';
+            }
         } else {
             atasData.dadosDisponiveis = false;
-
-            statusContainer.classList.remove('alert-success', 'border-success', 'alert-light', 'border');
-            statusContainer.classList.add('alert-warning', 'border-warning');
-            statusIcon.classList.remove('text-success', 'text-muted');
-            statusIcon.classList.add('text-warning');
+            statusIcon.className = 'widget-icon bg-warning-subtle text-warning-emphasis';
             statusIcon.innerHTML = '<i class="material-symbols-outlined">warning</i>';
-            statusText.innerHTML = 'Arquivo de dados não encontrado. Execute "Obter dados dos SICAF" primeiro.';
+            statusText.innerHTML = 'Arquivos SICAF não extraídos';
+            
+            resultIcon.className = 'widget-icon bg-secondary-subtle text-secondary';
+            resultIcon.innerHTML = '<i class="material-symbols-outlined">analytics</i>';
+            resultText.innerHTML = '—';
+            lidosText.innerHTML = '—';
+            dupContainer.style.display = 'none';
         }
     } catch (error) {
         console.error('Erro ao verificar status dos dados:', error);
         atasData.dadosDisponiveis = false;
-        statusText.textContent = 'Erro ao verificar status dos dados.';
+        if(statusText) statusText.textContent = 'Erro ao verificar arquivos';
     }
 
     atualizarBotaoGerarAtas();

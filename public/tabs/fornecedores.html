@@ -37,30 +37,44 @@
         <div class="script-form shadow-sm">
             <h4><i class="material-symbols-outlined">info</i> Informações do Pregão</h4>
             <div id="fornecedores-info-pregao">
-                <table class="table table-sm table-borderless">
-                    <tbody>
-                        <tr>
-                            <td class="fw-bold text-nowrap"><i class="material-symbols-outlined me-1">gavel</i>
-                                Pregão:</td>
-                            <td id="info-pregao-numero">—</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold text-nowrap"><i class="material-symbols-outlined me-1">description</i>
-                                Qtde de Fornecedores:</td>
-                            <td id="info-pregao-qtd">—</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold text-nowrap"><i class="material-symbols-outlined me-1">check_circle</i>
-                                Gerado?</td>
-                            <td id="info-pregao-gerado">—</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold text-nowrap"><i class="material-symbols-outlined me-1">error</i>
-                                Com erros?</td>
-                            <td id="info-pregao-erros">—</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="dashboard-widget-grid">
+                    <div class="dashboard-widget">
+                        <div class="widget-icon bg-primary-subtle text-primary">
+                            <i class="material-symbols-outlined">gavel</i>
+                        </div>
+                        <div class="widget-content">
+                            <span class="widget-label">Pregão</span>
+                            <span class="widget-value" id="info-pregao-numero">—</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-widget">
+                        <div class="widget-icon bg-success-subtle text-success">
+                            <i class="material-symbols-outlined">description</i>
+                        </div>
+                        <div class="widget-content">
+                            <span class="widget-label">Fornecedores</span>
+                            <span class="widget-value" id="info-pregao-qtd">—</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-widget">
+                        <div class="widget-icon bg-info-subtle text-info">
+                            <i class="material-symbols-outlined">check_circle</i>
+                        </div>
+                        <div class="widget-content">
+                            <span class="widget-label">Gerado?</span>
+                            <span class="widget-value" id="info-pregao-gerado">—</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-widget">
+                        <div class="widget-icon bg-danger-subtle text-danger">
+                            <i class="material-symbols-outlined">error</i>
+                        </div>
+                        <div class="widget-content">
+                            <span class="widget-label">Com erros?</span>
+                            <span class="widget-value" id="info-pregao-erros">—</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="form-buttons">
                 <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"

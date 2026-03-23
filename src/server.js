@@ -81,7 +81,11 @@ function abrirNaInterface(targetPath, isFile = false) {
 
 // Retorna null com o erro já respondido via res quando o caminho é inválido ou inexistente.
 async function resolverPastaScript(res, scriptName, innerFolder, context) {
-  const folderPath = path.join(SCRIPTS_PATH, scriptName, innerFolder);
+  let mappedFolder = innerFolder;
+  if (innerFolder === 'RAIZ') {
+    mappedFolder = '.';
+  }
+  const folderPath = path.join(SCRIPTS_PATH, scriptName, mappedFolder);
 
   if (!isPathSafe(folderPath, SCRIPTS_PATH)) {
     res.status(403).json({ error: 'Acesso negado: fora do diretório permitido' });
@@ -299,12 +303,26 @@ app.post('/api/open-file', async (req, res) => {
 app.get('/api/check-atas-data', async (req, res) => {
   try {
     const filePath = path.join(__dirname, '..', 'scripts', 'atas', 'dados_atas.xlsx');
+    const configPath = path.join(__dirname, '..', 'scripts', '_common', 'config.json');
 
     try {
       const stats = await fs.stat(filePath);
+      
+      let atasConfig = {};
+      try {
+        const configRaw = await fs.readFile(configPath, 'utf-8');
+        const configJson = JSON.parse(configRaw);
+        if (configJson.ATAS) {
+          atasConfig = configJson.ATAS;
+        }
+      } catch (e) {
+        // Ignora se não conseguir ler o config.json
+      }
+
       res.json({
         exists: true,
-        modified: stats.mtime
+        modified: stats.mtime,
+        atasConfig
       });
     } catch (e) {
       res.json({ exists: false });
