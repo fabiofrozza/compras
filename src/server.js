@@ -566,34 +566,26 @@ app.get('/api/fornecedores/pregoes', async (_req, res) => {
       const arquivos = await fs.readdir(pastaPath);
       const xlsxFiles = arquivos.filter(f => /^[^~].*\.xlsx?$/i.test(f));
 
-      // Ler status.json para verificação precisa de erros
+      // Ler status.json da pasta do pregão
       const statusName = `PE_${nome}_STATUS.json`;
-      let processado = false;
-      let comErros = false;
+      let resultado = null;
 
       try {
-        const statusContent = await fs.readFile(path.join(FORNECEDORES_IMPORTAR, statusName), 'utf-8');
+        const statusContent = await fs.readFile(path.join(FORNECEDORES_DADOS, nome, statusName), 'utf-8');
         const statusData = JSON.parse(statusContent);
-        processado = statusData.processado || false;
-        comErros = statusData.com_erros || false;
-      } catch {
-        // Fallback: se não achar o JSON, tenta achar o CSV de qualquer forma 
-        try {
-          await fs.access(path.join(FORNECEDORES_IMPORTAR, `PE_${nome}.csv`));
-          processado = true;
-        } catch { /* não processado */ }
-      }
+        resultado = statusData.resultado || null;
+      } catch { /* sem arquivo de status */ }
 
-      // Status: 'pendente' (amarelo), 'sucesso' (verde), 'erro' (vermelho)
+      // Status para o card: 'pendente', 'sucesso', 'parcial', 'sem_saida'
       let status = 'pendente';
-      if (processado && comErros) status = 'erro';
-      else if (processado) status = 'sucesso';
+      if (resultado === 'sucesso') status = 'sucesso';
+      else if (resultado === 'parcial') status = 'parcial';
+      else if (resultado === 'sem_saida') status = 'sem_saida';
 
       return {
         nome,
         qtdArquivos: xlsxFiles.length,
-        processado,
-        comErros,
+        resultado,
         status
       };
     }));
@@ -623,15 +615,15 @@ app.get('/api/fornecedores/pregao/:pregao/arquivos', async (req, res) => {
     const arquivos = await fs.readdir(pastaPath);
     const xlsxFiles = arquivos.filter(f => /^[^~].*\.xlsx?$/i.test(f));
 
-    // Verificar erros por arquivo lendo o _STATUS.json
+    // Verificar erros por arquivo lendo o _STATUS.json da pasta do pregão
     const statusName = `PE_${pregao}_STATUS.json`;
     let errosPorArquivo = [];
-    let processado = false;
+    let resultado = null;
     try {
-      const statusContent = await fs.readFile(path.join(FORNECEDORES_IMPORTAR, statusName), 'utf-8');
+      const statusContent = await fs.readFile(path.join(FORNECEDORES_DADOS, pregao, statusName), 'utf-8');
       const statusData = JSON.parse(statusContent);
-      processado = statusData.processado || false;
-      if (statusData.com_erros && Array.isArray(statusData.erros)) {
+      resultado = statusData.resultado || null;
+      if (Array.isArray(statusData.erros)) {
         errosPorArquivo = statusData.erros;
       }
     } catch { /* sem arquivo de status ou erro de parse */ }
@@ -656,7 +648,7 @@ app.get('/api/fornecedores/pregao/:pregao/arquivos', async (req, res) => {
       arquivos: fileDetails,
       folderPath: pastaPath,
       pregao,
-      processado
+      resultado
     });
   } catch (error) {
     logger.error(`Erro ao listar arquivos do pregão: ${error.message}`, 'Fornecedores', error);
@@ -682,13 +674,13 @@ app.get('/api/fornecedores/importar', async (_req, res) => {
       const match = file.match(/^PE_(.+)\.csv$/i);
       const pregao = match ? match[1] : '';
 
-      // Verificar se há erro usando o STATUS.json
+      // Verificar se há erro usando o STATUS.json da pasta do pregão
       const statusName = `PE_${pregao}_STATUS.json`;
       let hasError = false;
       try {
-        const statusContent = await fs.readFile(path.join(FORNECEDORES_IMPORTAR, statusName), 'utf-8');
+        const statusContent = await fs.readFile(path.join(FORNECEDORES_DADOS, pregao, statusName), 'utf-8');
         const statusData = JSON.parse(statusContent);
-        hasError = statusData.com_erros || false;
+        hasError = statusData.resultado === 'parcial';
       } catch { /* fallback silencioso */ }
 
       // Verificar se há arquivo de conferência
@@ -806,14 +798,6 @@ app.post('/api/fornecedores/mover', async (req, res) => {
       await fs.unlink(confSrc);
       movedFiles.push(confName);
     } catch { /* Conferência não encontrada */ }
-
-    // Limpar STATUS.json (metadado interno, não precisa ir para Documentos)
-    const statusName = `PE_${pregao}_STATUS.json`;
-    const statusSrc = path.join(FORNECEDORES_IMPORTAR, statusName);
-    try {
-      await fs.access(statusSrc);
-      await fs.unlink(statusSrc);
-    } catch { /* Status não encontrado */ }
 
     if (movedFiles.length === 0) {
       return res.status(404).json({ error: 'Nenhum arquivo encontrado para mover' });

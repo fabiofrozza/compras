@@ -7,8 +7,7 @@ status_registrar_erro <- function(arquivo, tipo, razao_social = NULL) {
 
   status_pregao <- list(
     pregao = get_config("pregao"),
-    processado = FALSE,
-    com_erros = TRUE,
+    resultado = "em_execucao",
     data_processamento = format(Sys.time(), "%Y-%m-%dT%H:%M:%S")
   )
   status_pregao$erros <- erros
@@ -619,7 +618,7 @@ fornecedores_main <- function() {
 
   pregao <- commandArgs(trailingOnly = TRUE)[1]
   arquivo_status <-
-    file.path(pasta$importar, paste0("PE_", pregao, "_STATUS.json"))
+    file.path(pasta$dados, pregao, paste0("PE_", pregao, "_STATUS.json"))
   set_config(
     arquivo_status = arquivo_status,
     pregao = pregao,
@@ -659,13 +658,17 @@ fornecedores_main <- function() {
   arquivo_a_importar_salvar(dados_a_importar, pregao)
   arquivo_comparacao_salvar(dados, dados_a_importar, pregao)
 
-  # Salvar PE_XXX_STATUS.json final com processado = TRUE
+  # Salvar PE_XXX_STATUS.json final com resultado
   todos_erros <- get_config("status_erros")
   has_errors <- length(todos_erros) > 0
+  csv_gerado <- file.exists(
+    file.path(pasta$importar, paste0("PE_", pregao, ".csv"))
+  )
+  resultado <- if (!csv_gerado) "sem_saida" else if (!has_errors) "sucesso" else "parcial"
+
   status_pregao <- list(
     pregao = pregao,
-    processado = TRUE,
-    com_erros = has_errors,
+    resultado = resultado,
     qtd_arquivos = length(excel_fornecedores),
     data_processamento = format(Sys.time(), "%Y-%m-%dT%H:%M:%S")
   )

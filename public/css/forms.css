@@ -382,7 +382,11 @@ FORMS AND FILES
     color: #198754;
 }
 
-.pregao-card.status-erro .pregao-card-icon i {
+.pregao-card.status-parcial .pregao-card-icon i {
+    color: #fd7e14;
+}
+
+.pregao-card.status-sem_saida .pregao-card-icon i {
     color: #dc3545;
 }
 
@@ -411,7 +415,11 @@ FORMS AND FILES
     color: #198754;
 }
 
-.pregao-card.status-erro .pregao-card-status i {
+.pregao-card.status-parcial .pregao-card-status i {
+    color: #fd7e14;
+}
+
+.pregao-card.status-sem_saida .pregao-card-status i {
     color: #dc3545;
 }
 

@@ -86,13 +86,21 @@ async function carregarPregoes() {
 
         let html = buildFolderPathHTML(displayPath) + '<div class="fornecedores-pregoes-grid">';
         data.pregoes.forEach(pregao => {
-            const statusClass = pregao.status === 'sucesso' ? 'status-sucesso' :
-                pregao.status === 'erro' ? 'status-erro' : 'status-pendente';
-            const statusIcon = pregao.status === 'sucesso' ? 'check_circle' :
-                pregao.status === 'erro' ? 'error' : 'hourglass_empty';
-            const statusTooltip = pregao.status === 'sucesso' ? 'Arquivo gerado com sucesso' :
-                pregao.status === 'erro' ? 'Arquivo gerado com erros' :
-                    pregao.status === 'erro' ? 'Erro' : 'Pendente de geração do arquivo';
+                const statusClass = {
+                sucesso: 'status-sucesso',
+                parcial: 'status-parcial',
+                sem_saida: 'status-sem_saida'
+            }[pregao.status] || 'status-pendente';
+            const statusIcon = {
+                sucesso: 'check_circle',
+                parcial: 'warning',
+                sem_saida: 'cancel'
+            }[pregao.status] || 'hourglass_empty';
+            const statusTooltip = {
+                sucesso: 'Arquivo gerado com sucesso',
+                parcial: 'Arquivo gerado com erros',
+                sem_saida: 'Script executado sem gerar arquivo',
+            }[pregao.status] || 'Pendente de geração do arquivo';
             const isSelected = pregaoSelecionado === pregao.nome ? ' pregao-selected' : '';
 
             html += `
@@ -226,7 +234,7 @@ async function carregarConteudoPasta(pregao) {
         `;
 
         data.arquivos.forEach(file => {
-            const notProcessed = !data.processado;
+            const notProcessed = !data.resultado || data.resultado === 'sem_saida';
             const iconColor = file.hasError ? 'text-danger' : '';
             const erroText = file.hasError ? (file.errorType || 'Sim') : (notProcessed ? '—' : 'Não');
             const erroClass = file.hasError ? 'text-danger fw-bold' : (notProcessed ? '' : 'text-success');
@@ -355,16 +363,21 @@ async function atualizarInfoPregao(nome) {
         if (btn) btn.disabled = pregao.qtdArquivos === 0;
 
         if (elGerado) {
-            elGerado.textContent = pregao.processado ? 'Sim' : 'Não';
-            elGerado.className = pregao.processado ? 'text-success fw-bold' : '';
+            const gerado = pregao.resultado === 'sucesso' || pregao.resultado === 'parcial';
+            elGerado.textContent = gerado ? 'Sim' : 'Não';
+            elGerado.className = pregao.resultado === 'sucesso' ? 'text-success fw-bold' :
+                pregao.resultado === 'parcial' ? 'text-warning fw-bold' : '';
         }
         if (elErros) {
-            if (!pregao.processado) {
+            if (!pregao.resultado) {
                 elErros.textContent = '—';
                 elErros.className = '';
+            } else if (pregao.resultado === 'sucesso') {
+                elErros.textContent = 'Não';
+                elErros.className = 'text-success';
             } else {
-                elErros.textContent = pregao.comErros ? 'Sim' : 'Não';
-                elErros.className = pregao.comErros ? 'text-danger fw-bold' : 'text-success';
+                elErros.textContent = 'Sim';
+                elErros.className = 'text-danger fw-bold';
             }
         }
     } catch (error) {
@@ -530,14 +543,14 @@ async function excluirArquivoImportar(pregao) {
     const confirmed = await showConfirmationModal({
         title: 'Excluir Arquivos',
         message: `Tem certeza que deseja excluir todos os arquivos do pregão <strong>${pregao}</strong>?`,
-        detail: '<i class="material-symbols-outlined me-1">info</i> Serão excluídos o CSV, o arquivo de conferência e o log de status (se existirem).',
+        detail: '<i class="material-symbols-outlined me-1">info</i> Serão excluídos o CSV e o arquivo de conferência (se existirem).',
         confirmText: 'Excluir',
         confirmColor: 'btn-danger'
     });
 
     if (!confirmed) return;
 
-    const suffixes = ['.csv', '_CONFERENCIA.xlsx', '_STATUS.json'];
+    const suffixes = ['.csv', '_CONFERENCIA.xlsx'];
     let deleted = 0;
 
     for (const suffix of suffixes) {
