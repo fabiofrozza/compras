@@ -31,7 +31,6 @@ const TAB_SCRIPTS = {
     instalacao: 'js/instalacao.js'
 };
 
-const mainContent = document.getElementById('mainContent');
 const navbar = document.getElementById('navbar');
 
 let globalComputerName = '';

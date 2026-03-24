@@ -7,15 +7,12 @@ function applyDarkMode(darkModeEnabled = null) {
     document.body.classList.toggle('dark-mode', isDark);
     darkModeBtn.innerHTML = isDark ? '<i class="material-symbols-outlined">light_mode</i>' : '<i class="material-symbols-outlined">dark_mode</i>';
 
-    const mc = document.getElementById('mainContent');
+    const tc = document.getElementById('tabContent');
     if (isDark) {
-        mc.setAttribute('data-bs-theme', 'dark');
+        tc.setAttribute('data-bs-theme', 'dark');
     } else {
-        mc.removeAttribute('data-bs-theme');
+        tc.removeAttribute('data-bs-theme');
     }
-
-    mc.classList.toggle('bg-dark', isDark);
-    mc.classList.toggle('bg-white', !isDark);
 
 }
 
@@ -105,7 +102,7 @@ async function setHomeBackground(bgSource) {
 function randomizeGlassFilter() {
     const totalFilters = 6;
     const randomIndex = Math.floor(Math.random() * totalFilters) + 1;
-    document.documentElement.style.setProperty('--filter-name', `url(#container-glass-${randomIndex})`);
+    document.documentElement.style.setProperty('--compras-filter', `url(#container-glass-${randomIndex})`);
 }
 
 document.addEventListener('DOMContentLoaded', () => {

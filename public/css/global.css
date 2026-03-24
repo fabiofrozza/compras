@@ -1,5 +1,5 @@
 /* ==========================================================================
-RESET, BASE, VARIÁVEIS GLOBAIS E TEMAS
+RESET AND GLOBAL VARIABLES
 ========================================================================== */
 
 *,
@@ -10,138 +10,64 @@ RESET, BASE, VARIÁVEIS GLOBAIS E TEMAS
     box-sizing: border-box;
 }
 
-/* Chrome, Safari, Edge — webkit scrollbar API */
-@supports selector(::-webkit-scrollbar) {
-    *::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-    }
-
-    *::-webkit-scrollbar-button {
-        width: 0;
-        height: 0;
-        display: none;
-    }
-
-    *::-webkit-scrollbar-corner {
-        background: transparent;
-    }
-
-    *::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    *::-webkit-scrollbar-thumb {
-        background: var(--color-text-primary);
-        border-radius: 3px;
-    }
-}
-
-/* Firefox — standard scrollbar properties */
-@supports not selector(::-webkit-scrollbar) {
-    * {
-        scrollbar-color: var(--color-text-primary) transparent;
-        scrollbar-width: thin;
-    }
-}
-
-@property --icon-fill {
-    syntax: '<number>';
-    inherits: true;
-    initial-value: 1;
+body {
+    padding-top: var(--compras-nav-height) !important;
+    background: linear-gradient(to bottom, var(--compras-theme), white 12%);
+    color: var(--compras-text-primary);
 }
 
 :root {
-    /* Cores de Status */
-    --color-success: limegreen;
-    --color-warning: orange;
-    --color-error: salmon;
-    --color-info: cornflowerblue;
-    --color-idle: gray;
+    /* Status */
+    --compras-success: limegreen;
+    --compras-warning: orange;
+    --compras-error: salmon;
+    --compras-info: cornflowerblue;
+    --compras-idle: gray;
 
-    /* Cores do Tema Claro (Padrão) */
-    --color-background: var(--bs-primary-bg-subtle);
-    --color-surface-1: ivory;
-    --color-surface-2: var(--color-background);
-    --color-text-primary: color-mix(in srgb, rgb(0, 56, 147) 50%, black 50%);
-    --color-text-secondary: #555;
-    --color-text-muted: #666;
-    --color-border-focus: #667eea;
-    --color-accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --color-shadow-accent: rgba(102, 126, 234, 0.4);
-    --color-text-on-accent: white;
+    /* Tema Claro (Padrão) */
+    --compras-theme: var(--bs-primary-bg-subtle);
+    --compras-surface-1: ivory;
+    --compras-text-primary: color-mix(in srgb, var(--compras-theme), black 70%);
+    --compras-border-focus: #667eea;
 
     /* Glassmorphism */
-    --filter-name: url(#container-glass-5);
-    --blur-level: blur(2px);
+    --compras-filter: url(#container-glass-5);
+    --compras-c-glass: #bbbbbc;
+    --compras-c-light: #fff;
+    --compras-c-dark: #000;
+    --compras-reflex-dark: 1;
+    --compras-reflex-light: 1;
+    --compras-saturation: 150%;
 
-    --c-glass: #bbbbbc;
-    --c-light: #fff;
-    --c-dark: #000;
+    --compras-cat-fill: #212121;
 
-    --glass-reflex-dark: 1;
-    --glass-reflex-light: 1;
+    /* Layout */
+    --compras-padding-screen: 20px;
+    --compras-padding-main: 12px;
+    --compras-padding-buttons: 4px;
+    --compras-nav-height: 52px;
 
-    --saturation: 150%;
-
-    /* Dimensões e Layout */
-    --padding-screen: 20px;
-    --padding-main-container: 12px;
-    --padding-buttons: 4px;
-    --top-nav-height: 52px;
-    --transition-time: 0.25s;
-
-    /* Variáveis Específicas: Console e Toasts */
-    --running-timeout: .5s;
-
-    --toast-success: var(--color-success);
-    --toast-error: var(--color-error);
-    --toast-info: var(--color-info);
-    --toast-warning: var(--color-warning);
-    --toast-alpha: 25%;
-    --toast-border-left: 6px;
-
-    --cat-fill: #212121;
+    /* Toasts */
+    --compras-toast-success: var(--compras-success);
+    --compras-toast-error: var(--compras-error);
+    --compras-toast-info: var(--compras-info);
+    --compras-toast-warning: var(--compras-warning);
+    --compras-toast-alpha: 25%;
+    --compras-toast-border-left: 6px;
 }
 
 /* Tema Escuro */
 body.dark-mode {
-    --color-background: #1e1e1e;
-    --color-surface-1: rgb(2, 2, 58);
-    --color-surface-2: #3d3d3d;
-    --color-text-primary: ivory;
-    --color-text-secondary: #b0b0b0;
-    --color-text-muted: #999;
-    --cat-fill: ivory;
+    background: linear-gradient(to bottom, var(--compras-theme), #121212 12%);
+    --compras-theme: #1e1e1e;
+    --compras-surface-1: rgb(2, 2, 58);
+    --compras-text-primary: color-mix(in srgb, var(--compras-theme), white 80%);
+
+    --compras-cat-fill: ivory;
 }
 
-/* Utilitários Bootstrap Personalizados */
-.custom-spinner-container {
-    min-height: 100px;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.custom-spinner {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    justify-content: center;
-    gap: 10px;
-}
-
-/* Material Symbols — utilities */
-.material-symbols-outlined {
-    font-size: inherit;
-    vertical-align: middle;
-    font-variation-settings: 'opsz' 48;
-}
-
-.custom-tooltip {
-    --bs-tooltip-bg: var(--bs-warning-border-subtle);
-    --bs-tooltip-color: var(--bs-primary-text-emphasis);
-    --bs-tooltip-opacity: 1;
-    font-size: 75%;
+@property --compras-icon-fill {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 1;
 }
