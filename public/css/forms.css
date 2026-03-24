@@ -3,7 +3,7 @@ FORMS AND FILES
 ========================================================================== */
 
 .indicator-required {
-    color: var(--color-error);
+    color: var(--compras-error);
     font-size: 50%;
     cursor: help;
     margin-left: 3px;
@@ -25,7 +25,7 @@ FORMS AND FILES
 }
 
 .script-form {
-    background-color: color-mix(in srgb, var(--color-background) 75%, white);
+    background-color: color-mix(in srgb, var(--compras-theme) 75%, white);
     padding: 16px;
     border-radius: 8px;
     margin-bottom: 24px;
@@ -38,7 +38,7 @@ FORMS AND FILES
 
 .script-form h4,
 #importacaoTabs .nav-link.active {
-    color: var(--color-text-primary);
+    color: var(--compras-text-primary);
 }
 
 .script-form h4>i {
@@ -49,7 +49,7 @@ FORMS AND FILES
 
 .script-form h4 {
     margin-bottom: 14px;
-    border-bottom: 1px solid var(--color-border-focus);
+    border-bottom: 1px solid var(--compras-border-focus);
     padding-bottom: 8px;
 }
 
@@ -69,7 +69,7 @@ FORMS AND FILES
 .form-sub-container {
     margin-bottom: 12px;
     background-color:
-        color-mix(in srgb, var(--color-background) 50%, white);
+        color-mix(in srgb, var(--compras-theme) 50%, white);
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;
     padding: 12px;
@@ -131,7 +131,7 @@ FORMS AND FILES
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;
     cursor: pointer;
-    background-color: var(--color-surface-1);
+    background-color: var(--compras-surface-1);
     transition: background-color 0.15s ease, border-color 0.15s ease;
     margin-bottom: 0;
     flex-grow: 1;
@@ -168,7 +168,7 @@ FORMS AND FILES
 
 .files-list,
 .files-list-style {
-    background-color: color-mix(in srgb, var(--color-background) 50%, white);
+    background-color: color-mix(in srgb, var(--compras-theme) 50%, white);
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;
     min-height: 100px;
@@ -192,7 +192,7 @@ FORMS AND FILES
     border-bottom: var(--bs-border-color) solid 1px;
     padding: 5px;
     font-size: 12px;
-    color: var(--color-text-primary);
+    color: var(--compras-text-primary);
     font-family: Consolas, 'Courier New', monospace;
     display: flex;
     gap: 10px;
@@ -241,7 +241,7 @@ FORMS AND FILES
     width: 100%;
     border-collapse: collapse;
     font-size: 12px;
-    background-color: var(--color-surface-1);
+    background-color: var(--compras-surface-1);
 }
 
 .files-table td {
@@ -330,7 +330,7 @@ FORMS AND FILES
 }
 
 #importacaoTabs {
-    gap: calc(var(--padding-buttons) * 2);
+    gap: calc(var(--compras-padding-buttons) * 2);
     border: 0px;
 }
 
@@ -345,12 +345,12 @@ FORMS AND FILES
 }
 
 #importacaoTabs .nav-link:hover {
-    background-color: color-mix(in srgb, var(--color-background) 75%, white);
+    background-color: color-mix(in srgb, var(--compras-theme) 75%, white);
     color: var(--bs-primary);
 }
 
 #importacaoTabs .nav-link.active {
-    background-color: color-mix(in srgb, var(--color-background) 75%, white);
+    background-color: color-mix(in srgb, var(--compras-theme) 75%, white);
     color: var(--bs-headings-color);
 }
 
@@ -359,7 +359,7 @@ FORMS AND FILES
    ========================================================================== */
 
 .fornecedores-grid-list {
-    background-color: color-mix(in srgb, var(--color-background) 50%, white);
+    background-color: color-mix(in srgb, var(--compras-theme) 50%, white);
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;
     min-height: 100px;
@@ -394,7 +394,7 @@ FORMS AND FILES
     border: 2px solid var(--bs-border-color);
     border-radius: 8px;
     cursor: pointer;
-    background-color: var(--color-surface-1);
+    background-color: var(--compras-surface-1);
     transition: all 0.2s ease;
     text-align: center;
 }
@@ -548,14 +548,14 @@ FORMS AND FILES
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     margin-bottom: 12px;
-    background-color: color-mix(in srgb, var(--color-background) 50%, white);
+    background-color: color-mix(in srgb, var(--compras-theme) 50%, white);
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;
     padding: 12px;
 }
 
 .dashboard-widget {
-    background-color: var(--color-surface-1);
+    background-color: var(--compras-surface-1);
     border: 1px solid var(--bs-border-color);
     border-radius: 8px;
     padding: 12px;
@@ -597,7 +597,7 @@ FORMS AND FILES
 .widget-value {
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--color-text-primary);
+    color: var(--compras-text-primary);
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;

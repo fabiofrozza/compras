@@ -6,14 +6,14 @@ BARRA DE NAVEGAÇÃO SUPERIOR (Glassmorphism)
     top: 0;
     left: 0;
     width: 100%;
-    height: var(--top-nav-height);
+    height: var(--compras-nav-height);
     border-bottom: 1px solid rgba(255, 255, 255, 0.25);
     z-index: 1000;
-    transition: var(--transition-time) ease-in-out;
-    background: linear-gradient(175grad, var(--color-surface-1), transparent 15%) !important;
+    transition: all .25s ease-in-out;
+    background: linear-gradient(175grad, var(--compras-surface-1), transparent 15%) !important;
     display: flex;
     align-items: center;
-    padding: 0 var(--padding-main-container);
+    padding: 0 var(--compras-padding-main);
 }
 
 .top-nav::before {
@@ -23,7 +23,7 @@ BARRA DE NAVEGAÇÃO SUPERIOR (Glassmorphism)
     inset: 0;
     backdrop-filter: blur(0px);
     -webkit-backdrop-filter: blur(0px);
-    filter: var(--filter-name);
+    filter: var(--compras-filter);
     overflow: hidden;
     isolation: isolate;
 }
@@ -38,7 +38,7 @@ BARRA DE NAVEGAÇÃO SUPERIOR (Glassmorphism)
 }
 
 .navbar-logo {
-    height: calc(var(--top-nav-height) - 16px);
+    height: calc(var(--compras-nav-height) - 16px);
     object-fit: contain;
     flex-shrink: 0;
 }
@@ -64,7 +64,7 @@ body.dark-mode .navbar-logo {
     font-size: 1.1rem;
     padding-inline: 8px;
     white-space: nowrap;
-    color: var(--color-text-primary);
+    color: var(--compras-text-primary);
     pointer-events: none;
 }
 
@@ -97,19 +97,19 @@ Inspired by https://codepen.io/fooontic/pen/KwpRaGr
     margin: 0 auto;
     border: none;
     border-radius: 99em;
-    background-color: color-mix(in srgb, var(--c-glass) 12%, transparent);
-    backdrop-filter: blur(8px) saturate(var(--saturation));
+    background-color: color-mix(in srgb, var(--compras-c-glass) 12%, transparent);
+    backdrop-filter: blur(8px) saturate(var(--compras-saturation));
     box-shadow:
-        inset 0 0 0 1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 10%), transparent),
-        inset 1.8px 3px 0px -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 90%), transparent),
-        inset -2px -2px 0px -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 80%), transparent),
-        inset -3px -8px 1px -6px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 60%), transparent),
-        inset -0.3px -1px 4px 0px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 12%), transparent),
-        inset -1.5px 2.5px 0px -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
-        inset 0px 3px 4px -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
-        inset 2px -6.5px 1px -4px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
-        0px 1px 5px 0px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
-        0px 6px 16px 0px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 8%), transparent);
+        inset 0 0 0 1px color-mix(in srgb, var(--compras-c-light) calc(var(--compras-reflex-light) * 10%), transparent),
+        inset 1.8px 3px 0px -2px color-mix(in srgb, var(--compras-c-light) calc(var(--compras-reflex-light) * 90%), transparent),
+        inset -2px -2px 0px -2px color-mix(in srgb, var(--compras-c-light) calc(var(--compras-reflex-light) * 80%), transparent),
+        inset -3px -8px 1px -6px color-mix(in srgb, var(--compras-c-light) calc(var(--compras-reflex-light) * 60%), transparent),
+        inset -0.3px -1px 4px 0px color-mix(in srgb, var(--compras-c-dark) calc(var(--compras-reflex-dark) * 12%), transparent),
+        inset -1.5px 2.5px 0px -2px color-mix(in srgb, var(--compras-c-dark) calc(var(--compras-reflex-dark) * 20%), transparent),
+        inset 0px 3px 4px -2px color-mix(in srgb, var(--compras-c-dark) calc(var(--compras-reflex-dark) * 20%), transparent),
+        inset 2px -6.5px 1px -4px color-mix(in srgb, var(--compras-c-dark) calc(var(--compras-reflex-dark) * 10%), transparent),
+        0px 1px 5px 0px color-mix(in srgb, var(--compras-c-dark) calc(var(--compras-reflex-dark) * 10%), transparent),
+        0px 6px 16px 0px color-mix(in srgb, var(--compras-c-dark) calc(var(--compras-reflex-dark) * 8%), transparent);
 }
 
 .navbar-apps {
@@ -119,12 +119,12 @@ Inspired by https://codepen.io/fooontic/pen/KwpRaGr
 .navbar-app-btn.active {
     background:
         linear-gradient(135deg,
-            color-mix(in srgb, var(--color-surface-1), transparent 80%),
-            color-mix(in srgb, var(--color-surface-1), transparent 90%));
-    color: var(--color-text-primary);
+            color-mix(in srgb, var(--compras-surface-1), transparent 80%),
+            color-mix(in srgb, var(--compras-surface-1), transparent 90%));
+    color: var(--compras-text-primary);
     box-shadow:
-        inset 0 1px 0 color-mix(in srgb, var(--color-surface-1), transparent 70%),
-        0 4px 12px color-mix(in srgb, var(--color-text-primary), transparent 90%);
+        inset 0 1px 0 color-mix(in srgb, var(--compras-surface-1), transparent 70%),
+        0 4px 12px color-mix(in srgb, var(--compras-text-primary), transparent 90%);
 }
 
 .navbar-app-btn {
@@ -141,7 +141,7 @@ Inspired by https://codepen.io/fooontic/pen/KwpRaGr
     gap: 2px;
     padding: 0px 6px 0px 10px;
     margin: 2px;
-    color: var(--color-surface-1);
+    color: var(--compras-surface-1);
     opacity: 1;
 }
 
@@ -170,10 +170,10 @@ Inspired by https://codepen.io/fooontic/pen/KwpRaGr
 }
 
 .navbar-app-btn:hover {
-    color: var(--color-text-primary);
+    color: var(--compras-text-primary);
     box-shadow:
-        inset -12px -12px 12px -12px color-mix(in srgb, var(--color-text-primary), transparent 85%),
-        0 4px 12px color-mix(in srgb, var(--color-text-primary), transparent 90%);
+        inset -12px -12px 12px -12px color-mix(in srgb, var(--compras-text-primary), transparent 85%),
+        0 4px 12px color-mix(in srgb, var(--compras-text-primary), transparent 90%);
 }
 
 .navbar-app-btn:hover i,
@@ -194,7 +194,7 @@ Inspired by https://codepen.io/fooontic/pen/KwpRaGr
 /* Header Actions Group */
 .header-actions {
     position: absolute;
-    right: var(--padding-main-container);
+    right: var(--compras-padding-main);
     flex-shrink: 0;
 }
 
@@ -207,9 +207,9 @@ Inspired by https://codepen.io/fooontic/pen/KwpRaGr
     align-items: center;
     justify-content: center;
     border-radius: 1rem;
-    transition: var(--transition-time) ease-in-out;
+    transition: all .25s ease-in-out;
     background-color: transparent;
-    color: var(--color-text-primary);
+    color: var(--compras-text-primary);
     position: relative;
 }
 
@@ -219,17 +219,17 @@ Inspired by https://codepen.io/fooontic/pen/KwpRaGr
 
 .header-icon-btn:hover,
 .header-icon-btn.active {
-    color: var(--color-surface-1);
-    background-color: color-mix(in srgb, var(--color-text-primary) 60%, transparent);
+    color: var(--compras-surface-1);
+    background-color: color-mix(in srgb, var(--compras-text-primary) 60%, transparent);
     z-index: -1;
     box-shadow:
-        inset 0 0 0 1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 10%), transparent),
-        inset 2px 1px 0px -1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 90%), transparent),
-        inset -1.5px -1px 0px -1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 80%), transparent),
-        inset -2px -6px 1px -5px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 60%), transparent),
-        inset -1px 2px 3px -1px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
-        inset 0px -4px 1px -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
-        0px 3px 6px 0px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 8%), transparent);
+        inset 0 0 0 1px color-mix(in srgb, var(--compras-c-light) calc(var(--compras-reflex-light) * 10%), transparent),
+        inset 2px 1px 0px -1px color-mix(in srgb, var(--compras-c-light) calc(var(--compras-reflex-light) * 90%), transparent),
+        inset -1.5px -1px 0px -1px color-mix(in srgb, var(--compras-c-light) calc(var(--compras-reflex-light) * 80%), transparent),
+        inset -2px -6px 1px -5px color-mix(in srgb, var(--compras-c-light) calc(var(--compras-reflex-light) * 60%), transparent),
+        inset -1px 2px 3px -1px color-mix(in srgb, var(--compras-c-dark) calc(var(--compras-reflex-dark) * 20%), transparent),
+        inset 0px -4px 1px -2px color-mix(in srgb, var(--compras-c-dark) calc(var(--compras-reflex-dark) * 10%), transparent),
+        0px 3px 6px 0px color-mix(in srgb, var(--compras-c-dark) calc(var(--compras-reflex-dark) * 8%), transparent);
 }
 
 /* ==========================================================================
@@ -238,7 +238,7 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
 
 .header-panel {
     position: fixed;
-    top: calc(var(--top-nav-height) - 6px);
+    top: calc(var(--compras-nav-height) - 6px);
     right: 12px;
     width: 300px;
     transform-origin: top right;
@@ -265,7 +265,7 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
     padding: 12px 16px 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.5);
     font-weight: 600;
-    color: var(--color-text-primary);
+    color: var(--compras-text-primary);
 }
 
 .header-panel-header span i {
@@ -276,16 +276,16 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
     background: none;
     border: none;
     font-size: 16px;
-    color: var(--color-text-primary);
+    color: var(--compras-text-primary);
     line-height: 1;
     padding: 4px;
     border-radius: 6px;
-    transition: var(--transition-time) ease;
+    transition: all .25s ease;
 }
 
 .header-panel-close:hover {
     background-color: rgba(128, 128, 128, 0.15);
-    color: var(--color-text-primary);
+    color: var(--compras-text-primary);
 }
 
 .header-panel-body {
@@ -315,7 +315,7 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
     gap: 12px;
     padding: 4px;
     border-radius: 8px;
-    color: var(--color-text-primary);
+    color: var(--compras-text-primary);
     text-decoration: none;
     font-size: small;
     transition: background-color 0.15s;
@@ -327,7 +327,7 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
 
 .help-link-list li a i {
     font-size: 20px;
-    color: var(--color-text-muted);
+    color: var(--bs-secondary);
 }
 
 /* Settings Panel — User row */
@@ -339,7 +339,7 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
 
 .settings-user-avatar {
     font-size: 2.5rem;
-    color: var(--color-text-primary);
+    color: var(--compras-text-primary);
     flex-shrink: 0;
 }
 
@@ -360,7 +360,7 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
 
 .settings-user-computer {
     font-size: 0.75rem;
-    color: var(--color-text-secondary);
+    color: var(--bs-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -399,15 +399,15 @@ APP LAUNCHER (Grid de Aplicativos)
     border-radius: 12px;
     cursor: pointer;
     transition: all 300ms ease-in-out;
-    color: var(--color-text-primary);
+    color: var(--compras-text-primary);
 }
 
 .app-launcher-item:hover {
-    background: color-mix(in srgb, var(--c-glass) 12%, transparent);
+    background: color-mix(in srgb, var(--compras-c-glass) 12%, transparent);
 }
 
 .app-launcher-item.active {
-    background: color-mix(in srgb, var(--c-glass) 18%, transparent);
+    background: color-mix(in srgb, var(--compras-c-glass) 18%, transparent);
 }
 
 .app-launcher-icon {
@@ -417,7 +417,7 @@ APP LAUNCHER (Grid de Aplicativos)
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: color-mix(in srgb, var(--c-glass) 10%, transparent);
+    background: color-mix(in srgb, var(--compras-c-glass) 10%, transparent);
     transition: all 300ms ease-in-out;
 }
 
@@ -429,8 +429,8 @@ APP LAUNCHER (Grid de Aplicativos)
 
 .app-launcher-item:hover .app-launcher-icon,
 .app-launcher-item.active .app-launcher-icon {
-    background: var(--color-text-primary);
-    color: var(--color-surface-1);
+    background: var(--compras-text-primary);
+    color: var(--compras-surface-1);
 }
 
 .app-launcher-item:hover .app-launcher-icon i,

@@ -4,8 +4,8 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
 
 #toast-container {
     position: fixed;
-    bottom: var(--padding-main-container);
-    right: var(--padding-main-container);
+    bottom: var(--compras-padding-main);
+    right: var(--compras-padding-main);
     z-index: 9999 !important;
     display: flex;
     flex-direction: column-reverse;
@@ -50,9 +50,9 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
 }
 
 .app-toast.success {
-    border-left: var(--toast-border-left) solid var(--toast-success);
-    color: color-mix(in srgb, var(--toast-success) calc(100% - var(--toast-alpha)), black);
-    background-color: color-mix(in srgb, var(--toast-success) var(--toast-alpha), white);
+    border-left: var(--compras-toast-border-left) solid var(--compras-toast-success);
+    color: color-mix(in srgb, var(--compras-toast-success) calc(100% - var(--compras-toast-alpha)), black);
+    background-color: color-mix(in srgb, var(--compras-toast-success) var(--compras-toast-alpha), white);
 }
 
 .app-toast.success::before {
@@ -61,9 +61,9 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
 }
 
 .app-toast.error {
-    border-left: var(--toast-border-left) solid var(--toast-error);
-    color: color-mix(in srgb, var(--toast-error) calc(100% - var(--toast-alpha)), black);
-    background-color: color-mix(in srgb, var(--toast-error) var(--toast-alpha), white);
+    border-left: var(--compras-toast-border-left) solid var(--compras-toast-error);
+    color: color-mix(in srgb, var(--compras-toast-error) calc(100% - var(--compras-toast-alpha)), black);
+    background-color: color-mix(in srgb, var(--compras-toast-error) var(--compras-toast-alpha), white);
 }
 
 .app-toast.error::before {
@@ -72,9 +72,9 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
 }
 
 .app-toast.info {
-    border-left: var(--toast-border-left) solid var(--toast-info);
-    color: color-mix(in srgb, var(--toast-info) calc(100% - var(--toast-alpha)), black);
-    background-color: color-mix(in srgb, var(--toast-info) var(--toast-alpha), white);
+    border-left: var(--compras-toast-border-left) solid var(--compras-toast-info);
+    color: color-mix(in srgb, var(--compras-toast-info) calc(100% - var(--compras-toast-alpha)), black);
+    background-color: color-mix(in srgb, var(--compras-toast-info) var(--compras-toast-alpha), white);
 }
 
 .app-toast.info::before {
@@ -83,9 +83,9 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
 }
 
 .app-toast.warning {
-    border-left: var(--toast-border-left) solid var(--toast-warning);
-    color: color-mix(in srgb, var(--toast-warning) calc(100% - var(--toast-alpha)), black);
-    background-color: color-mix(in srgb, var(--toast-warning) var(--toast-alpha), white);
+    border-left: var(--compras-toast-border-left) solid var(--compras-toast-warning);
+    color: color-mix(in srgb, var(--compras-toast-warning) calc(100% - var(--compras-toast-alpha)), black);
+    background-color: color-mix(in srgb, var(--compras-toast-warning) var(--compras-toast-alpha), white);
 }
 
 .app-toast.warning::before {
@@ -155,7 +155,7 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     right: 2px;
     width: 12px;
     height: 12px;
-    background: var(--color-error);
+    background: var(--compras-error);
     color: white;
     font-size: 0.6rem;
     border-radius: 50%;
@@ -165,7 +165,7 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     line-height: 1;
     pointer-events: none;
     animation: badgePop 0.5s ease-out;
-    box-shadow: 0 0 0 2px var(--color-surface-1);
+    box-shadow: 0 0 0 2px var(--compras-surface-1);
 }
 
 #header-actions.bell-bump {
@@ -233,7 +233,7 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     padding: 10px 12px;
     border-radius: 8px;
     background: rgba(128, 128, 128, 0.1);
-    border-left: 4px solid var(--color-idle);
+    border-left: 4px solid var(--compras-idle);
     animation: notifSlideIn 0.25s ease-out;
     transition: all 0.2s ease;
 }
@@ -261,19 +261,19 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
 }
 
 .notification-item.success {
-    border-left-color: var(--color-success);
+    border-left-color: var(--compras-success);
 }
 
 .notification-item.error {
-    border-left-color: var(--color-error);
+    border-left-color: var(--compras-error);
 }
 
 .notification-item.warning {
-    border-left-color: var(--color-warning);
+    border-left-color: var(--compras-warning);
 }
 
 .notification-item.info {
-    border-left-color: var(--color-info);
+    border-left-color: var(--compras-info);
 }
 
 .notification-icon {
@@ -289,19 +289,19 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
 }
 
 .notification-item.success .notification-icon {
-    color: var(--color-success);
+    color: var(--compras-success);
 }
 
 .notification-item.error .notification-icon {
-    color: var(--color-error);
+    color: var(--compras-error);
 }
 
 .notification-item.warning .notification-icon {
-    color: var(--color-warning);
+    color: var(--compras-warning);
 }
 
 .notification-item.info .notification-icon {
-    color: var(--color-info);
+    color: var(--compras-info);
 }
 
 .notification-body {
@@ -311,7 +311,7 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
 
 .notification-message {
     font-size: 0.8rem;
-    color: var(--color-text-primary);
+    color: var(--compras-text-primary);
     line-height: 1.4;
     word-break: break-word;
 }
@@ -322,7 +322,7 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     gap: 8px;
     margin-top: 4px;
     font-size: 0.68rem;
-    color: var(--color-text-muted);
+    color: var(--bs-secondary);
 }
 
 .notification-source {
@@ -343,7 +343,7 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
 }
 
 .notification-dismiss i {
-    color: var(--color-text-primary);
+    color: var(--compras-text-primary);
     font-size: 1.25rem;
     font-variation-settings: 'opsz' 48;
     vertical-align: sub;
@@ -363,7 +363,7 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     align-items: center;
     justify-content: center;
     padding: 24px 16px;
-    color: var(--color-text-muted);
+    color: var(--bs-secondary);
     gap: 8px;
 }
 
@@ -393,7 +393,7 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
 .notification-clear-all {
     background: none;
     border: none;
-    color: var(--color-text-muted);
+    color: var(--bs-secondary);
     font-size: 0.75rem;
     cursor: pointer;
     padding: 4px 12px;
@@ -403,7 +403,7 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
 
 .notification-clear-all:hover {
     background: rgba(128, 128, 128, 0.12);
-    color: var(--color-text-primary);
+    color: var(--compras-text-primary);
 }
 
 /* ==========================================================================
