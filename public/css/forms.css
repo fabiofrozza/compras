@@ -49,7 +49,7 @@ FORMS AND FILES
 
 .script-form h4 {
     margin-bottom: 14px;
-    border-bottom: 1px solid var(--compras-border-focus);
+    border-bottom: 1px solid var(--compras-text-primary);
     padding-bottom: 8px;
 }
 

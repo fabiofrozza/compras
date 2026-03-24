@@ -41,7 +41,7 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
     height: 3px;
     background: linear-gradient(to right, transparent, currentColor);
     transform-origin: left;
-    animation: toastProgress var(--toast-duration) linear forwards;
+    animation: toastProgress var(--compras-toast-duration) linear forwards;
 }
 
 .app-toast::before {

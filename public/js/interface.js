@@ -7,11 +7,10 @@ function applyDarkMode(darkModeEnabled = null) {
     document.body.classList.toggle('dark-mode', isDark);
     darkModeBtn.innerHTML = isDark ? '<i class="material-symbols-outlined">light_mode</i>' : '<i class="material-symbols-outlined">dark_mode</i>';
 
-    const tc = document.getElementById('tabContent');
     if (isDark) {
-        tc.setAttribute('data-bs-theme', 'dark');
+        document.documentElement.setAttribute('data-bs-theme', 'dark');
     } else {
-        tc.removeAttribute('data-bs-theme');
+        document.documentElement.removeAttribute('data-bs-theme');
     }
 
 }

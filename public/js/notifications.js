@@ -28,7 +28,7 @@ function showToast(message, type = 'success', duration, source = 'origem não in
 
     closeButton.addEventListener('click', removeToast);
 
-    toast.style.setProperty('--toast-duration', `${duration}ms`);
+    toast.style.setProperty('--compras-toast-duration', `${duration}ms`);
     toast.appendChild(messageContainer);
     toast.appendChild(closeButton);
     container.appendChild(toast);

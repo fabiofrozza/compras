@@ -12,7 +12,7 @@ RESET AND GLOBAL VARIABLES
 
 body {
     padding-top: var(--compras-nav-height) !important;
-    background: linear-gradient(to bottom, var(--compras-theme), white 12%);
+    background: linear-gradient(to bottom, var(--compras-theme), var(--bs-body-bg) 12%);
     color: var(--compras-text-primary);
 }
 
@@ -24,12 +24,6 @@ body {
     --compras-info: cornflowerblue;
     --compras-idle: gray;
 
-    /* Tema Claro (Padrão) */
-    --compras-theme: var(--bs-primary-bg-subtle);
-    --compras-surface-1: ivory;
-    --compras-text-primary: color-mix(in srgb, var(--compras-theme), black 70%);
-    --compras-border-focus: #667eea;
-
     /* Glassmorphism */
     --compras-filter: url(#container-glass-5);
     --compras-c-glass: #bbbbbc;
@@ -38,8 +32,6 @@ body {
     --compras-reflex-dark: 1;
     --compras-reflex-light: 1;
     --compras-saturation: 150%;
-
-    --compras-cat-fill: #212121;
 
     /* Layout */
     --compras-padding-screen: 20px;
@@ -54,16 +46,23 @@ body {
     --compras-toast-warning: var(--compras-warning);
     --compras-toast-alpha: 25%;
     --compras-toast-border-left: 6px;
+
+    /* Themes */
+    --compras-theme-light: color-mix(in srgb, rgb(0, 56, 147), white 75%);
+    --compras-theme-dark: color-mix(in srgb, rgb(0, 56, 147), black 10%);
+
+    --compras-surface-1: color-mix(in srgb, var(--compras-theme-opposite), var(--bs-body-bg) 95%);
+    --compras-text-primary: color-mix(in srgb, var(--compras-theme), var(--bs-body-color) 90%);
+
+    /* Light theme (Default) */
+    --compras-theme: var(--compras-theme-light);
+    --compras-theme-opposite: var(--compras-theme-dark);
 }
 
-/* Tema Escuro */
+/* Dark theme */
 body.dark-mode {
-    background: linear-gradient(to bottom, var(--compras-theme), #121212 12%);
-    --compras-theme: #1e1e1e;
-    --compras-surface-1: rgb(2, 2, 58);
-    --compras-text-primary: color-mix(in srgb, var(--compras-theme), white 80%);
-
-    --compras-cat-fill: ivory;
+    --compras-theme: var(--compras-theme-dark);
+    --compras-theme-opposite: var(--compras-theme-light);
 }
 
 @property --compras-icon-fill {
