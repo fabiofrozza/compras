@@ -3,47 +3,67 @@
     <div class="col">
         <!-- Itens do TR -->
         <div id="form-itens-tr" class="script-form shadow-sm">
-            <h4>
-                <i class="material-symbols-outlined">shopping_basket</i> Itens do TR
+            <h4 class="d-flex justify-content-between align-items-center" role="button"
+                data-bs-toggle="collapse" data-bs-target="#catmat-itens-tr-collapse" aria-expanded="true"
+                aria-controls="catmat-itens-tr-collapse">
+                <span><i class="material-symbols-outlined">shopping_basket</i> Itens do TR</span>
+                <i class="material-symbols-outlined text-secondary">unfold_more</i>
             </h4>
-            <div id="catmat-lista-itens-tr" class="files-list" data-field="lista-itens-tr"
-                data-validate-rule="file-selectable" required data-folder="tr" data-selectable="true">
+            <div class="collapse show" id="catmat-itens-tr-collapse">
+                <div id="catmat-lista-itens-tr" class="files-list" data-field="lista-itens-tr"
+                    data-validate-rule="file-selectable" required data-folder="tr" data-selectable="true">
+                </div>
             </div>
         </div>
     </div>
     <div class="col">
         <!-- Escolha para execução -->
         <form id="form-catmat" class="script-form shadow-sm">
-            <h4><i class="material-symbols-outlined">filter_alt</i> Forma de consulta</h4>
-            <div class="form-group">
-                <div class="option-card-group">
-                    <label class="option-card">
-                        <div>
-                            <div class="option-card-title">Lista de CATMATs</div>
-                            <div class="option-card-description">Consulta ao arquivo local</div>
-                        </div>
-                        <input class="form-check-input" type="radio" name="catmat-metodo" value="lista" checked>
-                    </label>
-                    <label class="option-card">
-                        <div>
-                            <div class="option-card-title">API</div>
-                            <div class="option-card-description">Consulta direta aos Dados Abertos</div>
-                        </div>
-                        <input class="form-check-input" type="radio" name="catmat-metodo" value="api">
-                    </label>
+            <h4 class="d-flex justify-content-between align-items-center" role="button"
+                data-bs-toggle="collapse" data-bs-target="#catmat-forma-consulta-collapse" aria-expanded="true"
+                aria-controls="catmat-forma-consulta-collapse">
+                <span><i class="material-symbols-outlined">filter_alt</i> Forma de consulta</span>
+                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            </h4>
+            <div class="collapse show" id="catmat-forma-consulta-collapse">
+                <div class="form-group">
+                    <div class="option-card-group">
+                        <label class="option-card">
+                            <div>
+                                <div class="option-card-title">Lista de CATMATs</div>
+                                <div class="option-card-description">Consulta ao arquivo local</div>
+                            </div>
+                            <input class="form-check-input" type="radio" name="catmat-metodo" value="lista" checked>
+                        </label>
+                        <label class="option-card">
+                            <div>
+                                <div class="option-card-title">API</div>
+                                <div class="option-card-description">Consulta direta aos Dados Abertos</div>
+                            </div>
+                            <input class="form-check-input" type="radio" name="catmat-metodo" value="api">
+                        </label>
+                    </div>
                 </div>
-            </div>
-            <div class="form-buttons">
-                <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-form-itens-tr"
-                    data-script-name="catmat">
-                    Verificar margens de preferência
-                </button>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-form-itens-tr"
+                        data-script-name="catmat">
+                        Verificar margens de preferência
+                    </button>
+                </div>
             </div>
         </form>
         <!-- Listas processadas -->
         <div class="script-form shadow-sm">
-            <h4><i class="material-symbols-outlined">percent</i> Margens de preferência</h4>
-            <div id="catmat-arquivos-gerados" class="files-list" data-folder="arquivos_gerados" data-selectable="false">
+            <h4 class="d-flex justify-content-between align-items-center" role="button"
+                data-bs-toggle="collapse" data-bs-target="#catmat-margens-collapse" aria-expanded="true"
+                aria-controls="catmat-margens-collapse">
+                <span><i class="material-symbols-outlined">percent</i> Margens de preferência</span>
+                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            </h4>
+            <div class="collapse show" id="catmat-margens-collapse">
+                <div id="catmat-arquivos-gerados" class="files-list" data-folder="arquivos_gerados"
+                    data-selectable="false">
+                </div>
             </div>
         </div>
     </div>

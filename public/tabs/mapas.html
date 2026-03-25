@@ -3,43 +3,65 @@
     <div class="col">
         <!-- Mapas a processar -->
         <div class="script-form shadow-sm">
-            <h4><i class="material-symbols-outlined">gavel</i> Mapas a processar</h4>
-            <div id="mapas-mapas-a-processar" class="files-list" data-folder="mapas" data-selectable="false">
+            <h4 class="d-flex justify-content-between align-items-center" role="button"
+                data-bs-toggle="collapse" data-bs-target="#mapas-a-processar-collapse" aria-expanded="true"
+                aria-controls="mapas-a-processar-collapse">
+                <span><i class="material-symbols-outlined">gavel</i> Mapas a processar</span>
+                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            </h4>
+            <div class="collapse show" id="mapas-a-processar-collapse">
+                <div id="mapas-mapas-a-processar" class="files-list" data-folder="mapas" data-selectable="false">
+                </div>
             </div>
         </div>
     </div>
     <div class="col">
         <!-- Forma de geração -->
         <form id="form-mapas" class="script-form shadow-sm">
-            <h4><i class="material-symbols-outlined">filter_alt</i> Forma de geração</h4>
-            <div class="form-group">
-                <div class="option-card-group">
-                    <label class="option-card">
-                        <div>
-                            <div class="option-card-title">Agrupada</div>
-                            <div class="option-card-description">Lista única com todos os itens</div>
-                        </div>
-                        <input class="form-check-input" type="radio" name="mapas-estilo" value="grupo" checked>
-                    </label>
-                    <label class="option-card">
-                        <div>
-                            <div class="option-card-title">Por processo</div>
-                            <div class="option-card-description">Listas separadas por processo</div>
-                        </div>
-                        <input class="form-check-input" type="radio" name="mapas-estilo" value="processo">
-                    </label>
+            <h4 class="d-flex justify-content-between align-items-center" role="button"
+                data-bs-toggle="collapse" data-bs-target="#mapas-forma-geracao-collapse" aria-expanded="true"
+                aria-controls="mapas-forma-geracao-collapse">
+                <span><i class="material-symbols-outlined">filter_alt</i> Forma de geração</span>
+                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            </h4>
+            <div class="collapse show" id="mapas-forma-geracao-collapse">
+                <div class="form-group">
+                    <div class="option-card-group">
+                        <label class="option-card">
+                            <div>
+                                <div class="option-card-title">Agrupada</div>
+                                <div class="option-card-description">Lista única com todos os itens</div>
+                            </div>
+                            <input class="form-check-input" type="radio" name="mapas-estilo" value="grupo" checked>
+                        </label>
+                        <label class="option-card">
+                            <div>
+                                <div class="option-card-title">Por processo</div>
+                                <div class="option-card-description">Listas separadas por processo</div>
+                            </div>
+                            <input class="form-check-input" type="radio" name="mapas-estilo" value="processo">
+                        </label>
+                    </div>
                 </div>
-            </div>
-            <div class="form-buttons">
-                <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-run-mapas" data-script-name="mapas">
-                    Gerar listas prévias
-                </button>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-run-mapas"
+                        data-script-name="mapas">
+                        Gerar listas prévias
+                    </button>
+                </div>
             </div>
         </form>
         <!-- Listas processadas -->
         <div class="script-form shadow-sm">
-            <h4><i class="material-symbols-outlined">list</i> Listas processadas</h4>
-            <div id="mapas-listas-processadas" class="files-list" data-folder="listas" data-selectable="false">
+            <h4 class="d-flex justify-content-between align-items-center" role="button"
+                data-bs-toggle="collapse" data-bs-target="#mapas-listas-collapse" aria-expanded="true"
+                aria-controls="mapas-listas-collapse">
+                <span><i class="material-symbols-outlined">list</i> Listas processadas</span>
+                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            </h4>
+            <div class="collapse show" id="mapas-listas-collapse">
+                <div id="mapas-listas-processadas" class="files-list" data-folder="listas" data-selectable="false">
+                </div>
             </div>
         </div>
     </div>

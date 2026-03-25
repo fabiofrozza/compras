@@ -37,7 +37,7 @@ function showToast(message, type = 'success', duration, source = 'origem não in
 }
 
 function createRequiredFieldsTooltip() {
-    const requiredFields = document.querySelectorAll('label:has(+ [data-validate-rule]):not(:has(.indicator-required)), label:has(+ :required):not(:has(.indicator-required)), h4:has(+ [data-validate-rule]):not(:has(.indicator-required))');
+    const requiredFields = document.querySelectorAll('label:has(+ [data-validate-rule]):not(:has(.indicator-required)), label:has(+ :required):not(:has(.indicator-required)), h4:has(+ [data-validate-rule], + * [data-validate-rule]):not(:has(.indicator-required))');
     requiredFields.forEach(field => {
         const asteriskSpan = document.createElement('span');
         asteriskSpan.className = 'indicator-required';
@@ -45,7 +45,8 @@ function createRequiredFieldsTooltip() {
         asteriskSpan.dataset.bsToggle = 'tooltip';
         asteriskSpan.innerHTML = '<i class="material-symbols-outlined">emergency</i>'
 
-        field.appendChild(asteriskSpan);
+        const titleSpan = field.querySelector(':scope > span');
+        (titleSpan || field).appendChild(asteriskSpan);
     });
 
     initializeTooltips();

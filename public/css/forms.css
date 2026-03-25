@@ -4,9 +4,13 @@ FORMS AND FILES
 
 .indicator-required {
     color: var(--compras-error);
-    font-size: 50%;
     cursor: help;
     margin-left: 3px;
+}
+
+.indicator-required i {
+    font-size: .75rem !important;
+    vertical-align: baseline !important;
 }
 
 .form-label {
@@ -41,7 +45,7 @@ FORMS AND FILES
     color: var(--compras-text-primary);
 }
 
-.script-form h4>i {
+.script-form h4 i {
     font-size: 1.25rem;
     vertical-align: top;
     font-variation-settings: 'opsz' 48;
