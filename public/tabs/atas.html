@@ -94,7 +94,8 @@
             </h4>
 
             <div class="collapse show" id="atas-relatorios-sicaf-collapse">
-                <div id="atas-relatorios-sicaf" class="files-list" data-folder="sicaf" data-selectable="false">
+                <div id="atas-relatorios-sicaf" class="files-list" data-extensions="pdf" data-folder="sicaf"
+                    data-selectable="false">
                 </div>
                 <div class="form-buttons">
                     <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-form-info-pregao"
@@ -108,9 +109,8 @@
     <div class="col">
         <!-- Status Dados -->
         <div class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button"
-                data-bs-toggle="collapse" data-bs-target="#dados-obtidos-collapse" aria-expanded="true"
-                aria-controls="dados-obtidos-collapse">
+            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
+                data-bs-target="#dados-obtidos-collapse" aria-expanded="true" aria-controls="dados-obtidos-collapse">
                 <span><i class="material-symbols-outlined">analytics</i> Dados obtidos</span>
                 <i class="material-symbols-outlined text-secondary">unfold_more</i>
             </h4>
@@ -128,8 +128,7 @@
                             </div>
                         </div>
                         <div class="dashboard-widget">
-                            <div id="atas-widget-icon-resultado"
-                                class="widget-icon bg-secondary-subtle text-secondary">
+                            <div id="atas-widget-icon-resultado" class="widget-icon bg-secondary-subtle text-secondary">
                                 <i class="material-symbols-outlined">analytics</i>
                             </div>
                             <div class="widget-content">
@@ -159,8 +158,8 @@
                         </div>
                     </div>
                 </div>
-                <div id="atas-dados-arquivo" class="files-list" data-folder="RAIZ"
-                    data-name-contains="dados_atas.xlsx" data-selectable="false">
+                <div id="atas-dados-arquivo" class="files-list" data-folder="RAIZ" data-name-contains="dados_atas.xlsx"
+                    data-selectable="false">
                 </div>
             </div>
         </div>
@@ -170,23 +169,22 @@
     <div class="col">
         <!-- Modelos de Ata -->
         <div id="form-atas-modelos" class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button"
-                data-bs-toggle="collapse" data-bs-target="#atas-modelos-collapse" aria-expanded="true"
-                aria-controls="atas-modelos-collapse">
+            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
+                data-bs-target="#atas-modelos-collapse" aria-expanded="true" aria-controls="atas-modelos-collapse">
                 <span><i class="material-symbols-outlined">text_snippet</i> Modelos de Ata</span>
                 <i class="material-symbols-outlined text-secondary">unfold_more</i>
             </h4>
 
             <div class="collapse show" id="atas-modelos-collapse">
                 <!-- Lista de Modelos -->
-                <div id="atas-modelos" class="files-list" data-field="atas_modelos"
-                    data-validate-rule="file-selectable" required data-folder="atas_modelos" data-selectable="true">
+                <div id="atas-modelos" class="files-list" data-field="atas_modelos" data-validate-rule="file-selectable"
+                    required data-extensions="docx" data-folder="atas_modelos" data-selectable="true">
                 </div>
 
                 <!-- Botão Gerar Atas -->
                 <div class="form-buttons">
-                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"
-                        id="btn-form-atas-modelos" onclick="executarMailmergeAtas()" disabled>
+                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-form-atas-modelos"
+                        onclick="executarMailmergeAtas()" disabled>
                         Gerar Atas
                     </button>
                 </div>
@@ -196,8 +194,8 @@
     <div class="col">
         <!-- Atas Finalizadas -->
         <div class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button"
-                data-bs-toggle="collapse" data-bs-target="#atas-finalizadas-collapse" aria-expanded="true"
+            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
+                data-bs-target="#atas-finalizadas-collapse" aria-expanded="true"
                 aria-controls="atas-finalizadas-collapse">
                 <span><i class="material-symbols-outlined">assignment_turned_in</i> Atas finalizadas</span>
                 <i class="material-symbols-outlined text-secondary">unfold_more</i>

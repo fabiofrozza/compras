@@ -59,6 +59,11 @@ function matchFilePattern(filename, patterns) {
       return filename.toLowerCase().endsWith(p.toLowerCase());
     }
 
+    // Se tem curingas mas não tem ponto, trata como padrão de extensão (ex: "xls*" → "*.xls*")
+    if (!p.includes('.') && !p.startsWith('*')) {
+      p = '*.' + p;
+    }
+
     const regexString = '^' + p.replace(/[.+^${}()|[\]\\]/g, '\\$&')
       .replace(/\*/g, '.*')
       .replace(/\?/g, '.') + '$';
