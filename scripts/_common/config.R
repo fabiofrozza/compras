@@ -733,8 +733,6 @@ config_info <- function() {
   log_info(
     "Informações do sistema", Sys.info(),
     "-",
-    "Informações da rede", c(config_rede()),
-    "-",
     "Sessão R", R.version,
     cores = "highlight1"
   )
@@ -1215,73 +1213,6 @@ config_pasta <- function(...) {
       }
     )
   }
-}
-
-config_rede <- function() {
-  #' Identifica conexões de rede ativas
-  #'
-  #' @description
-  #' Verifica as conexões de rede ativas no sistema executando o comando
-  #' \code{ipconfig} e analisando seu resultado.
-  #'
-  #' @details
-  #' A função:
-  #' \itemize{
-  #'   \item{Executa o comando ipconfig}
-  #'   \item{Analisa as linhas contendo informações de DNS}
-  #'   \item{Identifica conexões ativas pelos sufixos DNS}
-  #'   \item{Remove conexões duplicadas}
-  #' }
-  #'
-  #' @returns Character vector contendo os sufixos DNS das conexões ativas.
-  #' Em caso de erro ou se nenhuma conexão for encontrada, retorna uma
-  #' mensagem descritiva.
-  #'
-  #' @examples
-  #' # Obtém lista de conexões ativas
-  #' redes <- config_rede()
-  #' print(redes)
-  #'
-  #' @seealso \code{\link{config_inicializar}}
-
-  tryCatch(
-    {
-      rede_info <-
-        system2("ipconfig", stdout = TRUE, stderr = TRUE, timeout = 5)
-
-      linhas_dns <- grep("DNS", rede_info, useBytes = TRUE)
-      redes <- c()
-
-      for (i in linhas_dns) {
-        linha <- rede_info[i]
-
-        sufixo <-
-          trimws(unlist(strsplit(rede_info[i], ":", useBytes = TRUE))[2])
-
-        if (sufixo != "" &&
-          !grepl(
-            "desconectada|disconnected",
-            rede_info[i - 1],
-            useBytes = TRUE
-          )
-        ) {
-          redes <- c(redes, sufixo)
-        }
-      }
-
-      redes <- unique(redes)
-
-      if (length(redes) == 0) redes <- "NENHUMA CONEXÃO LOCALIZADA"
-
-      return(redes)
-    },
-    error = function(e) {
-      "Erro: NÃO FOI POSSÍVEL TESTAR A REDE"
-    },
-    warning = function(w) {
-      "Aviso: NÃO FOI POSSÍVEL TESTAR A REDE"
-    }
-  )
 }
 
 # ---- INICIAR ----
