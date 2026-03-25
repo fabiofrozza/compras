@@ -2,15 +2,17 @@ const darkModeBtn = document.getElementById('darkModeBtn');
 
 function applyDarkMode(darkModeEnabled = null) {
 
-    const isDark = darkModeEnabled ?? !document.body.classList.contains('dark-mode');
+    const isDark = darkModeEnabled ?? !document.body.classList.contains('dark');
 
-    document.body.classList.toggle('dark-mode', isDark);
+    document.body.classList.toggle('dark', isDark);
     darkModeBtn.innerHTML = isDark ? '<i class="material-symbols-outlined">light_mode</i>' : '<i class="material-symbols-outlined">dark_mode</i>';
 
     if (isDark) {
         document.documentElement.setAttribute('data-bs-theme', 'dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
     } else {
         document.documentElement.removeAttribute('data-bs-theme');
+        document.documentElement.removeAttribute('data-theme')
     }
 
 }

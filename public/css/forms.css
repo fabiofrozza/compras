@@ -131,7 +131,7 @@ FORMS AND FILES
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;
     cursor: pointer;
-    background-color: var(--compras-surface-1);
+    background-color: Field;
     transition: background-color 0.15s ease, border-color 0.15s ease;
     margin-bottom: 0;
     flex-grow: 1;
@@ -139,7 +139,7 @@ FORMS AND FILES
 }
 
 .option-card:hover {
-    background-color: var(--bs-secondary-bg);
+    background-color: var(--compras-contrast);
 }
 
 .option-card:has(input:checked) {
@@ -241,7 +241,7 @@ FORMS AND FILES
     width: 100%;
     border-collapse: collapse;
     font-size: 12px;
-    background-color: var(--compras-surface-1);
+    background-color: Field;
 }
 
 .files-table td {
@@ -251,7 +251,7 @@ FORMS AND FILES
 }
 
 .files-table tbody tr:hover {
-    background: var(--bs-tertiary-bg);
+    background: var(--compras-contrast);
 }
 
 .files-table tbody tr {
@@ -394,7 +394,7 @@ FORMS AND FILES
     border: 2px solid var(--bs-border-color);
     border-radius: 8px;
     cursor: pointer;
-    background-color: var(--compras-surface-1);
+    background-color: Field;
     transition: all 0.2s ease;
     text-align: center;
 }
@@ -415,19 +415,19 @@ FORMS AND FILES
 }
 
 .pregao-card.status-pendente .pregao-card-icon i {
-    color: #ffc107;
+    color: var(--compras-pending);
 }
 
 .pregao-card.status-sucesso .pregao-card-icon i {
-    color: #198754;
+    color: var(--compras-success);
 }
 
 .pregao-card.status-parcial .pregao-card-icon i {
-    color: #fd7e14;
+    color: var(--compras-warning);
 }
 
 .pregao-card.status-sem_saida .pregao-card-icon i {
-    color: #dc3545;
+    color: var(--compras-error);
 }
 
 .pregao-card-name {
@@ -449,19 +449,19 @@ FORMS AND FILES
 }
 
 .pregao-card.status-pendente .pregao-card-status i {
-    color: #ffc107;
+    color: var(--compras-pending);
 }
 
 .pregao-card.status-sucesso .pregao-card-status i {
-    color: #198754;
+    color: var(--compras-success);
 }
 
 .pregao-card.status-parcial .pregao-card-status i {
-    color: #fd7e14;
+    color: var(--compras-warning);
 }
 
 .pregao-card.status-sem_saida .pregao-card-status i {
-    color: #dc3545;
+    color: var(--compras-error);
 }
 
 .pregao-card-delete,
@@ -555,7 +555,7 @@ FORMS AND FILES
 }
 
 .dashboard-widget {
-    background-color: var(--compras-surface-1);
+    background-color: Field;
     border: 1px solid var(--bs-border-color);
     border-radius: 8px;
     padding: 12px;

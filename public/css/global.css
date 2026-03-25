@@ -18,14 +18,15 @@ body {
 
 :root {
     /* Status */
-    --compras-success: limegreen;
-    --compras-warning: orange;
-    --compras-error: salmon;
+    --compras-success: #198754;
+    --compras-warning: #fd7e14;
+    --compras-pending: #ffc107;
+    --compras-error: #dc3545;
     --compras-info: cornflowerblue;
     --compras-idle: gray;
 
     /* Glassmorphism */
-    --compras-filter: url(#container-glass-5);
+    --compras-filter: url(#container-glass-1);
     --compras-c-glass: #bbbbbc;
     --compras-c-light: #fff;
     --compras-c-dark: #000;
@@ -40,29 +41,28 @@ body {
     --compras-nav-height: 52px;
 
     /* Toasts */
-    --compras-toast-success: var(--compras-success);
-    --compras-toast-error: var(--compras-error);
-    --compras-toast-info: var(--compras-info);
-    --compras-toast-warning: var(--compras-warning);
     --compras-toast-alpha: 25%;
     --compras-toast-border-left: 6px;
 
     /* Themes */
-    --compras-theme-light: color-mix(in srgb, rgb(0, 56, 147), white 75%);
-    --compras-theme-dark: color-mix(in srgb, rgb(0, 56, 147), black 10%);
-
-    --compras-surface-1: color-mix(in srgb, var(--compras-theme-opposite), var(--bs-body-bg) 95%);
-    --compras-text-primary: color-mix(in srgb, var(--compras-theme), var(--bs-body-color) 90%);
-
-    /* Light theme (Default) */
-    --compras-theme: var(--compras-theme-light);
-    --compras-theme-opposite: var(--compras-theme-dark);
+    color-scheme: light dark;
 }
 
-/* Dark theme */
-body.dark-mode {
-    --compras-theme: var(--compras-theme-dark);
-    --compras-theme-opposite: var(--compras-theme-light);
+body {
+    --compras-blue-light: color-mix(in srgb, rgb(0, 56, 147), white 85%);
+    --compras-blue-dark: color-mix(in srgb, rgb(0, 56, 147), black 75%);
+
+    --compras-theme: light-dark(var(--compras-blue-light), var(--compras-blue-dark));
+    --compras-text-primary: light-dark(var(--compras-blue-dark), floralwhite);
+    --compras-contrast: light-dark(floralwhite, var(--compras-blue-dark));
+}
+
+[data-theme="light"] {
+    color-scheme: light;
+}
+
+[data-theme="dark"] {
+    color-scheme: dark;
 }
 
 @property --compras-icon-fill {

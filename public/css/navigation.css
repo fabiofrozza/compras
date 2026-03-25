@@ -10,7 +10,7 @@ BARRA DE NAVEGAÇÃO SUPERIOR (Glassmorphism)
     border-bottom: 1px solid rgba(255, 255, 255, 0.25);
     z-index: 1000;
     transition: all .25s ease-in-out;
-    background: linear-gradient(175grad, var(--compras-surface-1), transparent 15%) !important;
+    background: linear-gradient(175grad, var(--compras-contrast), transparent 15%) !important;
     display: flex;
     align-items: center;
     padding: 0 var(--compras-padding-main);
@@ -43,7 +43,7 @@ BARRA DE NAVEGAÇÃO SUPERIOR (Glassmorphism)
     flex-shrink: 0;
 }
 
-body.dark-mode .navbar-logo {
+body.dark .navbar-logo {
     filter: invert(1) grayscale(1);
 }
 
@@ -119,11 +119,11 @@ Inspired by https://codepen.io/fooontic/pen/KwpRaGr
 .navbar-app-btn.active {
     background:
         linear-gradient(135deg,
-            color-mix(in srgb, var(--compras-surface-1), transparent 80%),
-            color-mix(in srgb, var(--compras-surface-1), transparent 90%));
+            color-mix(in srgb, var(--compras-contrast), transparent 80%),
+            color-mix(in srgb, var(--compras-contrast), transparent 90%));
     color: var(--compras-text-primary);
     box-shadow:
-        inset 0 1px 0 color-mix(in srgb, var(--compras-surface-1), transparent 70%),
+        inset 0 1px 0 color-mix(in srgb, var(--compras-contrast), transparent 70%),
         0 4px 12px color-mix(in srgb, var(--compras-text-primary), transparent 90%);
 }
 
@@ -141,7 +141,7 @@ Inspired by https://codepen.io/fooontic/pen/KwpRaGr
     gap: 2px;
     padding: 0px 6px 0px 10px;
     margin: 2px;
-    color: var(--compras-surface-1);
+    color: var(--compras-contrast);
     opacity: 1;
 }
 
@@ -227,7 +227,7 @@ Inspired by https://codepen.io/fooontic/pen/KwpRaGr
 
 .header-icon-btn:hover,
 .header-icon-btn.active {
-    color: var(--compras-surface-1);
+    color: var(--compras-contrast);
     background-color: color-mix(in srgb, var(--compras-text-primary) 60%, transparent);
     z-index: -1;
     box-shadow:
@@ -438,7 +438,7 @@ APP LAUNCHER (Grid de Aplicativos)
 .app-launcher-item:hover .app-launcher-icon,
 .app-launcher-item.active .app-launcher-icon {
     background: var(--compras-text-primary);
-    color: var(--compras-surface-1);
+    color: var(--compras-contrast);
 }
 
 .app-launcher-item:hover .app-launcher-icon i,

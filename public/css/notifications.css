@@ -50,9 +50,9 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
 }
 
 .app-toast.success {
-    border-left: var(--compras-toast-border-left) solid var(--compras-toast-success);
-    color: color-mix(in srgb, var(--compras-toast-success) calc(100% - var(--compras-toast-alpha)), black);
-    background-color: color-mix(in srgb, var(--compras-toast-success) var(--compras-toast-alpha), white);
+    border-left: var(--compras-toast-border-left) solid var(--compras-success);
+    color: color-mix(in srgb, var(--compras-success) calc(100% - var(--compras-toast-alpha)), black);
+    background-color: color-mix(in srgb, var(--compras-success) var(--compras-toast-alpha), white);
 }
 
 .app-toast.success::before {
@@ -61,9 +61,9 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
 }
 
 .app-toast.error {
-    border-left: var(--compras-toast-border-left) solid var(--compras-toast-error);
-    color: color-mix(in srgb, var(--compras-toast-error) calc(100% - var(--compras-toast-alpha)), black);
-    background-color: color-mix(in srgb, var(--compras-toast-error) var(--compras-toast-alpha), white);
+    border-left: var(--compras-toast-border-left) solid var(--compras-error);
+    color: color-mix(in srgb, var(--compras-error) calc(100% - var(--compras-toast-alpha)), black);
+    background-color: color-mix(in srgb, var(--compras-error) var(--compras-toast-alpha), white);
 }
 
 .app-toast.error::before {
@@ -72,9 +72,9 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
 }
 
 .app-toast.info {
-    border-left: var(--compras-toast-border-left) solid var(--compras-toast-info);
-    color: color-mix(in srgb, var(--compras-toast-info) calc(100% - var(--compras-toast-alpha)), black);
-    background-color: color-mix(in srgb, var(--compras-toast-info) var(--compras-toast-alpha), white);
+    border-left: var(--compras-toast-border-left) solid var(--compras-info);
+    color: color-mix(in srgb, var(--compras-info) calc(100% - var(--compras-toast-alpha)), black);
+    background-color: color-mix(in srgb, var(--compras-info) var(--compras-toast-alpha), white);
 }
 
 .app-toast.info::before {
@@ -83,9 +83,9 @@ NOTIFICAÇÕES (Toasts e Central de Notificações)
 }
 
 .app-toast.warning {
-    border-left: var(--compras-toast-border-left) solid var(--compras-toast-warning);
-    color: color-mix(in srgb, var(--compras-toast-warning) calc(100% - var(--compras-toast-alpha)), black);
-    background-color: color-mix(in srgb, var(--compras-toast-warning) var(--compras-toast-alpha), white);
+    border-left: var(--compras-toast-border-left) solid var(--compras-warning);
+    color: color-mix(in srgb, var(--compras-warning) calc(100% - var(--compras-toast-alpha)), black);
+    background-color: color-mix(in srgb, var(--compras-warning) var(--compras-toast-alpha), white);
 }
 
 .app-toast.warning::before {
@@ -165,7 +165,7 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     line-height: 1;
     pointer-events: none;
     animation: badgePop 0.5s ease-out;
-    box-shadow: 0 0 0 2px var(--compras-surface-1);
+    box-shadow: 0 0 0 2px var(--compras-contrast);
 }
 
 #header-actions.bell-bump {

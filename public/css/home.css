@@ -105,7 +105,7 @@ body:has(#home.show) {
     transition: background 0.4s ease;
 }
 
-body.dark-mode #home.home-bg-loaded::after {
+body.dark #home.home-bg-loaded::after {
     background: rgba(0, 0, 0, 0.55);
 }
 
@@ -118,7 +118,7 @@ body.no-animated-bg #home.home-bg-loaded::before {
 body.no-animated-bg .home-title {
     animation: none;
     background: none;
-    -webkit-text-fill-color: var(--compras-surface-1);
+    -webkit-text-fill-color: var(--compras-contrast);
 }
 
 /* Garante que o conteúdo fique acima do overlay */
@@ -287,7 +287,7 @@ body.no-animated-bg .home-title {
 .card-glass-title,
 .card-glass-text,
 .card-glass-icon i {
-    text-shadow: 1px 1px 2px var(--compras-surface-1);
+    text-shadow: 1px 1px 2px var(--compras-contrast);
 }
 
 .card-glass-title {
