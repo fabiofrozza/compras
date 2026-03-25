@@ -108,10 +108,10 @@ async function addNotification({ message, type = 'info', source = 'Sistema' }) {
     };
 
     notifications.unshift(notification); // Mais recente no topo
-    marioHeadbutt();
+    easterEggNotification();
 
     const delay = (ms) => new Promise(res => setTimeout(res, ms));
-    await delay(500);
+    await delay(1000);
 
     updateNotificationBadge();
     renderNotificationList();
@@ -119,36 +119,54 @@ async function addNotification({ message, type = 'info', source = 'Sistema' }) {
     return notification.id;
 }
 
-/** Faz o Mario aparecer embaixo do ícone de notificações e "cabecear" o sino */
-let _marioLoadersReady = false;
-async function marioHeadbutt() {
+let _easterEggsLoadersReady = false;
+async function easterEggNotification() {
     const btn = document.getElementById('notificationsBtn');
     const headerActions = document.getElementById('header-actions');
     if (!btn) return;
 
     // Lazy-load do loaders.js se ainda não carregado
-    if (!_marioLoadersReady && typeof getMario !== 'function') {
+    if (!_easterEggsLoadersReady && typeof getMario !== 'function') {
         try {
             await loadScript('js/loaders.js');
-            _marioLoadersReady = true;
+            _easterEggsLoadersReady = true;
         } catch (e) {
             return;
         }
     }
 
+    const useLink = Math.random() < 0.5;
+
     const container = document.createElement('div');
-    container.className = 'mario-headbutt-container';
-    container.innerHTML = getMario();
-    btn.appendChild(container);
+    container.className = 'easter-egg-container';
 
-    // Sincronizar o "pulo" do sino com a cabeçada do Mario
-    setTimeout(() => {
-        headerActions.classList.add('bell-bump');
-        setTimeout(() => headerActions.classList.remove('bell-bump'), 400);
-    }, 500);
+    if (useLink) {
+        // Link idle por 2s, depois troca para espada levantada e empurra o header
+        container.classList.add('link-character');
+        container.innerHTML = getLinkIdle();
+        btn.appendChild(container);
 
-    // Remover após um ciclo da animação original (2s)
-    setTimeout(() => container.remove(), 2000);
+        setTimeout(() => {
+            container.innerHTML = getLinkSword();
+            headerActions.classList.add('bell-bump');
+            setTimeout(() => headerActions.classList.remove('bell-bump'), 1000);
+        }, 1000);
+
+        // Remover após idle (2s) + exibição da espada (1s)
+        setTimeout(() => container.remove(), 2000);
+    } else {
+        container.innerHTML = getMario();
+        btn.appendChild(container);
+
+        // Sincronizar o "pulo" do sino com a cabeçada do Mario
+        setTimeout(() => {
+            headerActions.classList.add('bell-bump');
+            setTimeout(() => headerActions.classList.remove('bell-bump'), 400);
+        }, 500);
+
+        // Remover após um ciclo da animação original (2s)
+        setTimeout(() => container.remove(), 2000);
+    }
 }
 
 /** Atualiza o badge vermelho no botão do sino */

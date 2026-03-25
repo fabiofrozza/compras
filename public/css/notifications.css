@@ -407,16 +407,20 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
 }
 
 /* ==========================================================================
-MARIO HEADBUTT (Easter Egg: Mario bate a cabeça no sino)
+Easter Egg: game character bumps the bell notifications
 ========================================================================== */
 
-.mario-headbutt-container {
+.easter-egg-container {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translateX(-50%);
     z-index: 9999;
     pointer-events: none;
+}
+
+.easter-egg-container.link-character {
+    width: 40px;
 }
 
 #notificationsBtn {
