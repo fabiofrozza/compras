@@ -83,52 +83,52 @@ async function verificarStatusDadosAtas() {
             const dataModificacao = new Date(data.modified).toLocaleString('pt-BR');
             const conf = data.atasConfig || {};
 
-            statusIcon.className = 'widget-icon bg-success-subtle text-success';
+            statusIcon.className = 'widget-icon text-success';
             statusIcon.innerHTML = '<i class="material-symbols-outlined">check_circle</i>';
             statusText.innerHTML = `${dataModificacao}`;
 
-            lidosText.innerHTML = conf.qtd_sicaf !== undefined ? conf.qtd_sicaf : '—';
+            lidosText.innerHTML = conf.qtd_sicaf !== undefined ? conf.qtd_sicaf : '-';
 
             if (conf.resultado_geracao === 'sucesso') {
-                resultIcon.className = 'widget-icon bg-success-subtle text-success';
+                resultIcon.className = 'widget-icon text-success';
                 resultIcon.innerHTML = '<i class="material-symbols-outlined">check_circle</i>';
-                resultText.innerHTML = 'Sucesso';
+                resultText.innerHTML = '<span class="badge rounded-pill success"><i class="material-symbols-outlined">check</i> Sucesso</span>';
                 dupContainer.style.display = 'none';
             } else if (conf.resultado_geracao === 'ambos') {
-                resultIcon.className = 'widget-icon bg-warning-subtle text-warning-emphasis';
+                resultIcon.className = 'widget-icon text-warning-emphasis';
                 resultIcon.innerHTML = '<i class="material-symbols-outlined">warning</i>';
-                resultText.innerHTML = 'Alertas';
+                resultText.innerHTML = '<span class="badge rounded-pill warning"><i class="material-symbols-outlined">warning</i> Alertas</span>';
                 if (conf.final_message) {
                     dupContainer.style.display = 'flex';
                     dupText.innerHTML = conf.final_message;
                 }
             } else if (conf.resultado_geracao === 'erro') {
-                resultIcon.className = 'widget-icon bg-danger-subtle text-danger';
+                resultIcon.className = 'widget-icon text-danger';
                 resultIcon.innerHTML = '<i class="material-symbols-outlined">error</i>';
-                resultText.innerHTML = 'Erros';
+                resultText.innerHTML = '<span class="badge rounded-pill danger"><i class="material-symbols-outlined">close</i> Erros</span>';
                 dupContainer.style.display = 'none';
             } else {
-                resultIcon.className = 'widget-icon bg-primary-subtle text-primary';
+                resultIcon.className = 'widget-icon text-primary';
                 resultIcon.innerHTML = '<i class="material-symbols-outlined">analytics</i>';
-                resultText.innerHTML = 'Gerado';
+                resultText.innerHTML = '<span class="badge rounded-pill info">Gerado</span>';
                 dupContainer.style.display = 'none';
             }
         } else {
             atasData.dadosDisponiveis = false;
-            statusIcon.className = 'widget-icon bg-warning-subtle text-warning-emphasis';
+            statusIcon.className = 'widget-icon text-warning-emphasis';
             statusIcon.innerHTML = '<i class="material-symbols-outlined">warning</i>';
             statusText.innerHTML = 'Arquivos SICAF não extraídos';
-            
-            resultIcon.className = 'widget-icon bg-secondary-subtle text-secondary';
+
+            resultIcon.className = 'widget-icon text-secondary';
             resultIcon.innerHTML = '<i class="material-symbols-outlined">analytics</i>';
-            resultText.innerHTML = '—';
-            lidosText.innerHTML = '—';
+            resultText.innerHTML = '-';
+            lidosText.innerHTML = '-';
             dupContainer.style.display = 'none';
         }
     } catch (error) {
         console.error('Erro ao verificar status dos dados:', error);
         atasData.dadosDisponiveis = false;
-        if(statusText) statusText.textContent = 'Erro ao verificar arquivos';
+        if (statusText) statusText.textContent = 'Erro ao verificar arquivos';
     }
 
     atualizarBotaoGerarAtas();

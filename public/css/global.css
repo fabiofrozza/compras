@@ -50,7 +50,7 @@ body {
 
 body {
     --compras-blue-light: color-mix(in srgb, rgb(0, 56, 147), white 85%);
-    --compras-blue-dark: color-mix(in srgb, rgb(0, 56, 147), black 75%);
+    --compras-blue-dark: color-mix(in srgb, rgb(0, 56, 147), black 25%);
 
     --compras-theme: light-dark(var(--compras-blue-light), var(--compras-blue-dark));
     --compras-text-primary: light-dark(var(--compras-blue-dark), floralwhite);

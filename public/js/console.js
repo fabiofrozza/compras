@@ -1,4 +1,4 @@
-// Referências para elementos DOM — inicializadas sob demanda via ensureConsoleDOM()
+// Referências para elementos DOM - inicializadas sob demanda via ensureConsoleDOM()
 let consoleContainer, consoleHeader, consoleSummary, summaryTitle, summaryDescription;
 let closeButton, minimizeButton, consoleOutput, scriptRunningOverlay, overlayLoader;
 
@@ -529,7 +529,7 @@ const onDragEnd = () => {
   enforceConsoleConstraints();
 };
 
-// Event delegation para .btn-run — permite que botões carregados dinamicamente funcionem
+// Event delegation para .btn-run - permite que botões carregados dinamicamente funcionem
 document.addEventListener('click', (event) => {
   const btn = event.target.closest('.btn-run');
 
@@ -538,7 +538,7 @@ document.addEventListener('click', (event) => {
     // isScriptRunning é verificado internamente pelo próprio runRScript.
     if (btn.hasAttribute('onclick')) return;
 
-    // Bloqueia clique se há script em execução — apenas para botões sem onclick
+    // Bloqueia clique se há script em execução - apenas para botões sem onclick
     if (isScriptRunning) {
       event.preventDefault();
       showToast('Aguarde o término do script em execução antes de iniciar outro.', 'warning', 5000, 'execução');

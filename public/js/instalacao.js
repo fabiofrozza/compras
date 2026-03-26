@@ -66,7 +66,7 @@ async function carregarInfoR() {
     } else {
         versionEl.textContent = 'R não encontrado';
         versionEl.classList.add('text-danger');
-        pathEl.textContent = '—';
+        pathEl.textContent = '-';
     }
 
     // Versão mais recente

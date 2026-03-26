@@ -315,13 +315,11 @@ FORMS AND FILES
 }
 
 /* Status text dos formulários */
-#status-dados-atas,
 #importacao-sheet-status {
     font-size: 12px;
     margin-bottom: 0px;
 }
 
-#status-dados-atas i,
 #importacao-sheet-status i {
     font-size: 1.25rem;
     vertical-align: top;
@@ -548,37 +546,48 @@ FORMS AND FILES
    ========================================================================== */
 
 .dashboard-widget-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
     margin-bottom: 12px;
     background-color: color-mix(in srgb, var(--compras-theme) 50%, white);
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;
-    padding: 12px;
+    padding: 10px;
 }
 
 .dashboard-widget {
     background-color: Field;
     border: 1px solid var(--bs-border-color);
-    border-radius: 8px;
-    padding: 12px;
+    border-radius: 4px;
+    padding: 6px 6px 6px 10px;
     display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
+    flex-grow: 1;
+}
+
+.dashboard-widget.widget-full {
+    flex: 1 1 100%;
+    min-width: 100%;
+    max-width: 100%;
 }
 
 .widget-icon {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    min-width: 40px;
-    height: 40px;
-    border-radius: 8px;
+    min-width: 32px;
+    height: 100%;
 }
 
 .widget-icon i {
-    font-size: 1.5rem;
+    font-size: 2rem;
+    color: var(--compras-text-primary);
 }
 
 .widget-content {
@@ -588,26 +597,56 @@ FORMS AND FILES
 }
 
 .widget-label {
-    font-size: 0.70rem;
-    color: var(--bs-secondary-color);
-    text-transform: uppercase;
+    font-size: 0.85rem;
+    color: var(--compras-text-primary);
     letter-spacing: 0.5px;
-    font-weight: 600;
+    font-weight: 500;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
 }
 
 .widget-value {
-    font-size: 1.25rem;
-    font-weight: 700;
     color: var(--compras-text-primary);
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
 }
 
-.widget-value.text-break {
-    white-space: normal;
-    word-break: break-all;
+.badge {
+    display: inline-flex;
+    gap: 4px;
+    background-color: color-mix(in srgb, var(--compras-badge-background), white 75%);
+}
+
+.badge i {
+    border-radius: 50%;
+    font-size: 0.85rem;
+    color: white;
+    background-color: var(--compras-badge-icon);
+}
+
+.badge.success {
+    --compras-badge-background: var(--compras-success);
+    --compras-badge-icon: var(--compras-success);
+}
+
+.badge.danger {
+    --compras-badge-background: var(--compras-error);
+    --compras-badge-icon: var(--compras-error);
+}
+
+.badge.warning {
+    --compras-badge-background: var(--compras-warning);
+    --compras-badge-icon: var(--compras-warning);
+}
+
+.badge.info {
+    --compras-badge-background: var(--compras-info);
+    --compras-badge-icon: var(--compras-info);
+}
+
+.badge.blank {
+    --compras-badge-background: gray;
+    --compras-badge-icon: gray;
 }

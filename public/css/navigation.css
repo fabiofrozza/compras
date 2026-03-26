@@ -338,7 +338,7 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
     color: var(--bs-secondary);
 }
 
-/* Settings Panel — User row */
+/* Settings Panel - User row */
 .settings-user-row {
     display: flex;
     align-items: flex-start;

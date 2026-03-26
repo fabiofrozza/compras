@@ -111,7 +111,6 @@ async function validarLinkGoogle() {
 
 /**
  * Atualiza o feedback visual do link da planilha.
- * Segue o mesmo padrão visual do #status-dados-atas (aba Atas).
  * 
  * @param {'success'|'error'|'warning'|'info'|'loading'} tipo - Tipo do feedback
  * @param {string} mensagem - Texto da mensagem (sem ícone)

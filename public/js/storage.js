@@ -204,7 +204,7 @@ function loadConfig(container = document) {
         scope.querySelectorAll('[data-field]').forEach(field => {
             const fieldName = field.dataset.field;
 
-            // Preferências são aplicadas por applyUserPreferences — não sobrescrever aqui
+            // Preferências são aplicadas por applyUserPreferences - não sobrescrever aqui
             if (['darkMode', 'animatedBg', 'preferredTab', 'bgSource'].includes(fieldName)) return;
 
             const tabPane = field.closest('.tab-pane');

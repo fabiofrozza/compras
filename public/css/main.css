@@ -14,7 +14,7 @@ MAIN CONTENT
 }
 
 
-/* Chrome, Safari, Edge — webkit scrollbar API */
+/* Chrome, Safari, Edge - webkit scrollbar API */
 @supports selector(::-webkit-scrollbar) {
     *::-webkit-scrollbar {
         width: 6px;
@@ -41,7 +41,7 @@ MAIN CONTENT
     }
 }
 
-/* Firefox — standard scrollbar properties */
+/* Firefox - standard scrollbar properties */
 @supports not selector(::-webkit-scrollbar) {
     * {
         scrollbar-color: var(--compras-text-primary) transparent;
@@ -73,9 +73,10 @@ MAIN CONTENT
     font-size: 75%;
 }
 
-/* Material Symbols — utilities */
+/* Material Symbols - utilities */
 .material-symbols-outlined {
     font-size: inherit;
     vertical-align: middle;
     font-variation-settings: 'opsz' 48;
+    pointer-events: none;
 }

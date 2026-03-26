@@ -1,5 +1,5 @@
 // ===========================================
-// fornecedores.js — Lógica da aba Fornecedores
+// fornecedores.js - Lógica da aba Fornecedores
 // ===========================================
 
 let pregaoSelecionado = null;
@@ -239,7 +239,7 @@ async function carregarConteudoPasta(pregao) {
 
             const notProcessed = !data.resultado || data.resultado === 'sem_saida';
             const iconColor = file.hasError ? 'text-danger' : '';
-            const erroText = file.hasError ? (file.errorType || 'Sim') : (notProcessed ? '—' : 'Não');
+            const erroText = file.hasError ? (file.errorType || 'Sim') : (notProcessed ? '-' : 'Não');
             const erroClass = file.hasError ? 'text-danger fw-bold' : (notProcessed ? '' : 'text-success');
             const safeFilePath = file.fullPath.replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
 
@@ -365,22 +365,34 @@ async function atualizarInfoPregao(nome) {
         const btn = document.getElementById('btn-obter-dados-fornecedores');
         if (btn) btn.disabled = pregao.qtdArquivos === 0;
 
+        if (pregao.qtdArquivos === 0) {
+            elQtd.closest('.dashboard-widget').classList.add('border-danger');
+        } else {
+            elQtd.closest('.dashboard-widget').classList.remove('border-danger');
+        }
+
+
         if (elGerado) {
             const gerado = pregao.resultado === 'sucesso' || pregao.resultado === 'parcial';
-            elGerado.textContent = gerado ? 'Sim' : 'Não';
-            elGerado.className = pregao.resultado === 'sucesso' ? 'text-success fw-bold' :
-                pregao.resultado === 'parcial' ? 'text-warning fw-bold' : '';
+            if (gerado) {
+                const badgeClass = pregao.resultado === 'sucesso' ? 'success' : 'warning';
+                const badgeIcon = pregao.resultado === 'sucesso' ? 'check' : 'warning';
+                elGerado.innerHTML = `<span class="badge rounded-pill ${badgeClass}"><i class="material-symbols-outlined">${badgeIcon}</i> Sim</span>`;
+            } else {
+                elGerado.innerHTML = `<span class="badge rounded-pill blank">Não</span>`;
+            }
+            elGerado.className = 'widget-value';
         }
         if (elErros) {
             if (!pregao.resultado) {
-                elErros.textContent = '—';
-                elErros.className = '';
+                elErros.textContent = '-';
+                elErros.className = 'widget-value';
             } else if (pregao.resultado === 'sucesso') {
-                elErros.textContent = 'Não';
-                elErros.className = 'text-success';
+                elErros.innerHTML = `<span class="badge rounded-pill success"><i class="material-symbols-outlined">check</i> Não</span>`;
+                elErros.className = 'widget-value';
             } else {
-                elErros.textContent = 'Sim';
-                elErros.className = 'text-danger fw-bold';
+                elErros.innerHTML = `<span class="badge rounded-pill danger"><i class="material-symbols-outlined">close</i> Sim</span>`;
+                elErros.className = 'widget-value';
             }
         }
     } catch (error) {
@@ -393,8 +405,8 @@ function limparInfoPregao() {
     fields.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-            el.textContent = '—';
-            el.className = '';
+            el.textContent = '-';
+            el.className = 'widget-value';
         }
     });
 
@@ -484,7 +496,7 @@ async function carregarImportar() {
 
         data.arquivos.forEach(file => {
             const iconColor = file.hasError ? 'text-danger' : '';
-            const erroText = file.hasError === null ? '—' : (file.hasError ? 'Sim' : 'Não');
+            const erroText = file.hasError === null ? '-' : (file.hasError ? 'Sim' : 'Não');
             const erroClass = file.hasError === null ? '' : (file.hasError ? 'text-danger fw-bold' : 'text-success');
             const safeFilePath = file.fullPath.replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
             const safeConfPath = file.conferenciaPath ? file.conferenciaPath.replace(/\\/g, '\\\\').replace(/"/g, '&quot;') : '';
@@ -530,7 +542,7 @@ async function selecionarImportar(pregao) {
     if (pregaoCard) {
         selecionarPregao(pregao);
     } else {
-        // Pasta do pregão não existe — limpar seleção e atualizar listas
+        // Pasta do pregão não existe - limpar seleção e atualizar listas
         pregaoSelecionado = null;
         document.querySelectorAll('.pregao-card').forEach(card => {
             card.classList.remove('pregao-selected');

@@ -122,7 +122,7 @@ function arquivoPassaNoFiltro(file, patterns, filterNameContains) {
   return matchFilePattern(file, patterns);
 }
 
-// Compara versões no formato "x.y.z" — retorna negativo, zero ou positivo
+// Compara versões no formato "x.y.z" - retorna negativo, zero ou positivo
 function compareVersions(a, b) {
   const pa = a.split('.').map(Number);
   const pb = b.split('.').map(Number);
@@ -312,7 +312,7 @@ app.get('/api/check-atas-data', async (req, res) => {
 
     try {
       const stats = await fs.stat(filePath);
-      
+
       let atasConfig = {};
       try {
         const configRaw = await fs.readFile(configPath, 'utf-8');

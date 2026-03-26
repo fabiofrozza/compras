@@ -50,7 +50,7 @@ async function setHomeBackground(bgSource) {
 
     const pickBing = () => {
         const item = bingImages[Math.floor(Math.random() * bingImages.length)];
-        return { imageUrl: item.fullUrl, creditHref: item.pageUrl, creditTooltip: `${item.title} — ${item.copyright}` };
+        return { imageUrl: item.fullUrl, creditHref: item.pageUrl, creditTooltip: `${item.title} - ${item.copyright}` };
     };
 
     if (bgSource === 'local' || (bgSource === 'random' && !hasBing)) {
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
     randomizeGlassFilter();
 });
 
-// Event delegation para .card-link — funciona mesmo em conteúdo carregado dinamicamente
+// Event delegation para .card-link - funciona mesmo em conteúdo carregado dinamicamente
 document.addEventListener('click', (e) => {
     const link = e.target.closest('.card-link');
     if (link) {
