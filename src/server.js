@@ -536,12 +536,14 @@ app.post('/api/validate-link', async (req, res) => {
 
       const regexSPA = /23080\.\d{6}\/\d{4}-\d{2}/g;
       const processosSPA = [...new Set(htmlContent.match(regexSPA) || [])].sort();
+      const temValidacaoManual = htmlContent.includes('VALIDAÇÃO MANUAL');
 
       return res.json({
         isValid: true,
         status: 'success',
         msg: grupoMateriais,
         processosSPA,
+        temValidacaoManual,
       });
     } else {
       return res.json({

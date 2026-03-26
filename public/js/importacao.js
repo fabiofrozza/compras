@@ -84,9 +84,12 @@ async function validarLinkGoogle() {
         const result = await response.json();
         importacaoLastValidatedLink = url;
 
+        const processos = result.processosSPA || [];
+
         switch (result.status) {
             case 'success':
                 atualizarFeedbackPlanilha('success', result.msg, 'check_circle');
+                atualizarWidgetsExtras(processos, result.temValidacaoManual || false);
                 break;
             case 'warning':
                 atualizarFeedbackPlanilha('warning', result.msg, 'warning');
@@ -100,7 +103,7 @@ async function validarLinkGoogle() {
                 break;
         }
 
-        popularComboProcessosSPA(result.processosSPA || []);
+        popularComboProcessosSPA(processos);
 
     } catch (error) {
         console.error('Erro ao validar link:', error);
@@ -111,76 +114,96 @@ async function validarLinkGoogle() {
 
 /**
  * Atualiza o feedback visual do link da planilha.
- * 
+ *
  * @param {'success'|'error'|'warning'|'info'|'loading'} tipo - Tipo do feedback
  * @param {string} mensagem - Texto da mensagem (sem ícone)
- * @param {string} iconeClass - Classe Font Awesome do ícone (ex: 'check_circle')
+ * @param {string} iconeClass - Classe do ícone Material Symbols (ex: 'check_circle')
  */
 function atualizarFeedbackPlanilha(tipo, mensagem, iconeClass) {
     const linkInput = document.getElementById('importacao-link');
-    const statusContainer = document.getElementById('importacao-sheet-status');
-    const statusIcon = document.getElementById('icon-status-link');
     const statusText = document.getElementById('texto-status-link');
+    const widgetStatus = document.getElementById('widget-status-link');
 
-    if (!linkInput || !statusContainer || !statusIcon || !statusText) return;
+    if (!linkInput || !statusText || !widgetStatus) return;
 
     const btnAbrir = document.getElementById('btn-abrir-link');
     if (btnAbrir) btnAbrir.disabled = !linkInput.value.trim();
 
-    // Remove todas as classes de estado anteriores
-    const classesEstado = ['alert-success', 'alert-danger', 'alert-warning', 'alert-light',
-        'border-success', 'border-danger', 'border-warning', 'border'];
-    statusContainer.classList.remove(...classesEstado);
+    const classesIcone = ['border-success', 'border-danger', 'border-warning', 'border-muted', 'border-info'];
+    widgetStatus.classList.remove(...classesIcone);
 
-    const classesIcone = ['text-success', 'text-danger', 'text-warning', 'text-muted', 'text-info'];
-    statusIcon.classList.remove(...classesIcone);
-
-    // Atualiza ícone
-    statusIcon.innerHTML = `<i class="material-symbols-outlined">${iconeClass}</i>`;
     statusText.innerHTML = mensagem;
 
     switch (tipo) {
         case 'success':
-            statusContainer.classList.add('alert-success', 'border-success');
-            statusIcon.classList.add('text-success');
+            widgetStatus.classList.add('border-success');
             linkInput.classList.remove('is-invalid');
             linkInput.classList.add('is-valid');
             importacaoLinkValido = true;
             break;
 
         case 'error':
-            statusContainer.classList.add('alert-danger', 'border-danger');
-            statusIcon.classList.add('text-danger');
+            widgetStatus.classList.add('border-danger');
             linkInput.classList.remove('is-valid');
             linkInput.classList.add('is-invalid');
             importacaoLinkValido = false;
             break;
 
         case 'warning':
-            statusContainer.classList.add('alert-warning', 'border-warning');
-            statusIcon.classList.add('text-warning');
+            widgetStatus.classList.add('border-warning');
             linkInput.classList.remove('is-invalid');
             linkInput.classList.add('is-valid');
             importacaoLinkValido = true;
             break;
 
         case 'loading':
-            statusContainer.classList.add('alert-light', 'border');
-            statusIcon.classList.add('text-info');
+            widgetStatus.classList.add('border-info');
             linkInput.classList.remove('is-valid', 'is-invalid');
             importacaoLinkValido = false;
             break;
 
         case 'info':
         default:
-            statusContainer.classList.add('alert-light', 'border');
-            statusIcon.classList.add('text-muted');
+            widgetStatus.classList.add('border-muted');
             linkInput.classList.remove('is-valid', 'is-invalid');
             importacaoLinkValido = false;
             break;
     }
 
+    // Esconde widgets extras quando não é sucesso
+    if (tipo !== 'success') {
+        atualizarWidgetsExtras([], false);
+    }
+
     verificarLiberacaoBotoesImportacao();
+}
+
+/**
+ * Atualiza os widgets de processos e validação manual.
+ */
+function atualizarWidgetsExtras(processos, temValidacaoManual) {
+    const widgetProcessos = document.getElementById('widget-processos');
+    const textoProcessos = document.getElementById('texto-processos');
+    const widgetValidacao = document.getElementById('widget-validacao');
+    const textoValidacao = document.getElementById('texto-validacao');
+
+    if (widgetProcessos && textoProcessos) {
+        if (processos.length > 0) {
+            widgetProcessos.classList.remove('d-none');
+            textoProcessos.textContent = processos.length;
+        } else {
+            widgetProcessos.classList.add('d-none');
+        }
+    }
+
+    if (widgetValidacao && textoValidacao) {
+        if (temValidacaoManual) {
+            widgetValidacao.classList.remove('d-none');
+            textoValidacao.innerHTML = '<span class="badge rounded-pill warning"><i class="material-symbols-outlined">warning</i> Há itens a validar</span>';
+        } else {
+            widgetValidacao.classList.add('d-none');
+        }
+    }
 }
 
 function popularComboProcessosSPA(processos) {

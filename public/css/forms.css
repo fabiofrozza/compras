@@ -315,17 +315,6 @@ FORMS AND FILES
     font-variation-settings: 'opsz' 48;
 }
 
-/* Status text dos formulários */
-#importacao-sheet-status {
-    font-size: 12px;
-    margin-bottom: 0px;
-}
-
-#importacao-sheet-status i {
-    font-size: 1.25rem;
-    vertical-align: top;
-}
-
 /* Estilos de Abas de Importação no Formulário */
 .sub-tabs-content {
     padding: 0;
@@ -621,7 +610,7 @@ FORMS AND FILES
 .badge {
     display: inline-flex;
     gap: 4px;
-    background-color: color-mix(in srgb, var(--compras-badge-background), white 75%);
+    background-color: color-mix(in srgb, var(--compras-badge-background), white 25%);
 }
 
 .badge i {

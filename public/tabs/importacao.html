@@ -13,31 +13,25 @@
             <div class="collapse show" id="importacao-link-collapse">
                 <div class="row">
                     <div class="col">
-                        <label for="importacao-link" class="form-label" data-bs-toggle="tooltip"
-                            data-bs-title="Link da aba LISTA FINAL da planilha de inserção de demandas.">
-                            Link da Planilha do Google Drive
-                        </label>
-                        <div class="input-group input-group-sm">
-                            <input type="url" class="form-control" id="importacao-link" data-field="planilha_link"
-                                placeholder="https://docs.google.com/spreadsheets/d/..." required>
-                            <button type="button" class="btn btn-outline-primary" id="btn-atualizar-link"
-                                onclick="revalidarLinkGoogle()" data-bs-toggle="tooltip"
-                                data-bs-title="Atualizar informações da planilha">
-                                <i class="material-symbols-outlined">refresh</i>
-                            </button>
-                            <button type="button" class="btn btn-outline-primary" id="btn-abrir-link"
-                                onclick="abrirLinkPlanilha()" data-bs-toggle="tooltip"
-                                data-bs-title="Abrir planilha em nova aba" disabled>
-                                <i class="material-symbols-outlined">open_in_new</i>
-                            </button>
-                        </div>
-                        <div id="importacao-sheet-status"
-                            class="alert alert-light border d-flex align-items-start p-1 mt-2 mb-2" role="alert">
-                            <div id="icon-status-link" class="me-2 text-muted">
-                                <i class="material-symbols-outlined">info</i>
+                        <div class="form-sub-container">
+                            <label for="importacao-link" class="form-label" data-bs-toggle="tooltip"
+                                data-bs-title="Link da aba LISTA FINAL da planilha de inserção de demandas.">
+                                Link da Planilha do Google Drive
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <input type="url" class="form-control" id="importacao-link" data-field="planilha_link"
+                                    placeholder="https://docs.google.com/spreadsheets/d/..." required>
+                                <button type="button" class="btn btn-outline-primary" id="btn-atualizar-link"
+                                    onclick="revalidarLinkGoogle()" data-bs-toggle="tooltip"
+                                    data-bs-title="Atualizar informações da planilha">
+                                    <i class="material-symbols-outlined">refresh</i>
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" id="btn-abrir-link"
+                                    onclick="abrirLinkPlanilha()" data-bs-toggle="tooltip"
+                                    data-bs-title="Abrir planilha em nova aba" disabled>
+                                    <i class="material-symbols-outlined">open_in_new</i>
+                                </button>
                             </div>
-                            <span id="texto-status-link" class="text-primary-emphasis">Insira o link da planilha para
-                                validação.</span>
                         </div>
                     </div>
                 </div>
@@ -46,6 +40,36 @@
                         class="btn btn-outline-danger btn-sm" onclick="limparFormulario('form-importacao-link')">
                         <i class="material-symbols-outlined">ink_eraser</i>
                     </button>
+                </div>
+                <div id="importacao-sheet-status" class="dashboard-widget-grid mt-2 mb-0">
+                    <div class="dashboard-widget widget-full" id="widget-status-link">
+                        <div class="widget-icon">
+                            <i class="material-symbols-outlined">info</i>
+                        </div>
+                        <div class="widget-content">
+                            <span class="widget-label">Planilha</span>
+                            <span class="widget-value" id="texto-status-link">Insira o link da planilha para
+                                validação.</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-widget d-none" id="widget-processos">
+                        <div class="widget-icon">
+                            <i class="material-symbols-outlined">folder_open</i>
+                        </div>
+                        <div class="widget-content">
+                            <span class="widget-label">Processos</span>
+                            <span class="widget-value" id="texto-processos">-</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-widget d-none" id="widget-validacao">
+                        <div class="widget-icon">
+                            <i class="material-symbols-outlined">edit_note</i>
+                        </div>
+                        <div class="widget-content">
+                            <span class="widget-label">Validação Manual</span>
+                            <span class="widget-value" id="texto-validacao">-</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </form>
@@ -61,69 +85,72 @@
             </h4>
 
             <div class="collapse show" id="importacao-config-collapse">
-                <div class="row">
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="importacao-val-min" class="form-label" data-bs-toggle="tooltip"
-                                data-bs-title="Valor mínimo total do item para inclusão no processo">
-                                Valor Mínimo
-                            </label>
-                            <input type="number" class="form-control form-control-sm" id="importacao-val-min"
-                                data-field="valor_minimo" data-validate-rule="numeric" min="1" required>
+                <div class="form-sub-container">
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="importacao-val-min" class="form-label" data-bs-toggle="tooltip"
+                                    data-bs-title="Valor mínimo total do item para inclusão no processo">
+                                    Valor Mínimo
+                                </label>
+                                <input type="number" class="form-control form-control-sm" id="importacao-val-min"
+                                    data-field="valor_minimo" data-validate-rule="numeric" min="1" required>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="importacao-qtd-min" class="form-label" data-bs-toggle="tooltip"
+                                    data-bs-title="Quantidade mínima demandada do item para inclusão no processo">
+                                    Qtd. Mínima
+                                </label>
+                                <input type="number" class="form-control form-control-sm" id="importacao-qtd-min"
+                                    data-field="qtd_minima" data-validate-rule="numeric" min="1" required>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="importacao-celula" class="form-label" data-bs-toggle="tooltip"
+                                    data-bs-title="Célula da LISTA FINAL onde inicia a área de inserção dos quantitativos pelas Unidades (ex: Q6)">
+                                    Célula Inicial
+                                </label>
+                                <input type="text" class="form-control form-control-sm" id="importacao-celula"
+                                    data-field="celula_inicial" data-validate-rule="pattern"
+                                    data-regex-pattern="^[A-Za-z]+[1-9][0-9]*$" placeholder="Ex: Q6" required>
+                            </div>
                         </div>
                     </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="importacao-qtd-min" class="form-label" data-bs-toggle="tooltip"
-                                data-bs-title="Quantidade mínima demandada do item para inclusão no processo">
-                                Qtd. Mínima
-                            </label>
-                            <input type="number" class="form-control form-control-sm" id="importacao-qtd-min"
-                                data-field="qtd_minima" data-validate-rule="numeric" min="1" required>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="importacao-celula" class="form-label" data-bs-toggle="tooltip"
-                                data-bs-title="Célula da LISTA FINAL onde inicia a área de inserção dos quantitativos pelas Unidades (ex: Q6)">
-                                Célula Inicial
-                            </label>
-                            <input type="text" class="form-control form-control-sm" id="importacao-celula"
-                                data-field="celula_inicial" data-validate-rule="pattern"
-                                data-regex-pattern="^[A-Za-z]+[1-9][0-9]*$" placeholder="Ex: Q6" required>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="row">
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="importacao-qtd-un" class="form-label" data-bs-toggle="tooltip"
-                                data-bs-title="Quantidade de colunas de Unidades requerentes (incluindo ocultas)">
-                                Qtd. Unidades
-                            </label>
-                            <input type="number" class="form-control form-control-sm" id="importacao-qtd-un"
-                                data-field="qtd_unidades" min="1" data-validate-rule="numeric" min="1" required>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="importacao-qtd-un" class="form-label" data-bs-toggle="tooltip"
+                                    data-bs-title="Quantidade de colunas de Unidades requerentes (incluindo ocultas)">
+                                    Qtd. Unidades
+                                </label>
+                                <input type="number" class="form-control form-control-sm" id="importacao-qtd-un"
+                                    data-field="qtd_unidades" min="1" data-validate-rule="numeric" min="1" required>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="importacao-aba-menu" class="form-label" data-bs-toggle="tooltip"
-                                data-bs-title="Nome da aba Menu na planilha (apenas letras, números e espaços)">
-                                Aba Menu
-                            </label>
-                            <input type="text" class="form-control form-control-sm" id="importacao-aba-menu"
-                                data-field="aba_menu" placeholder="Ex: Menu" required>
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="importacao-aba-menu" class="form-label" data-bs-toggle="tooltip"
+                                    data-bs-title="Nome da aba Menu na planilha (apenas letras, números e espaços)">
+                                    Aba Menu
+                                </label>
+                                <input type="text" class="form-control form-control-sm" id="importacao-aba-menu"
+                                    data-field="aba_menu" placeholder="Ex: Menu" required>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="importacao-aba-lista" class="form-label" data-bs-toggle="tooltip"
-                                data-bs-title="Nome da aba LISTA FINAL na planilha (apenas letras, números e espaços)">
-                                Aba LISTA FINAL
-                            </label>
-                            <input type="text" class="form-control form-control-sm" id="importacao-aba-lista"
-                                data-field="aba_lista_final" placeholder="Ex: LISTA FINAL" value="LISTA FINAL" required>
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="importacao-aba-lista" class="form-label" data-bs-toggle="tooltip"
+                                    data-bs-title="Nome da aba LISTA FINAL na planilha (apenas letras, números e espaços)">
+                                    Aba LISTA FINAL
+                                </label>
+                                <input type="text" class="form-control form-control-sm" id="importacao-aba-lista"
+                                    data-field="aba_lista_final" placeholder="Ex: LISTA FINAL" value="LISTA FINAL"
+                                    required>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -140,7 +167,7 @@
 <div class="row">
     <!-- Tabs Importação, Pedidos e Relatório -->
     <div class="col">
-        <ul class="nav nav-tabs" id="importacaoTabs" role="tablist">
+        <ul class="nav nav-tabs sub-tabs" id="importacaoTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="tab-arquivos-importacao" data-bs-toggle="tab"
                     data-bs-target="#content-arquivos-importacao" type="button" role="tab">
@@ -161,7 +188,7 @@
             </li>
         </ul>
 
-        <div class="script-form shadow-sm" id="importacaoTabsForm">
+        <div class="script-form shadow-sm sub-tabs-content" id="importacaoTabsForm">
             <div class="tab-content" id="importacaoTabsContent">
 
                 <div class="tab-pane fade show active" id="content-arquivos-importacao" role="tabpanel">
