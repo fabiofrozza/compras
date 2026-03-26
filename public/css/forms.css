@@ -331,6 +331,10 @@ FORMS AND FILES
     border-top-left-radius: 0;
 }
 
+#importacaoTabsForm .tab-pane {
+    min-height: unset;
+}
+
 #importacaoTabs {
     gap: calc(var(--compras-padding-buttons) * 2);
     border: 0px;

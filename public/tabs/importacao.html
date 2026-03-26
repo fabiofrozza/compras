@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <div class="row">
-    <div class="col-sm-5">
+    <div class="col-sm-6">
         <!-- Form link planilha -->
         <form id="form-importacao-link" class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button"
-                data-bs-toggle="collapse" data-bs-target="#importacao-link-collapse" aria-expanded="true"
+            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
+                data-bs-target="#importacao-link-collapse" aria-expanded="true"
                 aria-controls="importacao-link-collapse">
                 <span><i class="material-symbols-outlined">add_to_drive</i> Link da Lista</span>
                 <i class="material-symbols-outlined text-secondary">unfold_more</i>
@@ -49,10 +49,12 @@
                 </div>
             </div>
         </form>
+    </div>
+    <div class="col-sm-6">
         <!-- Form configurações -->
         <form id="form-importacao-config" class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button"
-                data-bs-toggle="collapse" data-bs-target="#importacao-config-collapse" aria-expanded="true"
+            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
+                data-bs-target="#importacao-config-collapse" aria-expanded="true"
                 aria-controls="importacao-config-collapse">
                 <span><i class="material-symbols-outlined">settings</i> Configurações</span>
                 <i class="material-symbols-outlined text-secondary">unfold_more</i>
@@ -121,23 +123,23 @@
                                 Aba LISTA FINAL
                             </label>
                             <input type="text" class="form-control form-control-sm" id="importacao-aba-lista"
-                                data-field="aba_lista_final" placeholder="Ex: LISTA FINAL" value="LISTA FINAL"
-                                required>
+                                data-field="aba_lista_final" placeholder="Ex: LISTA FINAL" value="LISTA FINAL" required>
                         </div>
                     </div>
                 </div>
                 <div class="form-buttons">
                     <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
-                        class="btn btn-outline-danger btn-sm"
-                        onclick="limparFormulario('form-importacao-config')">
+                        class="btn btn-outline-danger btn-sm" onclick="limparFormulario('form-importacao-config')">
                         <i class="material-symbols-outlined">ink_eraser</i>
                     </button>
                 </div>
             </div>
         </form>
     </div>
+</div>
+<div class="row">
     <!-- Tabs Importação, Pedidos e Relatório -->
-    <div class="col-sm-7">
+    <div class="col">
         <ul class="nav nav-tabs" id="importacaoTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="tab-arquivos-importacao" data-bs-toggle="tab"
