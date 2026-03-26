@@ -536,7 +536,17 @@ app.post('/api/validate-link', async (req, res) => {
 
       const regexSPA = /23080\.\d{6}\/\d{4}-\d{2}/g;
       const processosSPA = [...new Set(htmlContent.match(regexSPA) || [])].sort();
-      const temValidacaoManual = htmlContent.includes('VALIDAÇÃO MANUAL');
+      // Busca "VALIDAÇÃO MANUAL" apenas dentro de células da tabela (<td>),
+      // ignorando metadados, nomes de abas e filter views no HTML.
+      const tdContentRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
+      let temValidacaoManual = false;
+      let tdMatch;
+      while ((tdMatch = tdContentRegex.exec(htmlContent)) !== null) {
+        if (tdMatch[1].includes('VALIDAÇÃO MANUAL')) {
+          temValidacaoManual = true;
+          break;
+        }
+      }
 
       return res.json({
         isValid: true,
