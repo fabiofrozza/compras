@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <div class="row">
-    <div class="col-sm-6">
+    <div class="col">
         <!-- Form link planilha -->
         <form id="form-importacao-link" class="script-form shadow-sm">
             <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
@@ -12,7 +12,7 @@
 
             <div class="collapse show" id="importacao-link-collapse">
                 <div class="row">
-                    <div class="col">
+                    <div class="col-sm-5">
                         <div class="form-sub-container">
                             <label for="importacao-link" class="form-label" data-bs-toggle="tooltip"
                                 data-bs-title="Link da aba LISTA FINAL da planilha de inserção de demandas.">
@@ -33,141 +33,59 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="form-buttons">
-                    <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
-                        class="btn btn-outline-danger btn-sm" onclick="limparFormulario('form-importacao-link')">
-                        <i class="material-symbols-outlined">ink_eraser</i>
-                    </button>
-                </div>
-                <div id="importacao-sheet-status" class="dashboard-widget-grid mt-2 mb-0">
-                    <div class="dashboard-widget widget-full" id="widget-status-link">
-                        <div class="widget-icon">
-                            <i class="material-symbols-outlined">info</i>
-                        </div>
-                        <div class="widget-content">
-                            <span class="widget-label">Planilha</span>
-                            <span class="widget-value" id="texto-status-link">Insira o link da planilha para
-                                validação.</span>
-                        </div>
-                    </div>
-                    <div class="dashboard-widget d-none" id="widget-processos">
-                        <div class="widget-icon">
-                            <i class="material-symbols-outlined">folder_open</i>
-                        </div>
-                        <div class="widget-content">
-                            <span class="widget-label">Processos</span>
-                            <span class="widget-value" id="texto-processos">-</span>
-                        </div>
-                    </div>
-                    <div class="dashboard-widget d-none" id="widget-validacao">
-                        <div class="widget-icon">
-                            <i class="material-symbols-outlined">edit_note</i>
-                        </div>
-                        <div class="widget-content">
-                            <span class="widget-label">Validação Manual</span>
-                            <span class="widget-value" id="texto-validacao">-</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </div>
-    <div class="col-sm-6">
-        <!-- Form configurações -->
-        <form id="form-importacao-config" class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#importacao-config-collapse" aria-expanded="true"
-                aria-controls="importacao-config-collapse">
-                <span><i class="material-symbols-outlined">settings</i> Configurações</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
-            </h4>
-
-            <div class="collapse show" id="importacao-config-collapse">
-                <div class="form-sub-container">
-                    <div class="row">
-                        <div class="col">
-                            <div class="form-group">
-                                <label for="importacao-val-min" class="form-label" data-bs-toggle="tooltip"
-                                    data-bs-title="Valor mínimo total do item para inclusão no processo">
-                                    Valor Mínimo
-                                </label>
-                                <input type="number" class="form-control form-control-sm" id="importacao-val-min"
-                                    data-field="valor_minimo" data-validate-rule="numeric" min="1" required>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="form-group">
-                                <label for="importacao-qtd-min" class="form-label" data-bs-toggle="tooltip"
-                                    data-bs-title="Quantidade mínima demandada do item para inclusão no processo">
-                                    Qtd. Mínima
-                                </label>
-                                <input type="number" class="form-control form-control-sm" id="importacao-qtd-min"
-                                    data-field="qtd_minima" data-validate-rule="numeric" min="1" required>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="form-group">
-                                <label for="importacao-celula" class="form-label" data-bs-toggle="tooltip"
-                                    data-bs-title="Célula da LISTA FINAL onde inicia a área de inserção dos quantitativos pelas Unidades (ex: Q6)">
-                                    Célula Inicial
-                                </label>
-                                <input type="text" class="form-control form-control-sm" id="importacao-celula"
-                                    data-field="celula_inicial" data-validate-rule="pattern"
-                                    data-regex-pattern="^[A-Za-z]+[1-9][0-9]*$" placeholder="Ex: Q6" required>
-                            </div>
+                        <div class="form-buttons">
+                            <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
+                                class="btn btn-outline-danger btn-sm"
+                                onclick="limparFormulario('form-importacao-link')">
+                                <i class="material-symbols-outlined">ink_eraser</i>
+                            </button>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col">
-                            <div class="form-group">
-                                <label for="importacao-qtd-un" class="form-label" data-bs-toggle="tooltip"
-                                    data-bs-title="Quantidade de colunas de Unidades requerentes (incluindo ocultas)">
-                                    Qtd. Unidades
-                                </label>
-                                <input type="number" class="form-control form-control-sm" id="importacao-qtd-un"
-                                    data-field="qtd_unidades" min="1" data-validate-rule="numeric" min="1" required>
+                    <div class="col-sm-7">
+                        <div id="importacao-sheet-status" class="dashboard-widget-grid">
+                            <div class="dashboard-widget" id="widget-status-link">
+                                <div class="widget-icon">
+                                    <i class="material-symbols-outlined">info</i>
+                                </div>
+                                <div class="widget-content">
+                                    <span class="widget-label">Planilha</span>
+                                    <span class="widget-value" id="texto-status-link" data-bs-toggle="tooltip"
+                                        data-bs-placement="bottom"
+                                        data-bs-title="Insira o link da planilha para validação.">Insira o link da
+                                        planilha para
+                                        validação.</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col">
-                            <div class="form-group">
-                                <label for="importacao-aba-menu" class="form-label" data-bs-toggle="tooltip"
-                                    data-bs-title="Nome da aba Menu na planilha (apenas letras, números e espaços)">
-                                    Aba Menu
-                                </label>
-                                <input type="text" class="form-control form-control-sm" id="importacao-aba-menu"
-                                    data-field="aba_menu" placeholder="Ex: Menu" required>
+                            <div class="dashboard-widget d-none" id="widget-processos">
+                                <div class="widget-icon">
+                                    <i class="material-symbols-outlined">folder_open</i>
+                                </div>
+                                <div class="widget-content">
+                                    <span class="widget-label">Processos</span>
+                                    <span class="widget-value" id="texto-processos">-</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col">
-                            <div class="form-group">
-                                <label for="importacao-aba-lista" class="form-label" data-bs-toggle="tooltip"
-                                    data-bs-title="Nome da aba LISTA FINAL na planilha (apenas letras, números e espaços)">
-                                    Aba LISTA FINAL
-                                </label>
-                                <input type="text" class="form-control form-control-sm" id="importacao-aba-lista"
-                                    data-field="aba_lista_final" placeholder="Ex: LISTA FINAL" value="LISTA FINAL"
-                                    required>
+                            <div class="dashboard-widget d-none" id="widget-validacao">
+                                <div class="widget-icon">
+                                    <i class="material-symbols-outlined">edit_note</i>
+                                </div>
+                                <div class="widget-content">
+                                    <span class="widget-label">Validação Manual</span>
+                                    <span class="widget-value" id="texto-validacao">-</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="form-buttons">
-                    <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
-                        class="btn btn-outline-danger btn-sm" onclick="limparFormulario('form-importacao-config')">
-                        <i class="material-symbols-outlined">ink_eraser</i>
-                    </button>
                 </div>
             </div>
         </form>
     </div>
 </div>
 <div class="row">
-    <!-- Tabs Importação, Pedidos e Relatório -->
+    <!-- Tabs Importação, Pedidos, Relatório e Configurações -->
     <div class="col">
-        <ul class="nav nav-tabs sub-tabs" id="importacaoTabs" role="tablist">
+        <ul class="nav nav-tabs sub-tabs last-right" id="importacaoTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="tab-arquivos-importacao" data-bs-toggle="tab"
                     data-bs-target="#content-arquivos-importacao" type="button" role="tab">
@@ -184,6 +102,12 @@
                 <button class="nav-link" id="tab-relatorio-gerencial" data-bs-toggle="tab"
                     data-bs-target="#content-relatorio-gerencial" type="button" role="tab">
                     <i class="material-symbols-outlined">pie_chart</i> Relatório gerencial
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-configuracoes" data-bs-toggle="tab"
+                    data-bs-target="#content-configuracoes" type="button" role="tab">
+                    <i class="material-symbols-outlined">settings</i> Configurações
                 </button>
             </li>
         </ul>
@@ -265,7 +189,86 @@
                         </button>
                     </div>
                 </div>
+
+                <div class="tab-pane fade" id="content-configuracoes" role="tabpanel">
+                    <!-- Form configurações -->
+                    <h4>Configurações</h4>
+                    <div class="form-sub-container" id="form-importacao-config">
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="importacao-val-min" class="form-label" data-bs-toggle="tooltip"
+                                        data-bs-title="Valor mínimo total do item para inclusão no processo">
+                                        Valor Mínimo
+                                    </label>
+                                    <input type="number" class="form-control form-control-sm" id="importacao-val-min"
+                                        data-field="valor_minimo" data-validate-rule="numeric" min="1" required>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="importacao-qtd-min" class="form-label" data-bs-toggle="tooltip"
+                                        data-bs-title="Quantidade mínima demandada do item para inclusão no processo">
+                                        Qtd. Mínima
+                                    </label>
+                                    <input type="number" class="form-control form-control-sm" id="importacao-qtd-min"
+                                        data-field="qtd_minima" data-validate-rule="numeric" min="1" required>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="importacao-celula" class="form-label" data-bs-toggle="tooltip"
+                                        data-bs-title="Célula da LISTA FINAL onde inicia a área de inserção dos quantitativos pelas Unidades (ex: Q6)">
+                                        Célula Inicial
+                                    </label>
+                                    <input type="text" class="form-control form-control-sm" id="importacao-celula"
+                                        data-field="celula_inicial" data-validate-rule="pattern"
+                                        data-regex-pattern="^[A-Za-z]+[1-9][0-9]*$" placeholder="Ex: Q6" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="importacao-qtd-un" class="form-label" data-bs-toggle="tooltip"
+                                        data-bs-title="Quantidade de colunas de Unidades requerentes (incluindo ocultas)">
+                                        Qtd. Unidades
+                                    </label>
+                                    <input type="number" class="form-control form-control-sm" id="importacao-qtd-un"
+                                        data-field="qtd_unidades" min="1" data-validate-rule="numeric" min="1" required>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="importacao-aba-menu" class="form-label" data-bs-toggle="tooltip"
+                                        data-bs-title="Nome da aba Menu na planilha (apenas letras, números e espaços)">
+                                        Aba Menu
+                                    </label>
+                                    <input type="text" class="form-control form-control-sm" id="importacao-aba-menu"
+                                        data-field="aba_menu" placeholder="Ex: Menu" required>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="importacao-aba-lista" class="form-label" data-bs-toggle="tooltip"
+                                        data-bs-title="Nome da aba LISTA FINAL na planilha (apenas letras, números e espaços)">
+                                        Aba LISTA FINAL
+                                    </label>
+                                    <input type="text" class="form-control form-control-sm" id="importacao-aba-lista"
+                                        data-field="aba_lista_final" placeholder="Ex: LISTA FINAL" value="LISTA FINAL"
+                                        required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
+                            class="btn btn-outline-danger btn-sm" onclick="limparFormulario('form-importacao-config')">
+                            <i class="material-symbols-outlined">ink_eraser</i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>

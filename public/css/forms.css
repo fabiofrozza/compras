@@ -19,6 +19,7 @@ FORMS AND FILES
     width: fit-content;
     display: flex;
     align-items: center;
+    margin-left: 6px;
 }
 
 .form-label>i {
@@ -36,12 +37,12 @@ FORMS AND FILES
 }
 
 .script-form h4,
-#importacaoTabs .nav-link {
+.sub-tabs .nav-link {
     font-size: 1em;
 }
 
 .script-form h4,
-#importacaoTabs .nav-link.active {
+.sub-tabs .nav-link.active {
     color: var(--compras-text-primary);
 }
 
@@ -350,6 +351,21 @@ FORMS AND FILES
     color: var(--bs-headings-color);
 }
 
+.sub-tabs.last-right .nav-item:last-child {
+    margin-left: auto;
+    margin-right: 4px;
+}
+
+.sub-tabs .nav-link.has-validation-issue {
+    color: var(--compras-error) !important;
+}
+
+.sub-tabs .nav-link.has-validation-issue::after {
+    font-family: 'Material Symbols Outlined';
+    content: "emergency";
+    font-size: 75%;
+}
+
 /* ==========================================================================
    FORNECEDORES TAB
    ========================================================================== */
@@ -563,8 +579,10 @@ FORMS AND FILES
     align-items: center;
     gap: 10px;
     flex-grow: 1;
+    max-width: 50%;
 }
 
+.dashboard-widget:not(.d-none):not(:has(~ .dashboard-widget:not(.d-none))):not(.dashboard-widget:not(.d-none) ~ .dashboard-widget),
 .dashboard-widget.widget-full {
     flex: 1 1 100%;
     min-width: 100%;
