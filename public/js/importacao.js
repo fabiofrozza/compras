@@ -134,6 +134,11 @@ function atualizarFeedbackPlanilha(tipo, mensagem, iconeClass) {
 
     statusText.innerHTML = mensagem;
 
+    // Atualiza o tooltip com o mesmo texto (sem HTML)
+    statusText.setAttribute('data-bs-title', statusText.textContent.trim());
+    const tooltipInstance = bootstrap.Tooltip.getInstance(statusText);
+    if (tooltipInstance) tooltipInstance.setContent({ '.tooltip-inner': statusText.textContent.trim() });
+
     switch (tipo) {
         case 'success':
             widgetStatus.classList.add('border-success');
@@ -228,6 +233,8 @@ function verificarLiberacaoBotoesImportacao() {
             formValido = false;
         }
     });
+
+    atualizarIndicadoresSubTabs();
 
     const podeExecutar = importacaoLinkValido && formValido;
 

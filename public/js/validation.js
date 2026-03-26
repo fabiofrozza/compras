@@ -95,7 +95,32 @@ function setupLiveValidation(aba) {
         ['input', 'change', 'blur', 'click'].forEach(eventType => {
             field.addEventListener(eventType, () => {
                 validateSingleField(field);
+                atualizarIndicadoresSubTabs(field);
             });
+        });
+    });
+}
+
+/**
+ * Verifica cada tab-pane de sub-tabs e marca o nav-link correspondente
+ * quando há campos requeridos vazios ou inválidos no painel.
+ * @param {HTMLElement} [campo] - Campo que disparou a atualização (otimiza para atualizar apenas o grupo relevante)
+ */
+function atualizarIndicadoresSubTabs(campo) {
+    const tabContents = campo
+        ? [campo.closest('.tab-content')].filter(Boolean)
+        : document.querySelectorAll('.sub-tabs + .sub-tabs-content .tab-content, .sub-tabs + .script-form .tab-content');
+
+    tabContents.forEach(tabContent => {
+        tabContent.querySelectorAll('.tab-pane').forEach(pane => {
+            const navLink = document.querySelector(`[data-bs-target="#${pane.id}"]`);
+            if (!navLink) return;
+
+            const temProblema = Array.from(pane.querySelectorAll('[required]')).some(f =>
+                f.classList.contains('is-invalid') || ('value' in f && !f.value)
+            );
+
+            navLink.classList.toggle('has-validation-issue', temProblema);
         });
     });
 }

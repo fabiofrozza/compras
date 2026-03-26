@@ -233,6 +233,7 @@ document.addEventListener('shown.bs.tab', async (event) => {
             await refreshScriptFileLists(tabId);
             setupLiveValidation(tabId);
             validateTabFields(tabId);
+            atualizarIndicadoresSubTabs();
             createRequiredFieldsTooltip();
 
             if (tabId === 'atas' && typeof inicializarAtas === 'function') {
