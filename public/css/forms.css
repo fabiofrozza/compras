@@ -83,8 +83,9 @@ FORMS AND FILES
 .form-info-pregao-grid {
     display: grid;
     grid-template-areas:
-        "grid-1 grid-3 grid-5 grid-7"
-        "grid-2 grid-4 grid-6 grid-7";
+        "grid-1 grid-5"
+        "grid-3 grid-4"
+        "grid-7 grid-7";
     gap: 8px;
 }
 
@@ -326,36 +327,36 @@ FORMS AND FILES
 }
 
 /* Estilos de Abas de Importação no Formulário */
-#importacaoTabsForm {
+.sub-tabs-content {
     padding: 0;
     border-top-left-radius: 0;
 }
 
-#importacaoTabsForm .tab-pane {
+.sub-tabs-content .tab-pane {
     min-height: unset;
 }
 
-#importacaoTabs {
+.sub-tabs {
     gap: calc(var(--compras-padding-buttons) * 2);
     border: 0px;
 }
 
-#importacaoTabs .nav-link {
+.sub-tabs .nav-link {
     border: 0px;
     color: var(--bs-secondary);
 }
 
-#importacaoTabs .nav-link i {
+.sub-tabs .nav-link i {
     font-size: 1.25rem;
     vertical-align: sub;
 }
 
-#importacaoTabs .nav-link:hover {
+.sub-tabs .nav-link:hover {
     background-color: color-mix(in srgb, var(--compras-theme) 75%, white);
     color: var(--bs-primary);
 }
 
-#importacaoTabs .nav-link.active {
+.sub-tabs .nav-link.active {
     background-color: color-mix(in srgb, var(--compras-theme) 75%, white);
     color: var(--bs-headings-color);
 }

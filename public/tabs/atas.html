@@ -1,203 +1,240 @@
 <!DOCTYPE html>
 <div class="row">
     <div class="col">
-        <!-- Formulário com Informações do Pregão -->
-        <form id="form-info-pregao" class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#form-info-pregao-collapse" aria-expanded="true"
-                aria-controls="form-info-pregao-collapse">
-                <span><i class="material-symbols-outlined">gavel</i> Informações do Pregão</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
-            </h4>
+        <ul class="nav nav-tabs sub-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tab-atas-dados" data-bs-toggle="tab"
+                    data-bs-target="#content-atas-dados" type="button" role="tab">
+                    <i class="material-symbols-outlined">description</i> Obtenção dos dados
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-atas-atas" data-bs-toggle="tab" data-bs-target="#content-atas-atas"
+                    type="button" role="tab">
+                    <i class="material-symbols-outlined">receipt_long</i> Geração de atas
+                </button>
+            </li>
+        </ul>
 
-            <div class="collapse show" id="form-info-pregao-collapse">
-                <div class="form-sub-container form-info-pregao-grid">
-                    <div class="form-group grid-1">
-                        <label for="atas-numero-pregao" class="form-label">
-                            Número do pregão
-                        </label>
-                        <input type="number" class="form-control form-control-sm" id="atas-numero-pregao"
-                            data-field="n_pregao" min="1" data-validate-rule="numeric" required>
-                    </div>
-                    <div class="form-group grid-2">
-                        <label for="atas-ano-pregao" class="form-label">
-                            Ano do pregão
-                        </label>
-                        <select class="form-select form-select-sm" id="atas-ano-pregao" data-field="ano_pregao"
-                            data-validate-rule="numeric" required>
-                            <option value="">-- Selecione --</option>
-                        </select>
-                    </div>
-                    <div class="form-group grid-3">
-                        <label for="atas-processo-spa" class="form-label" data-bs-toggle="tooltip"
-                            data-bs-title="Informe o número completo do processo SPA. Digite somente os números, sem pontuação.">
-                            Processo SPA
-                        </label>
-                        <input type="text" class="form-control form-control-sm" id="atas-processo-spa"
-                            data-field="processo" data-validate-rule="pattern"
-                            data-regex-pattern="23080\.\d{6}/\d{4}-\d{2}" required>
-                    </div>
-                    <div class="form-group grid-4">
-                        <label for="atas-data-pregao" class="form-label" data-bs-toggle="tooltip"
-                            data-bs-title="Informe a data da publicação do pregão no DOU.">
-                            Data Pregão DOU
-                        </label>
-                        <input type="date" class="form-control form-control-sm" id="atas-data-pregao" data-field="data"
-                            required>
-                    </div>
-                    <div class="form-group grid-5">
-                        <label for="atas-primeira-ata" class="form-label" data-bs-toggle="tooltip"
-                            data-bs-title="Informe o número da primeira Ata a ser gerada. As próximas serão numeradas automaticamente, conforme os relatórios SICAF presentes na pasta.">
-                            Primeira Ata
-                        </label>
-                        <input type="number" class="form-control form-control-sm" id="atas-primeira-ata"
-                            data-field="n_ata" min="1" data-validate-rule="numeric" required>
-                    </div>
-                    <div class="form-group grid-6">
-                        <label for="atas-ano-ata" class="form-label">
-                            Ano Ata
-                        </label>
-                        <select class="form-select form-select-sm" id="atas-ano-ata" data-field="ano_ata"
-                            data-validate-rule="numeric" required>
-                            <option value="">-- Selecione --</option>
-                        </select>
-                    </div>
-                    <div class="form-group grid-7">
-                        <label for="atas-objeto" class="form-label" data-bs-toggle="tooltip"
-                            data-bs-title="Informe o objeto do pregão conforme o Edital. Na Ata, esta informação será incluída após o trecho 'REGISTRAR PREÇO...'.">
-                            Objeto
-                        </label>
-                        <textarea id="atas-objeto" class="form-control form-control-sm" data-field="objeto" rows="4"
-                            required></textarea>
-                    </div>
-                </div>
+        <div class="script-form shadow-sm sub-tabs-content">
+            <div class="tab-content">
 
-                <div class="form-buttons">
-                    <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
-                        class="btn btn-outline-danger btn-sm" onclick="limparFormulario('form-info-pregao')">
-                        <i class="material-symbols-outlined">ink_eraser</i>
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-    <div class="col">
-        <!-- Lista de Relatórios SICAF -->
-        <div class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#atas-relatorios-sicaf-collapse" aria-expanded="true"
-                aria-controls="atas-relatorios-sicaf-collapse">
-                <span><i class="material-symbols-outlined">contact_page</i> Relatórios SICAF</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
-            </h4>
+                <div class="tab-pane fade show active" id="content-atas-dados" role="tabpanel">
+                    <div class="row">
+                        <div class="col">
+                            <!-- Formulário com Informações do Pregão -->
+                            <form id="form-info-pregao" class="script-form shadow-sm">
+                                <h4 class="d-flex justify-content-between align-items-center" role="button"
+                                    data-bs-toggle="collapse" data-bs-target="#form-info-pregao-collapse"
+                                    aria-expanded="true" aria-controls="form-info-pregao-collapse">
+                                    <span><i class="material-symbols-outlined">gavel</i> Informações do Pregão</span>
+                                    <i class="material-symbols-outlined text-secondary">unfold_more</i>
+                                </h4>
 
-            <div class="collapse show" id="atas-relatorios-sicaf-collapse">
-                <div id="atas-relatorios-sicaf" class="files-list" data-extensions="pdf" data-folder="sicaf"
-                    data-selectable="false">
-                </div>
-                <div class="form-buttons">
-                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-form-info-pregao"
-                        data-script-name="atas">
-                        Obter dados dos SICAF
-                    </button>
-                </div>
-            </div>
-        </div>
-        <!-- Status Dados -->
-        <div class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#dados-obtidos-collapse" aria-expanded="true" aria-controls="dados-obtidos-collapse">
-                <span><i class="material-symbols-outlined">analytics</i> Dados obtidos</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
-            </h4>
-            <div class="collapse show" id="dados-obtidos-collapse">
-                <div id="status-dados-atas">
-                    <div class="dashboard-widget-grid">
-                        <div class="dashboard-widget">
-                            <div id="atas-widget-icon-status" class="widget-icon">
-                                <i class="material-symbols-outlined">storage</i>
+                                <div class="collapse show" id="form-info-pregao-collapse">
+                                    <div class="form-sub-container form-info-pregao-grid">
+                                        <div class="form-group grid-1">
+                                            <label for="atas-numero-pregao" class="form-label">
+                                                Número/Ano do pregão
+                                            </label>
+                                            <div class="input-group input-group-sm" data-validate-rule="required"
+                                                data-validate-target="atas-numero-pregao,atas-ano-pregao">
+                                                <input type="number" class="form-control form-control-sm"
+                                                    id="atas-numero-pregao" data-field="n_pregao" min="1"
+                                                    data-validate-rule="numeric" required>
+                                                <select class="form-select form-select-sm" id="atas-ano-pregao"
+                                                    data-field="ano_pregao" data-validate-rule="numeric" required>
+                                                    <option value="">-- Selecione --</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group grid-3">
+                                            <label for="atas-processo-spa" class="form-label" data-bs-toggle="tooltip"
+                                                data-bs-title="Informe o número completo do processo SPA. Digite somente os números, sem pontuação.">
+                                                Processo SPA
+                                            </label>
+                                            <input type="text" class="form-control form-control-sm"
+                                                id="atas-processo-spa" data-field="processo"
+                                                data-validate-rule="pattern"
+                                                data-regex-pattern="23080\.\d{6}/\d{4}-\d{2}" required>
+                                        </div>
+                                        <div class="form-group grid-4">
+                                            <label for="atas-data-pregao" class="form-label" data-bs-toggle="tooltip"
+                                                data-bs-title="Informe a data da publicação do pregão no DOU.">
+                                                Data Pregão DOU
+                                            </label>
+                                            <input type="date" class="form-control form-control-sm"
+                                                id="atas-data-pregao" data-field="data" required>
+                                        </div>
+                                        <div class="form-group grid-5">
+                                            <label for="atas-primeira-ata" class="form-label" data-bs-toggle="tooltip"
+                                                data-bs-title="Informe o número da primeira Ata a ser gerada. As próximas serão numeradas automaticamente, conforme os relatórios SICAF presentes na pasta.">
+                                                Primeira Ata/Ano
+                                            </label>
+                                            <div class="input-group input-group-sm" data-validate-rule="required"
+                                                data-validate-target="atas-primeira-ata,atas-ano-ata">
+                                                <input type="number" class="form-control form-control-sm"
+                                                    id="atas-primeira-ata" data-field="n_ata" min="1"
+                                                    data-validate-rule="numeric" required>
+                                                <select class="form-select form-select-sm" id="atas-ano-ata"
+                                                    data-field="ano_ata" data-validate-rule="numeric" required>
+                                                    <option value="">-- Selecione --</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group grid-7">
+                                            <label for="atas-objeto" class="form-label" data-bs-toggle="tooltip"
+                                                data-bs-title="Informe o objeto do pregão conforme o Edital. Na Ata, esta informação será incluída após o trecho 'REGISTRAR PREÇO...'.">
+                                                Objeto
+                                            </label>
+                                            <textarea id="atas-objeto" class="form-control form-control-sm"
+                                                data-field="objeto" rows="4" required></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-buttons">
+                                        <button type="button" data-bs-toggle="tooltip"
+                                            data-bs-title="Limpar todos os campos" class="btn btn-outline-danger btn-sm"
+                                            onclick="limparFormulario('form-info-pregao')">
+                                            <i class="material-symbols-outlined">ink_eraser</i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col">
+                            <!-- Lista de Relatórios SICAF -->
+                            <div class="script-form shadow-sm">
+                                <h4 class="d-flex justify-content-between align-items-center" role="button"
+                                    data-bs-toggle="collapse" data-bs-target="#atas-relatorios-sicaf-collapse"
+                                    aria-expanded="true" aria-controls="atas-relatorios-sicaf-collapse">
+                                    <span><i class="material-symbols-outlined">contact_page</i> Relatórios SICAF</span>
+                                    <i class="material-symbols-outlined text-secondary">unfold_more</i>
+                                </h4>
+
+                                <div class="collapse show" id="atas-relatorios-sicaf-collapse">
+                                    <div id="atas-relatorios-sicaf" class="files-list" data-extensions="pdf"
+                                        data-folder="sicaf" data-selectable="false">
+                                    </div>
+                                    <div class="form-buttons">
+                                        <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"
+                                            id="btn-form-info-pregao" data-script-name="atas">
+                                            Obter dados dos SICAF
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="widget-content">
-                                <span class="widget-label">Última atualização</span>
-                                <span class="widget-value" id="atas-widget-text-status">Verificando...</span>
+                            <!-- Status Dados -->
+                            <div class="script-form shadow-sm">
+                                <h4 class="d-flex justify-content-between align-items-center" role="button"
+                                    data-bs-toggle="collapse" data-bs-target="#dados-obtidos-collapse"
+                                    aria-expanded="true" aria-controls="dados-obtidos-collapse">
+                                    <span><i class="material-symbols-outlined">analytics</i> Dados obtidos</span>
+                                    <i class="material-symbols-outlined text-secondary">unfold_more</i>
+                                </h4>
+                                <div class="collapse show" id="dados-obtidos-collapse">
+                                    <div id="status-dados-atas">
+                                        <div class="dashboard-widget-grid">
+                                            <div class="dashboard-widget">
+                                                <div id="atas-widget-icon-status" class="widget-icon">
+                                                    <i class="material-symbols-outlined">storage</i>
+                                                </div>
+                                                <div class="widget-content">
+                                                    <span class="widget-label">Última atualização</span>
+                                                    <span class="widget-value"
+                                                        id="atas-widget-text-status">Verificando...</span>
+                                                </div>
+                                            </div>
+                                            <div class="dashboard-widget">
+                                                <div id="atas-widget-icon-resultado" class="widget-icon">
+                                                    <i class="material-symbols-outlined">analytics</i>
+                                                </div>
+                                                <div class="widget-content">
+                                                    <span class="widget-label">Status</span>
+                                                    <span class="widget-value" id="atas-widget-text-resultado">-</span>
+                                                </div>
+                                            </div>
+                                            <div class="dashboard-widget">
+                                                <div class="widget-icon">
+                                                    <i class="material-symbols-outlined">description</i>
+                                                </div>
+                                                <div class="widget-content">
+                                                    <span class="widget-label">Fornecedores</span>
+                                                    <span class="widget-value" id="atas-widget-text-lidos">-</span>
+                                                </div>
+                                            </div>
+                                            <div class="dashboard-widget border border-warning"
+                                                id="atas-widget-duplicados" style="display: none">
+                                                <div class="widget-icon">
+                                                    <i class="material-symbols-outlined">warning</i>
+                                                </div>
+                                                <div class="widget-content">
+                                                    <span class="widget-label"
+                                                        id="atas-widget-text-duplicados-label">Alertas</span>
+                                                    <span class="widget-value" id="atas-widget-text-duplicados">-</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="atas-dados-arquivo" class="files-list" data-folder="RAIZ"
+                                        data-name-contains="dados_atas.xlsx" data-selectable="false">
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="dashboard-widget">
-                            <div id="atas-widget-icon-resultado" class="widget-icon">
-                                <i class="material-symbols-outlined">analytics</i>
-                            </div>
-                            <div class="widget-content">
-                                <span class="widget-label">Status</span>
-                                <span class="widget-value" id="atas-widget-text-resultado">-</span>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="content-atas-atas" role="tabpanel">
+                    <div class="row">
+                        <div class="col">
+                            <!-- Modelos de Ata -->
+                            <div id="form-atas-modelos" class="script-form shadow-sm">
+                                <h4 class="d-flex justify-content-between align-items-center" role="button"
+                                    data-bs-toggle="collapse" data-bs-target="#atas-modelos-collapse"
+                                    aria-expanded="true" aria-controls="atas-modelos-collapse">
+                                    <span><i class="material-symbols-outlined">text_snippet</i> Modelos de Ata</span>
+                                    <i class="material-symbols-outlined text-secondary">unfold_more</i>
+                                </h4>
+
+                                <div class="collapse show" id="atas-modelos-collapse">
+                                    <!-- Lista de Modelos -->
+                                    <div id="atas-modelos" class="files-list" data-field="atas_modelos"
+                                        data-validate-rule="file-selectable" required data-extensions="docx"
+                                        data-folder="atas_modelos" data-selectable="true">
+                                    </div>
+
+                                    <!-- Botão Gerar Atas -->
+                                    <div class="form-buttons">
+                                        <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"
+                                            id="btn-form-atas-modelos" onclick="executarMailmergeAtas()" disabled>
+                                            Gerar Atas
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="dashboard-widget">
-                            <div class="widget-icon">
-                                <i class="material-symbols-outlined">description</i>
-                            </div>
-                            <div class="widget-content">
-                                <span class="widget-label">Fornecedores</span>
-                                <span class="widget-value" id="atas-widget-text-lidos">-</span>
-                            </div>
-                        </div>
-                        <div class="dashboard-widget border border-warning" id="atas-widget-duplicados"
-                            style="display: none">
-                            <div class="widget-icon">
-                                <i class="material-symbols-outlined">warning</i>
-                            </div>
-                            <div class="widget-content">
-                                <span class="widget-label" id="atas-widget-text-duplicados-label">Alertas</span>
-                                <span class="widget-value" id="atas-widget-text-duplicados">-</span>
+                        <div class="col">
+                            <!-- Atas Finalizadas -->
+                            <div class="script-form shadow-sm">
+                                <h4 class="d-flex justify-content-between align-items-center" role="button"
+                                    data-bs-toggle="collapse" data-bs-target="#atas-finalizadas-collapse"
+                                    aria-expanded="true" aria-controls="atas-finalizadas-collapse">
+                                    <span><i class="material-symbols-outlined">assignment_turned_in</i> Atas
+                                        finalizadas</span>
+                                    <i class="material-symbols-outlined text-secondary">unfold_more</i>
+                                </h4>
+                                <div class="collapse show" id="atas-finalizadas-collapse">
+                                    <div id="atas-finalizadas" class="files-list" data-folder="atas_finalizadas"
+                                        data-selectable="false">
+                                        <div class="no-files-message">Não há Atas finalizadas.</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div id="atas-dados-arquivo" class="files-list" data-folder="RAIZ" data-name-contains="dados_atas.xlsx"
-                    data-selectable="false">
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col">
-        <!-- Modelos de Ata -->
-        <div id="form-atas-modelos" class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#atas-modelos-collapse" aria-expanded="true" aria-controls="atas-modelos-collapse">
-                <span><i class="material-symbols-outlined">text_snippet</i> Modelos de Ata</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
-            </h4>
 
-            <div class="collapse show" id="atas-modelos-collapse">
-                <!-- Lista de Modelos -->
-                <div id="atas-modelos" class="files-list" data-field="atas_modelos" data-validate-rule="file-selectable"
-                    required data-extensions="docx" data-folder="atas_modelos" data-selectable="true">
-                </div>
-
-                <!-- Botão Gerar Atas -->
-                <div class="form-buttons">
-                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-form-atas-modelos"
-                        onclick="executarMailmergeAtas()" disabled>
-                        Gerar Atas
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col">
-        <!-- Atas Finalizadas -->
-        <div class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#atas-finalizadas-collapse" aria-expanded="true"
-                aria-controls="atas-finalizadas-collapse">
-                <span><i class="material-symbols-outlined">assignment_turned_in</i> Atas finalizadas</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
-            </h4>
-            <div class="collapse show" id="atas-finalizadas-collapse">
-                <div id="atas-finalizadas" class="files-list" data-folder="atas_finalizadas" data-selectable="false">
-                    <div class="no-files-message">Não há Atas finalizadas.</div>
-                </div>
             </div>
         </div>
     </div>
