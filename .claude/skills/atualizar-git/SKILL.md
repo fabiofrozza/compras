@@ -39,11 +39,14 @@ allowed-tools:
 
 1. **Criar branch** a partir do `develop`: `git checkout develop && git checkout -b prefixo/descricao`
 2. **Commitar no branch de trabalho**, nunca diretamente no `develop`.
-3. **Mergear no `develop`** quando o trabalho estiver concluído: `git checkout develop && git merge prefixo/descricao`
+3. **Mergear no `develop`** com fast-forward (histórico linear):
+   - `git checkout develop && git merge prefixo/descricao`
+   - Se o `develop` avançou desde a criação do branch, **rebasear antes** de mergear:
+     `git checkout prefixo/descricao && git rebase develop && git checkout develop && git merge prefixo/descricao`
 4. **Deletar o branch de trabalho** após o merge: `git branch -d prefixo/descricao` — **obrigatório, nunca pular esta etapa.**
-5. **Atualizar branches em andamento** com mudanças do `develop` quando necessário:
-   - **Merge**: `git checkout feature/... && git merge develop` — preserva o histórico dos branches (cria um "balãozinho" no grafo).
-   - **Rebase**: `git checkout feature/... && git rebase develop` — reescreve os commits sobre o `develop`, resultando em histórico linear e limpo. Não usar se o branch já foi compartilhado (pushed) com outros.
+5. **Ao mergear múltiplos branches sequencialmente**, sempre rebasear cada branch sobre o `develop` atualizado antes de mergear, garantindo que todos os merges sejam fast-forward.
+
+> **REGRA:** O histórico do git deve ser sempre **linear** (flat). Nunca criar merge commits que produzam "bolhas" no grafo. Sempre usar rebase para garantir fast-forward merges.
 
 > **REGRA CRÍTICA:** O assistente de IA **NUNCA** deve mergear no `main` a não ser que o usuário **expressamente autorize** naquela conversa específica. Essa autorização não pode ser inferida, antecipada ou presumida — deve ser explícita e inequívoca.
 
