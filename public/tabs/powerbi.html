@@ -3,9 +3,8 @@
     <div class="col-sm-12">
         <!-- Formulário de seleção do painel -->
         <form id="form-powerbi-panel" class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button"
-                data-bs-toggle="collapse" data-bs-target="#powerbi-painel-collapse" aria-expanded="true"
-                aria-controls="powerbi-painel-collapse">
+            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
+                data-bs-target="#powerbi-painel-collapse" aria-expanded="true" aria-controls="powerbi-painel-collapse">
                 <span><i class="material-symbols-outlined">show_chart</i> Painel do Observatório</span>
                 <i class="material-symbols-outlined text-secondary">unfold_more</i>
             </h4>
@@ -57,8 +56,8 @@
                     </div>
                 </div>
                 <div class="form-buttons">
-                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"
-                        id="btn-run-powerbi-panel" onclick="executarPowerBI(this)">
+                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-run-powerbi-panel"
+                        onclick="executarPowerBI(this)">
                         Gerar dados
                     </button>
                 </div>
@@ -68,19 +67,16 @@
     <div class="col-sm-6">
         <!-- Pasta da base de dados -->
         <form id="form-powerbi-path" class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button"
-                data-bs-toggle="collapse" data-bs-target="#powerbi-base-collapse" aria-expanded="true"
-                aria-controls="powerbi-base-collapse">
+            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
+                data-bs-target="#powerbi-base-collapse" aria-expanded="true" aria-controls="powerbi-base-collapse">
                 <span><i class="material-symbols-outlined">table_chart</i> Base de dados</span>
                 <i class="material-symbols-outlined text-secondary">unfold_more</i>
             </h4>
 
             <div class="collapse show" id="powerbi-base-collapse">
                 <div class="form-sub-container">
-                    <button type="button" data-bs-toggle="tooltip"
-                        data-bs-title="Limpar todos os campos"
-                        class="form-sub-btn"
-                        onclick="limparFormulario('form-powerbi-path')">
+                    <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
+                        class="form-sub-btn" onclick="limparFormulario('form-powerbi-path')">
                         <i class="material-symbols-outlined">ink_eraser</i>
                     </button>
                     <div class="form-group" style="margin-bottom: 0">
@@ -100,8 +96,8 @@
     <div class="col-sm-6">
         <!-- Formulário de manutenção -->
         <form id="form-powerbi-manutencao" class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button"
-                data-bs-toggle="collapse" data-bs-target="#powerbi-manutencao-collapse" aria-expanded="true"
+            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
+                data-bs-target="#powerbi-manutencao-collapse" aria-expanded="true"
                 aria-controls="powerbi-manutencao-collapse">
                 <span><i class="material-symbols-outlined">build</i> Manutenção</span>
                 <i class="material-symbols-outlined text-secondary">unfold_more</i>
@@ -116,8 +112,7 @@
                                     'Execução AF Empenho' serão renomeados conforme o padrão TIPO - ANO - ETAPA -
                                     PROCESSO - PREGÃO.</div>
                             </div>
-                            <input class="form-check-input" type="radio" name="powerbi-tipo" value="renomear"
-                                checked>
+                            <input class="form-check-input" type="radio" name="powerbi-tipo" value="renomear" checked>
                         </label>
                     </div>
                 </div>
