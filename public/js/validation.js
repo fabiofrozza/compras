@@ -72,6 +72,16 @@ function setButtonState(field) {
         return;
     }
 
+    if (formId === 'form-importacao-link' || formId === 'importacaoTabsForm') {
+        const hasInvalidFields = Array.from(document.querySelectorAll('#form-importacao-link [data-field], #form-importacao-config [data-field]'))
+            .some(f => f.classList.contains('is-invalid'));
+        ['btn-importacao-arquivos', 'btn-importacao-resumo', 'btn-importacao-relatorio'].forEach(btnId => {
+            const btn = document.getElementById(btnId);
+            if (btn) btn.disabled = hasInvalidFields;
+        });
+        return;
+    }
+
     const button = document.getElementById('btn-' + formId);
 
     if (!button) return;

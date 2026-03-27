@@ -20,8 +20,12 @@ function configurarValidacaoContinuaImportacao() {
         linkInput.addEventListener('change', validarLinkGoogle);
         linkInput.addEventListener('input', () => {
             importacaoLastValidatedLink = '';
-            linkInput.classList.remove('is-valid', 'is-invalid');
-            atualizarFeedbackPlanilha('info', 'Informe o link da aba LISTA FINAL e aguarde.', 'info');
+            if (linkInput.value.trim() === '') {
+                atualizarFeedbackPlanilha('info', 'Insira o link da planilha para validação.', 'info');
+            } else {
+                linkInput.classList.remove('is-valid', 'is-invalid');
+                atualizarFeedbackPlanilha('info', 'Informe o link da aba LISTA FINAL e aguarde.', 'info');
+            }
             verificarLiberacaoBotoesImportacao();
         });
     }
@@ -170,7 +174,9 @@ function atualizarFeedbackPlanilha(tipo, mensagem, iconeClass) {
         case 'info':
         default:
             widgetStatus.classList.add('border-muted');
-            linkInput.classList.remove('is-valid', 'is-invalid');
+            if (linkInput.value.trim() !== '') {
+                linkInput.classList.remove('is-valid', 'is-invalid');
+            }
             importacaoLinkValido = false;
             break;
     }
