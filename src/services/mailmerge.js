@@ -1,5 +1,6 @@
 // mailmerge.js - Função de mailmerge para atas em JavaScript
 const ExcelJS = require('exceljs');
+const XLSX = require('xlsx');
 const fs = require('fs').promises;
 const path = require('path');
 const JSZip = require('jszip');
@@ -106,6 +107,20 @@ async function executarMailmerge(params, logger) {
 
         logger(`📝 Tipo de documento: ${extensaoTemplate}`, 'info');
 
+        // Verificar se existem arquivos .xls de tabela na pasta SICAF
+        const pastaSicaf = path.join(scriptsDir, 'SICAF');
+        let tabelasDisponiveis = false;
+        try {
+            const arquivosSicaf = await fs.readdir(pastaSicaf);
+            const xlsFiles = arquivosSicaf.filter(f => f.toLowerCase().endsWith('.xls') || f.toLowerCase().endsWith('.xlsx'));
+            tabelasDisponiveis = xlsFiles.length > 0;
+            if (tabelasDisponiveis) {
+                logger(`📊 ${xlsFiles.length} arquivo(s) de tabela (.xls) encontrado(s) na pasta SICAF`, 'info');
+            }
+        } catch (e) {
+            // Pasta SICAF não encontrada ou inacessível - segue sem tabelas
+        }
+
         logger('⚙️ Iniciando processamento de atas...', 'info');
 
         const arquivosGerados = [];
@@ -147,13 +162,50 @@ async function executarMailmerge(params, logger) {
                 numeroAta = parseInt(dadosLinha['ata']) || (i - 1);
                 logger(`📄 Processando Ata ${i - 1} de ${numRegistros}...`, 'info');
 
+                // Buscar arquivo .xls de tabela correspondente na pasta SICAF
+                let dadosTabela = null;
+                if (tabelasDisponiveis) {
+                    // Procurar pelo mesmo nome do PDF (número da ata)
+                    const possiveisNomes = [
+                        `${numeroAta}.xls`,
+                        `${numeroAta}.xlsx`,
+                    ];
+
+                    for (const nomeXls of possiveisNomes) {
+                        const caminhoXls = path.join(pastaSicaf, nomeXls);
+                        try {
+                            await fs.access(caminhoXls);
+                            dadosTabela = lerTabelaXls(caminhoXls);
+
+                            // Verificação cruzada de CNPJ
+                            const cnpjDados = String(dadosLinha['cnpj'] || '').trim();
+                            const cnpjTabela = String(dadosTabela.cnpj || '').trim();
+                            if (cnpjDados && cnpjTabela && cnpjDados !== cnpjTabela) {
+                                logger(`   ⚠️ CNPJ divergente no arquivo ${nomeXls}: esperado ${cnpjDados}, encontrado ${cnpjTabela}`, 'warning');
+                            }
+
+                            // Verificação cruzada de número da ata
+                            const ataTabela = String(dadosTabela.ata || '').trim();
+                            if (ataTabela && String(numeroAta) !== ataTabela) {
+                                logger(`   ⚠️ Nº Ata divergente no arquivo ${nomeXls}: esperado ${numeroAta}, encontrado ${ataTabela}`, 'warning');
+                            }
+
+                            logger(`   📊 Tabela carregada: ${dadosTabela.itens.length} item(ns) de ${nomeXls}`, 'info');
+                            break;
+                        } catch (e) {
+                            // Arquivo não encontrado, tentar próximo nome
+                        }
+                    }
+                }
+
                 // Substituir dados no documento
                 const documentoProcessado = await processarDocumento(
                     templateBuffer,
                     dadosLinha,
                     numeroAta,
                     extensaoTemplate,
-                    logger
+                    logger,
+                    dadosTabela
                 );
 
                 // Validar documento processado
@@ -216,10 +268,10 @@ async function executarMailmerge(params, logger) {
 /**
  * Processa documento DOCX substituindo placeholders
  */
-async function processarDocumento(templateBuffer, dados, numeroAta, extensao, logger) {
+async function processarDocumento(templateBuffer, dados, numeroAta, extensao, logger, dadosTabela) {
     try {
         if (extensao === '.docx') {
-            return await processarDocumento_DOCX(templateBuffer, dados, numeroAta);
+            return await processarDocumento_DOCX(templateBuffer, dados, numeroAta, dadosTabela);
         } else {
             throw new Error(`Formato de arquivo não suportado: ${extensao}`);
         }
@@ -231,7 +283,7 @@ async function processarDocumento(templateBuffer, dados, numeroAta, extensao, lo
 /**
  * Processa arquivo DOCX (ZIP com XMLs)
  */
-async function processarDocumento_DOCX(templateBuffer, dados, numeroAta) {
+async function processarDocumento_DOCX(templateBuffer, dados, numeroAta, dadosTabela) {
     try {
         const zip = new JSZip();
         const carregado = await zip.loadAsync(templateBuffer);
@@ -260,10 +312,21 @@ async function processarDocumento_DOCX(templateBuffer, dados, numeroAta) {
             throw new Error('Nenhum arquivo XML de documento encontrado');
         }
 
+        // Gerar XML da tabela se houver dados
+        const tabelaXml = dadosTabela && dadosTabela.itens.length > 0
+            ? gerarTabelaOoxml(dadosTabela)
+            : null;
+
         // Processar cada arquivo XML
         for (const nomeArquivo of arquivosProcessar) {
-            const conteudoAtual = await carregado.file(nomeArquivo).async('text');
-            const conteudoProcessado = substituirCampos(conteudoAtual, dados, numeroAta);
+            let conteudoAtual = await carregado.file(nomeArquivo).async('text');
+            let conteudoProcessado = substituirCampos(conteudoAtual, dados, numeroAta);
+
+            // Inserir tabela no lugar do placeholder TABELA_ITENS
+            if (tabelaXml && conteudoProcessado.includes('TABELA_ITENS')) {
+                conteudoProcessado = inserirTabelaNoXml(conteudoProcessado, tabelaXml);
+            }
+
             carregado.file(nomeArquivo, conteudoProcessado);
         }
 
@@ -348,6 +411,204 @@ function formatarDataBrasil(valorData) {
     ];
 
     return `${dia} de ${meses[mesIndex]} de ${ano}`;
+}
+
+/**
+ * Lê os dados de itens de um arquivo .xls de tabela do fornecedor
+ * @param {string} caminhoXls - Caminho para o arquivo .xls
+ * @returns {Object} { cnpj, ata, itens: [{item, descricao, unidade, qtde, valor, total}], valorTotal }
+ */
+function lerTabelaXls(caminhoXls) {
+    const wb = XLSX.readFile(caminhoXls);
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const dados = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+    // Extrair CNPJ e nº da ata do cabeçalho
+    let cnpj = '';
+    let ata = '';
+    let valorTotal = 0;
+
+    for (const row of dados) {
+        if (!row || row.length === 0) continue;
+        const primeira = String(row[0] || '').trim();
+        if (primeira.startsWith('CNPJ:')) {
+            cnpj = String(row[3] || '').trim();
+        } else if (primeira === 'Nº ata:' || primeira.startsWith('N\u00ba ata')) {
+            ata = String(row[3] || '').trim();
+        } else if (primeira === 'Valor total:') {
+            valorTotal = row[3] || 0;
+        }
+    }
+
+    // Encontrar a linha de cabeçalho da tabela de itens
+    let headerIdx = -1;
+    for (let i = 0; i < dados.length; i++) {
+        const row = dados[i];
+        if (!row) continue;
+        const primeira = String(row[0] || '').trim();
+        if (primeira === 'Grupo/Item' || primeira === 'Item') {
+            headerIdx = i;
+            break;
+        }
+    }
+
+    const itens = [];
+    if (headerIdx >= 0) {
+        // Ler linhas de dados (após o cabeçalho, até "Valor total" ou fim)
+        for (let i = headerIdx + 1; i < dados.length; i++) {
+            const row = dados[i];
+            if (!row || row.length === 0) continue;
+            const primeira = String(row[0] || '').trim();
+            if (primeira === 'Valor total') {
+                // Linha de total da tabela - captura o valor total se não veio do cabeçalho
+                if (!valorTotal && row[8]) valorTotal = row[8];
+                break;
+            }
+            if (primeira === '') continue;
+
+            // Colunas: [0]Grupo/Item, [1]_, [2]Descrição, [3]_, [4]Unid.medida, [5]Qtde, [6]Valor, [7]_, [8]Total
+            const item = String(row[0] || '');
+            const descricao = String(row[2] || '');
+            const unidade = String(row[4] || '');
+            const qtde = row[5] || 0;
+            const valor = row[6] || 0;
+            const total = row[8] || 0;
+
+            itens.push({ item, descricao, unidade, qtde, valor, total });
+        }
+    }
+
+    return { cnpj, ata, itens, valorTotal };
+}
+
+/**
+ * Formata número como moeda brasileira (1.234,5600)
+ */
+function formatarMoeda(valor) {
+    if (typeof valor !== 'number') valor = parseFloat(valor) || 0;
+    return valor.toLocaleString('pt-BR', {
+        minimumFractionDigits: 4,
+        maximumFractionDigits: 4
+    });
+}
+
+/**
+ * Escapa caracteres especiais para XML
+ */
+function escaparXml(texto) {
+    return String(texto)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+/**
+ * Gera uma célula OOXML (<w:tc>) com texto
+ */
+function gerarCelula(texto, negrito, spanCols, preenchimento) {
+    const fill = preenchimento || 'FFFFFF';
+    let tcPr = '<w:tcPr><w:tcW w:w="0" w:type="auto"/>';
+    if (spanCols) {
+        tcPr += `<w:gridSpan w:val="${spanCols}"/>`;
+    }
+    tcPr += '<w:tcBorders>'
+        + '<w:top w:val="single" w:sz="4" w:space="0" w:color="010000"/>'
+        + '<w:left w:val="single" w:sz="4" w:space="0" w:color="010000"/>'
+        + '<w:bottom w:val="single" w:sz="4" w:space="0" w:color="010000"/>'
+        + '<w:right w:val="single" w:sz="4" w:space="0" w:color="010000"/>'
+        + '</w:tcBorders>';
+    tcPr += `<w:shd w:val="clear" w:color="000000" w:fill="${fill}"/>`;
+    tcPr += '</w:tcPr>';
+
+    const rPr = '<w:rPr>'
+        + '<w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>'
+        + (negrito ? '<w:b/><w:bCs/>' : '')
+        + '<w:color w:val="010000"/>'
+        + '<w:sz w:val="22"/><w:szCs w:val="22"/>'
+        + '</w:rPr>';
+
+    // Tratar quebras de linha na descrição
+    const linhas = String(texto).split('\n');
+    let runs = '';
+    linhas.forEach((linha, idx) => {
+        if (idx > 0) {
+            runs += `<w:r>${rPr}<w:br/></w:r>`;
+        }
+        runs += `<w:r>${rPr}<w:t xml:space="preserve">${escaparXml(linha)}</w:t></w:r>`;
+    });
+
+    return `<w:tc>${tcPr}<w:p><w:pPr><w:rPr>${rPr.replace('<w:rPr>', '').replace('</w:rPr>', '')}</w:rPr></w:pPr>${runs}</w:p></w:tc>`;
+}
+
+/**
+ * Gera o XML OOXML completo de uma tabela de itens
+ */
+function gerarTabelaOoxml(dadosTabela) {
+    const { itens } = dadosTabela;
+
+    let xml = '<w:tbl>';
+
+    // Propriedades da tabela
+    xml += '<w:tblPr>'
+        + '<w:tblW w:w="0" w:type="auto"/>'
+        + '<w:tblInd w:w="75" w:type="dxa"/>'
+        + '<w:tblCellMar><w:left w:w="70" w:type="dxa"/><w:right w:w="70" w:type="dxa"/></w:tblCellMar>'
+        + '<w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1"/>'
+        + '</w:tblPr>';
+
+    // Grid (larguras das colunas)
+    xml += '<w:tblGrid>'
+        + '<w:gridCol w:w="587"/>'
+        + '<w:gridCol w:w="6222"/>'
+        + '<w:gridCol w:w="943"/>'
+        + '<w:gridCol w:w="655"/>'
+        + '<w:gridCol w:w="864"/>'
+        + '<w:gridCol w:w="1260"/>'
+        + '</w:tblGrid>';
+
+    // Linha de cabeçalho (cinza)
+    xml += '<w:tr><w:trPr><w:trHeight w:val="435"/></w:trPr>';
+    xml += gerarCelula('Item', true, null, 'CCCCCC');
+    xml += gerarCelula('Descri\u00e7\u00e3o', true, null, 'CCCCCC');
+    xml += gerarCelula('Unid. medida', true, null, 'CCCCCC');
+    xml += gerarCelula('Qtde.', true, null, 'CCCCCC');
+    xml += gerarCelula('Valor', true, null, 'CCCCCC');
+    xml += gerarCelula('Total', true, null, 'CCCCCC');
+    xml += '</w:tr>';
+
+    // Linhas de itens
+    for (const item of itens) {
+        const numItem = String(item.item).padStart(4, '0');
+        xml += '<w:tr><w:trPr><w:trHeight w:val="416"/></w:trPr>';
+        xml += gerarCelula(numItem, false);
+        xml += gerarCelula(item.descricao, false);
+        xml += gerarCelula(item.unidade, false);
+        xml += gerarCelula(String(item.qtde), false);
+        xml += gerarCelula(formatarMoeda(item.valor), false);
+        xml += gerarCelula(formatarMoeda(item.total), false);
+        xml += '</w:tr>';
+    }
+
+    // Linha de valor total - soma calculada dos itens (o .xls traz o total do pregão, não da ata)
+    const totalCalculado = itens.reduce((soma, item) => soma + (typeof item.total === 'number' ? item.total : parseFloat(item.total) || 0), 0);
+    const totalFormatado = formatarMoeda(totalCalculado);
+    xml += '<w:tr><w:trPr><w:trHeight w:val="218"/></w:trPr>';
+    xml += gerarCelula('Valor total', true, 5);
+    xml += gerarCelula(totalFormatado, true);
+    xml += '</w:tr>';
+
+    xml += '</w:tbl>';
+    return xml;
+}
+
+/**
+ * Substitui o parágrafo que contém o placeholder TABELA_ITENS pelo XML da tabela
+ */
+function inserirTabelaNoXml(conteudoXml, tabelaXml) {
+    // Encontrar o <w:p> que contém "TABELA_ITENS" (qualquer formato de placeholder)
+    const regex = /<w:p\b[^>]*>(?:(?!<w:p\b).)*?TABELA_ITENS(?:(?!<w:p\b).)*?<\/w:p>/gs;
+    return conteudoXml.replace(regex, tabelaXml);
 }
 
 module.exports = { executarMailmerge };
