@@ -72,12 +72,40 @@ FORMS AND FILES
 }
 
 .form-sub-container {
+    position: relative;
     margin-bottom: 12px;
     background-color:
         color-mix(in srgb, var(--compras-theme) 50%, white);
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;
     padding: 12px;
+}
+
+.form-sub-container .form-sub-btn {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--bs-danger);
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    line-height: 1;
+}
+
+.form-sub-container .form-sub-btn:hover {
+    opacity: 1;
+}
+
+.form-sub-container:hover .form-sub-btn {
+    display: flex;
+}
+
+.form-sub-container .form-sub-btn .material-symbols-outlined {
+    font-size: 1rem;
 }
 
 /* Grid de formulários */

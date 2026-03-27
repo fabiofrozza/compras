@@ -76,20 +76,22 @@
             </h4>
 
             <div class="collapse show" id="powerbi-base-collapse">
-                <div class="form-group">
-                    <label for="powerbi-pasta" class="form-label" data-bs-toggle="tooltip"
-                        data-bs-title="Pasta que contém as subpastas 'Mapa de Licitações' e 'Execução AF Empenho', e onde serão salvos os arquivos gerados.">
-                        Caminho da pasta
-                    </label>
-                    <input type="text" class="form-control form-control-sm" id="powerbi-pasta"
-                        data-field="pasta_powerbi" data-validate-rule="pattern" data-regex-pattern=".+(?=\\)"
-                        placeholder="Ex: G:\Google Drive\Base de Dados\POWERBI" required>
-                </div>
-                <div class="form-buttons">
-                    <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
-                        class="btn btn-outline-danger btn-sm" onclick="limparFormulario('form-powerbi-path')">
+                <div class="form-sub-container">
+                    <button type="button" data-bs-toggle="tooltip"
+                        data-bs-title="Limpar todos os campos"
+                        class="form-sub-btn"
+                        onclick="limparFormulario('form-powerbi-path')">
                         <i class="material-symbols-outlined">ink_eraser</i>
                     </button>
+                    <div class="form-group" style="margin-bottom: 0">
+                        <label for="powerbi-pasta" class="form-label" data-bs-toggle="tooltip"
+                            data-bs-title="Pasta que contém as subpastas 'Mapa de Licitações' e 'Execução AF Empenho', e onde serão salvos os arquivos gerados.">
+                            Caminho da pasta
+                        </label>
+                        <input type="text" class="form-control form-control-sm" id="powerbi-pasta"
+                            data-field="pasta_powerbi" data-validate-rule="pattern" data-regex-pattern=".+(?=\\)"
+                            placeholder="Ex: G:\Google Drive\Base de Dados\POWERBI" required>
+                    </div>
                 </div>
             </div>
         </form>

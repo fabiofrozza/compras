@@ -33,6 +33,12 @@
 
                                 <div class="collapse show" id="form-info-pregao-collapse">
                                     <div class="form-sub-container form-info-pregao-grid">
+                                        <button type="button" data-bs-toggle="tooltip"
+                                            data-bs-title="Limpar todos os campos"
+                                            class="form-sub-btn"
+                                            onclick="limparFormulario('form-info-pregao')">
+                                            <i class="material-symbols-outlined">ink_eraser</i>
+                                        </button>
                                         <div class="form-group grid-1">
                                             <label for="atas-numero-pregao" class="form-label">
                                                 Número/Ano do pregão
@@ -90,14 +96,6 @@
                                             <textarea id="atas-objeto" class="form-control form-control-sm"
                                                 data-field="objeto" rows="4" required></textarea>
                                         </div>
-                                    </div>
-
-                                    <div class="form-buttons">
-                                        <button type="button" data-bs-toggle="tooltip"
-                                            data-bs-title="Limpar todos os campos" class="btn btn-outline-danger btn-sm"
-                                            onclick="limparFormulario('form-info-pregao')">
-                                            <i class="material-symbols-outlined">ink_eraser</i>
-                                        </button>
                                     </div>
                                 </div>
                             </form>
