@@ -34,8 +34,7 @@
                                 <div class="collapse show" id="form-info-pregao-collapse">
                                     <div class="form-sub-container form-info-pregao-grid">
                                         <button type="button" data-bs-toggle="tooltip"
-                                            data-bs-title="Limpar todos os campos"
-                                            class="form-sub-btn"
+                                            data-bs-title="Limpar todos os campos" class="form-sub-btn"
                                             onclick="limparFormulario('form-info-pregao')">
                                             <i class="material-symbols-outlined">ink_eraser</i>
                                         </button>
@@ -208,6 +207,21 @@
                                             id="btn-form-atas-modelos" onclick="executarMailmergeAtas()" disabled>
                                             Gerar Atas
                                         </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Lista de Tabelas -->
+                            <div class="script-form shadow-sm">
+                                <h4 class="d-flex justify-content-between align-items-center" role="button"
+                                    data-bs-toggle="collapse" data-bs-target="#atas-tabelas-collapse"
+                                    aria-expanded="true" aria-controls="atas-tabelas-collapse">
+                                    <span><i class="material-symbols-outlined">table_chart</i> Tabelas de Itens</span>
+                                    <i class="material-symbols-outlined text-secondary">unfold_more</i>
+                                </h4>
+
+                                <div class="collapse show" id="atas-tabelas-collapse">
+                                    <div id="atas-tabelas" class="files-list" data-extensions="xls*" data-folder="sicaf"
+                                        data-selectable="false">
                                     </div>
                                 </div>
                             </div>

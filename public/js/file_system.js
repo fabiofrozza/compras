@@ -436,8 +436,8 @@ function setupFileListButtons(filesList) {
         });
     }
 
-    // Se é a lista de relatórios SICAF, numerar as atas após carregamento
-    if (filesList.id === 'atas-relatorios-sicaf' && typeof numerarAtas === 'function') {
+    // Se é a lista de relatórios SICAF ou tabelas, numerar as atas após carregamento
+    if ((filesList.id === 'atas-relatorios-sicaf' || filesList.id === 'atas-tabelas') && typeof numerarAtas === 'function') {
         numerarAtas();
     }
 }

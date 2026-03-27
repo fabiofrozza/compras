@@ -30,31 +30,36 @@ function popularAnosSelector() {
 }
 
 function numerarAtas() {
-    const container = document.getElementById('atas-relatorios-sicaf');
+    const containers = [
+        document.getElementById('atas-relatorios-sicaf'),
+        document.getElementById('atas-tabelas'),
+    ];
     const numeroPrimeiraAta = parseInt(document.getElementById('atas-primeira-ata').value);
 
-    if (!container) return;
+    containers.forEach(container => {
+        if (!container) return;
 
-    const linhas = container.querySelectorAll('tr');
+        const linhas = container.querySelectorAll('tr');
 
-    linhas.forEach((linha, index) => {
-        // Tenta localizar a célula de numeração pela classe para não duplicar ou sobrescrever
-        let cellNumero = linha.querySelector('.coluna-numero-ata');
+        linhas.forEach((linha, index) => {
+            // Tenta localizar a célula de numeração pela classe para não duplicar ou sobrescrever
+            let cellNumero = linha.querySelector('.coluna-numero-ata');
 
-        // Se não encontrar, insere uma nova célula na posição 1 (entre ícone e nome)
-        if (!cellNumero) {
-            cellNumero = linha.insertCell(1);
-            cellNumero.className = 'coluna-numero-ata';
-            cellNumero.style.verticalAlign = "middle";
-            cellNumero.style.paddingRight = "10px";
-        }
+            // Se não encontrar, insere uma nova célula na posição 1 (entre ícone e nome)
+            if (!cellNumero) {
+                cellNumero = linha.insertCell(1);
+                cellNumero.className = 'coluna-numero-ata';
+                cellNumero.style.verticalAlign = "middle";
+                cellNumero.style.paddingRight = "10px";
+            }
 
-        if (isNaN(numeroPrimeiraAta) || numeroPrimeiraAta < 1) {
-            cellNumero.textContent = "Ata ----";
-        } else {
-            const numeroAta = numeroPrimeiraAta + index;
-            cellNumero.textContent = "Ata " + String(numeroAta).padStart(4, '0');
-        }
+            if (isNaN(numeroPrimeiraAta) || numeroPrimeiraAta < 1) {
+                cellNumero.textContent = "Ata ----";
+            } else {
+                const numeroAta = numeroPrimeiraAta + index;
+                cellNumero.textContent = "Ata " + String(numeroAta).padStart(4, '0');
+            }
+        });
     });
 
     if (!isNaN(numeroPrimeiraAta) && numeroPrimeiraAta >= 1) {
