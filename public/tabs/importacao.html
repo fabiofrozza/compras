@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <div class="row">
-    <div class="col">
+    <div class="col" id="importacao-link-col">
         <!-- Form link planilha -->
         <form id="form-importacao-link" class="script-form shadow-sm">
             <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
@@ -12,7 +12,7 @@
 
             <div class="collapse show" id="importacao-link-collapse">
                 <div class="row">
-                    <div class="col-sm-5">
+                    <div class="col">
                         <div class="form-sub-container">
                             <label for="importacao-link" class="form-label" data-bs-toggle="tooltip"
                                 data-bs-title="Link da aba LISTA FINAL da planilha de inserção de demandas.">
@@ -42,7 +42,7 @@
                         </div>
                     </div>
 
-                    <div class="col-sm-7">
+                    <div class="col">
                         <div id="importacao-sheet-status" class="dashboard-widget-grid">
                             <div class="dashboard-widget" id="widget-status-link">
                                 <div class="widget-icon">
@@ -80,6 +80,21 @@
                 </div>
             </div>
         </form>
+    </div>
+    <div class="col d-none" id="importacao-resultado-col">
+        <div class="script-form shadow-sm" id="importacao-resultado">
+            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
+                data-bs-target="#importacao-resultado-collapse" aria-expanded="true"
+                aria-controls="importacao-resultado-collapse">
+                <span><i class="material-symbols-outlined">query_stats</i> Conferência</span>
+                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            </h4>
+
+            <div class="collapse show" id="importacao-resultado-collapse">
+                <div class="dashboard-widget-grid d-none" id="importacao-resultado-widgets"></div>
+                <div class="d-none mt-2" id="importacao-resultado-msg"></div>
+            </div>
+        </div>
     </div>
 </div>
 <div class="row">

@@ -44,6 +44,12 @@ function connectWebSocket() {
                 }
             }
 
+            if (data.type === 'config_data') {
+                if (data.scriptName === 'importacao' && typeof exibirResultadoImportacao === 'function') {
+                    exibirResultadoImportacao(data.data);
+                }
+            }
+
             // Finalização do script: SEMPRE processar, independente do console estar visível
             // Isso garante que isScriptRunning seja resetado e o overlay seja removido
             if (data.type === 'success' || data.type === 'warning' || data.type === 'error') {

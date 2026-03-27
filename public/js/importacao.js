@@ -253,6 +253,63 @@ function verificarLiberacaoBotoesImportacao() {
     }
 }
 
+function exibirResultadoImportacao(data) {
+    const col = document.getElementById('importacao-resultado-col');
+    const linkCol = document.getElementById('importacao-link-col');
+    const grid = document.getElementById('importacao-resultado-widgets');
+    const msgDiv = document.getElementById('importacao-resultado-msg');
+    if (!col || !grid || !msgDiv) return;
+
+    grid.innerHTML = '';
+    msgDiv.innerHTML = '';
+
+    const conf = data.conferencia;
+    if (conf && Object.keys(conf).length > 0) {
+        grid.classList.remove('d-none');
+
+        const widgets = [
+            { icon: 'category', label: 'Grupo', value: conf.grupo + ' - ' + conf.nome_grupo, size: 'full' },
+            { icon: 'calendar_today', label: 'Etapa', value: conf.etapa + ' / ' + conf.ano },
+            { icon: 'inventory_2', label: 'Itens', value: conf.n_itens },
+            { icon: 'assignment', label: 'Solicitações', value: conf.n_solicitacoes }
+        ];
+
+        widgets.forEach(w => {
+            if (w.value == null) return;
+            const div = document.createElement('div');
+            div.className = 'dashboard-widget ' + (w.size === 'full' ? 'widget-full' : '');
+            div.innerHTML = `
+                <div class="widget-icon"><i class="material-symbols-outlined">${w.icon}</i></div>
+                <div class="widget-content">
+                    <span class="widget-label">${w.label}</span>
+                    <span class="widget-value">${w.value}</span>
+                </div>`;
+            grid.appendChild(div);
+        });
+    }
+
+    // msg_erro: array onde o primeiro item é o nome do log (ignorar), os demais são mensagens
+    const erros = data.msg_erro;
+    if (Array.isArray(erros) && erros.length > 1) {
+        const mensagens = erros.slice(1);
+        let msgErros = `
+            <div class="alert alert-warning alert-sm py-1 px-2 mb-1">
+                <i class="material-symbols-outlined">warning</i>
+        `;
+        msgErros += mensagens
+            .map(m => ` ${m}<br>`)
+            .join('');
+        msgErros += `</div>`;
+
+        msgDiv.classList.remove('d-none');
+        msgDiv.innerHTML = msgErros;
+    }
+
+    col.classList.remove('d-none');
+    linkCol.classList.remove('col');
+    linkCol.classList.add('col-sm-6')
+}
+
 function executarAcaoImportacao(abaDestino) {
     // Mapeia aliases de abas: HTML usa 'gerar', form usa 'arquivos'
     const btnIdMap = {

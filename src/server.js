@@ -1158,6 +1158,7 @@ async function executeRScript(ws, scriptFolder, params) {
                 if (parsed.data && parsed.data.final_message) {
                   finalMessage = parsed.data.final_message;
                 }
+                ws.send(JSON.stringify({ type: 'config_data', scriptName: scriptFolder, data: parsed.data }));
                 return;
               }
 
