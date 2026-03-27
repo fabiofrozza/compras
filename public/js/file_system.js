@@ -36,14 +36,16 @@ function getFileIcon(fileName, isDirectory) {
     return entry ? fileIcon(entry[1], entry[0]) : fileIcon('insert_drive_file');
 }
 
-function buildFolderPathHTML(folderPath) {
+function buildFolderPathHTML(folderPath, beforeCopyHTML = '', afterCopyHTML = '') {
     return `
         <div class="folder-path-container">
             <i class="material-symbols-outlined">folder</i>
             <span class="folder-path">${folderPath}</span>
+            ${beforeCopyHTML}
             <button data-bs-toggle="tooltip" data-bs-title="Copiar caminho" class="folder-path-btn copy-icon">
                 <i class="material-symbols-outlined">content_copy</i>
             </button>
+            ${afterCopyHTML}
             <button data-bs-toggle="tooltip" data-bs-title="Abrir pasta" class="folder-path-btn btn-open" data-folder-path="${folderPath}">
                 <i class="material-symbols-outlined">folder_open</i>
             </button>
@@ -300,23 +302,20 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
             return;
         }
 
-        let filesHTML = buildFolderPathHTML(data.folderPath);
-
         const hasFiles = data.files && data.files.length > 0;
         const canDelete = data.canDelete;
 
-        let filesHTMLButtons = `
-            <div class="folder-buttons-container">
-                ${canDelete ? `
-                <button data-bs-toggle="tooltip" data-bs-title="Excluir todos os arquivos da pasta" class="btn btn-outline-danger btn-sm btn-clear" data-container-id="${containerId}" data-folder-path="${data.folderPath}" data-script-name="${scriptName}" data-inner-folder="${innerFolder}" ${hasFiles ? '' : 'disabled'}>
-                    <i class="material-symbols-outlined">delete</i>
-                </button>
-                ` : ''}
-                <button data-bs-toggle="tooltip" data-bs-title="Atualizar lista de arquivos" class="btn btn-outline-primary btn-sm btn-refresh" data-container-id="${containerId}" data-script-name="${scriptName}">
-                    <i class="material-symbols-outlined">refresh</i>
-                </button>
-            </div>
-        `;
+        const deleteBtn = canDelete ? `
+            <button data-bs-toggle="tooltip" data-bs-title="Excluir todos os arquivos da pasta" class="folder-path-btn text-danger btn-clear" data-container-id="${containerId}" data-folder-path="${data.folderPath}" data-script-name="${scriptName}" data-inner-folder="${innerFolder}" ${hasFiles ? '' : 'disabled'}>
+                <i class="material-symbols-outlined">delete</i>
+            </button>` : '';
+
+        const refreshBtn = `
+            <button data-bs-toggle="tooltip" data-bs-title="Atualizar lista de arquivos" class="folder-path-btn btn-refresh" data-container-id="${containerId}" data-script-name="${scriptName}">
+                <i class="material-symbols-outlined">refresh</i>
+            </button>`;
+
+        let filesHTML = buildFolderPathHTML(data.folderPath, deleteBtn, refreshBtn);
 
         if (!data.files || data.files.length === 0) {
             filesHTML += `
@@ -324,7 +323,6 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
                     <i class="material-symbols-outlined">warning</i> Nenhum arquivo encontrado na pasta
                 </div>
             `;
-            filesHTML += filesHTMLButtons;
             filesList.innerHTML = filesHTML;
             setupFileListButtons(filesList);
             initializeTooltips();
@@ -381,7 +379,6 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
         });
 
         filesHTML += '</tbody></table></div>';
-        filesHTML += filesHTMLButtons;
 
         filesList.innerHTML = filesHTML;
 

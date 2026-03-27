@@ -177,8 +177,8 @@ FORMS AND FILES
     background-color: color-mix(in srgb, var(--compras-theme) 50%, white);
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;
-    min-height: 100px;
     margin-bottom: 12px;
+    overflow: hidden;
 }
 
 .files-list:not(.is-invalid):has(.selectable) {
@@ -235,7 +235,9 @@ FORMS AND FILES
     opacity: 1;
 }
 
-.folder-path-container:hover .folder-path-btn {
+.files-list:hover .folder-path-btn:not(:disabled),
+.files-list-style:hover .folder-path-btn:not(:disabled),
+.fornecedores-grid-list:hover .folder-path-btn:not(:disabled) {
     display: flex;
 }
 
@@ -302,13 +304,9 @@ FORMS AND FILES
     color: #276DC3;
 }
 
-.folder-buttons-container {
-    display: flex;
-    border-top: var(--bs-border-color) solid 1px;
-    justify-content: right;
-    gap: 10px;
-    flex-wrap: wrap;
-    padding: 10px;
+.folder-path-btn:disabled {
+    opacity: 0 !important;
+    pointer-events: none;
 }
 
 .btn-sm .material-symbols-outlined {

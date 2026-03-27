@@ -12,15 +12,7 @@ function inicializarFornecedores() {
     carregarPregoes();
     carregarImportar();
 
-    const btnRefreshPregoes = document.getElementById('btn-refresh-pregoes');
     const btnObterDados = document.getElementById('btn-obter-dados-fornecedores');
-
-    if (btnRefreshPregoes) {
-        btnRefreshPregoes.addEventListener('click', () => {
-            removeTooltip(btnRefreshPregoes);
-            carregarPregoes();
-        });
-    }
 
     if (btnObterDados) {
         btnObterDados.addEventListener('click', (e) => {
@@ -76,15 +68,21 @@ async function carregarPregoes() {
         pregoesDadosFolderPath = data.folderPath;
         const displayPath = data.folderPath.replace(/\\/g, '/');
 
+        const refreshPregoes = `
+            <button data-bs-toggle="tooltip" data-bs-title="Atualizar lista de pregões" class="folder-path-btn btn-refresh-pregoes">
+                <i class="material-symbols-outlined">refresh</i>
+            </button>`;
+
         if (!data.pregoes || data.pregoes.length === 0) {
-            container.innerHTML = buildFolderPathHTML(displayPath) +
+            container.innerHTML = buildFolderPathHTML(displayPath, '', refreshPregoes) +
                 `<div class="alert alert-warning"><i class="material-symbols-outlined">warning</i> Nenhum pregão encontrado na pasta DADOS</div>`;
             setupFolderPathButtons(container);
+            setupRefreshPregoesButton(container);
             initializeTooltips();
             return;
         }
 
-        let html = buildFolderPathHTML(displayPath) + '<div class="fornecedores-pregoes-grid">';
+        let html = buildFolderPathHTML(displayPath, '', refreshPregoes) + '<div class="fornecedores-pregoes-grid">';
         data.pregoes.forEach(pregao => {
             const statusClass = {
                 sucesso: 'status-sucesso',
@@ -134,9 +132,20 @@ async function carregarPregoes() {
 
         container.innerHTML = html;
         setupFolderPathButtons(container);
+        setupRefreshPregoesButton(container);
         initializeTooltips();
     } catch (error) {
         container.innerHTML = `<div class="alert alert-danger"><i class="material-symbols-outlined">error</i> Erro ao carregar pregões: ${error.message}</div>`;
+    }
+}
+
+function setupRefreshPregoesButton(container) {
+    const btn = container.querySelector('.btn-refresh-pregoes');
+    if (btn) {
+        btn.addEventListener('click', () => {
+            removeTooltip(btn);
+            carregarPregoes();
+        });
     }
 }
 
@@ -213,13 +222,17 @@ async function carregarConteudoPasta(pregao) {
             return;
         }
 
-        if (!data.arquivos || data.arquivos.length === 0) {
-            container.innerHTML = `<div class="alert alert-warning"><i class="material-symbols-outlined">warning</i> Nenhum arquivo encontrado</div>`;
-            return;
-        }
-
         const displayPath = data.folderPath.replace(/\\/g, '/');
         let html = buildFolderPathHTML(displayPath);
+
+        if (!data.arquivos || data.arquivos.length === 0) {
+            html += `<div class="alert alert-warning"><i class="material-symbols-outlined">warning</i> Nenhum arquivo encontrado</div>`;
+            container.innerHTML = html;
+            setupFolderPathButtons(container);
+            setupConteudoFooterButtons(container, pregao, false);
+            initializeTooltips();
+            return;
+        }
         html += `
             <div class="files-table-container">
                 <table class="files-table">
@@ -273,25 +286,30 @@ async function carregarConteudoPasta(pregao) {
 }
 
 function setupConteudoFooterButtons(container, pregao, hasFiles) {
-    const footer = document.createElement('div');
-    footer.className = 'folder-buttons-container';
-    footer.innerHTML = `
-        <button data-bs-toggle="tooltip" data-bs-title="Excluir todos os arquivos" class="btn btn-outline-danger btn-sm btn-clear-conteudo" ${hasFiles ? '' : 'disabled'}>
-            <i class="material-symbols-outlined">delete</i>
-        </button>
-        <button data-bs-toggle="tooltip" data-bs-title="Atualizar lista" class="btn btn-outline-primary btn-sm btn-refresh-conteudo">
-            <i class="material-symbols-outlined">refresh</i>
-        </button>
-    `;
-    container.appendChild(footer);
+    const folderPathContainer = container.querySelector('.folder-path-container');
+    const copyIcon = folderPathContainer.querySelector('.copy-icon');
 
-    const btnClear = footer.querySelector('.btn-clear-conteudo');
+    const btnClear = document.createElement('button');
+    btnClear.className = 'folder-path-btn text-danger btn-clear-conteudo';
+    btnClear.setAttribute('data-bs-toggle', 'tooltip');
+    btnClear.setAttribute('data-bs-title', 'Excluir todos os arquivos');
+    btnClear.innerHTML = '<i class="material-symbols-outlined">delete</i>';
+    if (!hasFiles) btnClear.disabled = true;
+    folderPathContainer.insertBefore(btnClear, copyIcon);
+
+    const btnRefresh = document.createElement('button');
+    btnRefresh.className = 'folder-path-btn btn-refresh-conteudo';
+    btnRefresh.setAttribute('data-bs-toggle', 'tooltip');
+    btnRefresh.setAttribute('data-bs-title', 'Atualizar lista');
+    btnRefresh.innerHTML = '<i class="material-symbols-outlined">refresh</i>';
+    const btnOpen = folderPathContainer.querySelector('.btn-open');
+    folderPathContainer.insertBefore(btnRefresh, btnOpen);
+
     btnClear.addEventListener('click', () => {
         removeTooltip(btnClear);
         excluirPregao(pregao);
     });
 
-    const btnRefresh = footer.querySelector('.btn-refresh-conteudo');
     btnRefresh.addEventListener('click', () => {
         removeTooltip(btnRefresh);
         carregarConteudoPasta(pregao);
@@ -417,25 +435,30 @@ function limparInfoPregao() {
 // ====== ARQUIVOS A IMPORTAR ======
 
 function setupImportarFooterButtons(container, hasFiles) {
-    const footer = document.createElement('div');
-    footer.className = 'folder-buttons-container';
-    footer.innerHTML = `
-        <button data-bs-toggle="tooltip" data-bs-title="Excluir todos os arquivos" class="btn btn-outline-danger btn-sm btn-clear-importar" ${hasFiles ? '' : 'disabled'}>
-            <i class="material-symbols-outlined">delete</i>
-        </button>
-        <button data-bs-toggle="tooltip" data-bs-title="Atualizar lista" class="btn btn-outline-primary btn-sm btn-refresh-importar">
-            <i class="material-symbols-outlined">refresh</i>
-        </button>
-    `;
-    container.appendChild(footer);
+    const folderPathContainer = container.querySelector('.folder-path-container');
+    const copyIcon = folderPathContainer.querySelector('.copy-icon');
 
-    const btnClear = footer.querySelector('.btn-clear-importar');
+    const btnClear = document.createElement('button');
+    btnClear.className = 'folder-path-btn text-danger btn-clear-importar';
+    btnClear.setAttribute('data-bs-toggle', 'tooltip');
+    btnClear.setAttribute('data-bs-title', 'Excluir todos os arquivos');
+    btnClear.innerHTML = '<i class="material-symbols-outlined">delete</i>';
+    if (!hasFiles) btnClear.disabled = true;
+    folderPathContainer.insertBefore(btnClear, copyIcon);
+
+    const btnRefresh = document.createElement('button');
+    btnRefresh.className = 'folder-path-btn btn-refresh-importar';
+    btnRefresh.setAttribute('data-bs-toggle', 'tooltip');
+    btnRefresh.setAttribute('data-bs-title', 'Atualizar lista');
+    btnRefresh.innerHTML = '<i class="material-symbols-outlined">refresh</i>';
+    const btnOpen = folderPathContainer.querySelector('.btn-open');
+    folderPathContainer.insertBefore(btnRefresh, btnOpen);
+
     btnClear.addEventListener('click', () => {
         removeTooltip(btnClear);
         limparPastaImportar();
     });
 
-    const btnRefresh = footer.querySelector('.btn-refresh-importar');
     btnRefresh.addEventListener('click', () => {
         removeTooltip(btnRefresh);
         carregarImportar();
