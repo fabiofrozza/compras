@@ -46,7 +46,8 @@
                                                 data-validate-target="atas-numero-pregao,atas-ano-pregao">
                                                 <input type="number" class="form-control form-control-sm"
                                                     id="atas-numero-pregao" data-field="n_pregao" min="1"
-                                                    data-validate-rule="numeric" required>
+                                                    data-validate-rule="numeric" required
+                                                    data-validation-msg="Informe o número e o ano do pregão.">
                                                 <select class="form-select form-select-sm" id="atas-ano-pregao"
                                                     data-field="ano_pregao" data-validate-rule="numeric" required>
                                                     <option value="">-- Selecione --</option>
@@ -61,7 +62,8 @@
                                             <input type="text" class="form-control form-control-sm"
                                                 id="atas-processo-spa" data-field="processo"
                                                 data-validate-rule="pattern"
-                                                data-regex-pattern="23080\.\d{6}/\d{4}-\d{2}" required>
+                                                data-regex-pattern="23080\.\d{6}/\d{4}-\d{2}" required
+                                                data-validation-msg="Informe o processo no formato 23080.XXXXXX/XXXX-XX.">
                                         </div>
                                         <div class="form-group grid-4">
                                             <label for="atas-data-pregao" class="form-label" data-bs-toggle="tooltip"
@@ -69,7 +71,8 @@
                                                 Data Pregão DOU
                                             </label>
                                             <input type="date" class="form-control form-control-sm"
-                                                id="atas-data-pregao" data-field="data" required>
+                                                id="atas-data-pregao" data-field="data" required
+                                                data-validation-msg="Informe a data do pregão.">
                                         </div>
                                         <div class="form-group grid-5">
                                             <label for="atas-primeira-ata" class="form-label" data-bs-toggle="tooltip"
@@ -80,7 +83,8 @@
                                                 data-validate-target="atas-primeira-ata,atas-ano-ata">
                                                 <input type="number" class="form-control form-control-sm"
                                                     id="atas-primeira-ata" data-field="n_ata" min="1"
-                                                    data-validate-rule="numeric" required>
+                                                    data-validate-rule="numeric" required
+                                                    data-validation-msg="Informe o número e o ano da primeira ata.">
                                                 <select class="form-select form-select-sm" id="atas-ano-ata"
                                                     data-field="ano_ata" data-validate-rule="numeric" required>
                                                     <option value="">-- Selecione --</option>
@@ -93,7 +97,8 @@
                                                 Objeto
                                             </label>
                                             <textarea id="atas-objeto" class="form-control form-control-sm"
-                                                data-field="objeto" rows="4" required></textarea>
+                                                data-field="objeto" rows="4" required
+                                                data-validation-msg="Informe o objeto do pregão."></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -198,7 +203,8 @@
                                     <!-- Lista de Modelos -->
                                     <div id="atas-modelos" class="files-list" data-field="atas_modelos"
                                         data-validate-rule="file-selectable" required data-extensions="docx"
-                                        data-folder="atas_modelos" data-selectable="true">
+                                        data-folder="atas_modelos" data-selectable="true"
+                                        data-validation-msg="Selecione um modelo de ata.">
                                     </div>
 
                                     <!-- Botão Gerar Atas -->

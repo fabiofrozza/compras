@@ -24,7 +24,8 @@
                             </label>
                             <div class="input-group input-group-sm">
                                 <input type="url" class="form-control" id="importacao-link" data-field="planilha_link"
-                                    placeholder="https://docs.google.com/spreadsheets/d/..." required>
+                                    placeholder="https://docs.google.com/spreadsheets/d/..." required
+                                    data-validation-msg="Informe o link da planilha.">
                                 <button type="button" class="btn btn-outline-primary" id="btn-atualizar-link"
                                     onclick="revalidarLinkGoogle()" data-bs-toggle="tooltip"
                                     data-bs-title="Atualizar informações da planilha">
@@ -218,7 +219,8 @@
                                         Valor Mínimo
                                     </label>
                                     <input type="number" class="form-control form-control-sm" id="importacao-val-min"
-                                        data-field="valor_minimo" data-validate-rule="numeric" min="1" required>
+                                        data-field="valor_minimo" data-validate-rule="numeric" min="1" required
+                                        data-validation-msg="Informe um valor mínimo válido.">
                                 </div>
                             </div>
                             <div class="col">
@@ -228,7 +230,8 @@
                                         Qtd. Mínima
                                     </label>
                                     <input type="number" class="form-control form-control-sm" id="importacao-qtd-min"
-                                        data-field="qtd_minima" data-validate-rule="numeric" min="1" required>
+                                        data-field="qtd_minima" data-validate-rule="numeric" min="1" required
+                                        data-validation-msg="Informe uma quantidade mínima válida.">
                                 </div>
                             </div>
                             <div class="col">
@@ -239,7 +242,8 @@
                                     </label>
                                     <input type="text" class="form-control form-control-sm" id="importacao-celula"
                                         data-field="celula_inicial" data-validate-rule="pattern"
-                                        data-regex-pattern="^[A-Za-z]+[1-9][0-9]*$" placeholder="Ex: Q6" required>
+                                        data-regex-pattern="^[A-Za-z]+[1-9][0-9]*$" placeholder="Ex: Q6" required
+                                        data-validation-msg="Informe a célula no formato correto (ex: Q6).">
                                 </div>
                             </div>
                         </div>
@@ -252,7 +256,8 @@
                                         Qtd. Unidades
                                     </label>
                                     <input type="number" class="form-control form-control-sm" id="importacao-qtd-un"
-                                        data-field="qtd_unidades" min="1" data-validate-rule="numeric" min="1" required>
+                                        data-field="qtd_unidades" min="1" data-validate-rule="numeric" min="1" required
+                                        data-validation-msg="Informe a quantidade de unidades.">
                                 </div>
                             </div>
                             <div class="col">
@@ -262,7 +267,8 @@
                                         Aba Menu
                                     </label>
                                     <input type="text" class="form-control form-control-sm" id="importacao-aba-menu"
-                                        data-field="aba_menu" placeholder="Ex: Menu" required>
+                                        data-field="aba_menu" placeholder="Ex: Menu" required
+                                        data-validation-msg="Informe o nome da aba Menu.">
                                 </div>
                             </div>
                             <div class="col">
@@ -273,7 +279,8 @@
                                     </label>
                                     <input type="text" class="form-control form-control-sm" id="importacao-aba-lista"
                                         data-field="aba_lista_final" placeholder="Ex: LISTA FINAL" value="LISTA FINAL"
-                                        required>
+                                        required
+                                        data-validation-msg="Informe o nome da aba LISTA FINAL.">
                                 </div>
                             </div>
                         </div>
