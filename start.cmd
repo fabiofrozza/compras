@@ -11,21 +11,13 @@
 @ECHO  ╚██████╗╚██████╔╝██╗    ██║ ╚████║██║  ██║██║ ╚═╝ ██║███████╗
 @ECHO   ╚═════╝ ╚═════╝ ╚═╝    ╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝%esc%[0m
 
-@PROMPT=$s$e[34m$v$_$s$d$s$b$s$t$h$h$h$_$s$p$_$_$s$e[0m%separador%$_$s$e[34m$sIniciando...$e[0m$_$s%separador%$_$s
-ECHO.
-
-@ECHO OFF
-
-ECHO.
-SET "texto=Node.js versão:"
-ECHO  %separador%& ECHO.%esc%[34m  %texto%%esc%[0m& ECHO. %separador%
-".\bin\node.exe" --version
+@PROMPT=$s$e[34m$v$_$s$d$s$b$s$t$h$h$h$_$s$p$_$_$s$e[0m%separador%$_$s$e[34m$sIniciando servidor...$e[0m$_$s%separador%$_$s$e[30m
+ECHO OFF
 
 @TITLE SERVIDOR EM EXECUÇÃO. NÃO FECHE ESTA JANELA
 
-ECHO.
-SET "texto=Iniciando servidor..."
-ECHO  %separador%& ECHO.%esc%[34m  %texto%%esc%[0m& ECHO. %separador%
+SET "texto=Aguarde..."
+ECHO  %esc%[97m%separador%& ECHO.%esc%[34m  %texto%%esc%[0m& ECHO. %separador%%esc%[93m%esc%[44m
 ".\bin\node.exe" ".\src\server.js"
 
 ECHO %esc%[41m%esc%[93m
