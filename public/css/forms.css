@@ -218,6 +218,18 @@ FORMS AND FILES
     border-color: var(--bs-form-invalid-border-color);
 }
 
+.validation-msg {
+    color: var(--bs-form-invalid-color);
+    font-size: .6em;
+    margin-top: .2rem;
+    margin-left: 6px;
+    display: none;
+}
+
+.validation-msg.show {
+    display: block;
+}
+
 .files-list .alert i {
     font-size: 1.25rem;
     vertical-align: sub;

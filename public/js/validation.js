@@ -52,9 +52,27 @@ function validateSingleField(field) {
     }
 
     field.classList.toggle('is-invalid', hasError);
+    toggleValidationMsg(field, hasError);
     setButtonState(field);
 
     return !hasError;
+}
+
+function toggleValidationMsg(field, hasError) {
+    const msg = field.dataset.validationMsg;
+    if (!msg) return;
+
+    const feedbackId = field.id + '-feedback';
+    let feedback = document.getElementById(feedbackId);
+    if (!feedback) {
+        feedback = document.createElement('div');
+        feedback.id = feedbackId;
+        feedback.className = 'validation-msg';
+        feedback.textContent = msg;
+        const insertTarget = field.closest('.input-group') || field;
+        insertTarget.insertAdjacentElement('afterend', feedback);
+    }
+    feedback.classList.toggle('show', hasError);
 }
 
 function setButtonState(field) {
