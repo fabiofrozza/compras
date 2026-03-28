@@ -154,7 +154,9 @@ function selecionarPregao(nome) {
 
     // Atualizar visual de seleção
     document.querySelectorAll('.pregao-card').forEach(card => {
-        card.classList.toggle('pregao-selected', card.dataset.pregao === nome);
+        const isSelected = card.dataset.pregao === nome;
+        card.classList.toggle('pregao-selected', isSelected);
+        card.classList.toggle('selected', isSelected);
     });
 
     carregarConteudoPasta(nome);
