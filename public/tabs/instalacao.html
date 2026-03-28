@@ -1,6 +1,61 @@
 <!DOCTYPE html>
 <div class="row">
     <div class="col">
+        <!-- Informações do Node.js -->
+        <div id="node-info-panel" class="script-form shadow-sm">
+            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
+                data-bs-target="#instalacao-node-info-collapse" aria-expanded="true"
+                aria-controls="instalacao-node-info-collapse">
+                <span><i class="material-symbols-outlined">hub</i> Informações do Node.js</span>
+                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            </h4>
+            <div class="collapse show" id="instalacao-node-info-collapse">
+                <div class="form-group">
+                    <div class="custom-spinner-container" id="node-info-loading">
+                        <div class="custom-spinner text-primary">
+                            <div class="spinner-border spinner-border-sm"></div>
+                            <span role="status">Verificando Node.js...</span>
+                        </div>
+                    </div>
+                    <div id="node-info-content" class="d-none">
+                        <div class="dashboard-widget-grid">
+                            <div class="dashboard-widget">
+                                <div class="widget-icon">
+                                    <i class="material-symbols-outlined">terminal</i>
+                                </div>
+                                <div class="widget-content">
+                                    <span class="widget-label">Versão Instalada</span>
+                                    <span class="widget-value" id="node-info-version">-</span>
+                                </div>
+                            </div>
+                            <div class="dashboard-widget">
+                                <div class="widget-icon">
+                                    <i class="material-symbols-outlined">update</i>
+                                </div>
+                                <div class="widget-content">
+                                    <span class="widget-label">Versão Mais Recente</span>
+                                    <span class="widget-value">
+                                        <span id="node-info-latest">-</span>
+                                        <span id="node-info-status" class="badge ms-2"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="dashboard-widget widget-full">
+                                <div class="widget-icon">
+                                    <i class="material-symbols-outlined">folder</i>
+                                </div>
+                                <div class="widget-content">
+                                    <span class="widget-label">Local de Instalação</span>
+                                    <span class="widget-value" id="node-info-path">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
         <!-- Informações do R -->
         <div id="r-info-panel" class="script-form shadow-sm">
             <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
@@ -57,57 +112,40 @@
                         id="btn-download-r" onclick="downloadR()">
                         Baixar R
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-primary text-nowrap" id="btn-refresh-r-info"
-                        data-bs-toggle="tooltip" data-bs-title="Atualizar informações" onclick="carregarInfoR()">
-                        <i class="material-symbols-outlined">refresh</i>
-                    </button>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="col">
-        <!-- Instalar pacotes -->
-        <form id="form-instalacao-instalar" class="script-form shadow-sm">
+        <!-- Pacotes R -->
+        <form id="form-instalacao" class="script-form shadow-sm">
             <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#instalacao-instalar-collapse" aria-expanded="true"
-                aria-controls="instalacao-instalar-collapse">
-                <span><i class="material-symbols-outlined">build</i> Instalar pacotes</span>
+                data-bs-target="#instalacao-pacotes-collapse" aria-expanded="true"
+                aria-controls="instalacao-pacotes-collapse">
+                <span><i class="material-symbols-outlined">build</i> Pacotes R</span>
                 <i class="material-symbols-outlined text-secondary">unfold_more</i>
             </h4>
-            <div class="collapse show" id="instalacao-instalar-collapse">
+            <div class="collapse show" id="instalacao-pacotes-collapse">
                 <div class="form-group">
-                    <p class="text-body-secondary small mb-0">
-                        Instala todos os pacotes R necessários para o funcionamento da aplicação.
-                        Execute esta opção no primeiro uso.
-                    </p>
+                    <div class="option-card-group">
+                        <label class="option-card">
+                            <div>
+                                <div class="option-card-title">Instalar pacotes</div>
+                                <div class="option-card-description">Instala todos os pacotes R necessários para o funcionamento da aplicação. Execute esta opção no primeiro uso.</div>
+                            </div>
+                            <input class="form-check-input" type="radio" name="instalacao-modo" value="instalar" checked>
+                        </label>
+                        <label class="option-card">
+                            <div>
+                                <div class="option-card-title">Atualizar pacotes</div>
+                                <div class="option-card-description">Atualiza os pacotes R para a versão mais recente disponível. Utilize quando os scripts apresentarem erros relacionados a versões desatualizadas.</div>
+                            </div>
+                            <input class="form-check-input" type="radio" name="instalacao-modo" value="atualizar">
+                        </label>
+                    </div>
                 </div>
                 <div class="form-buttons">
                     <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"
-                        id="btn-run-instalacao-instalar" onclick="executarInstalacao('instalar')">
-                        Instalar
-                    </button>
-                </div>
-            </div>
-        </form>
-        <!-- Atualizar pacotes -->
-        <form id="form-instalacao-atualizar" class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#instalacao-atualizar-collapse" aria-expanded="true"
-                aria-controls="instalacao-atualizar-collapse">
-                <span><i class="material-symbols-outlined">refresh</i> Atualizar pacotes</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
-            </h4>
-            <div class="collapse show" id="instalacao-atualizar-collapse">
-                <div class="form-group">
-                    <p class="text-body-secondary small mb-0">
-                        Atualiza os pacotes R para a versão mais recente disponível.
-                        Utilize quando os scripts apresentarem erros relacionados a versões desatualizadas.
-                    </p>
-                </div>
-                <div class="form-buttons">
-                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"
-                        id="btn-run-instalacao-atualizar" onclick="executarInstalacao('atualizar')">
-                        Atualizar
+                        id="btn-run-instalacao" onclick="executarInstalacaoSelecionada()">
+                        Executar
                     </button>
                 </div>
             </div>

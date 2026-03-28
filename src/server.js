@@ -856,6 +856,30 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
+app.get('/api/check-node', (_req, res) => {
+  res.json({
+    installed: true,
+    version: process.version.replace(/^v/, ''),
+    path: process.execPath
+  });
+});
+
+app.get('/api/check-node-latest', async (_req, res) => {
+  try {
+    const response = await fetch('https://nodejs.org/dist/latest/');
+    const html = await response.text();
+    const match = html.match(/node-v(\d+\.\d+\.\d+)/);
+    if (match) {
+      res.json({ latest: match[1] });
+    } else {
+      res.json({ error: 'Não foi possível identificar a versão mais recente.' });
+    }
+  } catch (err) {
+    logger.error(`Erro ao consultar versão do Node.js: ${err.message}`, 'NodeLatest');
+    res.json({ error: 'Não foi possível consultar o site do Node.js.' });
+  }
+});
+
 app.get('/api/check-r', async (_req, res) => {
   cachedRScriptPath = null;
   const rscriptCmd = await getRScriptPath();

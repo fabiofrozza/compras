@@ -4,6 +4,11 @@ function executarInstalacao(modo) {
     runRScript('instalacao', { modo });
 }
 
+function executarInstalacaoSelecionada() {
+    const modo = document.querySelector('input[name="instalacao-modo"]:checked')?.value;
+    if (modo) executarInstalacao(modo);
+}
+
 function downloadR() {
     if (!_rDownloadUrl) return;
     window.open(_rDownloadUrl, '_blank');
@@ -95,4 +100,57 @@ async function carregarInfoR() {
     }
 }
 
+async function carregarInfoNode() {
+    const loading = document.getElementById('node-info-loading');
+    const content = document.getElementById('node-info-content');
+    if (!content) return;
+
+    loading.classList.remove('d-none');
+    content.classList.add('d-none');
+
+    const [localRes, latestRes] = await Promise.allSettled([
+        fetch('/api/check-node').then(r => r.json()),
+        fetch('/api/check-node-latest').then(r => r.json())
+    ]);
+
+    loading.classList.add('d-none');
+    content.classList.remove('d-none');
+
+    const versionEl = document.getElementById('node-info-version');
+    const pathEl = document.getElementById('node-info-path');
+    const latestEl = document.getElementById('node-info-latest');
+    const statusEl = document.getElementById('node-info-status');
+
+    let installedVersion = '';
+    if (localRes.status === 'fulfilled' && localRes.value.installed) {
+        installedVersion = localRes.value.version;
+        versionEl.textContent = installedVersion;
+        pathEl.textContent = localRes.value.path;
+    } else {
+        versionEl.textContent = 'Node.js não encontrado';
+        versionEl.classList.add('text-danger');
+        pathEl.textContent = '-';
+    }
+
+    if (latestRes.status === 'fulfilled' && latestRes.value.latest) {
+        const latest = latestRes.value.latest;
+        latestEl.innerHTML = `<a href="https://nodejs.org/en/download/" target="_blank">${latest}</a>`;
+
+        if (installedVersion) {
+            const cmp = compareVersions(installedVersion, latest);
+            if (cmp >= 0) {
+                statusEl.textContent = 'Atualizado';
+                statusEl.className = 'badge ms-2 text-bg-success';
+            } else {
+                statusEl.textContent = 'Nova versão disponível';
+                statusEl.className = 'badge ms-2 text-bg-warning';
+            }
+        }
+    } else {
+        latestEl.textContent = 'Não foi possível verificar';
+        latestEl.classList.add('text-body-secondary');
+    }
+}
+
 carregarInfoR();
+carregarInfoNode();
