@@ -356,11 +356,13 @@ function substituirCampos(conteudo, dados, numeroAta) {
 
     // Lista de padrões de placeholder (incluindo «...»)
     const padroes = [
-        /«([a-zA-Z0-9_]+)»/g,          // «campo»
-        /<<\{([a-zA-Z0-9_]+)\}>>/g,    // <<{campo}>>
-        /\[([a-zA-Z0-9_]+)\]/g,         // [campo]
-        /\{([a-zA-Z0-9_]+)\}/g,         // {campo}
-        /<<([a-zA-Z0-9_]+)>>/g          // <<campo>>
+        /«([a-zA-Z0-9_]+)»/g,                                  // «campo»
+        /&lt;&lt;\{([a-zA-Z0-9_]+)\}&gt;&gt;/g,                // <<{campo}>> (XML escaped)
+        /<<\{([a-zA-Z0-9_]+)\}>>/g,                            // <<{campo}>>
+        /\[([a-zA-Z0-9_]+)\]/g,                                // [campo]
+        /\{([a-zA-Z0-9_]+)\}/g,                                // {campo}
+        /&lt;&lt;([a-zA-Z0-9_]+)&gt;&gt;/g,                    // <<campo>> (XML escaped)
+        /<<([a-zA-Z0-9_]+)>>/g                                  // <<campo>>
     ];
 
     // Aplica cada padrão
