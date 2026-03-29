@@ -59,6 +59,29 @@ function validateSingleField(field) {
 }
 
 function toggleValidationMsg(field, hasError) {
+    const inputGroup = field.closest('.input-group');
+
+    if (inputGroup) {
+        const msgField = inputGroup.querySelector('[data-validation-msg]');
+        if (!msgField) return;
+
+        const anyError = hasError || Array.from(inputGroup.querySelectorAll('[data-field]'))
+            .filter(f => f !== field)
+            .some(f => f.classList.contains('is-invalid'));
+
+        const feedbackId = msgField.id + '-feedback';
+        let feedback = document.getElementById(feedbackId);
+        if (!feedback) {
+            feedback = document.createElement('div');
+            feedback.id = feedbackId;
+            feedback.className = 'validation-msg';
+            feedback.textContent = msgField.dataset.validationMsg;
+            inputGroup.insertAdjacentElement('afterend', feedback);
+        }
+        feedback.classList.toggle('show', anyError);
+        return;
+    }
+
     const msg = field.dataset.validationMsg;
     if (!msg) return;
 
@@ -69,8 +92,7 @@ function toggleValidationMsg(field, hasError) {
         feedback.id = feedbackId;
         feedback.className = 'validation-msg';
         feedback.textContent = msg;
-        const insertTarget = field.closest('.input-group') || field;
-        insertTarget.insertAdjacentElement('afterend', feedback);
+        field.insertAdjacentElement('afterend', feedback);
     }
     feedback.classList.toggle('show', hasError);
 }

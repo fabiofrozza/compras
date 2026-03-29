@@ -210,11 +210,13 @@ FORMS AND FILES
     overflow: hidden;
 }
 
-.files-list:not(.is-invalid):has(.selectable) {
+.files-list:not(.is-invalid):has(.selectable),
+.fornecedores-grid-list:not(.is-invalid):has(.pregao-selected) {
     border: 1px solid var(--bs-primary);
 }
 
-.files-list.is-invalid {
+.files-list.is-invalid,
+.fornecedores-grid-list.is-invalid {
     border-color: var(--bs-form-invalid-border-color);
 }
 
@@ -224,6 +226,18 @@ FORMS AND FILES
     margin-top: .2rem;
     margin-left: 6px;
     display: none;
+}
+
+.validation-msg::before {
+    font-family: 'Material Symbols Outlined';
+    content: 'warning';
+    vertical-align: text-top;
+    margin-right: 2px;
+}
+
+.files-list+.validation-msg,
+.fornecedores-grid-list+.validation-msg {
+    margin-top: -.5rem;
 }
 
 .validation-msg.show {
