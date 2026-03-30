@@ -206,6 +206,13 @@ Inspired by https://codepen.io/fooontic/pen/KwpRaGr
     flex-shrink: 0;
 }
 
+.header-separator {
+    width: 1px;
+    align-self: stretch;
+    margin: 4px 2px;
+    background-color: color-mix(in srgb, var(--compras-text-primary) 25%, transparent);
+}
+
 .header-icon-btn {
     border: none;
     font-size: 1.5rem;
