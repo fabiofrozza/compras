@@ -1,5 +1,31 @@
 const darkModeBtn = document.getElementById('darkModeBtn');
 
+// ====== TELA INTEIRA ======
+
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+document.addEventListener('fullscreenchange', () => {
+    const btn = document.getElementById('fullscreenBtn');
+    if (!btn) return;
+    const icon = btn.querySelector('i');
+    if (document.fullscreenElement) {
+        icon.textContent = 'minimize';
+        btn.setAttribute('data-bs-title', 'Sair da tela inteira');
+    } else {
+        icon.textContent = 'open_in_full';
+        btn.setAttribute('data-bs-title', 'Tela inteira');
+    }
+    const tooltip = bootstrap.Tooltip.getInstance(btn);
+    if (tooltip) tooltip.dispose();
+    new bootstrap.Tooltip(btn);
+});
+
 function applyDarkMode(darkModeEnabled = null) {
 
     const isDark = darkModeEnabled ?? !document.body.classList.contains('dark');
@@ -206,6 +232,7 @@ async function inicializarPreferenciasPanel() {
 
 document.addEventListener('DOMContentLoaded', () => {
     const companyLogo = document.getElementById('companyLogo');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
     const settingsBtn = document.getElementById('settingsBtn');
     const notificationsBtn = document.getElementById('notificationsBtn');
     const helpBtn = document.getElementById('helpBtn');
@@ -222,6 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (homeTab) new bootstrap.Tab(homeTab).show();
         });
     }
+    if (fullscreenBtn) fullscreenBtn.addEventListener('click', toggleFullscreen);
     if (settingsBtn) settingsBtn.addEventListener('click', () => openPanel('settings-panel', settingsBtn));
     if (notificationsBtn) notificationsBtn.addEventListener('click', () => openPanel('notifications-panel', notificationsBtn));
     if (helpBtn) helpBtn.addEventListener('click', () => openPanel('help-panel', helpBtn));
