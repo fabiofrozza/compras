@@ -289,6 +289,8 @@ async function buildHelpPanel() {
         { icon: 'article', label: 'Manual do Departamento', url: cfg.manualSite || '#' },
         { separator: true },
         { icon: 'code', label: 'Repositório', url: 'https://github.com/fabiofrozza/compras' },
+        { separator: true },
+        { icon: 'build', label: 'Instalação', tabId: 'instalacao' },
     ];
 
     const ul = document.createElement('ul');
@@ -298,6 +300,16 @@ async function buildHelpPanel() {
         const li = document.createElement('li');
         if (item.separator) {
             li.innerHTML = '<hr>';
+        } else if (item.tabId) {
+            const btn = document.createElement('button');
+            btn.dataset.tabId = item.tabId;
+            btn.innerHTML = `<i class="material-symbols-outlined">${item.icon}</i>${item.label}`;
+            btn.addEventListener('click', () => {
+                const tabButton = document.getElementById(`${item.tabId}-tab`);
+                if (tabButton) new bootstrap.Tab(tabButton).show();
+                closeAllPanels();
+            });
+            li.appendChild(btn);
         } else {
             const a = document.createElement('a');
             a.href = item.url;
