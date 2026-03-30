@@ -102,6 +102,22 @@ function applyUserPreferences(preferences) {
     const preferredTabSelect = document.getElementById('preferredTab');
     if (preferredTabSelect) preferredTabSelect.value = preferences.preferredTab || '';
 
+    // Atualizar estrelas de aba preferida nos cards da home
+    document.querySelectorAll('.card-glass-star').forEach(star => {
+        const isPreferred = preferences.preferredTab && star.dataset.tabId === preferences.preferredTab;
+        star.classList.toggle('active', isPreferred);
+
+        const title = isPreferred ? 'Aba preferida' : 'Definir como aba preferida';
+        star.setAttribute('data-bs-title', title);
+        star.setAttribute('aria-label', title);
+
+        // Atualizar tooltip do Bootstrap se existir
+        const tooltip = bootstrap.Tooltip.getInstance(star);
+        if (tooltip) {
+            tooltip.setContent({ '.tooltip-inner': title });
+        }
+    });
+
     // Aplicar navegação (abrir a aba) se estivermos na inicialização
     if (!window.navigationInitialized) {
         window.navigationInitialized = true;

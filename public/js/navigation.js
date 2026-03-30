@@ -50,7 +50,14 @@ function buildTabPanes() {
     const tabContent = document.getElementById('tabContent');
     if (!tabContent) return;
 
-    const defaultTab = localStorage.getItem('lastActiveTab') || 'home';
+    // Verificar aba preferida salva para definir qual pane inicia ativa
+    let defaultTab = localStorage.getItem('lastActiveTab') || 'home';
+    try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        if (saved?.preferences?.preferredTab) {
+            defaultTab = saved.preferences.preferredTab;
+        }
+    } catch (e) { /* fallback para lastActiveTab */ }
 
     tabContent.innerHTML = TAB_LIST.map(tab => {
         const isDefault = tab.id === defaultTab;
@@ -112,12 +119,21 @@ function buildHomeCards() {
     const grid = document.getElementById('home-cards-grid');
     if (!grid) return;
 
+    const preferredTab = appState?.preferences?.preferredTab || '';
+
     grid.innerHTML = TAB_LIST
         .filter(tab => !tab.hidden && tab.id !== 'instalacao')
         .map(tab => {
             const colorClass = tab.color ? ` ${tab.color}` : '';
+            const isPreferred = preferredTab && tab.id === preferredTab;
+            const starActiveClass = isPreferred ? ' active' : '';
+            const starTitle = isPreferred ? 'Aba preferida' : 'Definir como aba preferida';
             return `<a class="card-link card-glass-container" data-bs-toggle="pill" data-bs-target="#${tab.id}" role="tab"
                 aria-controls="${tab.id}" aria-selected="false">
+                <button class="card-glass-star${starActiveClass}" data-tab-id="${tab.id}"
+                    data-bs-toggle="tooltip" data-bs-title="${starTitle}" aria-label="${starTitle}">
+                    <i class="material-symbols-outlined">star</i>
+                </button>
                 <div class="card-glass-title">${tab.label}</div>
                 <hr>
                 <div class="card-glass-text">${tab.description || ''}</div>
@@ -126,6 +142,28 @@ function buildHomeCards() {
                 </div>
             </a>`;
         }).join('');
+
+    // Delegação de evento para as estrelas
+    grid.addEventListener('click', (e) => {
+        const starBtn = e.target.closest('.card-glass-star');
+        if (!starBtn) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (starBtn.classList.contains('active')) {
+            // Estrela preferida → abre painel de configurações
+            if (typeof openPanel === 'function') openPanel('settings-panel');
+        } else {
+            // Estrela cinza → salva como preferida
+            const tabId = starBtn.dataset.tabId;
+            appState.preferences.preferredTab = tabId;
+            saveAppState();
+            applyUserPreferences(appState.preferences);
+            if (typeof showToast === 'function') {
+                showToast('Aba preferida atualizada', 'success', 2000, 'configurações');
+            }
+        }
+    });
 }
 
 // --- App Launcher ---
