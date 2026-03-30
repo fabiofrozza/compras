@@ -1,3 +1,6 @@
+// Sinaliza que JavaScript está habilitado (oculta avisos de noscript)
+document.documentElement.classList.replace('no-js', 'js-enabled');
+
 let ws;
 let selectedFiles = {}; // Armazena arquivos selecionados por containerId
 let wsDisconnectedAlertShown = false;

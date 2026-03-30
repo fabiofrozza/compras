@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="no-js">
 
 <head>
     <meta charset="UTF-8">
@@ -109,6 +109,12 @@
         </div>
 
         <div class="header-actions" id="header-actions">
+            <button class="header-icon-btn noscript-warning-icon" aria-label="JavaScript desabilitado"
+                data-bs-toggle="tooltip" data-bs-title="JavaScript está desabilitado" data-bs-placement="bottom"
+                style="color: #ef4444;">
+                <i class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1, 'wght' 600;">error</i>
+            </button>
+            <div class="header-separator noscript-warning-icon" role="separator"></div>
             <button id="darkModeBtn" class="header-icon-btn" aria-label="Ativar/desativar modo escuro"
                 data-bs-toggle="tooltip" data-bs-title="Ativar/desativar modo escuro" data-bs-placement="bottom"
                 onclick="applyDarkMode()">
@@ -141,6 +147,14 @@
     </header>
 
     <div class="d-none" id="hidden-tablist" role="tablist"></div>
+
+    <!-- Aviso exibido quando JavaScript está desabilitado -->
+    <noscript>
+        <div class="noscript-banner">
+            <i class="material-symbols-outlined">error</i>
+            <span>JavaScript está desabilitado no seu navegador. Esta página requer JavaScript para funcionar corretamente. Por favor, habilite o JavaScript nas configurações do seu navegador.</span>
+        </div>
+    </noscript>
 
     <main class="tab-content" id="tabContent"></main>
 
