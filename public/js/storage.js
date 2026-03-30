@@ -7,6 +7,7 @@ let appState = {
     preferences: {
         darkMode: false,
         animatedBg: true,
+        enableAnimations: true,
         preferredTab: '',
         bgSource: 'random'
     }
@@ -96,6 +97,11 @@ function applyUserPreferences(preferences) {
     const animatedBgEl = document.getElementById('animatedBg');
     if (animatedBgEl) animatedBgEl.checked = animatedBg;
 
+    const enableAnimations = preferences.enableAnimations !== false;
+    document.body.classList.toggle('no-animations', !enableAnimations);
+    const enableAnimationsEl = document.getElementById('enableAnimations');
+    if (enableAnimationsEl) enableAnimationsEl.checked = enableAnimations;
+
     const bgSourceSelect = document.getElementById('bgSource');
     if (bgSourceSelect) bgSourceSelect.value = preferences.bgSource || 'random';
 
@@ -179,7 +185,7 @@ function setupAutoSave(container) {
                 }
 
                 // Preferências UI
-                if (['darkMode', 'animatedBg', 'preferredTab', 'bgSource'].includes(fieldName)) {
+                if (['darkMode', 'animatedBg', 'enableAnimations', 'preferredTab', 'bgSource'].includes(fieldName)) {
                     appState.preferences[fieldName] = value;
                     saveAppState();
                     applyUserPreferences(appState.preferences);

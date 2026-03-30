@@ -121,6 +121,8 @@ async function addNotification({ message, type = 'info', source = 'Sistema' }) {
 
 let _easterEggsLoadersReady = false;
 async function easterEggNotification() {
+    if (document.body.classList.contains('no-animations')) return;
+
     const btn = document.getElementById('notificationsBtn');
     const headerActions = document.getElementById('header-actions');
     if (!btn) return;
