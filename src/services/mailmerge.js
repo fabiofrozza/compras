@@ -288,25 +288,10 @@ async function processarDocumento_DOCX(templateBuffer, dados, numeroAta, dadosTa
         const zip = new JSZip();
         const carregado = await zip.loadAsync(templateBuffer);
 
-        // Encontrar arquivos XML que contêm o texto
-        const arquivosProcessar = [];
-
-        for (const nomeArquivo of Object.keys(carregado.files)) {
-            if (nomeArquivo.includes('word/document') ||
-                (nomeArquivo.includes('word/') && nomeArquivo.endsWith('.xml')) ||
-                nomeArquivo === 'document.xml' ||
-                nomeArquivo === 'content.xml') {
-                arquivosProcessar.push(nomeArquivo);
-            }
-        }
-
-        if (arquivosProcessar.length === 0) {
-            for (const nomeArquivo of Object.keys(carregado.files)) {
-                if (nomeArquivo.endsWith('.xml') && !nomeArquivo.includes('_rels')) {
-                    arquivosProcessar.push(nomeArquivo);
-                }
-            }
-        }
+        // Processar todos os XMLs do ZIP exceto arquivos de relacionamento
+        const arquivosProcessar = Object.keys(carregado.files).filter(
+            nome => nome.endsWith('.xml') && !nome.includes('_rels')
+        );
 
         if (arquivosProcessar.length === 0) {
             throw new Error('Nenhum arquivo XML de documento encontrado');
@@ -320,7 +305,8 @@ async function processarDocumento_DOCX(templateBuffer, dados, numeroAta, dadosTa
         // Processar cada arquivo XML
         for (const nomeArquivo of arquivosProcessar) {
             let conteudoAtual = await carregado.file(nomeArquivo).async('text');
-            let conteudoProcessado = substituirCampos(conteudoAtual, dados, numeroAta);
+            let conteudoNormalizado = normalizarPlaceholdersSplit(conteudoAtual);
+            let conteudoProcessado = substituirCampos(conteudoNormalizado, dados, numeroAta);
 
             // Inserir tabela no lugar do placeholder TABELA_ITENS
             if (tabelaXml && conteudoProcessado.includes('TABELA_ITENS')) {
@@ -337,6 +323,42 @@ async function processarDocumento_DOCX(templateBuffer, dados, numeroAta, dadosTa
     } catch (err) {
         throw new Error(`Erro ao processar DOCX: ${err.message}`);
     }
+}
+
+/**
+ * Normaliza placeholders divididos pelo Word em múltiplos runs XML.
+ * O Word às vezes divide <<campo>> em runs separados, ex:
+ *   &lt;&lt;</w:t></w:r><w:r><w:t>campo</w:t></w:r><w:r><w:t>&gt;&gt;
+ * Esta função reune o placeholder num único token antes da substituição.
+ */
+function normalizarPlaceholdersSplit(xml) {
+    let resultado = xml;
+
+    // Normaliza &lt;&lt;...&gt;&gt; (<<campo>> com escape XML, possivelmente dividido por runs)
+    resultado = resultado.replace(
+        /&lt;&lt;((?:(?!&lt;&lt;|&gt;&gt;|<\/w:p>)[\s\S]){0,2000})&gt;&gt;/g,
+        (match, inner) => {
+            const campo = inner.replace(/<[^>]*>/g, '').replace(/\s/g, '');
+            if (/^[a-zA-Z0-9_]+$/.test(campo)) {
+                return `&lt;&lt;${campo}&gt;&gt;`;
+            }
+            return match;
+        }
+    );
+
+    // Normaliza <<...>> (literal, possivelmente dividido por runs)
+    resultado = resultado.replace(
+        /<<((?:(?!<<|>>|<\/w:p>)[\s\S]){0,2000})>>/g,
+        (match, inner) => {
+            const campo = inner.replace(/<[^>]*>/g, '').replace(/\s/g, '');
+            if (/^[a-zA-Z0-9_]+$/.test(campo)) {
+                return `<<${campo}>>`;
+            }
+            return match;
+        }
+    );
+
+    return resultado;
 }
 
 /**
