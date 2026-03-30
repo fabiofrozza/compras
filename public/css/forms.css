@@ -202,16 +202,31 @@ FORMS AND FILES
 /* File Manager */
 
 .files-list,
-.files-list-style {
+.files-list-style,
+.fornecedores-grid-list {
     background-color: color-mix(in srgb, var(--compras-theme) 50%, white);
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;
     margin-bottom: 12px;
+}
+
+.files-list,
+.files-list-style {
     overflow: hidden;
 }
 
+.files-list.view-grid {
+    padding: 8px;
+}
+
+.files-list.view-grid .folder-path-container {
+    margin: -8px -8px 8px;
+    border-radius: 5px 5px 0 0;
+}
+
 .files-list:not(.is-invalid):has(.selectable),
-.fornecedores-grid-list:not(.is-invalid):has(.pregao-selected) {
+.files-list.view-grid:not(.is-invalid):has(.item-selectable),
+.fornecedores-grid-list:not(.is-invalid):has(.item-selected) {
     border: 1px solid var(--bs-primary);
 }
 
@@ -261,6 +276,7 @@ FORMS AND FILES
     justify-content: space-between;
     word-break: break-all;
     flex-wrap: nowrap;
+    position: relative;
 }
 
 .folder-path {
@@ -274,8 +290,27 @@ FORMS AND FILES
     font-size: 1.25rem;
 }
 
-.folder-path-btn {
+.folder-path-actions {
     display: none;
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding-left: 16px;
+    background: linear-gradient(to right, transparent, color-mix(in srgb, var(--compras-theme) 50%, white) 20%);
+}
+
+.files-list:hover .folder-path-actions,
+.files-list-style:hover .folder-path-actions,
+.fornecedores-grid-list:hover .folder-path-actions {
+    display: flex;
+}
+
+.folder-path-btn {
+    display: flex;
     padding: 0;
     border: none;
     background: none;
@@ -288,12 +323,6 @@ FORMS AND FILES
 
 .folder-path-btn:hover {
     opacity: 1;
-}
-
-.files-list:hover .folder-path-btn:not(:disabled),
-.files-list-style:hover .folder-path-btn:not(:disabled),
-.fornecedores-grid-list:hover .folder-path-btn:not(:disabled) {
-    display: flex;
 }
 
 .folder-path-btn .material-symbols-outlined {
@@ -424,13 +453,9 @@ FORMS AND FILES
    ========================================================================== */
 
 .fornecedores-grid-list {
-    background-color: color-mix(in srgb, var(--compras-theme) 50%, white);
-    border: 1px solid var(--bs-border-color);
-    border-radius: 6px;
     min-height: 100px;
     max-height: 350px;
     overflow-y: auto;
-    margin-bottom: 12px;
     padding: 8px;
 }
 
@@ -444,13 +469,15 @@ FORMS AND FILES
     border-radius: 5px 5px 0 0;
 }
 
-.fornecedores-pregoes-grid {
+/* Items grid (pregões e visualização em grid de arquivos) */
+.items-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 8px;
 }
 
-.pregao-card {
+/* Item card genérico */
+.item-card {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -464,87 +491,88 @@ FORMS AND FILES
     text-align: center;
 }
 
-.pregao-card.pregao-selected {
+.item-card.item-selected {
     border-color: var(--bs-primary);
     background-color: var(--bs-primary-bg-subtle);
 }
 
-.pregao-card-icon {
+.item-card-icon {
     font-size: 2rem;
     margin-bottom: 4px;
 }
 
-.pregao-card-icon i {
+.item-card-icon i {
     font-size: 2rem;
     font-variation-settings: 'FILL' 1;
 }
 
-.pregao-card.status-pendente .pregao-card-icon i {
+.item-card.status-pendente .item-card-icon i {
     color: var(--compras-pending);
 }
 
-.pregao-card.status-sucesso .pregao-card-icon i {
+.item-card.status-sucesso .item-card-icon i {
     color: var(--compras-success);
 }
 
-.pregao-card.status-parcial .pregao-card-icon i {
+.item-card.status-parcial .item-card-icon i {
     color: var(--compras-warning);
 }
 
-.pregao-card.status-sem_saida .pregao-card-icon i {
+.item-card.status-sem_saida .item-card-icon i {
     color: var(--compras-error);
 }
 
-.pregao-card-name {
+.item-card-name {
     font-size: 11px;
     font-weight: 600;
     word-break: break-all;
     line-height: 1.2;
 }
 
-.pregao-card-status {
+/* Status badge (usado nos cards de pregões) */
+.item-card-status {
     position: absolute;
     top: 6px;
     right: 6px;
 }
 
-.pregao-card-status i {
+.item-card-status i {
     font-size: 14px;
     vertical-align: top;
 }
 
-.pregao-card.status-pendente .pregao-card-status i {
+.item-card.status-pendente .item-card-status i {
     color: var(--compras-pending);
 }
 
-.pregao-card.status-sucesso .pregao-card-status i {
+.item-card.status-sucesso .item-card-status i {
     color: var(--compras-success);
 }
 
-.pregao-card.status-parcial .pregao-card-status i {
+.item-card.status-parcial .item-card-status i {
     color: var(--compras-warning);
 }
 
-.pregao-card.status-sem_saida .pregao-card-status i {
+.item-card.status-sem_saida .item-card-status i {
     color: var(--compras-error);
 }
 
-.pregao-card-delete,
-.pregao-card-open {
+.item-card-delete,
+.item-card-open {
     position: absolute;
     left: 6px;
 }
 
-.pregao-card-delete {
+.item-card-delete {
     top: 20px;
 }
 
-.pregao-card-open {
+.item-card-open {
     top: 0px;
 }
 
-.pregao-card-delete:hover,
-.pregao-card-open:hover {
+.item-card-delete:hover,
+.item-card-open:hover {
     opacity: 1 !important;
 }
 
@@ -596,7 +624,7 @@ FORMS AND FILES
 }
 
 .files-table tbody tr:hover .file-row-btn,
-.pregao-card:hover .file-row-btn {
+.item-card:hover .file-row-btn {
     opacity: 0.7;
 }
 

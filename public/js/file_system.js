@@ -1,3 +1,5 @@
+const fileViewMode = {}; // containerId -> 'table' | 'grid'
+
 const FILE_ICON_MAP = {
     doc: ['file-word', 'description'],
     docx: ['file-word', 'description'],
@@ -41,14 +43,16 @@ function buildFolderPathHTML(folderPath, beforeCopyHTML = '', afterCopyHTML = ''
         <div class="folder-path-container">
             <i class="material-symbols-outlined">folder</i>
             <span class="folder-path">${folderPath}</span>
-            ${beforeCopyHTML}
-            <button data-bs-toggle="tooltip" data-bs-title="Copiar caminho" class="folder-path-btn copy-icon">
-                <i class="material-symbols-outlined">content_copy</i>
-            </button>
-            ${afterCopyHTML}
-            <button data-bs-toggle="tooltip" data-bs-title="Abrir pasta" class="folder-path-btn btn-open" data-folder-path="${folderPath}">
-                <i class="material-symbols-outlined">folder_open</i>
-            </button>
+            <div class="folder-path-actions">
+                ${beforeCopyHTML}
+                <button data-bs-toggle="tooltip" data-bs-title="Copiar caminho" class="folder-path-btn copy-icon">
+                    <i class="material-symbols-outlined">content_copy</i>
+                </button>
+                ${afterCopyHTML}
+                <button data-bs-toggle="tooltip" data-bs-title="Abrir pasta" class="folder-path-btn btn-open" data-folder-path="${folderPath}">
+                    <i class="material-symbols-outlined">folder_open</i>
+                </button>
+            </div>
         </div>
     `;
 }
@@ -258,12 +262,94 @@ function refreshFileList(containerId, scriptName) {
     return loadFiles(containerId, scriptName, folder, selectable);
 }
 
+function buildFilesTableHTML(files, containerId, scriptName, innerFolder, canDelete, selectable, folderPath) {
+    let html = '<div class="files-table-container"><table class="files-table"><tbody>';
+
+    files.forEach((file, index) => {
+        const modDate = new Date(file.modifiedDate).toLocaleString('pt-BR');
+        const icon = getFileIcon(file.name, file.isDirectory);
+        const fileId = `${containerId}-file-${index}`;
+        const safeFolderPath = folderPath.replace(/"/g, '&quot;');
+        const safeFileName = file.name.replace(/"/g, '&quot;');
+        const fileFullPath = `${safeFolderPath}/${safeFileName}`;
+        const isSelected = selectedFiles[containerId] === file.name ? 'selected' : '';
+
+        if (selectable) {
+            html += `<tr class="selectable ${isSelected}" id="${fileId}" data-filepath="${fileFullPath}" onclick='selectFile("${containerId}", "${file.name}", "${fileId}")' ondblclick='openFile(this.dataset.filepath)'>`;
+        } else {
+            html += `<tr data-filepath="${fileFullPath}" ondblclick='openFile(this.dataset.filepath)'>`;
+        }
+
+        let rowButtons = `
+            <button class="btn btn-sm text-primary file-row-btn" onclick="event.stopPropagation(); openFile(this.closest('tr').dataset.filepath)"
+                data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">
+                <i class="material-symbols-outlined">open_in_new</i>
+            </button>`;
+
+        if (canDelete && !file.isDirectory) {
+            rowButtons += `
+            <button class="btn btn-sm text-danger file-row-btn" onclick="event.stopPropagation(); deleteFile('${containerId}', '${scriptName}', '${innerFolder}', '${safeFileName}')"
+                data-bs-toggle="tooltip" data-bs-title="Excluir arquivo">
+                <i class="material-symbols-outlined">delete</i>
+            </button>`;
+        }
+
+        html += `<td><span class="file-icon">${icon}</span></td><td>${file.name}</td><td>${modDate}</td><td class="table-btn-column text-nowrap">${rowButtons}</td></tr>`;
+    });
+
+    html += '</tbody></table></div>';
+    return html;
+}
+
+function buildFilesGridHTML(files, containerId, scriptName, innerFolder, canDelete, selectable, folderPath) {
+    let html = '<div class="items-grid">';
+
+    files.forEach((file, index) => {
+        const icon = getFileIcon(file.name, file.isDirectory);
+        const fileId = `${containerId}-file-${index}`;
+        const safeFolderPath = folderPath.replace(/"/g, '&quot;');
+        const safeFileName = file.name.replace(/"/g, '&quot;');
+        const fileFullPath = `${safeFolderPath}/${safeFileName}`;
+        const isSelected = selectedFiles[containerId] === file.name ? ' item-selected selected' : '';
+        const selectableClass = selectable ? ' item-selectable' : '';
+        const onclickAttr = selectable
+            ? `onclick='selectFile("${containerId}", "${file.name}", "${fileId}")'`
+            : `onclick='openFile(this.dataset.filepath)'`;
+
+        const deleteBtn = (canDelete && !file.isDirectory) ? `
+            <button class="item-card-delete btn btn-sm text-danger file-row-btn"
+                onclick="event.stopPropagation(); deleteFile('${containerId}', '${scriptName}', '${innerFolder}', '${safeFileName}')"
+                data-bs-toggle="tooltip" data-bs-title="Excluir arquivo">
+                <i class="material-symbols-outlined">delete</i>
+            </button>` : '';
+
+        html += `
+            <div class="item-card${isSelected}${selectableClass}" id="${fileId}" data-filepath="${fileFullPath}" ${onclickAttr}>
+                <div class="item-card-icon">${icon}</div>
+                <div class="item-card-name">${file.name}</div>
+                <button class="item-card-open btn btn-sm text-primary file-row-btn"
+                    onclick="event.stopPropagation(); openFile(this.closest('.item-card').dataset.filepath)"
+                    data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">
+                    <i class="material-symbols-outlined">open_in_new</i>
+                </button>
+                ${deleteBtn}
+            </div>`;
+    });
+
+    html += '</div>';
+    return html;
+}
+
 async function loadFiles(containerId, scriptName, innerFolder, selectable) {
     const filesList = document.getElementById(containerId);
     if (!filesList) return;
     const extensions = filesList.dataset.extensions;
     const nameContains = filesList.dataset.nameContains;
     const sort = filesList.dataset.sort;
+    const defaultView = filesList.dataset.gridView === 'true' ? 'grid' : (filesList.dataset.view || 'table');
+    const viewMode = fileViewMode[containerId] || defaultView;
+
+    filesList.classList.toggle('view-grid', viewMode === 'grid');
 
     try {
         filesList.innerHTML = `
@@ -277,15 +363,9 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
 
         let url = `/api/list-files/${scriptName}/${innerFolder}`;
         let params = new URLSearchParams();
-        if (extensions) {
-            params.append('extensions', extensions);
-        }
-        if (nameContains) {
-            params.append('nameContains', nameContains);
-        }
-        if (sort) {
-            params.append('sort', sort);
-        }
+        if (extensions) params.append('extensions', extensions);
+        if (nameContains) params.append('nameContains', nameContains);
+        if (sort) params.append('sort', sort);
 
         let qs = params.toString();
         if (qs) url += `?${qs}`;
@@ -310,14 +390,19 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
                 <i class="material-symbols-outlined">delete</i>
             </button>` : '';
 
+        const toggleViewBtn = hasFiles ? `
+            <button data-bs-toggle="tooltip" data-bs-title="Alternar visualização" class="folder-path-btn btn-toggle-view" data-container-id="${containerId}">
+                <i class="material-symbols-outlined">${viewMode === 'grid' ? 'table_rows' : 'grid_view'}</i>
+            </button>` : '';
+
         const refreshBtn = `
             <button data-bs-toggle="tooltip" data-bs-title="Atualizar lista de arquivos" class="folder-path-btn btn-refresh" data-container-id="${containerId}" data-script-name="${scriptName}">
                 <i class="material-symbols-outlined">refresh</i>
             </button>`;
 
-        let filesHTML = buildFolderPathHTML(data.folderPath, deleteBtn, refreshBtn);
+        let filesHTML = buildFolderPathHTML(data.folderPath, deleteBtn, toggleViewBtn + refreshBtn);
 
-        if (!data.files || data.files.length === 0) {
+        if (!hasFiles) {
             filesHTML += `
                 <div class="alert alert-warning" role="alert">
                     <i class="material-symbols-outlined">warning</i> Nenhum arquivo encontrado na pasta
@@ -329,56 +414,11 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
             return;
         }
 
-        filesHTML += `
-            <div class="files-table-container">
-                <table class="files-table">
-                    <tbody>
-        `;
-
-        data.files.forEach((file, index) => {
-            const modDate = new Date(file.modifiedDate).toLocaleString('pt-BR');
-            const icon = getFileIcon(file.name, file.isDirectory);
-            const fileId = `${containerId}-file-${index}`;
-            const safeFolderPath = data.folderPath.replace(/"/g, '&quot;');
-            const safeFileName = file.name.replace(/"/g, '&quot;');
-
-            // Usamos '/' para unir que o backend entende em qualquer SO
-            const fileFullPath = `${safeFolderPath}/${safeFileName}`;
-
-            const isSelected = selectedFiles[containerId] === file.name ? 'selected' : '';
-            if (selectable) {
-                filesHTML += `
-                    <tr class="selectable ${isSelected}" id="${fileId}" data-filepath="${fileFullPath}" onclick='selectFile("${containerId}", "${file.name}", "${fileId}")' ondblclick='openFile(this.dataset.filepath)'>
-                `;
-            } else {
-                filesHTML += `
-                    <tr data-filepath="${fileFullPath}" ondblclick='openFile(this.dataset.filepath)'>
-                `;
-            }
-
-            let rowButtons = `
-                <button class="btn btn-sm text-primary file-row-btn" onclick="event.stopPropagation(); openFile(this.closest('tr').dataset.filepath)"
-                    data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">
-                    <i class="material-symbols-outlined">open_in_new</i>
-                </button>`;
-
-            if (canDelete && !file.isDirectory) {
-                rowButtons += `
-                <button class="btn btn-sm text-danger file-row-btn" onclick="event.stopPropagation(); deleteFile('${containerId}', '${scriptName}', '${innerFolder}', '${safeFileName}')"
-                    data-bs-toggle="tooltip" data-bs-title="Excluir arquivo">
-                    <i class="material-symbols-outlined">delete</i>
-                </button>`;
-            }
-
-            filesHTML += `
-                    <td><span class="file-icon">${icon}</span></td><td>${file.name}</td>
-                    <td>${modDate}</td>
-                    <td class="table-btn-column text-nowrap">${rowButtons}</td>
-                </tr>
-            `;
-        });
-
-        filesHTML += '</tbody></table></div>';
+        if (viewMode === 'grid') {
+            filesHTML += buildFilesGridHTML(data.files, containerId, scriptName, innerFolder, canDelete, selectable, data.folderPath);
+        } else {
+            filesHTML += buildFilesTableHTML(data.files, containerId, scriptName, innerFolder, canDelete, selectable, data.folderPath);
+        }
 
         filesList.innerHTML = filesHTML;
 
@@ -403,8 +443,23 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
 function setupFileListButtons(filesList) {
     const btnRefresh = filesList.querySelector('.btn-refresh');
     const btnClear = filesList.querySelector('.btn-clear');
+    const btnToggleView = filesList.querySelector('.btn-toggle-view');
 
     setupFolderPathButtons(filesList);
+
+    if (btnToggleView) {
+        btnToggleView.addEventListener('click', async () => {
+            removeTooltip(btnToggleView);
+            const containerId = btnToggleView.dataset.containerId;
+            const el = document.getElementById(containerId);
+            const defaultView = el?.dataset.gridView === 'true' ? 'grid' : (el?.dataset.view || 'table');
+            const currentMode = fileViewMode[containerId] || defaultView;
+            fileViewMode[containerId] = currentMode === 'table' ? 'grid' : 'table';
+            await refreshFileList(containerId);
+            const updatedList = document.getElementById(containerId);
+            if (updatedList) validateSingleField(updatedList);
+        });
+    }
 
     if (btnRefresh) {
         btnRefresh.addEventListener('click', async (e) => {
@@ -445,26 +500,32 @@ function setupFileListButtons(filesList) {
 function selectFile(containerId, fileName, fileId) {
     const container = document.getElementById(containerId);
     if (container) {
-        const previousSelected = container.querySelector('tr.selected');
-        if (previousSelected) {
-            previousSelected.classList.remove('selected');
-            previousSelected.style.borderLeft = '';
-            previousSelected.style.backgroundColor = '';
+        const previousTableSelected = container.querySelector('tr.selected');
+        if (previousTableSelected) {
+            previousTableSelected.classList.remove('selected');
+            previousTableSelected.style.borderLeft = '';
+            previousTableSelected.style.backgroundColor = '';
+        }
+        const previousCardSelected = container.querySelector('.item-card.item-selected');
+        if (previousCardSelected) {
+            previousCardSelected.classList.remove('item-selected', 'selected');
         }
     }
 
     const fileRow = document.getElementById(fileId);
     if (fileRow) {
         fileRow.classList.add('selected');
+        if (fileRow.classList.contains('item-card')) {
+            fileRow.classList.add('item-selected');
+        }
         colorSelectedRow(containerId);
     }
 
     selectedFiles[containerId] = fileName;
 
-    const event = new CustomEvent('file-selected', {
+    document.dispatchEvent(new CustomEvent('file-selected', {
         detail: { containerId: containerId, fileName: fileName }
-    });
-    document.dispatchEvent(event);
+    }));
 }
 
 function colorSelectedRow(containerId) {

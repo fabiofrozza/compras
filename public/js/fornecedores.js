@@ -28,11 +28,11 @@ function inicializarFornecedores() {
     const pregoesContainer = document.getElementById('fornecedores-pregoes-list');
     if (pregoesContainer) {
         pregoesContainer.addEventListener('click', (e) => {
-            const btn = e.target.closest('.pregao-card-open');
+            const btn = e.target.closest('.item-card-open');
             if (!btn) return;
             e.stopPropagation();
             removeTooltip(btn);
-            const pregao = btn.closest('.pregao-card')?.dataset.pregao;
+            const pregao = btn.closest('.item-card')?.dataset.pregao;
             if (pregao && pregoesDadosFolderPath) {
                 openFolder(pregoesDadosFolderPath + '\\' + pregao);
                 showToast(`Abrindo pasta ${pregao}. Verifique na barra de tarefas...`, 'info', 5000);
@@ -82,7 +82,7 @@ async function carregarPregoes() {
             return;
         }
 
-        let html = buildFolderPathHTML(displayPath, '', refreshPregoes) + '<div class="fornecedores-pregoes-grid">';
+        let html = buildFolderPathHTML(displayPath, '', refreshPregoes) + '<div class="items-grid">';
         data.pregoes.forEach(pregao => {
             const statusClass = {
                 sucesso: 'status-sucesso',
@@ -99,27 +99,27 @@ async function carregarPregoes() {
                 parcial: 'Arquivo gerado com erros',
                 sem_saida: 'Script executado sem gerar arquivo',
             }[pregao.status] || 'Pendente de geração do arquivo';
-            const isSelected = pregaoSelecionado === pregao.nome ? ' pregao-selected' : '';
+            const isSelected = pregaoSelecionado === pregao.nome ? ' item-selected selected' : '';
 
             html += `
-                <div class="pregao-card ${statusClass}${isSelected}" data-pregao="${pregao.nome}"
+                <div class="item-card ${statusClass}${isSelected}" data-pregao="${pregao.nome}"
                      onclick="selecionarPregao('${pregao.nome}')">
-                    <div class="pregao-card-icon">
+                    <div class="item-card-icon">
                         <i class="material-symbols-outlined">folder</i>
                     </div>
-                    <div class="pregao-card-name">${pregao.nome}</div>
-                    <div class="pregao-card-status">
+                    <div class="item-card-name">${pregao.nome}</div>
+                    <div class="item-card-status">
                         <i class="material-symbols-outlined"
                         data-bs-toggle="tooltip" data-bs-title="${statusTooltip}">
                             ${statusIcon}
                         </i>
                     </div>
-                    <button class="pregao-card-open btn btn-sm text-primary file-row-btn" data-bs-toggle="tooltip"
+                    <button class="item-card-open btn btn-sm text-primary file-row-btn" data-bs-toggle="tooltip"
                         data-bs-title="Abrir pasta ${pregao.nome}"
                         data-bs-placement="right">
                         <i class="material-symbols-outlined">folder_open</i>
                     </button>
-                    <button class="pregao-card-delete btn btn-sm text-danger file-row-btn" data-bs-toggle="tooltip"
+                    <button class="item-card-delete btn btn-sm text-danger file-row-btn" data-bs-toggle="tooltip"
                         data-bs-title="Excluir pregão ${pregao.nome}"
                         data-bs-placement="right"
                         onclick="event.stopPropagation(); excluirPregao('${pregao.nome}')">
@@ -153,9 +153,9 @@ function selecionarPregao(nome) {
     pregaoSelecionado = nome;
 
     // Atualizar visual de seleção
-    document.querySelectorAll('.pregao-card').forEach(card => {
+    document.querySelectorAll('.item-card[data-pregao]').forEach(card => {
         const isSelected = card.dataset.pregao === nome;
-        card.classList.toggle('pregao-selected', isSelected);
+        card.classList.toggle('item-selected', isSelected);
         card.classList.toggle('selected', isSelected);
     });
 
@@ -297,7 +297,7 @@ function setupConteudoFooterButtons(container, pregao, hasFiles) {
     btnClear.setAttribute('data-bs-title', 'Excluir todos os arquivos');
     btnClear.innerHTML = '<i class="material-symbols-outlined">delete</i>';
     if (!hasFiles) btnClear.disabled = true;
-    folderPathContainer.insertBefore(btnClear, copyIcon);
+    copyIcon.parentNode.insertBefore(btnClear, copyIcon);
 
     const btnRefresh = document.createElement('button');
     btnRefresh.className = 'folder-path-btn btn-refresh-conteudo';
@@ -305,7 +305,7 @@ function setupConteudoFooterButtons(container, pregao, hasFiles) {
     btnRefresh.setAttribute('data-bs-title', 'Atualizar lista');
     btnRefresh.innerHTML = '<i class="material-symbols-outlined">refresh</i>';
     const btnOpen = folderPathContainer.querySelector('.btn-open');
-    folderPathContainer.insertBefore(btnRefresh, btnOpen);
+    btnOpen.parentNode.insertBefore(btnRefresh, btnOpen);
 
     btnClear.addEventListener('click', () => {
         removeTooltip(btnClear);
@@ -446,7 +446,7 @@ function setupImportarFooterButtons(container, hasFiles) {
     btnClear.setAttribute('data-bs-title', 'Excluir todos os arquivos');
     btnClear.innerHTML = '<i class="material-symbols-outlined">delete</i>';
     if (!hasFiles) btnClear.disabled = true;
-    folderPathContainer.insertBefore(btnClear, copyIcon);
+    copyIcon.parentNode.insertBefore(btnClear, copyIcon);
 
     const btnRefresh = document.createElement('button');
     btnRefresh.className = 'folder-path-btn btn-refresh-importar';
@@ -454,7 +454,7 @@ function setupImportarFooterButtons(container, hasFiles) {
     btnRefresh.setAttribute('data-bs-title', 'Atualizar lista');
     btnRefresh.innerHTML = '<i class="material-symbols-outlined">refresh</i>';
     const btnOpen = folderPathContainer.querySelector('.btn-open');
-    folderPathContainer.insertBefore(btnRefresh, btnOpen);
+    btnOpen.parentNode.insertBefore(btnRefresh, btnOpen);
 
     btnClear.addEventListener('click', () => {
         removeTooltip(btnClear);
@@ -562,15 +562,15 @@ async function carregarImportar() {
 }
 
 async function selecionarImportar(pregao) {
-    const pregaoCard = document.querySelector(`.pregao-card[data-pregao="${pregao}"]`);
+    const pregaoCard = document.querySelector(`.item-card[data-pregao="${pregao}"]`);
 
     if (pregaoCard) {
         selecionarPregao(pregao);
     } else {
         // Pasta do pregão não existe - limpar seleção e atualizar listas
         pregaoSelecionado = null;
-        document.querySelectorAll('.pregao-card').forEach(card => {
-            card.classList.remove('pregao-selected');
+        document.querySelectorAll('.item-card[data-pregao]').forEach(card => {
+            card.classList.remove('item-selected', 'selected');
         });
         limparInfoPregao();
         limparConteudoPasta();
