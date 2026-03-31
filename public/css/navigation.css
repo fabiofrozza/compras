@@ -91,9 +91,9 @@ Inspired by https://codepen.io/fooontic/pen/KwpRaGr
 .header-panel {
     display: flex;
     align-items: stretch;
-    gap: 2px;
+    gap: 0px;
     box-sizing: border-box;
-    padding: 2px;
+    padding: 3px;
     margin: 0 auto;
     border: none;
     border-radius: 99em;
@@ -204,6 +204,7 @@ Inspired by https://codepen.io/fooontic/pen/KwpRaGr
     position: absolute;
     right: var(--compras-padding-main);
     flex-shrink: 0;
+    anchor-name: --header-actions;
 }
 
 .header-separator {
@@ -215,9 +216,9 @@ Inspired by https://codepen.io/fooontic/pen/KwpRaGr
 
 .header-icon-btn {
     border: none;
-    font-size: 1.5rem;
-    width: 30px;
-    height: 30px;
+    font-size: 1.2rem;
+    width: 22px;
+    height: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -240,10 +241,11 @@ Inspired by https://codepen.io/fooontic/pen/KwpRaGr
     box-shadow:
         inset 0 0 0 1px color-mix(in srgb, var(--compras-c-light) calc(var(--compras-reflex-light) * 10%), transparent),
         inset 2px 1px 0px -1px color-mix(in srgb, var(--compras-c-light) calc(var(--compras-reflex-light) * 90%), transparent),
-        inset -1.5px -1px 0px -1px color-mix(in srgb, var(--compras-c-light) calc(var(--compras-reflex-light) * 80%), transparent),
+        /*        inset -1.5px -1px 0px -1px color-mix(in srgb, var(--compras-c-light) calc(var(--compras-reflex-light) * 80%), transparent),
         inset -2px -6px 1px -5px color-mix(in srgb, var(--compras-c-light) calc(var(--compras-reflex-light) * 60%), transparent),
         inset -1px 2px 3px -1px color-mix(in srgb, var(--compras-c-dark) calc(var(--compras-reflex-dark) * 20%), transparent),
         inset 0px -4px 1px -2px color-mix(in srgb, var(--compras-c-dark) calc(var(--compras-reflex-dark) * 10%), transparent),
+ */
         0px 3px 6px 0px color-mix(in srgb, var(--compras-c-dark) calc(var(--compras-reflex-dark) * 8%), transparent);
 }
 
@@ -253,8 +255,9 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
 
 .header-panel {
     position: fixed;
-    top: calc(var(--compras-nav-height) - 6px);
-    right: 12px;
+    position-anchor: --header-actions;
+    top: anchor(bottom);
+    right: anchor(right);
     width: 300px;
     transform-origin: top right;
     transform: translateY(-12px) scale(.01);

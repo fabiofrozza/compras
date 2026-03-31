@@ -309,7 +309,7 @@ function showConfirmationModal({
                         </div>
                         <div class="modal-body">
                             <p>${message}</p>
-                            <div id="${modalId}-detail-container" class="p-2 bg-light border rounded mb-3 text-break small" style="display: none;">
+                            <div id="${modalId}-detail-container" class="modal-detail p-2 border rounded mb-3 text-break small" style="display: none;">
                                 <span id="${modalId}-detail-text"></span>
                             </div>
                             ${confirmColor === 'btn-danger' ? '<p class="text-danger mb-0 fw-bold">Esta ação não pode ser desfeita!</p>' : ''}

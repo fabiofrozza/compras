@@ -151,10 +151,10 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
 
 .notification-badge {
     position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 12px;
-    height: 12px;
+    top: 1px;
+    right: 1px;
+    width: 10px;
+    height: 10px;
     background: var(--compras-error);
     color: white;
     font-size: 0.6rem;
@@ -165,7 +165,7 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     line-height: 1;
     pointer-events: none;
     animation: badgePop 0.5s ease-out;
-    box-shadow: 0 0 0 2px var(--compras-contrast);
+    box-shadow: 0 0 0 1px var(--compras-contrast);
 }
 
 #header-actions.bell-bump {
@@ -425,4 +425,8 @@ Easter Egg: game character bumps the bell notifications
 
 #notificationsBtn {
     overflow: visible;
+}
+
+.modal-detail {
+    background-color: color-mix(in srgb, var(--compras-theme) 75%, white);
 }
