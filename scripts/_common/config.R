@@ -713,14 +713,16 @@ config_finalizar <- function(sucesso = FALSE) {
   }
 
   if (!utils_is_interactive()) {
-    sink(type = "message")
-    sink()
+    if (!is.null(log_r$con)) {
+      sink(type = "message")
+      sink()
 
-    close(log_r$con)
+      close(log_r$con)
 
-    if (codigo_saida == 0 && config$geral$log_level == "error-warning") {
-      log_path <- file.path(get_config("pasta")$log, log_r$nome)
-      suppressWarnings(file.remove(log_path))
+      if (codigo_saida == 0 && config$geral$log_level == "error-warning") {
+        log_path <- file.path(get_config("pasta")$log, log_r$nome)
+        suppressWarnings(file.remove(log_path))
+      }
     }
 
     quit(status = codigo_saida)

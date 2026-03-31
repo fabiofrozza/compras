@@ -386,6 +386,10 @@ log_gravacao <- function() {
   #' @examples log_gravacao()
   #' @seealso \code{\link{set_config}}, \code{\link{config_json}}
 
+  if ("log-consent=false" %in% commandArgs(trailingOnly = TRUE)) {
+    return(invisible(NULL))
+  }
+
   pasta <- get_config("pasta")
   script_nome <- get_config("geral")$script_nome
 

@@ -15,6 +15,7 @@ class Logger {
             error: 3
         };
         this.fileStream = null;
+        this.logDir = null;
 
         if (options.logDir) {
             this._initFileLogging(options.logDir);
@@ -22,6 +23,7 @@ class Logger {
     }
 
     _initFileLogging(logDir) {
+        this.logDir = logDir;
         try {
             fs.mkdirSync(logDir, { recursive: true });
 
@@ -145,6 +147,20 @@ class Logger {
     setLevel(level) {
         if (this.levels[level] !== undefined) {
             this.minLevel = level;
+        }
+    }
+
+    enableFileLogging(logDir) {
+        const dir = logDir || this.logDir;
+        if (dir && !this.fileStream) {
+            this._initFileLogging(dir);
+        }
+    }
+
+    disableFileLogging() {
+        if (this.fileStream) {
+            this.fileStream.end();
+            this.fileStream = null;
         }
     }
 }

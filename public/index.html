@@ -16,7 +16,7 @@
 
     <!-- Material Symbols Outlined (ícones) -->
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,add_chart,add_to_drive,analytics,apps,article,assignment,assignment_turned_in,balance,build,business,calendar_today,cancel,category,check,check_circle,close,cloud_download,code,computer,contact_page,content_copy,dark_mode,delete,description,edit_note,emergency,error,event_repeat,filter_alt,fingerprint,flag,folder,folder_open,folder_zip,fullscreen,fullscreen_exit,gavel,grid_view,help,home,hourglass_empty,hub,image,info,ink_eraser,insert_drive_file,install_desktop,inventory_2,joystick,label,light_mode,list,list_alt,looks_one,minimize,money_range,notifications,notifications_off,open_in_browser,open_in_new,percent,percent_discount,photo_camera,picture_as_pdf,pie_chart,query_stats,receipt_long,refresh,schedule,settings,settings_account_box,settings_heart,shopping_basket,show_chart,slow_motion_video,star,storage,store,storefront,table_chart,table_rows,terminal,text_snippet,unfold_more,update,upload_file,warning&display=swap">
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,add_chart,add_to_drive,analytics,apps,article,assignment,assignment_turned_in,balance,build,business,calendar_today,cancel,category,check,check_circle,close,cloud_download,code,computer,contact_page,content_copy,dark_mode,delete,description,edit_note,emergency,error,event_repeat,filter_alt,fingerprint,flag,folder,folder_open,folder_zip,fullscreen,fullscreen_exit,gavel,grid_view,help,home,hourglass_empty,hub,image,info,ink_eraser,insert_drive_file,install_desktop,inventory_2,joystick,label,light_mode,list,list_alt,looks_one,minimize,money_range,notifications,notifications_off,open_in_browser,open_in_new,percent,percent_discount,photo_camera,picture_as_pdf,pie_chart,query_stats,receipt_long,refresh,schedule,settings,settings_account_box,settings_heart,shield_person,shopping_basket,show_chart,slow_motion_video,star,storage,store,storefront,table_chart,table_rows,terminal,text_snippet,unfold_more,update,upload_file,warning&display=swap">
 
     <!-- Popper.js (dependência do Bootstrap para tooltips) -->
     <script defer src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
@@ -260,11 +260,21 @@
                 </select>
             </div>
             <!-- Aba preferida -->
-            <div class="mb-0">
+            <div class="mb-3">
                 <label for="preferredTab" class="form-label">
                     <i class="material-symbols-outlined">star</i> Aba ao iniciar
                 </label>
                 <select id="preferredTab" class="form-select form-select-sm" data-field="preferredTab"></select>
+            </div>
+            <hr class="my-2">
+            <!-- Registro de logs -->
+            <div class="form-group mb-1">
+                <div class="form-check form-switch">
+                    <input type="checkbox" role="switch" id="logConsent" class="form-check-input" checked>
+                    <label for="logConsent" class="form-label">
+                        <i class="material-symbols-outlined">receipt_long</i> Salvar logs em arquivo
+                    </label>
+                </div>
             </div>
         </div>
     </div>
@@ -312,6 +322,7 @@
     </div>
 
     <script defer src="js/storage.js"></script>
+    <script defer src="js/privacy.js"></script>
     <script defer src="js/notifications.js"></script>
     <script defer src="js/interface.js"></script>
     <script defer src="js/validation.js"></script>

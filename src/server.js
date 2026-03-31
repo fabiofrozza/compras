@@ -8,10 +8,9 @@ const { spawn, execSync } = require('child_process');
 const Logger = require('./utils/logger');
 const { executarMailmerge } = require('./services/mailmerge');
 
-const logger = new Logger({
-  minLevel: 'debug',
-  logDir: path.join(__dirname, '..', 'logs')
-});
+let logConsentEnabled = true; // null/true = salvar logs (permissivo por padrão); false = opt-out
+
+const logger = new Logger({ minLevel: 'debug' });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -851,6 +850,23 @@ app.post('/api/fornecedores/mover', async (req, res) => {
   }
 });
 
+// API - POST consentimento de gravação de logs (decisão persiste no localStorage do cliente)
+app.post('/api/log-consent', (req, res) => {
+  const { consent } = req.body;
+  if (typeof consent !== 'boolean') {
+    return res.status(400).json({ error: 'consent deve ser boolean' });
+  }
+
+  logConsentEnabled = consent;
+  if (consent) {
+    logger.enableFileLogging(path.join(__dirname, '..', 'logs'));
+  } else {
+    logger.disableFileLogging();
+  }
+
+  res.json({ ok: true });
+});
+
 // Rota principal
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
@@ -1142,7 +1158,8 @@ async function executeRScript(ws, scriptFolder, params) {
     return;
   }
 
-  const args = [scriptPath, ...Object.values(params), 'json-output'];
+  const consentFlag = logConsentEnabled ? 'log-consent=true' : 'log-consent=false';
+  const args = [scriptPath, ...Object.values(params), 'json-output', consentFlag];
 
   const spawnOptions = {
     cwd: workingDir,

@@ -9,7 +9,8 @@ let appState = {
         animatedBg: true,
         enableAnimations: true,
         preferredTab: '',
-        bgSource: 'random'
+        bgSource: 'random',
+        logConsent: null
     }
 };
 
