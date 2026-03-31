@@ -154,14 +154,15 @@ FORMS AND FILES
     width: 100%;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 12px;
     align-items: flex-start;
 }
 
 .option-card {
+    position: relative;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 12px;
     padding: 10px 14px;
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;
@@ -182,10 +183,46 @@ FORMS AND FILES
     background-color: var(--bs-primary-bg-subtle);
 }
 
+.option-card::after {
+    font-family: 'Material Symbols Outlined';
+    content: 'check';
+    color: white;
+    font-variation-settings: 'FILL' 1, 'wght' 900;
+    padding-left: 1px;
+    line-height: 1.2;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: var(--bs-primary);
+    opacity: 0;
+}
+
+.option-card:has(input:checked)::after {
+    opacity: 1;
+}
+
+.option-card-icon {
+    flex-shrink: 0;
+    font-size: 2rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.option-card-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
 .option-card-title {
     font-size: 87.5%;
     font-weight: 500;
-    min-width: max-content;
 }
 
 .option-card-description {
@@ -193,10 +230,13 @@ FORMS AND FILES
     color: var(--bs-secondary-color);
 }
 
+/* Esconde o radio input nativo mantendo funcionalidade */
 .option-card .form-check-input {
-    flex-shrink: 0;
-    margin-left: 0.75rem;
-    margin-top: 0;
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
 }
 
 /* File Manager */

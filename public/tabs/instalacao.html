@@ -127,24 +127,34 @@
                 <div class="form-group">
                     <div class="option-card-group">
                         <label class="option-card">
+                            <i class="material-symbols-outlined option-card-icon">
+                                install_desktop
+                            </i>
                             <div>
                                 <div class="option-card-title">Instalar pacotes</div>
-                                <div class="option-card-description">Instala todos os pacotes R necessários para o funcionamento da aplicação. Execute esta opção no primeiro uso.</div>
+                                <div class="option-card-description">Instala todos os pacotes R necessários para o
+                                    funcionamento da aplicação. Execute esta opção no primeiro uso.</div>
                             </div>
-                            <input class="form-check-input" type="radio" name="instalacao-modo" value="instalar" checked>
+                            <input class="form-check-input" type="radio" name="instalacao-modo" value="instalar"
+                                checked>
                         </label>
                         <label class="option-card">
+                            <i class="material-symbols-outlined option-card-icon">
+                                event_repeat
+                            </i>
                             <div>
                                 <div class="option-card-title">Atualizar pacotes</div>
-                                <div class="option-card-description">Atualiza os pacotes R para a versão mais recente disponível. Utilize quando os scripts apresentarem erros relacionados a versões desatualizadas.</div>
+                                <div class="option-card-description">Atualiza os pacotes R para a versão mais recente
+                                    disponível. Utilize quando os scripts apresentarem erros relacionados a versões
+                                    desatualizadas.</div>
                             </div>
                             <input class="form-check-input" type="radio" name="instalacao-modo" value="atualizar">
                         </label>
                     </div>
                 </div>
                 <div class="form-buttons">
-                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"
-                        id="btn-run-instalacao" onclick="executarInstalacaoSelecionada()">
+                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-run-instalacao"
+                        onclick="executarInstalacaoSelecionada()">
                         Executar
                     </button>
                 </div>
