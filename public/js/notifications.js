@@ -83,6 +83,7 @@ function testToasts() {
 /** @type {{ id: number, message: string, type: string, source: string, timestamp: Date }[]} */
 const notifications = [];
 let notificationIdCounter = 0;
+const notificationActionCallbacks = new Map();
 
 const notificationIcons = {
     success: 'check_circle',
@@ -97,15 +98,24 @@ const notificationIcons = {
  * @param {string} options.message - Mensagem da notificação
  * @param {'success'|'error'|'warning'|'info'} [options.type='info'] - Tipo da notificação
  * @param {string} [options.source='Sistema'] - Aba ou serviço de origem
+ * @param {Array<{label: string, callback: Function}>} [options.actions] - Botões de ação opcionais
  */
-async function addNotification({ message, type = 'info', source = 'Sistema' }) {
+async function addNotification({ message, type = 'info', source = 'Sistema', actions = null }) {
     const notification = {
         id: ++notificationIdCounter,
         message,
         type,
         source,
-        timestamp: new Date()
+        timestamp: new Date(),
+        actions: null
     };
+
+    if (actions && actions.length > 0) {
+        notification.actions = actions.map((a, idx) => ({ label: a.label, idx }));
+        actions.forEach((a, idx) => {
+            notificationActionCallbacks.set(`${notification.id}_${idx}`, a.callback);
+        });
+    }
 
     notifications.unshift(notification); // Mais recente no topo
     easterEggNotification();
@@ -230,8 +240,30 @@ function renderNotificationList() {
                 <i class="material-symbols-outlined">close</i>
             </button>`;
 
+        if (notif.actions && notif.actions.length > 0) {
+            const actionsEl = document.createElement('div');
+            actionsEl.className = 'notification-actions';
+            notif.actions.forEach((a, i) => {
+                const btn = document.createElement('button');
+                const isLast = i === notif.actions.length - 1;
+                btn.className = `btn btn-sm ${isLast ? 'btn-primary' : 'btn-secondary'}`;
+                btn.dataset.notifId = notif.id;
+                btn.dataset.actionIdx = a.idx;
+                btn.textContent = a.label;
+                actionsEl.appendChild(btn);
+            });
+            item.querySelector('.notification-body').appendChild(actionsEl);
+        }
+
         list.appendChild(item);
     });
+}
+
+/** Remove callbacks de ação associados a uma notificação */
+function _cleanupNotificationCallbacks(id) {
+    for (const key of notificationActionCallbacks.keys()) {
+        if (key.startsWith(`${id}_`)) notificationActionCallbacks.delete(key);
+    }
 }
 
 /** Remove uma notificação individual pelo ID */
@@ -243,22 +275,28 @@ function dismissNotification(id) {
         setTimeout(() => {
             const index = notifications.findIndex(n => n.id === id);
             if (index !== -1) notifications.splice(index, 1);
+            _cleanupNotificationCallbacks(id);
             updateNotificationBadge();
             renderNotificationList();
+            if (notifications.length === 0 && typeof closeAllPanels === 'function') closeAllPanels();
         }, 200);
     } else {
         const index = notifications.findIndex(n => n.id === id);
         if (index !== -1) notifications.splice(index, 1);
+        _cleanupNotificationCallbacks(id);
         updateNotificationBadge();
         renderNotificationList();
+        if (notifications.length === 0 && typeof closeAllPanels === 'function') closeAllPanels();
     }
 }
 
 /** Remove todas as notificações */
 function clearAllNotifications() {
     notifications.length = 0;
+    notificationActionCallbacks.clear();
     updateNotificationBadge();
     renderNotificationList();
+    if (typeof closeAllPanels === 'function') closeAllPanels();
 }
 
 // Event delegation para dismiss de notificações individuais
@@ -267,6 +305,14 @@ document.addEventListener('click', (e) => {
     if (dismissBtn) {
         const id = parseInt(dismissBtn.dataset.notifId, 10);
         if (!isNaN(id)) dismissNotification(id);
+    }
+
+    const actionBtn = e.target.closest('.btn');
+    if (actionBtn) {
+        const notifId = parseInt(actionBtn.dataset.notifId, 10);
+        const actionIdx = parseInt(actionBtn.dataset.actionIdx, 10);
+        const cb = notificationActionCallbacks.get(`${notifId}_${actionIdx}`);
+        if (cb) cb();
     }
 });
 

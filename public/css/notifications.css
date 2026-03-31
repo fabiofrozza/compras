@@ -376,6 +376,38 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     font-size: 0.8rem;
 }
 
+.notification-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+/*
+.notification-action-btn {
+    font-size: 0.72rem;
+    padding: 2px 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(128, 128, 128, 0.35);
+    background: rgba(128, 128, 128, 0.08);
+    color: var(--compras-text-primary);
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.notification-action-btn:hover {
+    background: rgba(128, 128, 128, 0.2);
+    border-color: rgba(128, 128, 128, 0.55);
+}
+
+.notification-action-btn:last-child {
+    background: color-mix(in srgb, var(--compras-info) 15%, transparent);
+    border-color: color-mix(in srgb, var(--compras-info) 40%, transparent);
+    color: var(--compras-info);
+}
+
+.notification-action-btn:last-child:hover {
+    background: color-mix(in srgb, var(--compras-info) 25%, transparent);
+}*/
+
 .notification-footer {
     padding-top: 10px;
     margin-top: 6px;
