@@ -15,10 +15,10 @@ document.addEventListener('fullscreenchange', () => {
     if (!btn) return;
     const icon = btn.querySelector('i');
     if (document.fullscreenElement) {
-        icon.textContent = 'minimize';
+        icon.textContent = 'fullscreen_exit';
         btn.setAttribute('data-bs-title', 'Sair da tela inteira');
     } else {
-        icon.textContent = 'open_in_full';
+        icon.textContent = 'fullscreen';
         btn.setAttribute('data-bs-title', 'Tela inteira');
     }
     const tooltip = bootstrap.Tooltip.getInstance(btn);

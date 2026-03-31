@@ -2,11 +2,11 @@
 const TAB_LIST = [
     { id: 'home', label: 'Página inicial', icon: 'home', hidden: true },
     { id: 'atas', label: 'Atas', icon: 'description', description: 'Gere as Atas de Registro de Preços', color: 'text-primary' },
-    { id: 'catmat', label: 'Catmat', icon: 'list', description: 'Verifique as margens de preferência dos itens do TR', color: 'text-info' },
-    { id: 'fornecedores', label: 'Fornecedores', icon: 'business', description: 'Atualize os dados dos fornecedores', color: 'text-success' },
-    { id: 'importacao', label: 'Importação', icon: 'gavel', description: 'Gere os arquivos para importação dos pedidos e relatórios gerenciais', color: 'text-warning' },
+    { id: 'catmat', label: 'Catmat', icon: 'percent_discount', description: 'Verifique as margens de preferência dos itens do TR', color: 'text-info' },
+    { id: 'fornecedores', label: 'Fornecedores', icon: 'storefront', description: 'Atualize os dados dos fornecedores', color: 'text-success' },
+    { id: 'importacao', label: 'Importação', icon: 'upload_file', description: 'Gere os arquivos para importação dos pedidos e relatórios gerenciais', color: 'text-warning' },
     { id: 'mapas', label: 'Mapas', icon: 'shopping_basket', description: 'Transforme Mapas de licitação em listas prévias' },
-    { id: 'powerbi', label: 'Power BI', icon: 'show_chart', description: 'Gere os dados para o Observatório', color: 'text-danger', separator: 'after' },
+    { id: 'powerbi', label: 'Power BI', icon: 'add_chart', description: 'Gere os dados para o Observatório', color: 'text-danger', separator: 'after' },
     { id: 'instalacao', label: 'Instalação', icon: 'build' },
 ];
 

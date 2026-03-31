@@ -103,7 +103,7 @@ function ensureConsoleDOM() {
     consoleContainer.classList.toggle('minimized');
     const isMinimized = consoleContainer.classList.contains('minimized');
     const newTitle = isMinimized ? 'Restaurar' : 'Minimizar';
-    const newIcon = isMinimized ? 'open_in_full' : 'minimize';
+    const newIcon = isMinimized ? 'open_in_browser' : 'minimize';
     minimizeButton.innerHTML = `<i class="material-symbols-outlined">${newIcon}</i>`;
     minimizeButton.setAttribute('title', newTitle);
     minimizeButton.setAttribute('aria-label', newTitle);
