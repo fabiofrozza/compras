@@ -17,6 +17,8 @@ allowed-tools:
 
 # Git
 
+ATENÇÃO: UTILIZAR SEMPRE A LÍNGUA INGLESA PARA BRANCHES E COMMITS
+
 ## Branches
 
 - **`main`**: Branch de produção. Cada merge aqui gera uma release.
