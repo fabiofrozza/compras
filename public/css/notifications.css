@@ -169,7 +169,7 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
 }
 
 #header-actions.bell-bump {
-    animation: bellBump 0.4s cubic-bezier(0.2, 0.8, 0.3, 1);
+    animation: bellBump 0.4s ease-in-out;
 }
 
 @keyframes bellBump {
@@ -178,7 +178,7 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     }
 
     30% {
-        transform: translateY(-6px);
+        transform: translateY(-10px);
     }
 
     50% {
@@ -186,11 +186,11 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     }
 
     70% {
-        transform: translateY(-4px);
+        transform: translateY(-6px);
     }
 
     100% {
-        transform: translateY(0);
+        transform: translateY(-0);
     }
 }
 
@@ -382,32 +382,6 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     margin-top: 8px;
 }
 
-/*
-.notification-action-btn {
-    font-size: 0.72rem;
-    padding: 2px 10px;
-    border-radius: 4px;
-    border: 1px solid rgba(128, 128, 128, 0.35);
-    background: rgba(128, 128, 128, 0.08);
-    color: var(--compras-text-primary);
-    transition: background 0.15s ease, border-color 0.15s ease;
-}
-
-.notification-action-btn:hover {
-    background: rgba(128, 128, 128, 0.2);
-    border-color: rgba(128, 128, 128, 0.55);
-}
-
-.notification-action-btn:last-child {
-    background: color-mix(in srgb, var(--compras-info) 15%, transparent);
-    border-color: color-mix(in srgb, var(--compras-info) 40%, transparent);
-    color: var(--compras-info);
-}
-
-.notification-action-btn:last-child:hover {
-    background: color-mix(in srgb, var(--compras-info) 25%, transparent);
-}*/
-
 .notification-footer {
     padding-top: 10px;
     margin-top: 6px;
@@ -449,6 +423,12 @@ Easter Egg: game character bumps the bell notifications
     transform: translateX(-50%);
     z-index: 9999;
     pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.75s ease-in-out;
+}
+
+.easter-egg-container.visible {
+    opacity: 1;
 }
 
 .easter-egg-container.link-character {
@@ -458,6 +438,10 @@ Easter Egg: game character bumps the bell notifications
 #notificationsBtn {
     overflow: visible;
 }
+
+/* ==========================================================================
+Modal pop-up
+========================================================================== */
 
 .modal-detail {
     background-color: color-mix(in srgb, var(--compras-theme) 75%, white);

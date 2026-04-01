@@ -157,6 +157,7 @@ async function easterEggNotification() {
         container.classList.add('link-character');
         container.innerHTML = getLinkIdle();
         btn.appendChild(container);
+        requestAnimationFrame(() => requestAnimationFrame(() => container.classList.add('visible')));
 
         setTimeout(() => {
             container.innerHTML = getLinkSword();
@@ -164,11 +165,15 @@ async function easterEggNotification() {
             setTimeout(() => headerActions.classList.remove('bell-bump'), 1000);
         }, 1000);
 
-        // Remover após idle (2s) + exibição da espada (1s)
-        setTimeout(() => container.remove(), 2000);
+        // Fade-out e remoção após idle (2s) + exibição da espada (1s)
+        setTimeout(() => {
+            container.classList.remove('visible');
+            setTimeout(() => container.remove(), 300);
+        }, 1700);
     } else {
         container.innerHTML = getMario();
         btn.appendChild(container);
+        requestAnimationFrame(() => requestAnimationFrame(() => container.classList.add('visible')));
 
         // Sincronizar o "pulo" do sino com a cabeçada do Mario
         setTimeout(() => {
@@ -176,8 +181,11 @@ async function easterEggNotification() {
             setTimeout(() => headerActions.classList.remove('bell-bump'), 400);
         }, 500);
 
-        // Remover após um ciclo da animação original (2s)
-        setTimeout(() => container.remove(), 2000);
+        // Fade-out e remoção após um ciclo da animação original (2s)
+        setTimeout(() => {
+            container.classList.remove('visible');
+            setTimeout(() => container.remove(), 300);
+        }, 1700);
     }
 }
 
