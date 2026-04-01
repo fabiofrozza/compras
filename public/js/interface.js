@@ -200,9 +200,6 @@ async function inicializarPreferenciasPanel() {
     const darkModeCheckbox = document.getElementById('darkMode');
     if (darkModeCheckbox) darkModeCheckbox.checked = prefs.darkMode;
 
-    const animatedBgCheckbox = document.getElementById('animatedBg');
-    if (animatedBgCheckbox) animatedBgCheckbox.checked = prefs.animatedBg !== false;
-
     const bgSourceSelect = document.getElementById('bgSource');
     if (bgSourceSelect) bgSourceSelect.value = prefs.bgSource || 'random';
 

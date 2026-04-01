@@ -6,7 +6,6 @@ const autoSaveBoundFields = new WeakSet();
 let appState = {
     preferences: {
         darkMode: false,
-        animatedBg: true,
         enableAnimations: true,
         preferredTab: '',
         bgSource: 'random',
@@ -93,13 +92,9 @@ function applyUserPreferences(preferences) {
         if (el) el.checked = false;
     }
 
-    const animatedBg = preferences.animatedBg !== false;
-    document.body.classList.toggle('no-animated-bg', !animatedBg);
-    const animatedBgEl = document.getElementById('animatedBg');
-    if (animatedBgEl) animatedBgEl.checked = animatedBg;
-
     const enableAnimations = preferences.enableAnimations !== false;
     document.body.classList.toggle('no-animations', !enableAnimations);
+    document.body.classList.toggle('no-animated-bg', !enableAnimations);
     const enableAnimationsEl = document.getElementById('enableAnimations');
     if (enableAnimationsEl) enableAnimationsEl.checked = enableAnimations;
 
@@ -186,12 +181,15 @@ function setupAutoSave(container) {
                 }
 
                 // Preferências UI
-                if (['darkMode', 'animatedBg', 'enableAnimations', 'preferredTab', 'bgSource'].includes(fieldName)) {
+                if (['darkMode', 'enableAnimations', 'preferredTab', 'bgSource'].includes(fieldName)) {
                     appState.preferences[fieldName] = value;
                     saveAppState();
                     applyUserPreferences(appState.preferences);
 
                     if (eventType === 'change') {
+                        if (fieldName === 'bgSource' && typeof setHomeBackground === 'function') {
+                            setHomeBackground();
+                        }
                         showPreferencesSaveIndicator();
                     }
                 } else {
@@ -228,7 +226,7 @@ function loadConfig(container = document) {
             const fieldName = field.dataset.field;
 
             // Preferências são aplicadas por applyUserPreferences - não sobrescrever aqui
-            if (['darkMode', 'animatedBg', 'preferredTab', 'bgSource'].includes(fieldName)) return;
+            if (['darkMode', 'preferredTab', 'bgSource'].includes(fieldName)) return;
 
             const tabPane = field.closest('.tab-pane');
             const tabId = tabPane ? tabPane.id : 'global';
