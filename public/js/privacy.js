@@ -63,5 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('logConsent')?.addEventListener('change', (e) => {
         setLogConsent(e.target.checked);
+        if (typeof showPreferencesSaveIndicator === 'function') {
+            showPreferencesSaveIndicator();
+        }
     });
 });
