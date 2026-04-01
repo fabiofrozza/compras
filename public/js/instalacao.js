@@ -1,5 +1,12 @@
 let _rDownloadUrl = '';
 
+function atualizarBotoesInstalacao() {
+    ['btn-run-instalacao', 'btn-download-r'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.disabled = !navigator.onLine;
+    });
+}
+
 function executarInstalacao(modo) {
     runRScript('instalacao', { modo });
 }

@@ -242,7 +242,7 @@ function verificarLiberacaoBotoesImportacao() {
 
     atualizarIndicadoresSubTabs();
 
-    const podeExecutar = importacaoLinkValido && formValido;
+    const podeExecutar = importacaoLinkValido && formValido && navigator.onLine;
 
     const btnArquivos = document.getElementById('btn-importacao-arquivos');
     const btnResumo = document.getElementById('btn-importacao-resumo');
@@ -260,11 +260,11 @@ function verificarLiberacaoBotoesImportacao() {
 }
 
 function exibirResultadoImportacao(data) {
-    const col = document.getElementById('importacao-resultado-col');
+    const resultadoCol = document.getElementById('importacao-resultado-col');
     const linkCol = document.getElementById('importacao-link-col');
     const grid = document.getElementById('importacao-resultado-widgets');
     const msgDiv = document.getElementById('importacao-resultado-msg');
-    if (!col || !grid || !msgDiv) return;
+    if (!resultadoCol || !grid || !msgDiv) return;
 
     grid.innerHTML = '';
     msgDiv.innerHTML = '';
@@ -311,7 +311,8 @@ function exibirResultadoImportacao(data) {
         msgDiv.innerHTML = msgErros;
     }
 
-    col.classList.remove('d-none');
+    resultadoCol.classList.remove('d-none');
+    resultadoCol.classList.add('col-sm-6');
     linkCol.classList.remove('col');
     linkCol.classList.add('col-sm-6')
 }

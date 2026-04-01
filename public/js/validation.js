@@ -105,10 +105,9 @@ function setButtonState(field) {
 
     if (formId === 'form-powerbi-path') {
         const hasInvalidFields = Array.from(document.querySelectorAll(`#${formId} [data-field]`)).some(f => f.classList.contains('is-invalid'));
-        ['btn-run-powerbi-panel', 'btn-run-powerbi-maintenance'].forEach(btnId => {
-            const btn = document.getElementById(btnId);
-            if (btn) btn.disabled = hasInvalidFields;
-        });
+        const btnMaintenance = document.getElementById('btn-run-powerbi-maintenance');
+        if (btnMaintenance) btnMaintenance.disabled = hasInvalidFields;
+        if (typeof atualizarBotaoPowerBIPanel === 'function') atualizarBotaoPowerBIPanel();
         return;
     }
 
@@ -135,8 +134,27 @@ function setButtonState(field) {
         shouldDisable = hasInvalidFields || !atasData.dadosDisponiveis;
     }
 
+    // Botão catmat: opção API exige internet
+    if (button.id === 'btn-form-itens-tr') {
+        const selected = document.querySelector('input[name="catmat-metodo"]:checked');
+        shouldDisable = hasInvalidFields || (selected?.value === 'api' && !navigator.onLine);
+    }
+
     button.disabled = shouldDisable;
 }
+
+function atualizarBotaoCatmat() {
+    const btn = document.getElementById('btn-form-itens-tr');
+    if (!btn) return;
+    const hasInvalidFields = Array.from(document.querySelectorAll('#form-itens-tr [data-field]'))
+        .some(f => f.classList.contains('is-invalid'));
+    const selected = document.querySelector('input[name="catmat-metodo"]:checked');
+    btn.disabled = hasInvalidFields || (selected?.value === 'api' && !navigator.onLine);
+}
+
+document.addEventListener('change', (e) => {
+    if (e.target.name === 'catmat-metodo') atualizarBotaoCatmat();
+});
 
 function setupLiveValidation(aba) {
     const container = document.querySelector('#' + aba);

@@ -5,6 +5,34 @@ let ws;
 let selectedFiles = {}; // Armazena arquivos selecionados por containerId
 let wsDisconnectedAlertShown = false;
 let wsDisconnectedNotifId = null;
+let internetOfflineNotifId = null;
+
+function handleInternetOffline() {
+    if (internetOfflineNotifId === null) {
+        showToast('Sem conexão com a internet', 'warning', 5000, 'Sistema');
+        addNotification({ message: 'Sem conexão com a internet.', type: 'warning', source: 'Sistema' })
+            .then(id => { internetOfflineNotifId = id; });
+    }
+    if (typeof atualizarBotaoPowerBIPanel === 'function') atualizarBotaoPowerBIPanel();
+    if (typeof verificarLiberacaoBotoesImportacao === 'function') verificarLiberacaoBotoesImportacao();
+    if (typeof atualizarBotoesInstalacao === 'function') atualizarBotoesInstalacao();
+    if (typeof atualizarBotaoCatmat === 'function') atualizarBotaoCatmat();
+}
+
+function handleInternetOnline() {
+    if (internetOfflineNotifId !== null) {
+        showToast('Conexão com a internet restaurada', 'success', 3000, 'Sistema');
+        dismissNotification(internetOfflineNotifId);
+        internetOfflineNotifId = null;
+    }
+    if (typeof atualizarBotaoPowerBIPanel === 'function') atualizarBotaoPowerBIPanel();
+    if (typeof verificarLiberacaoBotoesImportacao === 'function') verificarLiberacaoBotoesImportacao();
+    if (typeof atualizarBotoesInstalacao === 'function') atualizarBotoesInstalacao();
+    if (typeof atualizarBotaoCatmat === 'function') atualizarBotaoCatmat();
+}
+
+window.addEventListener('offline', handleInternetOffline);
+window.addEventListener('online', handleInternetOnline);
 
 function connectWebSocket() {
     ws = new WebSocket('ws://localhost:3000');
@@ -122,6 +150,7 @@ function connectWebSocket() {
 
 window.addEventListener('load', async () => {
     connectWebSocket();
+    if (!navigator.onLine) handleInternetOffline();
     await loadConfig();
     await initPreferencesPage();
 });
