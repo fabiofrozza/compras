@@ -7,12 +7,16 @@ MAIN CONTENT
     background-color: transparent;
 }
 
+.tab-content {
+    max-height: calc(100vh - var(--compras-nav-height));
+    overflow-y: scroll;
+}
+
 .tab-pane {
     padding: var(--compras-padding-main);
     padding-top: calc(var(--compras-padding-main) * 2);
     min-height: calc(100vh - var(--compras-nav-height));
 }
-
 
 /* Chrome, Safari, Edge - webkit scrollbar API */
 @supports selector(::-webkit-scrollbar) {

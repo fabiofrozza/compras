@@ -10,6 +10,7 @@ body:has(#home.show) {
     overflow: hidden;
     min-height: 100vh;
     padding: 0 !important;
+    background-color: var(--compras-theme);
 }
 
 .home-title {
@@ -30,6 +31,8 @@ body:has(#home.show) {
     text-decoration: none;
     white-space: nowrap;
     font-family: sans-serif;
+    width: stretch;
+    z-index: 1;
 }
 
 @keyframes shine {
@@ -45,7 +48,7 @@ body:has(#home.show) {
 #home.show.active {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-end;
     height: 100vh;
 }
 
@@ -122,11 +125,11 @@ body.no-animated-bg .home-title {
     -webkit-text-fill-color: var(--compras-contrast);
 }
 
-/* Garante que o conteúdo fique acima do overlay */
+/* Garante que o conteúdo fique acima do overlay 
 #home.home-bg-loaded>* {
     position: relative;
     z-index: 1;
-}
+}*/
 
 @keyframes panBackground {
     0% {
@@ -169,6 +172,7 @@ body.no-animated-bg .home-title {
     justify-content: flex-end;
     align-content: flex-end;
     flex-wrap: wrap;
+    max-height: 100vh;
 }
 
 @media only screen and (max-width: 560px) {

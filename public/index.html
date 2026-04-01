@@ -210,17 +210,20 @@
                 <i class="material-symbols-outlined settings-user-avatar">account_circle</i>
                 <div class="settings-user-info">
                     <span class="settings-user-name" id="userName">Carregando...</span>
-                    <span class="settings-user-computer" id="userComputerName"></span>
-                    <span class="settings-user-sync">
-                        <i class="material-symbols-outlined" data-bs-toggle="tooltip"
-                            data-bs-title="Última sincronização">schedule</i>
+                    <span class="settings-user-computer">
+                        <i class="material-symbols-outlined">computer</i>
+                        <span id="userComputerName"></span>
+                    </span>
+                    <span class="settings-user-sync" data-bs-toggle="tooltip" data-bs-placement="left"
+                        data-bs-title="Última sincronização">
+                        <i class="material-symbols-outlined">schedule</i>
                         <span id="lastSyncTime">-</span>
                     </span>
                 </div>
             </div>
-            <hr class="my-2">
+            <hr class="my-3">
             <!-- Tema -->
-            <div class="form-group mb-3">
+            <div class="form-group mb-1">
                 <div class="form-check form-switch">
                     <input type="checkbox" role="switch" id="darkMode" class="form-check-input" data-field="darkMode">
                     <label for="darkMode" class="form-label">
@@ -229,11 +232,12 @@
                 </div>
             </div>
             <!-- Animações -->
-            <div class="form-group mb-3">
+            <div class="form-group mb-1">
                 <div class="form-check form-switch">
                     <input type="checkbox" role="switch" id="enableAnimations" class="form-check-input"
                         data-field="enableAnimations" checked>
-                    <label for="enableAnimations" class="form-label">
+                    <label for="enableAnimations" class="form-label" data-bs-toggle="tooltip" data-bs-placement="left"
+                        data-bs-title="Exibe papel de parede e personagens animados. Desabilite para melhorar o desempenho.">
                         <i class="material-symbols-outlined">joystick</i> Animações
                     </label>
                 </div>
@@ -242,14 +246,15 @@
             <div class="form-group mb-1">
                 <div class="form-check form-switch">
                     <input type="checkbox" role="switch" id="logConsent" class="form-check-input" checked>
-                    <label for="logConsent" class="form-label">
+                    <label for="logConsent" class="form-label" data-bs-toggle="tooltip" data-bs-placement="left"
+                        data-bs-title="Para possibilitar o tratamento de erros, podem ser salvos logs de execução, incluindo nome de usuário, hostname e detalhes das operações realizadas.">
                         <i class="material-symbols-outlined">receipt_long</i> Salvar logs
                     </label>
                 </div>
             </div>
-            <hr class="my-2">
+            <hr class="my-3">
             <!-- Foto de fundo -->
-            <div class="mb-3">
+            <div class="mb-1">
                 <label for="bgSource" class="form-label">
                     <i class="material-symbols-outlined">image</i> Foto de fundo
                 </label>
@@ -260,7 +265,7 @@
                 </select>
             </div>
             <!-- Aba preferida -->
-            <div class="mb-3">
+            <div class="mb-1">
                 <label for="preferredTab" class="form-label">
                     <i class="material-symbols-outlined">star</i> Aba ao iniciar
                 </label>
