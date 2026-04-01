@@ -810,6 +810,7 @@ config_inicializar <- function(script_nome, pacotes, pasta = NULL) {
   # Elimina eventual mensagens de erro anteriores
   config_json("msg_erro", opcao = "remove")
   config_json("config_novo", opcao = "remove")
+  config_json("final_message", opcao = "remove")
   # Registra que o script está sendo executado, para eventual controle
   config_json("resultado_geracao", "running")
 
