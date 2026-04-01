@@ -10,7 +10,7 @@ const { executarMailmerge } = require('./services/mailmerge');
 
 let logConsentEnabled = true; // null/true = salvar logs (permissivo por padrão); false = opt-out
 
-const logger = new Logger({ minLevel: 'debug' });
+const logger = new Logger({ minLevel: process.env.COMPRAS_LOGGER_MIN_LEVEL || 'debug' });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,7 +27,8 @@ const ALLOWED_DELETE_FOLDERS = [
   'resumo_pedidos',
   'log',
   'temp',
-  'para_importar'
+  'para_importar',
+  'dados'
 ];
 let cachedRScriptPath = null;
 
@@ -40,6 +41,11 @@ function isPathSafe(targetPath, baseDir) {
   const realPath = path.resolve(path.normalize(targetPath));
   const safeBase = path.resolve(path.normalize(baseDir));
   return realPath.toLowerCase().startsWith(safeBase.toLowerCase());
+}
+
+// Dupla proteção: Nunca apagar scripts de código (.R, .js) ou o arquivo de dados de atas
+function isProtectedFile(filename) {
+  return filename.endsWith('.R') || filename.endsWith('.js') || filename.toLowerCase() === 'dados_atas.xlsx';
 }
 
 function matchFilePattern(filename, patterns) {
@@ -397,8 +403,8 @@ app.delete('/api/clear-folder/:scriptName/:innerFolder', async (req, res) => {
     let deletedCount = 0;
 
     for (const file of files) {
-      // Dupla proteção: Nunca apagar scripts de código ou o próprio excel
-      if (file.endsWith('.R') || file.endsWith('.js') || file.toLowerCase() === 'dados_atas.xlsx') continue;
+      // Dupla proteção: Nunca apagar scripts de código ou arquivos protegidos
+      if (isProtectedFile(file)) continue;
       if (!arquivoPassaNoFiltro(file, patterns, filterNameContains)) continue;
 
       const filePath = path.join(folderPath, file);
@@ -444,7 +450,7 @@ app.delete('/api/delete-file/:scriptName/:innerFolder', async (req, res) => {
     }
 
     // Never delete scripts or protected files
-    if (fileName.endsWith('.R') || fileName.endsWith('.js') || fileName.toLowerCase() === 'dados_atas.xlsx') {
+    if (isProtectedFile(fileName)) {
       return res.status(403).json({ error: 'Este tipo de arquivo não pode ser excluído.' });
     }
 
@@ -745,10 +751,21 @@ app.get('/api/fornecedores/importar', async (_req, res) => {
   }
 });
 
-// Deletar pasta do pregão
+// Deletar pasta do pregão (exclui apenas arquivos permitidos, depois remove a pasta se vazia)
 app.delete('/api/fornecedores/pregao/:pregao', async (req, res) => {
   try {
     const { pregao } = req.params;
+
+    // Mesma checagem da API genérica: só permitir exclusão em pastas autorizadas
+    if (!ALLOWED_DELETE_FOLDERS.includes('dados')) {
+      return res.status(403).json({ error: 'A exclusão nesta pasta não é permitida por segurança.' });
+    }
+
+    // Prevent path traversal via pregão name
+    if (pregao.includes('/') || pregao.includes('\\') || pregao === '..' || pregao === '.') {
+      return res.status(400).json({ error: 'Nome de pregão inválido' });
+    }
+
     const pastaPath = path.join(FORNECEDORES_DADOS, pregao);
 
     if (!isPathSafe(pastaPath, SCRIPTS_PATH)) {
@@ -759,8 +776,26 @@ app.delete('/api/fornecedores/pregao/:pregao', async (req, res) => {
       return res.status(404).json({ error: 'Pasta do pregão não encontrada' });
     }
 
-    await fs.rm(pastaPath, { recursive: true, force: true });
-    logger.info(`Pasta do pregão ${pregao} excluída`, 'Fornecedores');
+    // Dupla proteção: Nunca apagar scripts de código ou arquivos protegidos
+    const files = await fs.readdir(pastaPath);
+    let deletedCount = 0;
+    for (const file of files) {
+      if (isProtectedFile(file)) continue;
+      const filePath = path.join(pastaPath, file);
+      const stats = await fs.stat(filePath);
+      if (stats.isFile()) {
+        await fs.unlink(filePath);
+        deletedCount++;
+      }
+    }
+
+    // Remover a pasta somente se ficou vazia
+    const remaining = await fs.readdir(pastaPath);
+    if (remaining.length === 0) {
+      await fs.rmdir(pastaPath);
+    }
+
+    logger.info(`Pregão ${pregao}: ${deletedCount} arquivo(s) excluído(s)`, 'Fornecedores');
     res.json({ success: true, message: `Pregão ${pregao} excluído com sucesso` });
   } catch (error) {
     logger.error(`Erro ao excluir pregão: ${error.message}`, 'Fornecedores', error);
@@ -781,8 +816,28 @@ app.delete('/api/fornecedores/arquivo', async (req, res) => {
       return res.status(403).json({ error: 'Acesso negado' });
     }
 
+    // Mesma checagem da API genérica: verificar se a pasta-pai está na lista permitida
+    const relativePath = path.relative(SCRIPTS_PATH, path.resolve(filePath));
+    const parts = relativePath.split(path.sep);
+    // Estrutura esperada: fornecedores/DADOS|PARA_IMPORTAR/..., checar a subpasta (parts[1])
+    const innerFolder = parts.length >= 2 ? parts[1] : '';
+    if (!ALLOWED_DELETE_FOLDERS.includes(innerFolder.toLowerCase())) {
+      return res.status(403).json({ error: 'A exclusão nesta pasta não é permitida por segurança.' });
+    }
+
+    // Nunca apagar scripts de código ou arquivos protegidos
+    const fileName = path.basename(filePath);
+    if (isProtectedFile(fileName)) {
+      return res.status(403).json({ error: 'Este tipo de arquivo não pode ser excluído.' });
+    }
+
     try { await fs.access(filePath); } catch {
       return res.status(404).json({ error: 'Arquivo não encontrado' });
+    }
+
+    const stats = await fs.stat(filePath);
+    if (!stats.isFile()) {
+      return res.status(400).json({ error: 'O caminho não é um arquivo' });
     }
 
     await fs.unlink(filePath);
@@ -859,7 +914,7 @@ app.post('/api/log-consent', (req, res) => {
 
   logConsentEnabled = consent;
   if (consent) {
-    logger.enableFileLogging(path.join(__dirname, '..', 'logs'));
+    logger.enableFileLogging(path.join(__dirname, '..', process.env.COMPRAS_LOG_DIR || 'logs'));
   } else {
     logger.disableFileLogging();
   }

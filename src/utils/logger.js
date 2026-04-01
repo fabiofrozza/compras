@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const MAX_LOG_FILES = 20;
+const MAX_LOG_FILES = parseInt(process.env.COMPRAS_MAX_LOG_FILES) || 20;
 
 class Logger {
     constructor(options = {}) {
