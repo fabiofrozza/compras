@@ -1027,7 +1027,7 @@ app.get('/api/user-info', (req, res) => {
 // API - GET home background images (lidas do .env)
 app.get('/api/home-backgrounds', (req, res) => {
   try {
-    const raw = process.env.HOME_BACKGROUND_IMAGES || '';
+    const raw = process.env.COMPRAS_HOME_BACKGROUND_IMAGES || '';
     const images = raw.split(',').map(u => u.trim()).filter(Boolean);
     res.json({ images });
   } catch (error) {
