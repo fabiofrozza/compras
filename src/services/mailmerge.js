@@ -392,7 +392,7 @@ function substituirCampos(conteudo, dados, numeroAta) {
         resultado = resultado.replace(padrao, (match, nomeCampo) => {
             const nomeLower = nomeCampo.toLowerCase();
             if (dadosLower.hasOwnProperty(nomeLower)) {
-                return String(dadosLower[nomeLower]).trim();
+                return escaparXml(String(dadosLower[nomeLower]).trim());
             }
             return match; // mantém o placeholder se não encontrar
         });
