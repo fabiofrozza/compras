@@ -6,6 +6,10 @@ body:has(#home.show) {
     padding: 0 !important;
 }
 
+.tab-content:has(#home.show) {
+    overflow: visible;
+}
+
 #home {
     overflow: hidden;
     min-height: 100vh;
