@@ -1,6 +1,6 @@
 # Compras [![pt-br](https://img.shields.io/badge/lang-pt--br-yellow?style=plastic)](https://github.com/fabiofrozza/compras/tree/main/README.md) [![en-us](https://img.shields.io/badge/lang-en--us-blue?style=plastic)](https://github.com/fabiofrozza/compras/tree/main/README.en-us.md)
 
-![GitHub Release](https://img.shields.io/github/v/release/fabiofrozza/compras)
+[![GitHub Release](https://img.shields.io/github/v/release/fabiofrozza/compras)](https://github.com/fabiofrozza/compras/releases)
 
 <p align="center">
 <a href="#Funcionalidades">Funcionalidades</a> &nbsp;&bull;&nbsp;
