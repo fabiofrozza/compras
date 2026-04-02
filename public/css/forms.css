@@ -444,6 +444,11 @@ FORMS AND FILES
     border-top-left-radius: 0;
 }
 
+.sub-tabs-content .tab-content {
+    max-height: unset;
+    overflow-y: unset;
+}
+
 .sub-tabs-content .tab-pane {
     min-height: unset;
 }
