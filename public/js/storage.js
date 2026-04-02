@@ -159,61 +159,66 @@ function applyUserPreferences(preferences) {
 // ==== CAMPOS DO FORMULÁRIO (CONFIG) ====
 
 let saveTimeout = null;
+let isLoadingConfig = false;
 
 function setupAutoSave(container) {
     const fields = container.querySelectorAll('[data-field]');
     fields.forEach(field => {
         if (autoSaveBoundFields.has(field)) return;
         autoSaveBoundFields.add(field);
-        ['input', 'change'].forEach(eventType => {
-            field.addEventListener(eventType, (e) => {
-                const target = e.target;
-                target.classList.remove('is-invalid');
 
-                const fieldName = target.dataset.field;
-                // Radio buttons in a group share the same data-field
-                let value;
-                if (target.type === 'radio') {
-                    if (target.checked) value = target.value;
-                    else return; // only save the checked one
-                } else {
-                    value = target.type === 'checkbox' ? target.checked : target.value;
-                }
+        // Texto usa 'input' (a cada tecla); checkbox/radio/select usam 'change' (ao confirmar)
+        const isTextLike = field.type === 'text' || field.type === 'number' || field.tagName === 'TEXTAREA';
+        const eventType = isTextLike ? 'input' : 'change';
 
-                // Preferências UI
-                if (['darkMode', 'enableAnimations', 'preferredTab', 'bgSource'].includes(fieldName)) {
-                    appState.preferences[fieldName] = value;
-                    saveAppState();
-                    applyUserPreferences(appState.preferences);
+        field.addEventListener(eventType, (e) => {
+            const target = e.target;
+            target.classList.remove('is-invalid');
 
-                    if (eventType === 'change') {
-                        if (fieldName === 'bgSource' && typeof setHomeBackground === 'function') {
-                            setHomeBackground();
-                        }
-                        showPreferencesSaveIndicator();
+            const fieldName = target.dataset.field;
+            // Radio buttons in a group share the same data-field
+            let value;
+            if (target.type === 'radio') {
+                if (target.checked) value = target.value;
+                else return; // only save the checked one
+            } else {
+                value = target.type === 'checkbox' ? target.checked : target.value;
+            }
+
+            // Preferências UI
+            if (['darkMode', 'enableAnimations', 'preferredTab', 'bgSource'].includes(fieldName)) {
+                appState.preferences[fieldName] = value;
+                saveAppState();
+                applyUserPreferences(appState.preferences);
+
+                if (!isLoadingConfig) {
+                    if (fieldName === 'bgSource' && typeof setHomeBackground === 'function') {
+                        setHomeBackground();
                     }
-                } else {
-                    const tabPane = target.closest('.tab-pane');
-                    const tabId = tabPane ? tabPane.id : 'global';
-
-                    if (!appState[tabId]) appState[tabId] = {};
-                    appState[tabId][fieldName] = value;
-
-                    if (saveTimeout) clearTimeout(saveTimeout);
-                    saveTimeout = setTimeout(() => {
-                        saveAppState();
-                        if (typeof showToast === 'function') {
-                            showToast('Alterações salvas com sucesso!', 'success', 2000, 'configuração');
-                        }
-                    }, 500);
+                    showPreferencesSaveIndicator();
                 }
-            });
+            } else {
+                const tabPane = target.closest('.tab-pane');
+                const tabId = tabPane ? tabPane.id : 'global';
+
+                if (!appState[tabId]) appState[tabId] = {};
+                appState[tabId][fieldName] = value;
+
+                if (saveTimeout) clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(() => {
+                    saveAppState();
+                    if (!isLoadingConfig && typeof showToast === 'function') {
+                        showToast('Alterações salvas com sucesso!', 'success', 2000, 'configuração');
+                    }
+                }, 500);
+            }
         });
     });
 }
 
 function loadConfig(container = document) {
     try {
+        isLoadingConfig = true;
         loadAppState();
 
         if (typeof popularAnosSelector === 'function') {
@@ -250,6 +255,8 @@ function loadConfig(container = document) {
 
     } catch (error) {
         console.error('Erro ao carregar configuração:', error);
+    } finally {
+        isLoadingConfig = false;
     }
 }
 
