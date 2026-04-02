@@ -3,6 +3,8 @@ CLAUDE.md
 postman/
 .vscode
 node_modules/
+!bin/node_modules/
+!bin/node_modules/**
 doc/
 scripts/_common/log
 scripts/_common/.Renviron
