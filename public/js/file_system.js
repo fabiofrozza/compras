@@ -266,7 +266,7 @@ function buildFilesTableHTML(files, containerId, scriptName, innerFolder, canDel
     let html = '<div class="files-table-container"><table class="files-table"><tbody>';
 
     files.forEach((file, index) => {
-        const modDate = new Date(file.modifiedDate).toLocaleString('pt-BR');
+        const modDate = new Date(file.modifiedDate).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         const icon = getFileIcon(file.name, file.isDirectory);
         const fileId = `${containerId}-file-${index}`;
         const safeFolderPath = folderPath.replace(/"/g, '&quot;');
