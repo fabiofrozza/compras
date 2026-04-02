@@ -1,56 +1,69 @@
-# Compras [![pt-br](https://img.shields.io/badge/lang-pt--br-yellow?style=plastic)](https://github.com/fabiofrozza/compras/tree/main/README.md)
+# Compras [![pt-br](https://img.shields.io/badge/lang-pt--br-yellow?style=plastic)](https://github.com/fabiofrozza/compras/tree/main/README.md) [![en-us](https://img.shields.io/badge/lang-en--us-blue?style=plastic)](https://github.com/fabiofrozza/compras/tree/main/README.en-us.md)
 
-[![en-us](https://img.shields.io/badge/lang-en--us-blue?style=plastic)](https://github.com/fabiofrozza/compras/tree/main/README.en-us.md)
+![GitHub Release](https://img.shields.io/github/v/release/fabiofrozza/compras)
 
-Alguns scripts para auxiliar meus colegas nas atividades relacionadas a compras públicas.
+<p align="center">
+<a href="#Funcionalidades">Funcionalidades</a> &nbsp;&bull;&nbsp;
+<a href="#Instalação">Instalação e personalização</a> &nbsp;&bull;&nbsp;
+<a href="#Uso">Uso</a> &nbsp;&bull;&nbsp;
+<a href="#Observações">Observações</a> &nbsp;&bull;&nbsp;
+<a href="#Reconhecimento">Reconhecimento</a> &nbsp;&bull;&nbsp;
+<a href="#Licença">Licença</a>
+</p>
 
-## Conteúdo
+Aplicação web local que permite execução de scripts para auxiliar meus colegas nas atividades relacionadas a compras públicas.
 
-* [`importacao`](./importacao): geração de arquivos para importação e criação dos pedidos de compras, resumo das importações para controle dos processos e produção de relatórios gerenciais.
-* [`mapas`](./mapas): geração de listas de itens para licitação com base nos mapas de licitação de processos anteriores.
-* [`catmat`](./catmat): verificação dos CATMATs e das respectivas margens de preferência (se houver) com base na lista de itens do Termo de Referência.
-* [`atas`](./atas): geração de Atas de Registro de Preços com base nos relatórios de cadastramento dos fornecedores (obtidos no SICAF).
-* [`fornecedores`](./fornecedores): geração de arquivo para atualização dos dados bancários dos fornecedores.
-* [`powerbi`](./powerbi): geração de arquivo de dados para atualização dos painéis do Power BI.
-* [`primeiro_uso`](./primeiro_uso): instalação do programa R e (opcionalmente) atualização  do PowerShell, utilizados pelos scripts.
+## Funcionalidades
 
-## Iniciando
+* **Atas** — geração de Atas de Registro de Preços com base nos relatórios de cadastramento dos fornecedores (obtidos no SICAF) e na lista de itens do Termo de Referência (TR).
+* **CATMAT** — verificação dos CATMATs e das respectivas margens de preferência (se houver) com base na lista de itens do TR.
+* **Fornecedores** — geração de arquivo para atualização dos dados bancários dos fornecedores.
+* **Importação** — geração de arquivos para importação e criação dos pedidos de compras, resumo das importações para controle dos processos e produção de relatórios gerenciais.
+* **Mapas** — geração de listas de itens para licitação com base nos mapas de licitação de processos anteriores.
+* **Power BI** — geração de arquivo de dados para atualização dos painéis do Power BI.
+* **Instalação** — gerenciamento da instalação do R.
 
-### Instalação
+## Instalação e Personalização
 
-* [Baixe o conteúdo deste repositório](https://github.com/fabiofrozza/compras/archive/refs/heads/main.zip) na pasta desejada.
-* Mantenha a mesma estrutura de pastas.
-* Baixe a última versão do [R](https://cran.r-project.org/bin/windows/base/) e salve o arquivo na pasta `primeiro_uso`.
-* Execute o script `primeiro_uso/primeiro_uso.exe`.
-* _(Opcional, mas altamente recomendável)_ Baixe a última versão do [PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.5#installing-the-zip-package) (arquivo .zip) e salve o arquivo na pasta `primeiro_uso`.
-* Execute o script `primeiro_uso/opcional_powershell.exe`.
+1. [Baixe o conteúdo deste repositório](https://github.com/fabiofrozza/compras/archive/refs/heads/main.zip) e extraia na pasta desejada.
 
-### Personalização
+1. Abra `install.cmd` para instalar os pacotes necessários.
 
-* Na pasta `_common`, renomeie o arquivo `.Renviron-MODELO` para `.Renviron`.
-* Edite-o (no Bloco de Notas ou similar) seguindo as instruções do arquivo.
-* Na pasta `_common/images`, substitua as imagens `company.png`, `department.png` e `lists_page.png` pelas da sua empresa.
+1. Renomeie os seguintes arquivos e edite-os no Bloco de Notas, seguindo as instruções no seu interior:
+   * na pasta raiz: `.env-MODELO` para `.env`
+   * na pasta `scripts/_common`: `.Renviron-MODELO` para `.Renviron`
 
-Pronto! Os scripts estão prontos para serem usados!
+1. Substitua as seguintes imagens pelas da sua empresa:
+   * `public/img/company.png`
+   * `public/img/department.png`
+   * `scripts/_common/images/company.png`
+   * `scripts/_common/images/department.png`
+
+## Uso
+
+Execute o arquivo `start.cmd`. O servidor será iniciado e o navegador abrirá automaticamente em `http://localhost:3000`.
+
+A interface apresenta abas para cada funcionalidade. Basta preencher os campos necessários e acompanhar a execução dos scripts em tempo real pelo console integrado.
 
 ## Algumas observações
 
-Estes scripts são parte de um projeto pessoal que me rendeu muitas alegrias. 
+Este projeto é fruto de uma iniciativa pessoal que me rendeu muitas alegrias.
 
-Partindo de um conhecimento básico de R, iniciei, por necessidade, a criação do [`importacao`](./importacao) para agilizar a geração dos pedidos. Aos poucos, conforme o script funcionava, foram surgindo novas ideias e novos scripts. 
+Partindo de um conhecimento básico de R, iniciei a criação dos scripts de importação para agilizar a geração dos pedidos. Aos poucos, conforme os scripts funcionavam, foram surgindo novas ideias e novas funcionalidades, até que o projeto ganhou uma interface web própria, substituindo os antigos scripts de linha de comando por uma experiência mais acessível e amigável.
 
-Assim, busquei alternativas já disponíveis aos meus colegas (como o PowerShell, pré-instalado no Windows, e, obviamente, os batches do CMD), facilitando ao máximo a utilização dos scripts por quem não tem nenhum conhecimento prévio de programação. Por este motivo, a estrutura é um pouco diferente do que seria um projeto padrão ou um pacote R. Contudo, os benefícios justificam esta decisão.
+A interface gráfica foi construída com **Bootstrap 5** e **JavaScript vanilla**. Considerando que se trata de uma aplicação de execução local, frameworks como React ou Vue agregariam complexidade e peso desnecessários.
 
-## Desenvolvimento
-
-[Aqui](./_common/README.md) estão algumas informações sobre o desenvolvimento do código.
 
 ## Reconhecimento
 
 Agradeço aos meus colegas pela paciência em serem meus _"testadores"_ e às suas ideias e sugestões. É para vocês tudo isto, o que fiz com muito carinho (como podem ver pelas mensagens engraçadinhas pra fechar as janelas 😄).
 
-Obrigado a https://www.flaticon.com pelos ícones e imagens.
-
 Obrigado a https://ascii.co.uk/ e https://www.asciiart.eu/ pelas artes em ASCII.
 
 Obrigado a [Jonatas Emidio](https://github.com/jonatasemidio/multilanguage-readme-pattern) pelo template de readme multilínguas.
+
+Demais créditos estão junto ao código utilizado.
+
+## Licença
+
+Este projeto é de código aberto e está licenciado sob a licença MIT.
