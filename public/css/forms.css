@@ -1,6 +1,6 @@
 /* ==========================================================================
-FORMS AND FILES
-========================================================================== */
+   FORMS
+   ========================================================================== */
 
 .indicator-required {
     color: var(--compras-error);
@@ -239,41 +239,7 @@ FORMS AND FILES
     height: 0;
 }
 
-/* File Manager */
-
-.files-list,
-.files-list-style,
-.fornecedores-grid-list {
-    background-color: color-mix(in srgb, var(--compras-theme) 50%, white);
-    border: 1px solid var(--bs-border-color);
-    border-radius: 6px;
-    margin-bottom: 12px;
-}
-
-.files-list,
-.files-list-style {
-    overflow: hidden;
-}
-
-.files-list.view-grid {
-    padding: 8px;
-}
-
-.files-list.view-grid .folder-path-container {
-    margin: -8px -8px 8px;
-    border-radius: 5px 5px 0 0;
-}
-
-.files-list:not(.is-invalid):has(.selectable),
-.files-list.view-grid:not(.is-invalid):has(.item-selectable),
-.fornecedores-grid-list:not(.is-invalid):has(.item-selected) {
-    border: 1px solid var(--bs-primary);
-}
-
-.files-list.is-invalid,
-.fornecedores-grid-list.is-invalid {
-    border-color: var(--bs-form-invalid-border-color);
-}
+/* Validation */
 
 .validation-msg {
     color: var(--bs-form-invalid-color);
@@ -290,147 +256,8 @@ FORMS AND FILES
     margin-right: 2px;
 }
 
-.files-list+.validation-msg,
-.fornecedores-grid-list+.validation-msg {
-    margin-top: -.5rem;
-}
-
 .validation-msg.show {
     display: block;
-}
-
-.files-list .alert i {
-    font-size: 1.25rem;
-    vertical-align: sub;
-}
-
-.folder-path-container {
-    border-bottom: var(--bs-border-color) solid 1px;
-    padding: 5px;
-    font-size: 12px;
-    color: var(--compras-text-primary);
-    font-family: Consolas, 'Courier New', monospace;
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    justify-content: space-between;
-    word-break: break-all;
-    flex-wrap: nowrap;
-    position: relative;
-}
-
-.folder-path {
-    flex-grow: 1;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-.folder-path-container>i {
-    font-size: 1.25rem;
-}
-
-.folder-path-actions {
-    display: none;
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-    padding-left: 16px;
-    background: linear-gradient(to right, transparent, color-mix(in srgb, var(--compras-theme) 50%, white) 20%);
-}
-
-.files-list:hover .folder-path-actions,
-.files-list-style:hover .folder-path-actions,
-.fornecedores-grid-list:hover .folder-path-actions {
-    display: flex;
-}
-
-.folder-path-btn {
-    display: flex;
-    padding: 0;
-    border: none;
-    background: none;
-    color: var(--bs-primary);
-    cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-    line-height: 1;
-}
-
-.folder-path-btn:hover {
-    opacity: 1;
-}
-
-.folder-path-btn .material-symbols-outlined {
-    font-size: 1rem;
-}
-
-.files-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    background-color: Field;
-}
-
-.files-table td {
-    padding: 2px;
-    vertical-align: top;
-    word-break: break-all;
-}
-
-.files-table tbody tr:hover {
-    background: var(--compras-contrast);
-}
-
-.files-table tbody tr {
-    cursor: pointer;
-}
-
-.file-icon {
-    margin-left: 6px;
-    font-size: 1rem;
-}
-
-.file-icon i {
-    vertical-align: baseline !important;
-    font-variation-settings: 'opsz' 48;
-}
-
-.file-word {
-    color: #2B579A;
-}
-
-.file-excel {
-    color: #217346;
-}
-
-.file-pdf {
-    color: #D30015;
-}
-
-.file-text {
-    color: #777;
-}
-
-.file-image {
-    color: #FF6B6B;
-}
-
-.file-archive {
-    color: #FF6B35;
-}
-
-.file-code {
-    color: #276DC3;
-}
-
-.folder-path-btn:disabled {
-    opacity: 0 !important;
-    pointer-events: none;
 }
 
 .btn-sm .material-symbols-outlined {
@@ -514,113 +341,6 @@ FORMS AND FILES
     border-radius: 5px 5px 0 0;
 }
 
-/* Items grid (pregões e visualização em grid de arquivos) */
-.items-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 8px;
-}
-
-/* Item card genérico */
-.item-card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px 8px 6px;
-    border: 2px solid var(--bs-border-color);
-    border-radius: 8px;
-    cursor: pointer;
-    background-color: Field;
-    transition: all 0.2s ease;
-    text-align: center;
-}
-
-.item-card.item-selected {
-    border-color: var(--bs-primary);
-    background-color: var(--bs-primary-bg-subtle);
-}
-
-.item-card-icon {
-    font-size: 2rem;
-    margin-bottom: 4px;
-}
-
-.item-card-icon i {
-    font-size: 2rem;
-    font-variation-settings: 'FILL' 1;
-}
-
-.item-card.status-pendente .item-card-icon i {
-    color: var(--compras-pending);
-}
-
-.item-card.status-sucesso .item-card-icon i {
-    color: var(--compras-success);
-}
-
-.item-card.status-parcial .item-card-icon i {
-    color: var(--compras-warning);
-}
-
-.item-card.status-sem_saida .item-card-icon i {
-    color: var(--compras-error);
-}
-
-.item-card-name {
-    font-size: 11px;
-    font-weight: 600;
-    word-break: break-all;
-    line-height: 1.2;
-}
-
-/* Status badge (usado nos cards de pregões) */
-.item-card-status {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-}
-
-.item-card-status i {
-    font-size: 14px;
-    vertical-align: top;
-}
-
-.item-card.status-pendente .item-card-status i {
-    color: var(--compras-pending);
-}
-
-.item-card.status-sucesso .item-card-status i {
-    color: var(--compras-success);
-}
-
-.item-card.status-parcial .item-card-status i {
-    color: var(--compras-warning);
-}
-
-.item-card.status-sem_saida .item-card-status i {
-    color: var(--compras-error);
-}
-
-.item-card-delete,
-.item-card-open {
-    position: absolute;
-    left: 6px;
-}
-
-.item-card-delete {
-    top: 20px;
-}
-
-.item-card-open {
-    top: 0px;
-}
-
-.item-card-delete:hover,
-.item-card-open:hover {
-    opacity: 1 !important;
-}
-
 /* Informações do pregão */
 #fornecedores-info-pregao .table td:first-child {
     width: 50%;
@@ -647,34 +367,6 @@ FORMS AND FILES
     padding: 6px 4px;
     border-bottom: 1px solid var(--bs-border-color);
     color: var(--bs-secondary-color);
-}
-
-/* Botões auxiliares das tabelas (conteúdo da pasta e importar) */
-
-.table-btn-column {
-    text-align: right;
-}
-
-.file-row-btn {
-    --bs-btn-padding-y: 0;
-    --bs-btn-padding-x: 0;
-    border: none;
-    background: none;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.file-row-btn i {
-    font-size: 16px !important;
-}
-
-.files-table tbody tr:hover .file-row-btn,
-.item-card:hover .file-row-btn {
-    opacity: 0.7;
-}
-
-.file-row-btn:hover {
-    opacity: 1 !important;
 }
 
 /* ==========================================================================
