@@ -1,20 +1,33 @@
+# env and config files
 .env
-CLAUDE.md
-postman/
-.vscode
-node_modules/
-doc/
-scripts/_common/log
 scripts/_common/.Renviron
 scripts/_common/config.json
 scripts/**/*.json
+
+# editors and IDE 
+.claude/
+postman/
+.vscode
+
+# packages and dependencies
+node_modules/
+!bin/**
+
+# docs
+doc/
+
+# logs
+scripts/_common/log
+logs/
+
+# working files
 **/*.csv
-!scripts/fornecedores/_fontes/*.csv
 **/*.xls*
-!scripts/catmat/_fontes/*.xls*
 **/*.pdf
+**/*.doc*
 **/*.zip
 **/*.txt
-**/*.doc*
-logs/
-!bin/**
+
+# exception: data sources
+!scripts/fornecedores/_fontes/*.csv
+!scripts/catmat/_fontes/*.xls*
