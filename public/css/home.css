@@ -129,12 +129,6 @@ body.no-animated-bg .home-title {
     -webkit-text-fill-color: var(--compras-contrast);
 }
 
-/* Garante que o conteúdo fique acima do overlay 
-#home.home-bg-loaded>* {
-    position: relative;
-    z-index: 1;
-}*/
-
 @keyframes panBackground {
     0% {
         background-position: 0% 0%;
@@ -179,7 +173,7 @@ body.no-animated-bg .home-title {
     max-height: 100vh;
 }
 
-@media only screen and (max-width: 560px) {
+@media only screen and (max-width: 480px) {
     .card-glass-grid {
         flex-direction: column;
     }
