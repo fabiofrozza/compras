@@ -71,6 +71,23 @@
     gap: 10px;
 }
 
+.btn-tooltip-wrapper {
+    display: inline-block;
+}
+
+.btn-tooltip-wrapper:has(button:disabled) {
+    cursor: not-allowed;
+}
+
+.btn-tooltip-wrapper>button:disabled {
+    pointer-events: none;
+}
+
+.tooltip-disabled-btn .tooltip-inner {
+    text-align: left;
+    white-space: pre-wrap;
+}
+
 .form-sub-container {
     position: relative;
     margin-bottom: 12px;
@@ -352,12 +369,17 @@
 }
 
 /* Tabela do conteúdo da pasta com cabeçalho */
-#fornecedores-conteudo-list .files-table thead th {
+#fornecedores-conteudo-list .files-table thead th,
+#npm-packages-list .files-table thead th {
     font-size: 11px;
     font-weight: 600;
     padding: 6px 4px;
     border-bottom: 1px solid var(--bs-border-color);
     color: var(--bs-secondary-color);
+}
+
+#npm-packages-list .files-table tbody tr {
+    cursor: default;
 }
 
 /* Importar table header */

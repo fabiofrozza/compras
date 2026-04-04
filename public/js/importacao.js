@@ -242,20 +242,28 @@ function verificarLiberacaoBotoesImportacao() {
 
     atualizarIndicadoresSubTabs();
 
-    const podeExecutar = importacaoLinkValido && formValido && navigator.onLine;
+    const reasons = [];
+    if (!importacaoLinkValido) reasons.push('Informe um link válido do Comprasnet');
+    if (!formValido) reasons.push('Preencha os campos obrigatórios');
+    if (!navigator.onLine) reasons.push('Sem conexão com a internet');
 
     const btnArquivos = document.getElementById('btn-importacao-arquivos');
     const btnResumo = document.getElementById('btn-importacao-resumo');
     const btnRelatorio = document.getElementById('btn-importacao-relatorio');
 
-    if (btnArquivos) btnArquivos.disabled = !podeExecutar;
-    if (btnRelatorio) btnRelatorio.disabled = !podeExecutar;
+    [btnArquivos, btnRelatorio].forEach(btn => {
+        if (!btn) return;
+        btn.disabled = reasons.length > 0;
+        updateButtonTooltip(btn, reasons);
+    });
 
-    // O botão de resumo exige condição extra: a lista de PDFs não pode estar vazia
     if (btnResumo) {
         const listaPdf = document.getElementById('importacao-resumos-pdf');
         const temArquivosPdf = listaPdf && listaPdf.querySelectorAll('table tr').length > 0;
-        btnResumo.disabled = !podeExecutar || !temArquivosPdf;
+        const resumoReasons = [...reasons];
+        if (!temArquivosPdf) resumoReasons.push('Nenhum arquivo PDF disponível');
+        btnResumo.disabled = resumoReasons.length > 0;
+        updateButtonTooltip(btnResumo, resumoReasons);
     }
 }
 

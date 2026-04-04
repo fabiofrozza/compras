@@ -1,9 +1,12 @@
 let _rDownloadUrl = '';
 
 function atualizarBotoesInstalacao() {
-    ['btn-run-instalacao', 'btn-download-r'].forEach(id => {
+    ['btn-run-instalacao', 'btn-download-r', 'btn-run-npm_update'].forEach(id => {
         const btn = document.getElementById(id);
-        if (btn) btn.disabled = !navigator.onLine;
+        if (!btn) return;
+        const reasons = !navigator.onLine ? ['Sem conexão com a internet'] : [];
+        btn.disabled = reasons.length > 0;
+        updateButtonTooltip(btn, reasons);
     });
 }
 

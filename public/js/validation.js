@@ -97,6 +97,50 @@ function toggleValidationMsg(field, hasError) {
     feedback.classList.toggle('show', hasError);
 }
 
+// Envolve um botão num wrapper <span> para permitir tooltip em botões disabled
+function wrapButtonForTooltip(button) {
+    if (button.parentElement?.classList.contains('btn-tooltip-wrapper')) return button.parentElement;
+    const wrapper = document.createElement('span');
+    wrapper.className = 'btn-tooltip-wrapper';
+    button.parentElement.insertBefore(wrapper, button);
+    wrapper.appendChild(button);
+    return wrapper;
+}
+
+function updateButtonTooltip(button, reasons) {
+    const wrapper = button.parentElement?.classList.contains('btn-tooltip-wrapper')
+        ? button.parentElement
+        : wrapButtonForTooltip(button);
+
+    const existingTooltip = bootstrap.Tooltip.getInstance(wrapper);
+
+    if (reasons.length === 0) {
+        if (existingTooltip) existingTooltip.dispose();
+        wrapper.removeAttribute('data-bs-toggle');
+        wrapper.removeAttribute('data-bs-title');
+        return;
+    }
+
+    const title = reasons.length === 1
+        ? reasons[0]
+        : reasons.map(r => `• ${r}`).join('<br>');
+
+    wrapper.setAttribute('data-bs-toggle', 'tooltip');
+    wrapper.setAttribute('data-bs-html', true);
+    wrapper.setAttribute('data-bs-title', title);
+
+    if (existingTooltip) {
+        existingTooltip.setContent({ '.tooltip-inner': title });
+    } else {
+        new bootstrap.Tooltip(wrapper, {
+            container: 'body',
+            trigger: 'hover focus',
+            html: true,
+            customClass: 'custom-tooltip tooltip-disabled-btn'
+        });
+    }
+}
+
 function setButtonState(field) {
     const formElement = field.closest('.script-form');
     if (!formElement) return;
@@ -112,12 +156,7 @@ function setButtonState(field) {
     }
 
     if (formId === 'form-importacao-link' || formId === 'importacaoTabsForm') {
-        const hasInvalidFields = Array.from(document.querySelectorAll('#form-importacao-link [data-field], #form-importacao-config [data-field]'))
-            .some(f => f.classList.contains('is-invalid'));
-        ['btn-importacao-arquivos', 'btn-importacao-resumo', 'btn-importacao-relatorio'].forEach(btnId => {
-            const btn = document.getElementById(btnId);
-            if (btn) btn.disabled = hasInvalidFields;
-        });
+        if (typeof verificarLiberacaoBotoesImportacao === 'function') verificarLiberacaoBotoesImportacao();
         return;
     }
 
@@ -127,29 +166,36 @@ function setButtonState(field) {
 
     const hasInvalidFields = Array.from(document.querySelectorAll(`#${formId} [data-field]`)).some(f => f.classList.contains('is-invalid'));
 
-    let shouldDisable = hasInvalidFields;
+    const reasons = [];
+    if (hasInvalidFields) reasons.push('Preencha os campos obrigatórios');
 
-    // Regras de negócio: botão de atas também exige dados do SICAF disponíveis
     if (button.id === 'btn-form-atas-modelos') {
-        shouldDisable = hasInvalidFields || !atasData.dadosDisponiveis;
+        if (!atasData.dadosDisponiveis) reasons.push('Dados do SICAF não disponíveis');
     }
 
-    // Botão catmat: opção API exige internet
     if (button.id === 'btn-form-itens-tr') {
         const selected = document.querySelector('input[name="catmat-metodo"]:checked');
-        shouldDisable = hasInvalidFields || (selected?.value === 'api' && !navigator.onLine);
+        if (selected?.value === 'api' && !navigator.onLine) reasons.push('Sem conexão com a internet');
     }
 
-    button.disabled = shouldDisable;
+    button.disabled = reasons.length > 0;
+    updateButtonTooltip(button, reasons);
 }
 
 function atualizarBotaoCatmat() {
     const btn = document.getElementById('btn-form-itens-tr');
     if (!btn) return;
+
+    const reasons = [];
     const hasInvalidFields = Array.from(document.querySelectorAll('#form-itens-tr [data-field]'))
         .some(f => f.classList.contains('is-invalid'));
+    if (hasInvalidFields) reasons.push('Selecione um arquivo na lista');
+
     const selected = document.querySelector('input[name="catmat-metodo"]:checked');
-    btn.disabled = hasInvalidFields || (selected?.value === 'api' && !navigator.onLine);
+    if (selected?.value === 'api' && !navigator.onLine) reasons.push('Sem conexão com a internet');
+
+    btn.disabled = reasons.length > 0;
+    updateButtonTooltip(btn, reasons);
 }
 
 document.addEventListener('change', (e) => {

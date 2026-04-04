@@ -146,11 +146,12 @@ function atualizarBotaoGerarAtas() {
 
     const modeloSelecionado = selectedFiles['atas-modelos'];
 
-    if (atasData.dadosDisponiveis && modeloSelecionado) {
-        btnGerar.disabled = false;
-    } else {
-        btnGerar.disabled = true;
-    }
+    const reasons = [];
+    if (!atasData.dadosDisponiveis) reasons.push('Dados do SICAF não disponíveis');
+    if (!modeloSelecionado) reasons.push('Selecione um modelo de ata');
+
+    btnGerar.disabled = reasons.length > 0;
+    updateButtonTooltip(btnGerar, reasons);
 }
 
 function setupAtasListeners() {
