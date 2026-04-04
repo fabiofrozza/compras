@@ -969,12 +969,17 @@ app.get('/api/npm-outdated', async (_req, res) => {
     await new Promise(resolve => { proc.on('close', resolve); });
 
     const outdated = stdoutData.trim() ? JSON.parse(stdoutData) : {};
-    const packages = Object.entries(outdated).map(([name, info]) => ({
-      name,
-      current: info.current,
-      wanted: info.wanted,
-      latest: info.latest
-    }));
+    if (outdated.error) {
+      return res.json({ error: outdated.error.summary || 'Erro ao verificar pacotes npm.' });
+    }
+    const packages = Object.entries(outdated)
+      .filter(([, info]) => info && info.current !== undefined)
+      .map(([name, info]) => ({
+        name,
+        current: info.current,
+        wanted: info.wanted,
+        latest: info.latest
+      }));
 
     res.json({ packages });
   } catch (err) {
