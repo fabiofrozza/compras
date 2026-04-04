@@ -112,6 +112,10 @@ function connectWebSocket() {
                             verificarStatusDadosAtas();
                         }
 
+                        if (data.scriptName === 'npm_update' && typeof carregarNpmPackages === 'function') {
+                            carregarNpmPackages();
+                        }
+
                         if (data.scriptName === 'fornecedores') {
                             if (typeof carregarPregoes === 'function') carregarPregoes();
                             if (typeof carregarImportar === 'function') carregarImportar();

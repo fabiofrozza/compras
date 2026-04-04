@@ -952,6 +952,58 @@ app.get('/api/check-node-latest', async (_req, res) => {
   }
 });
 
+app.get('/api/npm-outdated', async (_req, res) => {
+  const npmCli = path.join(__dirname, '..', 'bin', 'node_modules', 'npm', 'bin', 'npm-cli.js');
+  const projectDir = path.join(__dirname, '..');
+
+  try {
+    const proc = spawn(process.execPath, [npmCli, 'outdated', '--json'], {
+      cwd: projectDir,
+      windowsHide: true
+    });
+
+    let stdoutData = '';
+    proc.stdout.on('data', (data) => { stdoutData += data.toString(); });
+    proc.stderr.on('data', () => {});
+
+    await new Promise(resolve => { proc.on('close', resolve); });
+
+    const outdated = stdoutData.trim() ? JSON.parse(stdoutData) : {};
+    const packages = Object.entries(outdated).map(([name, info]) => ({
+      name,
+      current: info.current,
+      wanted: info.wanted,
+      latest: info.latest
+    }));
+
+    res.json({ packages });
+  } catch (err) {
+    logger.error(`Erro ao verificar pacotes npm: ${err.message}`, 'NpmOutdated');
+    res.json({ error: 'Não foi possível verificar os pacotes npm.' });
+  }
+});
+
+app.get('/api/check-npm', async (_req, res) => {
+  const npmCli = path.join(__dirname, '..', 'bin', 'node_modules', 'npm', 'bin', 'npm-cli.js');
+
+  try {
+    const versionProc = spawn(process.execPath, [npmCli, '--version'], { windowsHide: true });
+    let versionOut = '';
+    versionProc.stdout.on('data', (data) => { versionOut += data.toString(); });
+    await new Promise(resolve => { versionProc.on('close', resolve); });
+    const currentVersion = versionOut.trim();
+
+    const response = await fetch('https://registry.npmjs.org/npm/latest');
+    const data = await response.json();
+    const latestVersion = data.version;
+
+    res.json({ current: currentVersion, latest: latestVersion });
+  } catch (err) {
+    logger.error(`Erro ao verificar versão do npm: ${err.message}`, 'NpmVersion');
+    res.json({ error: 'Não foi possível verificar a versão do npm.' });
+  }
+});
+
 app.get('/api/check-r', async (_req, res) => {
   cachedRScriptPath = null;
   const rscriptCmd = await getRScriptPath();
@@ -1135,6 +1187,9 @@ const server = app.listen(PORT, async () => {
             logger.section(`Executando script R: ${data.scriptName} [${ws.clientLabel}]`);
             executeRScript(ws, data.scriptName, data.params);
           }
+        } else if (data.action === 'execute-npm-update') {
+          logger.section(`Executando atualização de pacotes npm`);
+          executeNpmUpdate(ws);
         }
       } catch (err) {
         logger.error(`Erro ao processar mensagem: ${err.message}`, 'WebSocket', err);
@@ -1166,6 +1221,169 @@ const server = app.listen(PORT, async () => {
     });
   });
 });
+
+async function executeNpmUpdate(ws) {
+  const npmCli = path.join(__dirname, '..', 'bin', 'node_modules', 'npm', 'bin', 'npm-cli.js');
+  const nodeExe = process.execPath;
+  const projectDir = path.join(__dirname, '..');
+  const binDir = path.join(__dirname, '..', 'bin');
+
+  ws.send(JSON.stringify({
+    type: 'start',
+    message: 'Verificando npm e pacotes...'
+  }));
+
+  const sendLog = (message, level = 'info') => {
+    ws.send(JSON.stringify({ type: 'output', message, level }));
+  };
+
+  const spawnNpm = (args, cwd = projectDir) => spawn(nodeExe, [npmCli, ...args], {
+    cwd,
+    windowsHide: true
+  });
+
+  const streamOutput = (proc) => {
+    let lineBuffer = '';
+    proc.stdout.on('data', (data) => {
+      lineBuffer += data.toString();
+      const lines = lineBuffer.split('\n');
+      lineBuffer = lines.pop() || '';
+      lines.forEach(line => { if (line.trim()) sendLog(line.trim()); });
+    });
+    proc.stderr.on('data', (data) => {
+      const lines = data.toString().split('\n');
+      lines.forEach(line => {
+        if (!line.trim()) return;
+        if (line.toLowerCase().includes('warn')) {
+          sendLog(line.trim(), 'warning');
+        } else if (line.toLowerCase().includes('err')) {
+          sendLog(line.trim(), 'error');
+        } else {
+          sendLog(line.trim());
+        }
+      });
+    });
+  };
+
+  try {
+    const results = [];
+
+    // === Etapa 1: Verificar e atualizar o próprio npm ===
+    sendLog('Verificando versão do npm...', 'section');
+
+    const versionProc = spawnNpm(['--version']);
+    let currentNpmVersion = '';
+    versionProc.stdout.on('data', (data) => { currentNpmVersion += data.toString(); });
+    await new Promise(resolve => { versionProc.on('close', resolve); });
+    currentNpmVersion = currentNpmVersion.trim();
+
+    let latestNpmVersion = '';
+    try {
+      const response = await fetch('https://registry.npmjs.org/npm/latest');
+      const data = await response.json();
+      latestNpmVersion = data.version;
+    } catch {
+      sendLog('Não foi possível consultar a versão mais recente do npm.', 'warning');
+    }
+
+    if (currentNpmVersion && latestNpmVersion) {
+      sendLog(`  npm: ${currentNpmVersion} → ${latestNpmVersion}`);
+
+      const npmParts = currentNpmVersion.split('.').map(Number);
+      const latestParts = latestNpmVersion.split('.').map(Number);
+      let npmOutdated = false;
+      for (let i = 0; i < Math.max(npmParts.length, latestParts.length); i++) {
+        if ((latestParts[i] || 0) > (npmParts[i] || 0)) { npmOutdated = true; break; }
+        if ((latestParts[i] || 0) < (npmParts[i] || 0)) break;
+      }
+
+      if (npmOutdated) {
+        sendLog('');
+        sendLog('Atualizando npm...', 'section');
+
+        const npmUpdateProc = spawnNpm(['install', 'npm@latest', '--prefix', binDir], binDir);
+        streamOutput(npmUpdateProc);
+        const npmUpdateCode = await new Promise(resolve => { npmUpdateProc.on('close', resolve); });
+
+        if (npmUpdateCode === 0) {
+          sendLog(`✓ npm atualizado: ${currentNpmVersion} → ${latestNpmVersion}`, 'success');
+          results.push(`npm atualizado (${currentNpmVersion} → ${latestNpmVersion})`);
+        } else {
+          sendLog('Erro ao atualizar o npm.', 'error');
+          results.push('falha ao atualizar npm');
+        }
+      } else {
+        sendLog('✓ npm já está atualizado.', 'success');
+      }
+    }
+
+    sendLog('');
+
+    // === Etapa 2: Verificar e atualizar pacotes do projeto ===
+    sendLog('Verificando pacotes do projeto...', 'section');
+
+    const outdatedProcess = spawnNpm(['outdated', '--json']);
+
+    let stdoutData = '';
+    outdatedProcess.stdout.on('data', (data) => { stdoutData += data.toString(); });
+    outdatedProcess.stderr.on('data', () => {});
+
+    await new Promise(resolve => { outdatedProcess.on('close', resolve); });
+
+    const outdated = stdoutData.trim() ? JSON.parse(stdoutData) : {};
+    const packages = Object.keys(outdated);
+
+    if (packages.length === 0) {
+      sendLog('✓ Todos os pacotes já estão atualizados.', 'success');
+    } else {
+      for (const pkg of packages) {
+        const info = outdated[pkg];
+        sendLog(`  ${pkg}: ${info.current} → ${info.wanted}${info.latest !== info.wanted ? ` (última: ${info.latest})` : ''}`);
+      }
+
+      sendLog('');
+      sendLog('Atualizando pacotes...', 'section');
+
+      const updateProcess = spawnNpm(['update']);
+      streamOutput(updateProcess);
+      const updateCode = await new Promise(resolve => { updateProcess.on('close', resolve); });
+
+      if (updateCode === 0) {
+        sendLog('');
+        sendLog(`✓ ${packages.length} pacote(s) atualizado(s) com sucesso.`, 'success');
+        results.push(`${packages.length} pacote(s) atualizado(s)`);
+      } else {
+        sendLog('Erro ao atualizar pacotes npm.', 'error');
+        results.push('falha ao atualizar pacotes');
+      }
+    }
+
+    // === Resultado final ===
+    const hasError = results.some(r => r.startsWith('falha'));
+
+    if (results.length === 0) {
+      const msg = 'npm e pacotes Node.js já estão atualizados.';
+      const notificationMessage = buildNotificationMessage('npm_update', 'success', null, msg);
+      logger.success(notificationMessage, 'NpmUpdate');
+      ws.send(JSON.stringify({ type: 'success', message: msg, notificationMessage, scriptName: 'npm_update' }));
+    } else if (hasError) {
+      const msg = `Atualização concluída com erros: ${results.join('; ')}.`;
+      const notificationMessage = buildNotificationMessage('npm_update', 'error', null, msg);
+      logger.error(notificationMessage, 'NpmUpdate');
+      ws.send(JSON.stringify({ type: 'error', message: msg, notificationMessage, scriptName: 'npm_update' }));
+    } else {
+      const msg = `Atualização concluída: ${results.join('; ')}.`;
+      const notificationMessage = buildNotificationMessage('npm_update', 'success', null, msg);
+      logger.success(notificationMessage, 'NpmUpdate');
+      ws.send(JSON.stringify({ type: 'success', message: msg, notificationMessage, scriptName: 'npm_update' }));
+    }
+  } catch (err) {
+    const msg = `Erro ao executar npm: ${err.message}`;
+    const notificationMessage = buildNotificationMessage('npm_update', 'error', null, msg);
+    logger.error(notificationMessage, 'NpmUpdate', err);
+    ws.send(JSON.stringify({ type: 'error', message: msg, notificationMessage, scriptName: 'npm_update' }));
+  }
+}
 
 async function executeMailmergeJS(ws, params) {
   try {
@@ -1392,7 +1610,8 @@ async function executeRScript(ws, scriptFolder, params) {
 const TAB_NAMES = {
   atas: 'Atas', atas_mailmerge: 'Atas (Mailmerge)', catmat: 'Catmat',
   fornecedores: 'Fornecedores', importacao: 'Importação',
-  mapas: 'Mapas', powerbi: 'Power BI', instalacao: 'Instalação'
+  mapas: 'Mapas', powerbi: 'Power BI', instalacao: 'Instalação',
+  npm_update: 'Pacotes Node.js'
 };
 
 const TYPE_LABELS = {

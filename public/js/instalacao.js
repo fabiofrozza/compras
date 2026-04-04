@@ -19,6 +19,32 @@ function executarInstalacaoSelecionada() {
     if (modo) executarInstalacao(modo);
 }
 
+function executarNpmUpdate() {
+    if (isScriptRunning) {
+        showToast('Aguarde o término do script em execução antes de iniciar outro.', 'warning', 5000, 'execução');
+        return;
+    }
+
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+        showToast('Servidor não está conectado. Execute novamente o arquivo start.cmd para iniciar o servidor.', 'error', 10000, 'inicialização');
+        return;
+    }
+
+    prepareConsoleForExecution('npm_update');
+
+    try {
+        ws.send(JSON.stringify({ action: 'execute-npm-update' }));
+    } catch (error) {
+        console.error('Erro ao enviar mensagem:', error);
+        handleScriptResult({
+            status: 'error',
+            message: `Falha ao enviar comando para o servidor: ${error.message}`,
+            log: '',
+            scriptName: 'npm_update'
+        });
+    }
+}
+
 function downloadR() {
     if (!_rDownloadUrl) return;
     window.open(_rDownloadUrl, '_blank');
@@ -162,5 +188,118 @@ async function carregarInfoNode() {
     }
 }
 
+let _npmOutdated = false;
+
+async function carregarInfoNpm() {
+    const loading = document.getElementById('npm-version-loading');
+    const content = document.getElementById('npm-version-content');
+    if (!content) return;
+
+    loading.classList.remove('d-none');
+    content.classList.add('d-none');
+
+    try {
+        const res = await fetch('/api/check-npm');
+        const data = await res.json();
+
+        loading.classList.add('d-none');
+        content.classList.remove('d-none');
+
+        const versionEl = document.getElementById('npm-info-version');
+        const latestEl = document.getElementById('npm-info-latest');
+        const statusEl = document.getElementById('npm-info-status');
+
+        if (data.error) {
+            versionEl.textContent = 'Não foi possível verificar';
+            versionEl.classList.add('text-body-secondary');
+            return;
+        }
+
+        versionEl.textContent = data.current || '-';
+        latestEl.textContent = data.latest || '-';
+
+        if (data.current && data.latest) {
+            const cmp = compareVersions(data.current, data.latest);
+            if (cmp >= 0) {
+                statusEl.textContent = 'Atualizado';
+                statusEl.className = 'badge ms-2 text-bg-success';
+            } else {
+                statusEl.textContent = 'Nova versão disponível';
+                statusEl.className = 'badge ms-2 text-bg-warning';
+                _npmOutdated = true;
+                document.getElementById('btn-run-npm_update')?.classList.remove('d-none');
+            }
+        }
+    } catch {
+        loading.classList.add('d-none');
+        content.classList.remove('d-none');
+        document.getElementById('npm-info-version').textContent = 'Erro ao verificar';
+    }
+}
+
+async function carregarNpmPackages() {
+    const loading = document.getElementById('npm-packages-loading');
+    const content = document.getElementById('npm-packages-content');
+    const statusEl = document.getElementById('npm-packages-status');
+    const listEl = document.getElementById('npm-packages-list');
+    const updateBtn = document.getElementById('btn-run-npm_update');
+
+    if (!content) return;
+
+    loading.classList.remove('d-none');
+    content.classList.add('d-none');
+
+    try {
+        const res = await fetch('/api/npm-outdated');
+        const data = await res.json();
+
+        loading.classList.add('d-none');
+        content.classList.remove('d-none');
+
+        if (data.error) {
+            statusEl.innerHTML = `<span class="text-body-secondary">${data.error}</span>`;
+            return;
+        }
+
+        if (data.packages.length === 0) {
+            statusEl.innerHTML = '<span class="badge text-bg-success">Todos os pacotes estão atualizados</span>';
+            listEl.innerHTML = '';
+            return;
+        }
+
+        statusEl.innerHTML = `<span class="badge text-bg-warning">${data.packages.length} pacote(s) com atualização disponível</span>`;
+
+        const rows = data.packages.map(pkg =>
+            `<tr>
+                <td>${pkg.name}</td>
+                <td>${pkg.current}</td>
+                <td>${pkg.wanted}</td>
+                <td>${pkg.latest}</td>
+            </tr>`
+        ).join('');
+
+        listEl.innerHTML =
+            `<div class="files-table-container">
+                <table class="files-table">
+                    <thead><tr>
+                        <th>Pacote</th>
+                        <th>Atual</th>
+                        <th>Compatível</th>
+                        <th>Última</th>
+                    </tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>`;
+
+        updateBtn.classList.remove('d-none');
+    } catch {
+        loading.classList.add('d-none');
+        content.classList.remove('d-none');
+        statusEl.innerHTML = '<span class="text-body-secondary">Não foi possível verificar os pacotes.</span>';
+    }
+}
+
 carregarInfoR();
 carregarInfoNode();
+carregarInfoNpm();
+carregarNpmPackages();

@@ -199,9 +199,10 @@ function prepareConsoleForExecution(scriptName) {
   consoleSummary.className = 'summary-running';
   summaryTitle.textContent = 'Executando...';
 
-  // Se for o mailmerge (que é JS) não exibe 'script R'
   if (scriptName === 'atas_mailmerge') {
     summaryDescription.textContent = 'Aguarde o processamento da geração das atas.';
+  } else if (scriptName === 'npm_update') {
+    summaryDescription.textContent = 'Aguarde a atualização dos pacotes Node.js.';
   } else {
     summaryDescription.textContent = 'Aguarde o término do processamento do script R.';
   }
