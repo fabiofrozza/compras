@@ -4,6 +4,7 @@ const WebSocket = require('ws');
 const path = require('path');
 const fs = require('fs').promises;
 const os = require('os');
+const dns = require('dns');
 const { spawn, execSync } = require('child_process');
 const Logger = require('./utils/logger');
 const { executarMailmerge } = require('./services/mailmerge');
@@ -1047,16 +1048,45 @@ app.get('/api/app-config', (_req, res) => {
 
 const server = app.listen(PORT, async () => {
 
+  const localIp = Object.values(os.networkInterfaces())
+    .flat()
+    .find(iface => iface.family === 'IPv4' && !iface.internal);
+
   logger.section('Servidor iniciado');
   logger.info(`==============================================`);
   logger.info(``);
   logger.info(`Se a página não abrir automaticamente, acessar no navegador:`);
   logger.info(`http://localhost:${PORT}`);
+  if (localIp) {
+    logger.info(``);
+    logger.info(`Acesso pela rede local (outros computadores/celulares):`);
+    logger.info(`http://${localIp.address}:${PORT}`);
+  }
   logger.info(``);
   logger.info(`==============================================`);
   logger.debug(`Pasta: ${__dirname}`, 'Server');
 
   abrirNaInterface(`http://localhost:${PORT}`);
+
+  function parseClientLabel(ip, userAgent) {
+    const isLocal = ['::1', '127.0.0.1', '::ffff:127.0.0.1'].includes(ip);
+
+    let osName = 'Desconhecido';
+    if (/Windows/.test(userAgent)) osName = 'Windows';
+    else if (/Android/.test(userAgent)) osName = 'Android';
+    else if (/iPhone|iPad/.test(userAgent)) osName = 'iOS';
+    else if (/Mac OS/.test(userAgent)) osName = 'macOS';
+    else if (/Linux/.test(userAgent)) osName = 'Linux';
+
+    let browser = '';
+    if (/Edg\//.test(userAgent)) browser = 'Edge';
+    else if (/Chrome\//.test(userAgent)) browser = 'Chrome';
+    else if (/Firefox\//.test(userAgent)) browser = 'Firefox';
+    else if (/Safari\//.test(userAgent) && !/Chrome/.test(userAgent)) browser = 'Safari';
+
+    const device = browser ? `${osName}/${browser}` : osName;
+    return isLocal ? `local (${device})` : `${ip.replace(/^::ffff:/, '')} (${device})`;
+  }
 
   const wss = new WebSocket.Server({ server });
   let clientCount = 0;
@@ -1079,19 +1109,30 @@ const server = app.listen(PORT, async () => {
 
     const ip = req.socket.remoteAddress;
     const userAgent = req.headers['user-agent'] || 'Desconhecido';
+    const clientLabel = parseClientLabel(ip, userAgent);
+    ws.clientLabel = clientLabel;
 
-    logger.info(`Cliente conectado (Total: ${clientCount})`, 'WebSocket');
+    logger.info(`Cliente conectado: ${clientLabel} (Total: ${clientCount})`, 'WebSocket');
     logger.debug(`IP: ${ip} | Navegador: ${userAgent}`, 'WebSocket');
+
+    // Tentar resolver hostname via DNS reverso
+    const cleanIp = ip.replace(/^::ffff:/, '');
+    dns.reverse(cleanIp, (err, hostnames) => {
+      if (!err && hostnames && hostnames.length > 0) {
+        ws.clientLabel = `${hostnames[0]} (${clientLabel})`;
+        logger.debug(`Hostname resolvido: ${ws.clientLabel}`, 'WebSocket');
+      }
+    });
 
     ws.on('message', (message) => {
       try {
         const data = JSON.parse(message);
         if (data.action === 'execute-r-script') {
           if (data.scriptName === 'atas_mailmerge') {
-            logger.section(`Executando mailmerge de atas (JavaScript): ${data.scriptName}`);
+            logger.section(`Executando mailmerge de atas (JavaScript): ${data.scriptName} [${ws.clientLabel}]`);
             executeMailmergeJS(ws, data.params);
           } else {
-            logger.section(`Executando script R: ${data.scriptName}`);
+            logger.section(`Executando script R: ${data.scriptName} [${ws.clientLabel}]`);
             executeRScript(ws, data.scriptName, data.params);
           }
         }
@@ -1102,8 +1143,7 @@ const server = app.listen(PORT, async () => {
 
     ws.on('close', () => {
       clientCount--;
-      logger.info(`Cliente desconectado (Total: ${clientCount})`, 'WebSocket');
-      logger.debug(`IP: ${ip}`, 'WebSocket');
+      logger.info(`Cliente desconectado: ${ws.clientLabel} (Total: ${clientCount})`, 'WebSocket');
 
       if (clientCount === 0) {
         logger.info('Nenhum cliente conectado. Aguardando reconexão durante 4 segundos...', 'Server');

@@ -35,7 +35,7 @@ window.addEventListener('offline', handleInternetOffline);
 window.addEventListener('online', handleInternetOnline);
 
 function connectWebSocket() {
-    ws = new WebSocket('ws://localhost:3000');
+    ws = new WebSocket(`ws://${window.location.host}`);
 
     ws.onopen = () => {
         if (wsDisconnectedAlertShown) {
