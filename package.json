@@ -13,6 +13,17 @@
   ],
   "author": "Fábio Frozza",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fabiofrozza/compras"
+  },
+  "bugs": {
+    "url": "https://github.com/fabiofrozza/compras/issues"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "dependencies": {
     "dotenv": "^17.3.1",
     "exceljs": "^4.4.0",
