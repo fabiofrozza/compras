@@ -1,7 +1,3 @@
-// ===========================================
-// fornecedores.js - Lógica da aba Fornecedores
-// ===========================================
-
 let pregaoSelecionado = null;
 let pregoesDadosFolderPath = '';
 let importarFolderPath = '';
@@ -74,8 +70,11 @@ async function carregarPregoes() {
             </button>`;
 
         if (!data.pregoes || data.pregoes.length === 0) {
+            const emptyMsg = data.folderCreated
+                ? '<i class="material-symbols-outlined">create_new_folder</i> Pasta não encontrada e criada'
+                : '<i class="material-symbols-outlined">warning</i> Nenhum pregão encontrado na pasta DADOS';
             container.innerHTML = buildFolderPathHTML(displayPath, '', refreshPregoes) +
-                `<div class="alert alert-warning"><i class="material-symbols-outlined">warning</i> Nenhum pregão encontrado na pasta DADOS</div>`;
+                `<div class="alert alert-warning">${emptyMsg}</div>`;
             setupFolderPathButtons(container);
             setupRefreshPregoesButton(container);
             initializeTooltips();
@@ -495,8 +494,11 @@ async function carregarImportar() {
         importarFolderPath = data.folderPath;
 
         if (!data.arquivos || data.arquivos.length === 0) {
+            const emptyMsg = data.folderCreated
+                ? '<i class="material-symbols-outlined">create_new_folder</i> Pasta não encontrada e criada'
+                : '<i class="material-symbols-outlined">warning</i> Nenhum arquivo para importar';
             let html = buildFolderPathHTML(data.folderPath.replace(/\\/g, '/'));
-            html += `<div class="alert alert-warning"><i class="material-symbols-outlined">warning</i> Nenhum arquivo para importar</div>`;
+            html += `<div class="alert alert-warning">${emptyMsg}</div>`;
             container.innerHTML = html;
             setupFolderPathButtons(container);
             setupImportarFooterButtons(container, false);

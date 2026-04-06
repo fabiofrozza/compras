@@ -403,11 +403,10 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
         let filesHTML = buildFolderPathHTML(data.folderPath, deleteBtn, toggleViewBtn + refreshBtn);
 
         if (!hasFiles) {
-            filesHTML += `
-                <div class="alert alert-warning" role="alert">
-                    <i class="material-symbols-outlined">warning</i> Nenhum arquivo encontrado na pasta
-                </div>
-            `;
+            const emptyMsg = data.folderCreated
+                ? '<i class="material-symbols-outlined">create_new_folder</i> Pasta não encontrada e criada'
+                : '<i class="material-symbols-outlined">warning</i> Nenhum arquivo encontrado na pasta';
+            filesHTML += `<div class="alert alert-warning" role="alert">${emptyMsg}</div>`;
             filesList.innerHTML = filesHTML;
             setupFileListButtons(filesList);
             initializeTooltips();
