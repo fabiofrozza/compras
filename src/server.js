@@ -90,7 +90,8 @@ function abrirNaInterface(targetPath, isFile = false) {
   }
 }
 
-// Retorna null com o erro já respondido via res quando o caminho é inválido ou inexistente.
+// Retorna null com o erro já respondido via res quando o caminho é inválido.
+// Caso contrário, retorna { folderPath, created } onde created indica se a pasta foi criada agora.
 async function resolverPastaScript(res, scriptName, innerFolder, context) {
   let mappedFolder = innerFolder;
   if (innerFolder === 'RAIZ') {
@@ -103,15 +104,16 @@ async function resolverPastaScript(res, scriptName, innerFolder, context) {
     return null;
   }
 
+  let created = false;
   try {
     await fs.access(folderPath);
   } catch {
-    logger.debug(`Pasta não encontrada: ${folderPath}`, context);
-    res.status(404).json({ error: 'Pasta não encontrada' });
-    return null;
+    await fs.mkdir(folderPath, { recursive: true });
+    logger.debug(`Pasta criada: ${folderPath}`, context);
+    created = true;
   }
 
-  return folderPath;
+  return { folderPath, created };
 }
 
 function parsearFiltros(extensions, nameContains) {
@@ -350,8 +352,9 @@ app.get('/api/list-files/:scriptName/:innerFolder', async (req, res) => {
     const { scriptName, innerFolder } = req.params;
     const { extensions, nameContains, sort } = req.query;
 
-    const folderPath = await resolverPastaScript(res, scriptName, innerFolder, 'ListFiles');
-    if (!folderPath) return;
+    const result = await resolverPastaScript(res, scriptName, innerFolder, 'ListFiles');
+    if (!result) return;
+    const { folderPath, created } = result;
 
     const { patterns, filterNameContains } = parsearFiltros(extensions, nameContains);
     const files = await fs.readdir(folderPath);
@@ -378,7 +381,7 @@ app.get('/api/list-files/:scriptName/:innerFolder', async (req, res) => {
 
     logger.debug(`Listados ${filteredFiles.length} itens de ${scriptName}/${innerFolder}`, 'ListFiles');
     const canDelete = ALLOWED_DELETE_FOLDERS.includes(innerFolder.toLowerCase());
-    res.json({ files: fileDetails, folderPath, canDelete });
+    res.json({ files: fileDetails, folderPath, canDelete, folderCreated: created });
   } catch (error) {
     logger.error(`Erro ao listar arquivos: ${error.message}`, 'ListFiles', error);
     res.status(500).json({ error: error.message });
@@ -396,8 +399,9 @@ app.delete('/api/clear-folder/:scriptName/:innerFolder', async (req, res) => {
       return res.status(403).json({ error: 'A exclusão nesta pasta não é permitida por segurança.' });
     }
 
-    const folderPath = await resolverPastaScript(res, scriptName, innerFolder, 'ClearFolder');
-    if (!folderPath) return;
+    const result = await resolverPastaScript(res, scriptName, innerFolder, 'ClearFolder');
+    if (!result) return;
+    const { folderPath } = result;
 
     const { patterns, filterNameContains } = parsearFiltros(extensions, nameContains);
     const files = await fs.readdir(folderPath);
@@ -442,8 +446,9 @@ app.delete('/api/delete-file/:scriptName/:innerFolder', async (req, res) => {
       return res.status(403).json({ error: 'A exclusão nesta pasta não é permitida por segurança.' });
     }
 
-    const folderPath = await resolverPastaScript(res, scriptName, innerFolder, 'DeleteFile');
-    if (!folderPath) return;
+    const result = await resolverPastaScript(res, scriptName, innerFolder, 'DeleteFile');
+    if (!result) return;
+    const { folderPath } = result;
 
     // Prevent path traversal via fileName
     if (fileName.includes('/') || fileName.includes('\\') || fileName === '..' || fileName === '.') {
@@ -594,16 +599,16 @@ const FORNECEDORES_IMPORTAR = path.join(SCRIPTS_PATH, 'fornecedores', 'PARA_IMPO
 // Lista pregões (pastas em DADOS) com status de processamento
 app.get('/api/fornecedores/pregoes', async (_req, res) => {
   try {
-    try { await fs.access(FORNECEDORES_DADOS); } catch {
-      await fs.mkdir(FORNECEDORES_DADOS, { recursive: true });
-    }
+    const result = await resolverPastaScript(res, 'fornecedores', 'DADOS', 'FornecedoresPregoes');
+    if (!result) return;
+    const { folderPath: dadosPath, created } = result;
 
-    const entries = await fs.readdir(FORNECEDORES_DADOS, { withFileTypes: true });
+    const entries = await fs.readdir(dadosPath, { withFileTypes: true });
     const folders = entries.filter(e => e.isDirectory()).map(e => e.name);
 
     // Para cada pregão, verificar se já foi processado e se há erros
     const pregoes = await Promise.all(folders.map(async (nome) => {
-      const pastaPath = path.join(FORNECEDORES_DADOS, nome);
+      const pastaPath = path.join(dadosPath, nome);
       const arquivos = await fs.readdir(pastaPath);
       const xlsxFiles = arquivos.filter(f => /^[^~].*\.xlsx?$/i.test(f));
 
@@ -612,7 +617,7 @@ app.get('/api/fornecedores/pregoes', async (_req, res) => {
       let resultado = null;
 
       try {
-        const statusContent = await fs.readFile(path.join(FORNECEDORES_DADOS, nome, statusName), 'utf-8');
+        const statusContent = await fs.readFile(path.join(dadosPath, nome, statusName), 'utf-8');
         const statusData = JSON.parse(statusContent);
         resultado = statusData.resultado || null;
       } catch { /* sem arquivo de status */ }
@@ -632,7 +637,7 @@ app.get('/api/fornecedores/pregoes', async (_req, res) => {
     }));
 
     pregoes.sort((a, b) => a.nome.localeCompare(b.nome));
-    res.json({ pregoes, folderPath: FORNECEDORES_DADOS });
+    res.json({ pregoes, folderPath: dadosPath, folderCreated: created });
   } catch (error) {
     logger.error(`Erro ao listar pregões: ${error.message}`, 'Fornecedores', error);
     res.status(500).json({ error: error.message });
@@ -700,15 +705,15 @@ app.get('/api/fornecedores/pregao/:pregao/arquivos', async (req, res) => {
 // Lista arquivos para importar (PARA_IMPORTAR)
 app.get('/api/fornecedores/importar', async (_req, res) => {
   try {
-    try { await fs.access(FORNECEDORES_IMPORTAR); } catch {
-      await fs.mkdir(FORNECEDORES_IMPORTAR, { recursive: true });
-    }
+    const result = await resolverPastaScript(res, 'fornecedores', 'PARA_IMPORTAR', 'FornecedoresImportar');
+    if (!result) return;
+    const { folderPath: importarPath, created } = result;
 
-    const arquivos = await fs.readdir(FORNECEDORES_IMPORTAR);
+    const arquivos = await fs.readdir(importarPath);
     const csvFiles = arquivos.filter(f => f.endsWith('.csv'));
 
     const fileDetails = await Promise.all(csvFiles.map(async (file) => {
-      const filePath = path.join(FORNECEDORES_IMPORTAR, file);
+      const filePath = path.join(importarPath, file);
       const stats = await fs.stat(filePath);
 
       // Extrair número do pregão do nome: PE_XXXXX.csv
@@ -745,7 +750,7 @@ app.get('/api/fornecedores/importar', async (_req, res) => {
     }));
 
     fileDetails.sort((a, b) => b.name.localeCompare(a.name));
-    res.json({ arquivos: fileDetails, folderPath: FORNECEDORES_IMPORTAR });
+    res.json({ arquivos: fileDetails, folderPath: importarPath, folderCreated: created });
   } catch (error) {
     logger.error(`Erro ao listar arquivos importar: ${error.message}`, 'Fornecedores', error);
     res.status(500).json({ error: error.message });
