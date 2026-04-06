@@ -173,12 +173,6 @@ body.no-animated-bg .home-title {
     max-height: 100vh;
 }
 
-@media only screen and (max-width: 480px) {
-    .card-glass-grid {
-        flex-direction: column;
-    }
-}
-
 .card-glass-container {
     margin-left: -20px !important;
     margin-bottom: -20px !important;
@@ -358,4 +352,59 @@ body.no-animated-bg .home-title {
     line-height: 1.2;
     transition: transform .25s cubic-bezier(0.25, 0.8, 0.25, 1),
         opacity .25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@media only screen and (max-width: 768px) {
+    #home {
+        overflow-y: auto;
+        position: relative;
+    }
+
+    #home.show.active {
+        height: auto;
+        min-height: 100vh;
+        justify-content: flex-start;
+    }
+
+    .home-title {
+        font-size: 3rem;
+        position: relative;
+        top: unset;
+        left: unset;
+        padding: 3rem 1rem 0;
+    }
+
+    .card-glass-grid {
+        max-height: unset;
+    }
+
+    .card-glass-container {
+        width: 100px !important;
+        height: 140px !important;
+        border-radius: 18px;
+        margin-left: 0px !important;
+        margin-bottom: 0px !important;
+    }
+
+    .card-glass-title {
+        font-size: .8rem !important;
+    }
+
+    .card-glass-text {
+        font-size: .5rem !important;
+    }
+
+    .card-glass-icon i {
+        font-size: 1.5rem !important;
+    }
+
+    #home.home-bg-loaded::before {
+        background-size: cover;
+        /*        background-position: center top;*/
+    }
+
+    .home-bg-credit {
+        position: relative !important;
+        margin: 0 1rem 0 .5rem;
+    }
 }

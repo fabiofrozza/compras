@@ -189,7 +189,7 @@ Inspired by https://codepen.io/fooontic/pen/KwpRaGr
     text-shadow: none;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 768px) {
     .navbar-center {
         display: none;
     }
