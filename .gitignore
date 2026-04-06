@@ -9,9 +9,10 @@ scripts/**/*.json
 postman/
 .vscode
 
-# packages and dependencies
+# dist, packages and dependencies
 node_modules/
 !bin/**
+dist/
 
 # docs
 doc/

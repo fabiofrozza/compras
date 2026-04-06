@@ -4,7 +4,8 @@
   "description": "Some scripts to help my colleagues with activities related to public procurement / Alguns scripts para auxiliar meus colegas nas atividades relacionadas a compras públicas",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "build": "ncc build src/server.js -o dist --minify"
   },
   "keywords": [
     "R",
@@ -31,5 +32,8 @@
     "jszip": "^3.10.1",
     "ws": "^8.19.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.4"
   }
 }
