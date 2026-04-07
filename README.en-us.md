@@ -6,7 +6,7 @@
 <a href="#Features">Features</a> &nbsp;&bull;&nbsp;
 <a href="#Installation">Installation and customization</a> &nbsp;&bull;&nbsp;
 <a href="#Usage">Usage</a> &nbsp;&bull;&nbsp;
-<a href="#Observations">Observations</a> &nbsp;&bull;&nbsp;
+<a href="#Observations">Some observations</a> &nbsp;&bull;&nbsp;
 <a href="#Acknowledgments">Acknowledgments</a> &nbsp;&bull;&nbsp;
 <a href="#License">License</a>
 </p>
@@ -26,8 +26,6 @@ A local web application that runs scripts to assist my colleagues in activities 
 ## Installation and Customization
 
 1. [Download the content of this repository](https://github.com/fabiofrozza/compras/archive/refs/heads/main.zip) and extract it to the desired folder.
-
-1. Open `install.cmd` to install the required packages.
 
 1. Rename the following files and edit them in Notepad, following the instructions inside:
    * in the root folder: `.env-MODELO` to `.env`

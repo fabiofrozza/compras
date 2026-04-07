@@ -1,3 +1,0 @@
-bin\npm install
-
-pause

@@ -6,7 +6,7 @@
 <a href="#Funcionalidades">Funcionalidades</a> &nbsp;&bull;&nbsp;
 <a href="#Instalação">Instalação e personalização</a> &nbsp;&bull;&nbsp;
 <a href="#Uso">Uso</a> &nbsp;&bull;&nbsp;
-<a href="#Observações">Observações</a> &nbsp;&bull;&nbsp;
+<a href="#Observações">Algumas observações</a> &nbsp;&bull;&nbsp;
 <a href="#Reconhecimento">Reconhecimento</a> &nbsp;&bull;&nbsp;
 <a href="#Licença">Licença</a>
 </p>
@@ -26,8 +26,6 @@ Aplicação web local que permite execução de scripts para auxiliar meus coleg
 ## Instalação e Personalização
 
 1. [Baixe o conteúdo deste repositório](https://github.com/fabiofrozza/compras/archive/refs/heads/main.zip) e extraia na pasta desejada.
-
-1. Abra `install.cmd` para instalar os pacotes necessários.
 
 1. Renomeie os seguintes arquivos e edite-os no Bloco de Notas, seguindo as instruções no seu interior:
    * na pasta raiz: `.env-MODELO` para `.env`

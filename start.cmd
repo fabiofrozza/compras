@@ -16,8 +16,21 @@ ECHO OFF
 
 @TITLE SERVIDOR EM EXECUÇÃO. NÃO FECHE ESTA JANELA
 
+IF NOT EXIST ".\node_modules\" (
+    ECHO  %esc%[97m%separador%
+    ECHO.%esc%[34m  Instalando dependências pela primeira vez...%esc%[0m
+    ECHO. %separador%
+    ECHO  %esc%[93m%esc%[41m  Isso pode demorar alguns minutos. Aguarde...%esc%[0m
+    ECHO  %separador%
+    CALL bin\npm install
+    ECHO  %separador%
+)
+
 SET "texto=Aguarde..."
-ECHO  %esc%[97m%separador%& ECHO.%esc%[34m  %texto%%esc%[0m& ECHO. %separador%%esc%[93m%esc%[44m
+ECHO  %esc%[97m%separador%& ECHO.%esc%[34m  %texto%%esc%[0m& ECHO. %separador%%esc%[93m%esc%[41m
+ECHO   A primeira execução pode demorar...
+ECHO   A permissão ao firewall é opcional (se for Desktop Gerenciado, não permita)%esc%[0m
+ECHO  %separador%%esc%[93m%esc%[44m
 ".\bin\node.exe" ".\src\server.js"
 
 ECHO %esc%[41m%esc%[93m
