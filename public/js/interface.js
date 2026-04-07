@@ -321,6 +321,22 @@ async function buildHelpPanel() {
     body.appendChild(ul);
 }
 
+// Bootstrap não remove o elemento .tooltip do body quando o trigger é
+// removido/recriado dinamicamente sem chamar dispose(), o que pode deixar
+// tooltips "fantasmas" na tela. Esta varredura periódica remove tooltips
+// cujo trigger (referenciado via aria-describedby) não existe mais no DOM.
+function cleanupOrphanTooltips() {
+    document.querySelectorAll('body > .tooltip').forEach(tooltipEl => {
+        const id = tooltipEl.id;
+        const trigger = id ? document.querySelector(`[aria-describedby="${id}"]`) : null;
+        if (!trigger || !document.body.contains(trigger)) {
+            tooltipEl.remove();
+        }
+    });
+}
+
+setInterval(cleanupOrphanTooltips, 2000);
+
 function limparFormulario(formId) {
     const form = document.getElementById(formId);
     if (!form) return;
