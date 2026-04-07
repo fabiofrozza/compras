@@ -183,7 +183,7 @@ body.dragging-console {
     resize: none;
 }
 
-#console-container.minimized #console-output,
+#console-container.minimized .console-output-wrapper,
 #console-container.minimized #console-summary {
     display: none !important;
 }
@@ -303,25 +303,38 @@ body.dragging-console {
     content: 'close';
 }
 
-#console-output {
+/* Inspired by https://codepen.io/chriscoyier/pen/GBbOJd */
+.console-output-wrapper {
+    position: relative;
     flex: 1;
     min-height: 60px;
+    overflow: hidden;
+}
+
+.console-output-wrapper::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15) 1px, transparent 1px, transparent 2px);
+    pointer-events: none;
+}
+
+#console-output {
+    height: 100%;
     padding: 15px;
     line-height: normal;
     overflow-y: auto;
     font-family: Consolas, 'Courier New', monospace;
     font-size: 12px;
-    color: #00ff00;
     white-space: pre-wrap;
     word-wrap: break-word;
-    background: linear-gradient(to bottom,
-            rgba(255, 255, 255, 0),
-            rgba(255, 255, 255, .1) 50%,
-            rgba(0, 0, 0, .2) 70%,
-            rgba(0, 0, 0, .6));
-    background-size: 100% .3rem;
+    color: white;
+    text-shadow: 0 0 5px #C8C8C8;
+    background-color: black;
+    background-image: radial-gradient(rgba(0, 150, 0, 0.75), black 120%);
+    background-position: top left;
+    background-size: 175% 250%;
 }
-
 
 .error-text {
     color: var(--compras-error);
