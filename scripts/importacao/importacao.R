@@ -1612,23 +1612,100 @@ resumo_montar <- function(dados, lista_inicial) {
           `E-mail` = email
         )
 
-      extrair_todos_dados <- function(texto, padrao) {
-        map(texto, ~ str_extract_all(.x, padrao)[[1]]) %>%
-          flatten_chr()
+      extrair_dados_pdf <- function(texto) {
+        list(
+          processo = str_extract_all(
+            texto, "\\d{5}\\.\\d{6}/\\d{4}-\\d{2}"
+          )[[1]],
+          unidade  = str_replace(
+            str_extract_all(texto, "[:alpha:].+[:alpha:]")[[1]],
+            "PRODEGESP/UFS", "PRODEGESP/UFSC"
+          ),
+          protocolo = str_trim(
+            str_extract_all(texto, " \\d{6}/\\d{4}")[[1]]
+          ),
+          qtd = as.numeric(str_trim(
+            str_extract_all(texto, "\\s\\d{1,3}\\s")[[1]]
+          ))
+        )
       }
 
-      # Processa todos os elementos da lista_inicial
-      lista_processo <-
-        extrair_todos_dados(lista_inicial, "\\d{5}\\.\\d{6}/\\d{4}-\\d{2}")
-      lista_unidade <-
-        extrair_todos_dados(lista_inicial, "[:alpha:].+[:alpha:]") %>%
-        str_replace("PRODEGESP/UFS", "PRODEGESP/UFSC")
-      lista_protocolo <-
-        extrair_todos_dados(lista_inicial, " \\d{6}/\\d{4}") %>%
-        str_trim()
-      lista_qtd <- extrair_todos_dados(lista_inicial, "\\s\\d{1,3}\\s") %>%
-        str_trim() %>%
-        as.numeric()
+      # Valida PDF a PDF para identificar problemas com arquivo específico
+      validar_pdf <- function(arquivo, texto) {
+        nome <- basename(arquivo)
+
+        if (is.na(texto) || !nzchar(texto)) {
+          log_erro(
+            paste0(
+              "Não foi possível ler o conteúdo do PDF \"", nome, "\". ",
+              "O arquivo pode estar corrompido ou vazio. Encerrando..."
+            ),
+            finalizar = TRUE
+          )
+        }
+
+        d <- extrair_dados_pdf(texto)
+        tamanhos <- c(
+          processo  = length(d$processo),
+          unidade   = length(d$unidade),
+          protocolo = length(d$protocolo),
+          qtd       = length(d$qtd)
+        )
+
+        if (length(unique(tamanhos)) > 1) {
+          n_proc <- tamanhos[["processo"]]
+          n_prot <- tamanhos[["protocolo"]]
+          n_qtd  <- tamanhos[["qtd"]]
+
+          motivo <- if (n_prot < n_proc) {
+            paste0(
+              "há ", n_proc, " pedido(s) no PDF, mas apenas ", n_prot,
+              " com número de protocolo. Verifique se algum pedido apresentou",
+              " erro (ex: \"O usuário não está...\") e gere o PDF novamente",
+              " após corrigir."
+            )
+          } else if (n_qtd < n_proc || n_qtd < n_prot) {
+            paste0(
+              "há pedidos sem o quantitativo de itens no PDF (", n_qtd,
+              " quantidade(s) para ", n_proc, " pedido(s)). O PDF pode estar",
+              " incompleto — possivelmente cortado pela rolagem da tela.",
+              " Role a página até o final antes de salvar e gere o PDF",
+              " novamente."
+            )
+          } else {
+            paste0(
+              "as informações extraídas do PDF não estão alinhadas (",
+              "processos: ", n_proc, ", unidades: ", tamanhos[["unidade"]],
+              ", protocolos: ", n_prot, ", quantidades: ", n_qtd,
+              "). O PDF pode estar incompleto ou conter pedidos com erro.",
+              " Verifique o conteúdo e gere o PDF novamente."
+            )
+          }
+
+          log_erro(
+            paste0(
+              "Problema no arquivo \"", nome, "\": ", motivo, " Encerrando..."
+            ),
+            finalizar = TRUE
+          )
+        }
+
+        return(d)
+      }
+
+      arquivos_pdf <- attr(lista_inicial, "arquivos")
+      if (is.null(arquivos_pdf)) {
+        arquivos_pdf <- rep("(desconhecido)", length(lista_inicial))
+      }
+
+      dados_por_pdf <- map2(
+        arquivos_pdf, lista_inicial, validar_pdf
+      )
+
+      lista_processo  <- flatten_chr(map(dados_por_pdf, "processo"))
+      lista_unidade   <- flatten_chr(map(dados_por_pdf, "unidade"))
+      lista_protocolo <- flatten_chr(map(dados_por_pdf, "protocolo"))
+      lista_qtd       <- flatten_dbl(map(dados_por_pdf, "qtd"))
 
       # Cria tibble com os dados da lista
       lista_pedidos <- tibble(
@@ -1685,6 +1762,10 @@ resumo_obter_pdf <- function() {
         str_extract(
           pdf_dados, "(\\d{5}\\.\\d{6}/\\d{4}-\\d{2})(?s)(.*)(\\d{6}/\\d{4})"
         )
+
+      # mantém o caminho de cada PDF junto à respectiva extração para
+      # permitir mensagens de erro identificando o arquivo problemático
+      attr(lista_pedidos, "arquivos") <- pdf_arquivos
 
       return(lista_pedidos)
     },
