@@ -20,6 +20,17 @@ FLOATING CONSOLE AND LOGS DRAWER
     overflow: hidden;
 }
 
+@media only screen and (max-width: 768px) {
+    #console-container {
+        width: 150px !important;
+        height: 300px !important;
+    }
+
+    #console-output {
+        font-size: 6px !important;
+    }
+}
+
 #console-container.show {
     display: flex;
 }
