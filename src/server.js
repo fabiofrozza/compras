@@ -14,7 +14,7 @@ let logConsentEnabled = true; // null/true = salvar logs (permissivo por padrão
 const logger = new Logger({ minLevel: process.env.COMPRAS_LOGGER_MIN_LEVEL || 'debug' });
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.COMPRAS_PORT || 3000;
 const SCRIPTS_PATH = path.resolve(path.join(__dirname, '..', 'scripts'));
 const ALLOWED_DELETE_FOLDERS = [
   'atas_finalizadas',
@@ -1105,6 +1105,7 @@ app.get('/api/app-config', (_req, res) => {
     companySite: process.env.COMPRAS_COMPANY_SITE || '',
     departmentSite: process.env.COMPRAS_DEPARTMENT_SITE || '',
     manualSite: process.env.COMPRAS_MANUAL_SITE || '',
+    backgroundRefreshTime: parseInt(process.env.COMPRAS_HOME_BACKGROUND_REFRESH_TIME, 10) || 0,
   });
 });
 

@@ -132,9 +132,15 @@ function randomizeGlassFilter() {
     document.documentElement.style.setProperty('--compras-filter', `url(#container-glass-${randomIndex})`);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     setHomeBackground();
     randomizeGlassFilter();
+
+    try {
+        const cfg = await fetch('/api/app-config').then(r => r.json());
+        const refreshMs = (cfg.backgroundRefreshTime || 0) * 1000;
+        if (refreshMs > 0) setInterval(setHomeBackground, refreshMs);
+    } catch (_) {}
 });
 
 // Event delegation para .card-link - funciona mesmo em conteúdo carregado dinamicamente
