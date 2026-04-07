@@ -208,6 +208,7 @@ function prepareConsoleForExecution(scriptName) {
   }
 
   consoleHeader.addEventListener('mousedown', onDragStart);
+  consoleHeader.addEventListener('touchstart', onDragStart, { passive: false });
 }
 
 function handleScriptResult(result) {
@@ -479,6 +480,8 @@ const onDragStart = (e) => {
     return;
   }
 
+  const point = e.touches ? e.touches[0] : e;
+
   isDragging = true;
 
   // Na primeira vez, o console usa 'bottom'/'right'; convertemos para 'top'/'left' para o arraste funcionar
@@ -491,17 +494,21 @@ const onDragStart = (e) => {
     enforceConsoleConstraints();
   }
 
-  offsetX = e.clientX - consoleContainer.offsetLeft;
-  offsetY = e.clientY - consoleContainer.offsetTop;
+  offsetX = point.clientX - consoleContainer.offsetLeft;
+  offsetY = point.clientY - consoleContainer.offsetTop;
 
   document.body.classList.add('dragging-console');
   document.addEventListener('mousemove', onDragMove);
   document.addEventListener('mouseup', onDragEnd, { once: true });
+  document.addEventListener('touchmove', onDragMove, { passive: false });
+  document.addEventListener('touchend', onDragEnd, { once: true });
 };
 
 const onDragMove = (e) => {
   if (!isDragging) return;
+  if (e.cancelable) e.preventDefault(); // impede scroll da página durante arraste touch
 
+  const point = e.touches ? e.touches[0] : e;
   const navbar = document.getElementById('navbar');
 
   const minLeft = 0;
@@ -510,8 +517,8 @@ const onDragMove = (e) => {
   const maxLeft = window.innerWidth - consoleContainer.offsetWidth;
   const maxTop = window.innerHeight - consoleContainer.offsetHeight;
 
-  let newLeft = e.clientX - offsetX;
-  let newTop = e.clientY - offsetY;
+  let newLeft = point.clientX - offsetX;
+  let newTop = point.clientY - offsetY;
 
   newLeft = Math.max(minLeft, Math.min(newLeft, maxLeft));
   newTop = Math.max(minTop, Math.min(newTop, maxTop));
