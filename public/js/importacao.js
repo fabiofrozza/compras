@@ -21,10 +21,10 @@ function configurarValidacaoContinuaImportacao() {
         linkInput.addEventListener('input', () => {
             importacaoLastValidatedLink = '';
             if (linkInput.value.trim() === '') {
-                atualizarFeedbackPlanilha('info', 'Insira o link da planilha para validação.', 'info');
+                atualizarFeedbackPlanilha('info', 'Insira o link da planilha para validação.');
             } else {
                 linkInput.classList.remove('is-valid', 'is-invalid');
-                atualizarFeedbackPlanilha('info', 'Informe o link da aba LISTA FINAL e aguarde.', 'info');
+                atualizarFeedbackPlanilha('info', 'Informe o link da aba LISTA FINAL e aguarde.');
             }
             verificarLiberacaoBotoesImportacao();
         });
@@ -63,7 +63,7 @@ async function validarLinkGoogle() {
 
     if (!url) {
         importacaoLastValidatedLink = '';
-        atualizarFeedbackPlanilha('info', 'Informe o link da aba LISTA FINAL e aguarde.', 'info');
+        atualizarFeedbackPlanilha('info', 'Informe o link da aba LISTA FINAL e aguarde.');
         popularComboProcessosSPA([]);
         return;
     }
@@ -71,12 +71,12 @@ async function validarLinkGoogle() {
     try {
         new URL(url);
     } catch {
-        atualizarFeedbackPlanilha('error', 'Link inválido.', 'cancel');
+        atualizarFeedbackPlanilha('error', 'Link inválido.');
         popularComboProcessosSPA([]);
         return;
     }
 
-    atualizarFeedbackPlanilha('loading', 'Aguarde... Acessando o link informado...', 'hourglass_empty');
+    atualizarFeedbackPlanilha('loading', 'Aguarde... Acessando o link informado...');
 
     try {
         const response = await fetch('/api/validate-link', {
@@ -92,18 +92,18 @@ async function validarLinkGoogle() {
 
         switch (result.status) {
             case 'success':
-                atualizarFeedbackPlanilha('success', result.msg, 'check_circle');
+                atualizarFeedbackPlanilha('success', result.msg);
                 atualizarWidgetsExtras(processos, result.temValidacaoManual || false);
                 break;
             case 'warning':
-                atualizarFeedbackPlanilha('warning', result.msg, 'warning');
+                atualizarFeedbackPlanilha('warning', result.msg);
                 break;
             case 'error':
-                atualizarFeedbackPlanilha('error', result.msg, 'cancel');
+                atualizarFeedbackPlanilha('error', result.msg);
                 if (result.error) console.error('Erro ao acessar link:', result.error);
                 break;
             default:
-                atualizarFeedbackPlanilha('info', result.msg, 'info');
+                atualizarFeedbackPlanilha('info', result.msg);
                 break;
         }
 
@@ -111,69 +111,54 @@ async function validarLinkGoogle() {
 
     } catch (error) {
         console.error('Erro ao validar link:', error);
-        atualizarFeedbackPlanilha('error', 'Erro ao acessar o link informado. Veja erro no console.', 'cancel');
+        atualizarFeedbackPlanilha('error', 'Erro ao acessar o link informado. Veja erro no console.');
         popularComboProcessosSPA([]);
     }
 }
 
-/**
- * Atualiza o feedback visual do link da planilha.
- *
- * @param {'success'|'error'|'warning'|'info'|'loading'} tipo - Tipo do feedback
- * @param {string} mensagem - Texto da mensagem (sem ícone)
- * @param {string} iconeClass - Classe do ícone Material Symbols (ex: 'check_circle')
- */
-function atualizarFeedbackPlanilha(tipo, mensagem, iconeClass) {
+function atualizarFeedbackPlanilha(tipo, mensagem) {
     const linkInput = document.getElementById('importacao-link');
-    const statusText = document.getElementById('texto-status-link');
-    const widgetStatus = document.getElementById('widget-status-link');
+    const badge = document.getElementById('badge-status-link');
 
-    if (!linkInput || !statusText || !widgetStatus) return;
+    if (!linkInput || !badge) return;
 
     const btnAbrir = document.getElementById('btn-abrir-link');
     if (btnAbrir) btnAbrir.disabled = !linkInput.value.trim();
 
-    const classesIcone = ['border-success', 'border-danger', 'border-warning', 'border-muted', 'border-info'];
-    widgetStatus.classList.remove(...classesIcone);
-
-    statusText.innerHTML = mensagem;
-
-    // Atualiza o tooltip com o mesmo texto (sem HTML)
-    statusText.setAttribute('data-bs-title', statusText.textContent.trim());
-    const tooltipInstance = bootstrap.Tooltip.getInstance(statusText);
-    if (tooltipInstance) tooltipInstance.setContent({ '.tooltip-inner': statusText.textContent.trim() });
+    badge.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning', 'text-bg-secondary', 'text-bg-info');
+    badge.textContent = mensagem;
 
     switch (tipo) {
         case 'success':
-            widgetStatus.classList.add('border-success');
+            badge.classList.add('text-bg-success');
             linkInput.classList.remove('is-invalid');
             linkInput.classList.add('is-valid');
             importacaoLinkValido = true;
             break;
 
         case 'error':
-            widgetStatus.classList.add('border-danger');
+            badge.classList.add('text-bg-danger');
             linkInput.classList.remove('is-valid');
             linkInput.classList.add('is-invalid');
             importacaoLinkValido = false;
             break;
 
         case 'warning':
-            widgetStatus.classList.add('border-warning');
+            badge.classList.add('text-bg-warning');
             linkInput.classList.remove('is-invalid');
             linkInput.classList.add('is-valid');
             importacaoLinkValido = true;
             break;
 
         case 'loading':
-            widgetStatus.classList.add('border-info');
+            badge.classList.add('text-bg-info');
             linkInput.classList.remove('is-valid', 'is-invalid');
             importacaoLinkValido = false;
             break;
 
         case 'info':
         default:
-            widgetStatus.classList.add('border-muted');
+            badge.classList.add('text-bg-secondary');
             if (linkInput.value.trim() !== '') {
                 linkInput.classList.remove('is-valid', 'is-invalid');
             }
@@ -181,39 +166,29 @@ function atualizarFeedbackPlanilha(tipo, mensagem, iconeClass) {
             break;
     }
 
-    // Esconde widgets extras quando não é sucesso
     if (tipo !== 'success') {
         atualizarWidgetsExtras([], false);
+        ocultarResultadoImportacao();
     }
 
     verificarLiberacaoBotoesImportacao();
 }
 
-/**
- * Atualiza os widgets de processos e validação manual.
- */
 function atualizarWidgetsExtras(processos, temValidacaoManual) {
-    const widgetProcessos = document.getElementById('widget-processos');
-    const textoProcessos = document.getElementById('texto-processos');
-    const widgetValidacao = document.getElementById('widget-validacao');
-    const textoValidacao = document.getElementById('texto-validacao');
+    const badgeProcessos = document.getElementById('badge-processos');
+    const badgeValidacao = document.getElementById('badge-validacao');
 
-    if (widgetProcessos && textoProcessos) {
+    if (badgeProcessos) {
         if (processos.length > 0) {
-            widgetProcessos.classList.remove('d-none');
-            textoProcessos.textContent = processos.length;
+            badgeProcessos.classList.remove('d-none');
+            badgeProcessos.textContent = `${processos.length} processo${processos.length !== 1 ? 's' : ''}`;
         } else {
-            widgetProcessos.classList.add('d-none');
+            badgeProcessos.classList.add('d-none');
         }
     }
 
-    if (widgetValidacao && textoValidacao) {
-        if (temValidacaoManual) {
-            widgetValidacao.classList.remove('d-none');
-            textoValidacao.innerHTML = '<span class="badge rounded-pill warning"><i class="material-symbols-outlined">warning</i> Há itens a validar</span>';
-        } else {
-            widgetValidacao.classList.add('d-none');
-        }
+    if (badgeValidacao) {
+        badgeValidacao.classList.toggle('d-none', !temValidacaoManual);
     }
 }
 
@@ -265,6 +240,17 @@ function verificarLiberacaoBotoesImportacao() {
         btnResumo.disabled = resumoReasons.length > 0;
         updateButtonTooltip(btnResumo, resumoReasons);
     }
+}
+
+function ocultarResultadoImportacao() {
+    const resultadoCol = document.getElementById('importacao-resultado-col');
+    const linkCol = document.getElementById('importacao-link-col');
+    if (!resultadoCol || resultadoCol.classList.contains('d-none')) return;
+
+    resultadoCol.classList.add('d-none');
+    resultadoCol.classList.remove('col-sm-6');
+    linkCol.classList.remove('col-sm-6');
+    linkCol.classList.add('col');
 }
 
 function exibirResultadoImportacao(data) {

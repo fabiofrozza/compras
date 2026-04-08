@@ -11,69 +11,35 @@
             </h4>
 
             <div class="collapse show" id="importacao-link-collapse">
-                <div class="row">
-                    <div class="col">
-                        <div class="form-sub-container">
-                            <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
-                                class="form-sub-btn" onclick="limparFormulario('form-importacao-link')">
-                                <i class="material-symbols-outlined">ink_eraser</i>
-                            </button>
-                            <label for="importacao-link" class="form-label" data-bs-toggle="tooltip"
-                                data-bs-title="Link da aba LISTA FINAL da planilha de inserção de demandas.">
-                                Link da Planilha do Google Drive
-                            </label>
-                            <div class="input-group input-group-sm">
-                                <input type="url" class="form-control" id="importacao-link" data-field="planilha_link"
-                                    placeholder="https://docs.google.com/spreadsheets/d/..." required
-                                    data-validation-msg="Informe o link da planilha.">
-                                <button type="button" class="btn btn-outline-primary" id="btn-atualizar-link"
-                                    onclick="revalidarLinkGoogle()" data-bs-toggle="tooltip"
-                                    data-bs-title="Atualizar informações da planilha">
-                                    <i class="material-symbols-outlined">refresh</i>
-                                </button>
-                                <button type="button" class="btn btn-outline-primary" id="btn-abrir-link"
-                                    onclick="abrirLinkPlanilha()" data-bs-toggle="tooltip"
-                                    data-bs-title="Abrir planilha em nova aba" disabled>
-                                    <i class="material-symbols-outlined">open_in_new</i>
-                                </button>
-                            </div>
-                        </div>
+                <div class="form-sub-container">
+                    <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
+                        class="form-sub-btn" onclick="limparFormulario('form-importacao-link')">
+                        <i class="material-symbols-outlined">ink_eraser</i>
+                    </button>
+                    <label for="importacao-link" class="form-label" data-bs-toggle="tooltip"
+                        data-bs-title="Link da aba LISTA FINAL da planilha de inserção de demandas.">
+                        Link da Planilha do Google Drive
+                    </label>
+                    <div class="input-group input-group-sm">
+                        <input type="url" class="form-control" id="importacao-link" data-field="planilha_link"
+                            placeholder="https://docs.google.com/spreadsheets/d/..." required
+                            data-validation-msg="Informe o link da planilha.">
+                        <button type="button" class="btn btn-outline-primary" id="btn-atualizar-link"
+                            onclick="revalidarLinkGoogle()" data-bs-toggle="tooltip"
+                            data-bs-title="Atualizar informações da planilha">
+                            <i class="material-symbols-outlined">refresh</i>
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" id="btn-abrir-link"
+                            onclick="abrirLinkPlanilha()" data-bs-toggle="tooltip"
+                            data-bs-title="Abrir planilha em nova aba" disabled>
+                            <i class="material-symbols-outlined">open_in_new</i>
+                        </button>
                     </div>
-
-                    <div class="col">
-                        <div id="importacao-sheet-status" class="dashboard-widget-grid">
-                            <div class="dashboard-widget" id="widget-status-link">
-                                <div class="widget-icon">
-                                    <i class="material-symbols-outlined">info</i>
-                                </div>
-                                <div class="widget-content">
-                                    <span class="widget-label">Planilha</span>
-                                    <span class="widget-value" id="texto-status-link" data-bs-toggle="tooltip"
-                                        data-bs-placement="bottom"
-                                        data-bs-title="Insira o link da planilha para validação.">Insira o link da
-                                        planilha para
-                                        validação.</span>
-                                </div>
-                            </div>
-                            <div class="dashboard-widget d-none" id="widget-processos">
-                                <div class="widget-icon">
-                                    <i class="material-symbols-outlined">folder_open</i>
-                                </div>
-                                <div class="widget-content">
-                                    <span class="widget-label">Processos</span>
-                                    <span class="widget-value" id="texto-processos">-</span>
-                                </div>
-                            </div>
-                            <div class="dashboard-widget d-none" id="widget-validacao">
-                                <div class="widget-icon">
-                                    <i class="material-symbols-outlined">edit_note</i>
-                                </div>
-                                <div class="widget-content">
-                                    <span class="widget-label">Validação Manual</span>
-                                    <span class="widget-value" id="texto-validacao">-</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div id="importacao-sheet-status" class="d-flex flex-wrap gap-1 mt-2">
+                        <span class="badge rounded-pill d-inline-block text-truncate" id="badge-status-link"></span>
+                        <span class="badge rounded-pill text-bg-primary d-none" id="badge-processos"></span>
+                        <span class="badge rounded-pill text-bg-warning d-none" id="badge-validacao">Há itens a validar
+                            manualmente</span>
                     </div>
                 </div>
             </div>
@@ -84,7 +50,8 @@
             <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
                 data-bs-target="#importacao-resultado-collapse" aria-expanded="true"
                 aria-controls="importacao-resultado-collapse">
-                <span><i class="material-symbols-outlined">query_stats</i> Conferência</span>
+                <span><i class="material-symbols-outlined">query_stats</i> Conferência da última execução do
+                    script</span>
                 <i class="material-symbols-outlined text-secondary">unfold_more</i>
             </h4>
 
@@ -279,8 +246,7 @@
                                     </label>
                                     <input type="text" class="form-control form-control-sm" id="importacao-aba-lista"
                                         data-field="aba_lista_final" placeholder="Ex: LISTA FINAL" value="LISTA FINAL"
-                                        required
-                                        data-validation-msg="Informe o nome da aba LISTA FINAL.">
+                                        required data-validation-msg="Informe o nome da aba LISTA FINAL.">
                                 </div>
                             </div>
                         </div>
