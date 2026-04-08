@@ -610,7 +610,7 @@ app.get('/api/fornecedores/pregoes', async (_req, res) => {
     const pregoes = await Promise.all(folders.map(async (nome) => {
       const pastaPath = path.join(dadosPath, nome);
       const arquivos = await fs.readdir(pastaPath);
-      const xlsxFiles = arquivos.filter(f => /^[^~].*\.xlsx?$/i.test(f));
+      const xlsxFiles = arquivos.filter(f => /^[^~].*\.xlsx?$/i.test(f) && !/_CONFERENCIA\.xlsx$/i.test(f));
 
       // Ler status.json da pasta do pregão
       const statusName = `PE_${nome}_STATUS.json`;
