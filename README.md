@@ -4,9 +4,9 @@
 
 <p align="center">
 <a href="#Funcionalidades">Funcionalidades</a> &nbsp;&bull;&nbsp;
-<a href="#Instalação">Instalação e personalização</a> &nbsp;&bull;&nbsp;
+<a href="#Instalação_e_personalização">Instalação e personalização</a> &nbsp;&bull;&nbsp;
 <a href="#Uso">Uso</a> &nbsp;&bull;&nbsp;
-<a href="#Observações">Algumas observações</a> &nbsp;&bull;&nbsp;
+<a href="#Algumas_observações">Algumas observações</a> &nbsp;&bull;&nbsp;
 <a href="#Reconhecimento">Reconhecimento</a> &nbsp;&bull;&nbsp;
 <a href="#Licença">Licença</a>
 </p>
@@ -23,7 +23,7 @@ Aplicação web local que permite execução de scripts para auxiliar meus coleg
 * **Power BI** — geração de arquivo de dados para atualização dos painéis do Power BI.
 * **Instalação** — gerenciamento da instalação do R.
 
-## Instalação e Personalização
+## Instalação e personalização
 
 1. [Baixe o conteúdo deste repositório](https://github.com/fabiofrozza/compras/archive/refs/heads/main.zip) e extraia na pasta desejada.
 

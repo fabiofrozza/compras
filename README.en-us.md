@@ -4,9 +4,9 @@
 
 <p align="center">
 <a href="#Features">Features</a> &nbsp;&bull;&nbsp;
-<a href="#Installation">Installation and customization</a> &nbsp;&bull;&nbsp;
+<a href="#Installation_and_customization">Installation and customization</a> &nbsp;&bull;&nbsp;
 <a href="#Usage">Usage</a> &nbsp;&bull;&nbsp;
-<a href="#Observations">Some observations</a> &nbsp;&bull;&nbsp;
+<a href="#Some_observations">Some observations</a> &nbsp;&bull;&nbsp;
 <a href="#Acknowledgments">Acknowledgments</a> &nbsp;&bull;&nbsp;
 <a href="#License">License</a>
 </p>
@@ -23,7 +23,7 @@ A local web application that runs scripts to assist my colleagues in activities 
 * **Power BI** — generation of a data file to update Power BI dashboards.
 * **Instalação** — R installation management.
 
-## Installation and Customization
+## Installation and customization
 
 1. [Download the content of this repository](https://github.com/fabiofrozza/compras/archive/refs/heads/main.zip) and extract it to the desired folder.
 
