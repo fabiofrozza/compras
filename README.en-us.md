@@ -4,9 +4,9 @@
 
 <p align="center">
 <a href="#Features">Features</a> &nbsp;&bull;&nbsp;
-<a href="#Installation_and_customization">Installation and customization</a> &nbsp;&bull;&nbsp;
+<a href="#Installation-and-customization">Installation and customization</a> &nbsp;&bull;&nbsp;
 <a href="#Usage">Usage</a> &nbsp;&bull;&nbsp;
-<a href="#Some_observations">Some observations</a> &nbsp;&bull;&nbsp;
+<a href="#Some-observations">Some observations</a> &nbsp;&bull;&nbsp;
 <a href="#Acknowledgments">Acknowledgments</a> &nbsp;&bull;&nbsp;
 <a href="#License">License</a>
 </p>

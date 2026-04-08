@@ -4,9 +4,9 @@
 
 <p align="center">
 <a href="#Funcionalidades">Funcionalidades</a> &nbsp;&bull;&nbsp;
-<a href="#Instalação_e_personalização">Instalação e personalização</a> &nbsp;&bull;&nbsp;
+<a href="#Instalação-e-personalização">Instalação e personalização</a> &nbsp;&bull;&nbsp;
 <a href="#Uso">Uso</a> &nbsp;&bull;&nbsp;
-<a href="#Algumas_observações">Algumas observações</a> &nbsp;&bull;&nbsp;
+<a href="#Algumas-observações">Algumas observações</a> &nbsp;&bull;&nbsp;
 <a href="#Reconhecimento">Reconhecimento</a> &nbsp;&bull;&nbsp;
 <a href="#Licença">Licença</a>
 </p>
