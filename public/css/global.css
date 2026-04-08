@@ -70,3 +70,32 @@ body {
     inherits: true;
     initial-value: 1;
 }
+
+/* Form labels usadas tanto no painel de Preferências (carregado eagerly)
+   quanto nos formulários das abas de script (forms.css é lazy). */
+.form-label {
+    margin-bottom: .2rem;
+    font-size: 87.5%;
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    margin-left: 6px;
+}
+
+.form-label>i {
+    font-size: 1rem;
+    font-variation-settings: 'opsz' 48;
+    vertical-align: sub;
+    padding-right: 4px;
+}
+
+.indicator-required {
+    color: var(--compras-error);
+    cursor: help;
+    margin-left: 3px;
+}
+
+.indicator-required i {
+    font-size: .75rem !important;
+    vertical-align: baseline !important;
+}

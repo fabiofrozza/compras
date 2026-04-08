@@ -2,33 +2,6 @@
    FORMS
    ========================================================================== */
 
-.indicator-required {
-    color: var(--compras-error);
-    cursor: help;
-    margin-left: 3px;
-}
-
-.indicator-required i {
-    font-size: .75rem !important;
-    vertical-align: baseline !important;
-}
-
-.form-label {
-    margin-bottom: .2rem;
-    font-size: 87.5%;
-    width: fit-content;
-    display: flex;
-    align-items: center;
-    margin-left: 6px;
-}
-
-.form-label>i {
-    font-size: 1rem;
-    font-variation-settings: 'opsz' 48;
-    vertical-align: sub;
-    padding-right: 4px;
-}
-
 .script-form {
     background-color: color-mix(in srgb, var(--compras-theme) 75%, white);
     padding: 16px;

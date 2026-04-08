@@ -10,7 +10,7 @@ const TAB_LIST = [
     { id: 'instalacao', label: 'Instalação', icon: 'build' },
 ];
 
-// --- Lazy Loading de Scripts sob demanda ---
+// --- Lazy Loading de Scripts e Estilos sob demanda ---
 const _loadedScripts = new Set();
 function loadScript(src) {
     if (_loadedScripts.has(src)) return Promise.resolve();
@@ -21,6 +21,29 @@ function loadScript(src) {
         script.onerror = () => reject(new Error(`Falha ao carregar script: ${src}`));
         document.head.appendChild(script);
     });
+}
+
+const _loadedStyles = new Set();
+function loadStylesheet(href) {
+    if (_loadedStyles.has(href)) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        link.onload = () => { _loadedStyles.add(href); resolve(); };
+        link.onerror = () => reject(new Error(`Falha ao carregar CSS: ${href}`));
+        document.head.appendChild(link);
+    });
+}
+
+// Recursos compartilhados por todas as abas de script (não usados na home)
+function loadScriptTabAssets() {
+    return Promise.all([
+        loadScript('js/file_system.js'),
+        loadStylesheet('css/forms.css'),
+        loadStylesheet('css/files.css'),
+        loadStylesheet('css/console.css'),
+    ]);
 }
 
 const TAB_SCRIPTS = {
@@ -222,6 +245,19 @@ document.addEventListener('shown.bs.tab', async (event) => {
         // Sub-tabs (ex: importação) não devem alterar título nem processar lógica de aba principal
         const isMainTab = tabButton.closest('#hidden-tablist');
 
+        // Carregar recursos compartilhados das abas de script antes de injetar o HTML,
+        // para evitar FOUC e garantir disponibilidade de file_system.js
+        if (isMainTab) {
+            const earlyTabId = tabButton.getAttribute('id')?.replace('-tab', '') || tabButton.getAttribute('aria-controls');
+            if (earlyTabId && earlyTabId !== 'home') {
+                try {
+                    await loadScriptTabAssets();
+                } catch (error) {
+                    console.error('Erro ao carregar recursos da aba:', error);
+                }
+            }
+        }
+
         const targetSelector = tabButton.getAttribute('data-bs-target');
         if (targetSelector) {
             const targetPane = document.querySelector(targetSelector);
@@ -280,7 +316,9 @@ document.addEventListener('shown.bs.tab', async (event) => {
                 btn.classList.toggle('active', btn.dataset.tabId === tabId);
             });
 
-            await refreshScriptFileLists(tabId);
+            if (tabId !== 'home') {
+                await refreshScriptFileLists(tabId);
+            }
             setupLiveValidation(tabId);
             validateTabFields(tabId);
             atualizarIndicadoresSubTabs();
