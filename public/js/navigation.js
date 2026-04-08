@@ -128,8 +128,8 @@ function buildHomeCards() {
             const isPreferred = preferredTab && tab.id === preferredTab;
             const starActiveClass = isPreferred ? ' active' : '';
             const starTitle = isPreferred ? 'Aba preferida' : 'Definir como aba preferida';
-            return `<a class="card-link card-glass-container" data-bs-toggle="pill" data-bs-target="#${tab.id}" role="tab"
-                aria-controls="${tab.id}" aria-selected="false">
+            return `<a class="card-link card-glass-container" data-tab-id="${tab.id}" role="button"
+                aria-label="${tab.label}">
                 <button class="card-glass-star${starActiveClass}" data-tab-id="${tab.id}"
                     data-bs-toggle="tooltip" data-bs-title="${starTitle}" aria-label="${starTitle}">
                     <i class="material-symbols-outlined">star</i>
@@ -143,25 +143,37 @@ function buildHomeCards() {
             </a>`;
         }).join('');
 
-    // Delegação de evento para as estrelas
     grid.addEventListener('click', (e) => {
         const starBtn = e.target.closest('.card-glass-star');
-        if (!starBtn) return;
-        e.preventDefault();
-        e.stopPropagation();
+        if (starBtn) {
+            e.preventDefault();
+            e.stopPropagation();
 
-        if (starBtn.classList.contains('active')) {
-            // Estrela preferida → abre painel de configurações
-            if (typeof openPanel === 'function') openPanel('settings-panel');
-        } else {
-            // Estrela cinza → salva como preferida
-            const tabId = starBtn.dataset.tabId;
-            appState.preferences.preferredTab = tabId;
-            saveAppState();
-            applyUserPreferences(appState.preferences);
-            if (typeof showToast === 'function') {
-                showToast('Aba preferida atualizada', 'success', 2000, 'configurações');
+            if (starBtn.classList.contains('active')) {
+                // Estrela preferida → abre painel de configurações
+                if (typeof openPanel === 'function') openPanel('settings-panel');
+            } else {
+                // Estrela cinza → salva como preferida
+                const tabId = starBtn.dataset.tabId;
+                appState.preferences.preferredTab = tabId;
+                saveAppState();
+                applyUserPreferences(appState.preferences);
+                if (typeof showToast === 'function') {
+                    showToast('Aba preferida atualizada', 'success', 2000, 'configurações');
+                }
             }
+            return;
+        }
+
+        const card = e.target.closest('.card-link');
+        if (!card) return;
+        e.preventDefault();
+
+        const tabId = card.dataset.tabId;
+        const tabButton = document.getElementById(`${tabId}-tab`);
+        if (tabButton) {
+            const tab = new bootstrap.Tab(tabButton);
+            tab.show();
         }
     });
 }
