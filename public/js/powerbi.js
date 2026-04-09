@@ -45,6 +45,8 @@ function executarPowerBI(button) {
 }
 
 let observatorioRegistros = [];
+let observatorioFiltroProblemas = false;
+let observatorioOrdenacao = { coluna: null, direcao: 'asc' };
 
 function mostrarProgressoObservatorio() {
     const container = document.getElementById('powerbi-observatorio-progress-container');
@@ -80,6 +82,212 @@ function esconderProgressoObservatorio() {
     const container = document.getElementById('powerbi-observatorio-progress-container');
     if (container) container.classList.add('d-none');
 }
+
+function popularFiltrosObservatorio() {
+    const anos = [...new Set(observatorioRegistros.map(r => r.ano))].sort();
+    const situacoes = [...new Set(observatorioRegistros.map(r => r.situacao).filter(Boolean))].sort();
+    const statusLicitacao = [...new Set(observatorioRegistros.map(r => r.obsLicitacaoStatus).filter(Boolean))];
+    const statusExecucao = [...new Set(observatorioRegistros.map(r => r.obsExecucaoStatus).filter(Boolean))];
+
+    const buildStatusOptions = values =>
+        values.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(OBSERVATORIO_STATUS_LABEL[v] || v)}</option>`).join('');
+
+    document.getElementById('filtro-obs-ano').innerHTML =
+        '<option value="">Todos</option>' + anos.map(a => `<option value="${a}">${a}</option>`).join('');
+    document.getElementById('filtro-obs-situacao').innerHTML =
+        '<option value="">Todas</option>' + situacoes.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+    document.getElementById('filtro-obs-licitacao').innerHTML =
+        '<option value="">Todos</option>' + buildStatusOptions(statusLicitacao);
+    document.getElementById('filtro-obs-execucao').innerHTML =
+        '<option value="">Todos</option>' + buildStatusOptions(statusExecucao);
+}
+
+function criarLinhaObservatorio(r) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td>${r.ano}</td>
+        <td>${escapeHtml(r.processo)}</td>
+        <td>${escapeHtml(r.situacao)}</td>
+        <td>${escapeHtml(r.dataFinalizacao)}</td>
+        <td>${renderObservatorioBadge(r.obsLicitacao, r.obsLicitacaoStatus)}</td>
+        <td>${renderObservatorioBadge(r.obsExecucao, r.obsExecucaoStatus)}</td>
+    `;
+    return tr;
+}
+
+function aplicarFiltrosObservatorio() {
+    const ano = document.getElementById('filtro-obs-ano').value;
+    const processo = document.getElementById('filtro-obs-processo').value.trim().toLowerCase();
+    const situacao = document.getElementById('filtro-obs-situacao').value;
+    const data = document.getElementById('filtro-obs-data').value.trim().toLowerCase();
+    const licitacao = document.getElementById('filtro-obs-licitacao').value;
+    const execucao = document.getElementById('filtro-obs-execucao').value;
+
+    let registrosFiltrados = observatorioRegistros.filter(r => {
+        if (ano && String(r.ano) !== ano) return false;
+        if (processo && !r.processo.toLowerCase().includes(processo)) return false;
+        if (situacao && r.situacao !== situacao) return false;
+        if (data && !String(r.dataFinalizacao ?? '').toLowerCase().includes(data)) return false;
+        if (observatorioFiltroProblemas) {
+            const PROBLEMAS = ['pendente', 'divergente'];
+            if (!PROBLEMAS.includes(r.obsLicitacaoStatus) && !PROBLEMAS.includes(r.obsExecucaoStatus)) return false;
+        } else {
+            if (licitacao && r.obsLicitacaoStatus !== licitacao) return false;
+            if (execucao && r.obsExecucaoStatus !== execucao) return false;
+        }
+        return true;
+    });
+
+    if (observatorioOrdenacao.coluna) {
+        const { coluna, direcao } = observatorioOrdenacao;
+        registrosFiltrados = [...registrosFiltrados].sort((a, b) => {
+            const va = getObservatorioSortValue(a, coluna);
+            const vb = getObservatorioSortValue(b, coluna);
+            const cmp = va < vb ? -1 : va > vb ? 1 : 0;
+            return direcao === 'asc' ? cmp : -cmp;
+        });
+    }
+
+    const tbody = document.getElementById('powerbi-observatorio-tbody');
+    tbody.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+    for (const r of registrosFiltrados) fragment.appendChild(criarLinhaObservatorio(r));
+    tbody.appendChild(fragment);
+
+    const temFiltroOuOrdenacao = ano || processo || situacao || data || licitacao || execucao || observatorioFiltroProblemas || observatorioOrdenacao.coluna !== null;
+    const btnTopo = document.getElementById('btn-limpar-filtros-obs-bar');
+    if (btnTopo) btnTopo.hidden = !temFiltroOuOrdenacao;
+    const btnBaixo = document.getElementById('btn-limpar-filtros-obs-bar-bottom');
+    if (btnBaixo) btnBaixo.hidden = !temFiltroOuOrdenacao;
+
+    const temFiltro = ano || processo || situacao || data || licitacao || execucao || observatorioFiltroProblemas;
+    const countText = temFiltro
+        ? `${registrosFiltrados.length} de ${observatorioRegistros.length} processo(s)`
+        : `${observatorioRegistros.length} processo(s)`;
+    document.getElementById('observatorio-info-count').textContent = countText;
+    const countBottomEl = document.getElementById('observatorio-info-count-bottom');
+    if (countBottomEl) countBottomEl.textContent = countText;
+
+    atualizarDestaqueCabecalhos();
+}
+
+function toggleFiltroProblemas(button) {
+    observatorioFiltroProblemas = !observatorioFiltroProblemas;
+    button.classList.toggle('active', observatorioFiltroProblemas);
+
+    const selLicitacao = document.getElementById('filtro-obs-licitacao');
+    const selExecucao = document.getElementById('filtro-obs-execucao');
+    selLicitacao.disabled = observatorioFiltroProblemas;
+    selExecucao.disabled = observatorioFiltroProblemas;
+    if (observatorioFiltroProblemas) {
+        selLicitacao.value = '';
+        selExecucao.value = '';
+    }
+    aplicarFiltrosObservatorio();
+}
+
+function limparFiltrosEOrdenacaoObservatorio() {
+    observatorioOrdenacao = { coluna: null, direcao: 'asc' };
+    atualizarIndicadoresOrdenacao();
+
+    document.getElementById('filtro-obs-ano').value = '';
+    document.getElementById('filtro-obs-processo').value = '';
+    document.getElementById('filtro-obs-situacao').value = '';
+    document.getElementById('filtro-obs-data').value = '';
+    document.getElementById('filtro-obs-licitacao').value = '';
+    document.getElementById('filtro-obs-licitacao').disabled = false;
+    document.getElementById('filtro-obs-execucao').value = '';
+    document.getElementById('filtro-obs-execucao').disabled = false;
+    if (observatorioFiltroProblemas) {
+        observatorioFiltroProblemas = false;
+        document.getElementById('btn-filtro-problemas')?.classList.remove('active');
+    }
+    aplicarFiltrosObservatorio();
+}
+
+function atualizarDestaqueCabecalhos() {
+    const filtrosAtivos = {
+        ano: !!document.getElementById('filtro-obs-ano').value,
+        processo: !!document.getElementById('filtro-obs-processo').value.trim(),
+        situacao: !!document.getElementById('filtro-obs-situacao').value,
+        data: !!document.getElementById('filtro-obs-data').value.trim(),
+        licitacao: observatorioFiltroProblemas || !!document.getElementById('filtro-obs-licitacao').value,
+        execucao: observatorioFiltroProblemas || !!document.getElementById('filtro-obs-execucao').value,
+    };
+
+    document.querySelectorAll('#powerbi-observatorio-result th[data-col]').forEach(th => {
+        const col = th.dataset.col;
+        const temFiltroOuOrdenacao = filtrosAtivos[col] || (observatorioOrdenacao.coluna === col);
+        th.classList.toggle('text-primary', temFiltroOuOrdenacao);
+    });
+}
+
+function getObservatorioSortValue(r, coluna) {
+    switch (coluna) {
+        case 'ano':      return r.ano;
+        case 'processo': return r.processo.toLowerCase();
+        case 'situacao': return (r.situacao ?? '').toLowerCase();
+        case 'data': {
+            const [d, m, y] = (r.dataFinalizacao || '').split('/');
+            return y && m && d ? `${y}${m}${d}` : '';
+        }
+        case 'licitacao': return (r.obsLicitacao ?? '').toLowerCase();
+        case 'execucao':  return (r.obsExecucao ?? '').toLowerCase();
+        default: return '';
+    }
+}
+
+const OBSERVATORIO_COL_LABELS = {
+    ano: 'Ano', processo: 'Processo', situacao: 'Situação',
+    data: 'Data finalização', licitacao: 'Obs. Licitação', execucao: 'Obs. Execução',
+};
+
+function atualizarIndicadoresOrdenacao() {
+    document.querySelectorAll('#powerbi-observatorio-result th[data-col]').forEach(th => {
+        const icon = th.querySelector('.sort-icon');
+        if (!icon) return;
+        const ativa = observatorioOrdenacao.coluna === th.dataset.col;
+        icon.textContent = ativa
+            ? (observatorioOrdenacao.direcao === 'asc' ? 'arrow_upward' : 'arrow_downward')
+            : 'unfold_more';
+        th.classList.toggle('sorted', ativa);
+    });
+    const colLabel = OBSERVATORIO_COL_LABELS[observatorioOrdenacao.coluna] ?? '';
+    const sorted = !!observatorioOrdenacao.coluna;
+
+    const indicator = document.getElementById('observatorio-sort-indicator');
+    const label = document.getElementById('observatorio-sort-label');
+    if (indicator && label) {
+        indicator.hidden = !sorted;
+        label.textContent = colLabel;
+    }
+
+    const indicatorBottom = document.getElementById('observatorio-sort-indicator-bottom');
+    const labelBottom = document.getElementById('observatorio-sort-label-bottom');
+    if (indicatorBottom && labelBottom) {
+        indicatorBottom.hidden = !sorted;
+        labelBottom.textContent = colLabel;
+    }
+}
+
+function ordenarObservatorio(coluna) {
+    if (observatorioOrdenacao.coluna === coluna) {
+        if (observatorioOrdenacao.direcao === 'asc') {
+            observatorioOrdenacao.direcao = 'desc';
+        } else {
+            observatorioOrdenacao = { coluna: null, direcao: 'asc' };
+        }
+    } else {
+        observatorioOrdenacao = { coluna, direcao: 'asc' };
+    }
+    atualizarIndicadoresOrdenacao();
+    aplicarFiltrosObservatorio();
+}
+
+
+
+document.getElementById('observatorio-filter-row')?.addEventListener('input', aplicarFiltrosObservatorio);
+document.getElementById('observatorio-filter-row')?.addEventListener('change', aplicarFiltrosObservatorio);
 
 function executarObservatorio(button) {
     if (!navigator.onLine) {
@@ -131,24 +339,21 @@ function executarObservatorio(button) {
         const data = JSON.parse(e.data);
         observatorioRegistros = data.registros || [];
 
-        const fragment = document.createDocumentFragment();
-        for (const r of observatorioRegistros) {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${r.ano}</td>
-                <td>${escapeHtml(r.processo)}</td>
-                <td>${escapeHtml(r.situacao)}</td>
-                <td>${escapeHtml(r.dataFinalizacao)}</td>
-                <td>${renderObservatorioBadge(r.obsLicitacao, r.obsLicitacaoStatus)}</td>
-                <td>${renderObservatorioBadge(r.obsExecucao, r.obsExecucaoStatus)}</td>
-            `;
-            fragment.appendChild(tr);
-        }
-        tbody.appendChild(fragment);
+        observatorioFiltroProblemas = false;
+        observatorioOrdenacao = { coluna: null, direcao: 'asc' };
+        document.getElementById('btn-filtro-problemas')?.classList.remove('active');
+        document.getElementById('filtro-obs-licitacao').disabled = false;
+        document.getElementById('filtro-obs-execucao').disabled = false;
+
+        popularFiltrosObservatorio();
+        atualizarIndicadoresOrdenacao();
+        aplicarFiltrosObservatorio();
+
         result.hidden = false;
         downloadBtn.hidden = observatorioRegistros.length === 0;
+        document.getElementById('btn-filtro-problemas').hidden = observatorioRegistros.length === 0;
 
-        const partes = [`${data.total} processo(s) recuperado(s) das abas ${data.anos.join(', ')}.`];
+        const partes = [];
         if (data.abasComErro && data.abasComErro.length) {
             const detalhes = data.abasComErro.map(e => `${e.ano} (${e.erro})`).join('; ');
             partes.push(`Abas ignoradas: ${detalhes}.`);
