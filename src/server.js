@@ -6,6 +6,7 @@ const fs = require('fs').promises;
 const os = require('os');
 const dns = require('dns');
 const { spawn, execSync } = require('child_process');
+const ExcelJS = require('exceljs');
 const Logger = require('./utils/logger');
 const { executarMailmerge } = require('./services/mailmerge');
 
@@ -1169,7 +1170,119 @@ function parseDataFinalizacao(valor) {
   return isNaN(generic.getTime()) ? null : generic;
 }
 
-app.get('/api/observatorio/planilha-controle', async (_req, res) => {
+// Lê uma aba de um xlsx e devolve um array de objetos indexados pelo cabeçalho
+// (linha 1). Retorna null se a aba não existir.
+async function lerAbaXlsx(caminho, nomeAba) {
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.readFile(caminho);
+  const worksheet = workbook.getWorksheet(nomeAba);
+  if (!worksheet) return null;
+
+  const headers = [];
+  const headerRow = worksheet.getRow(1);
+  headerRow.eachCell({ includeEmpty: false }, (cell, colNumber) => {
+    headers[colNumber] = String(cell.value ?? '').trim();
+  });
+
+  const linhas = [];
+  for (let r = 2; r <= worksheet.rowCount; r++) {
+    const row = worksheet.getRow(r);
+    const obj = {};
+    let vazio = true;
+    for (let c = 1; c < headers.length; c++) {
+      const nome = headers[c];
+      if (!nome) continue;
+      const valor = row.getCell(c).value;
+      const texto = valor == null ? '' : String(typeof valor === 'object' && 'text' in valor ? valor.text : valor).trim();
+      obj[nome] = texto;
+      if (texto) vazio = false;
+    }
+    if (!vazio) linhas.push(obj);
+  }
+  return linhas;
+}
+
+// Constrói um índice processo → Set de valores de uma coluna específica.
+// Usado para checar rapidamente se um processo aparece e quais valores carrega.
+function indexarPorProcesso(linhas, colunaProcesso, colunaValor) {
+  const mapa = new Map();
+  if (!linhas) return mapa;
+  for (const linha of linhas) {
+    const proc = (linha[colunaProcesso] || '').trim();
+    if (!proc) continue;
+    const valor = (linha[colunaValor] || '').trim();
+    if (!mapa.has(proc)) mapa.set(proc, new Set());
+    mapa.get(proc).add(valor);
+  }
+  return mapa;
+}
+
+// Determina o status de cada dimensão (Licitação/Execução) cruzando o que a
+// Planilha de Controle declara com o que o usuário já disponibilizou nos xlsx.
+//
+// Estados possíveis:
+//   atendido   — declaração e xlsx coincidem
+//   pendente   — declaração exige um arquivo que ainda não foi incluído
+//   divergente — processo presente no xlsx, mas com valor incompatível
+//   na         — não se aplica (Migrado/Inativo)
+//   analise    — Planilha de Controle ainda não classificou o processo
+//
+// Mapeamento de regras:
+// 
+// Caso	== Status	== Cor
+// Pré DPL + processo no xlsx, todos resultados = "Não licitado"	== atendido	== verde
+// Pós DPL + xlsx tem ao menos um resultado ≠ "Não licitado"	== atendido	== verde
+// Incluir Execução + xlsx tem executado = Sim	== atendido	== verde
+// Pré/Pós DPL ou Incluir Execução + processo ausente do xlsx	== pendente	== amarelo
+// Incluir Execução + xlsx só tem executado = Não	== pendente	== amarelo
+// Pré DPL + xlsx tem resultado ≠ "Não licitado"	== divergente	== vermelho
+// Pós DPL + xlsx só tem resultado = "Não licitado"	== divergente	== vermelho
+// Migrado / Inativo	== na	== cinza
+// Coluna Observatório vazia (em análise)	== analise	== sem badge
+function classificarStatus(reg, mapaLicitacao, mapaExecucao) {
+  // Licitação
+  if (reg.obsLicitacao === 'Migrado para o ano seguinte' || reg.obsLicitacao === 'Inativo') {
+    reg.obsLicitacaoStatus = 'na';
+  } else if (reg.obsLicitacao === 'Incluir Pré DPL') {
+    const resultados = mapaLicitacao.get(reg.processo);
+    if (!resultados) {
+      reg.obsLicitacaoStatus = 'pendente';
+    } else if (Array.from(resultados).every(v => v === 'Não licitado')) {
+      reg.obsLicitacaoStatus = 'atendido';
+    } else {
+      reg.obsLicitacaoStatus = 'divergente';
+    }
+  } else if (reg.obsLicitacao === 'Incluir Pós DPL') {
+    const resultados = mapaLicitacao.get(reg.processo);
+    if (!resultados) {
+      reg.obsLicitacaoStatus = 'pendente';
+    } else if (Array.from(resultados).some(v => v && v !== 'Não licitado')) {
+      reg.obsLicitacaoStatus = 'atendido';
+    } else {
+      reg.obsLicitacaoStatus = 'divergente';
+    }
+  } else {
+    reg.obsLicitacaoStatus = 'analise';
+  }
+
+  // Execução
+  if (reg.obsExecucao === 'Migrado para o ano seguinte' || reg.obsExecucao === 'Inativo') {
+    reg.obsExecucaoStatus = 'na';
+  } else if (reg.obsExecucao === 'Incluir Execução') {
+    const valores = mapaExecucao.get(reg.processo);
+    if (!valores) {
+      reg.obsExecucaoStatus = 'pendente';
+    } else if (valores.has('Sim')) {
+      reg.obsExecucaoStatus = 'atendido';
+    } else {
+      reg.obsExecucaoStatus = 'pendente';
+    }
+  } else {
+    reg.obsExecucaoStatus = 'analise';
+  }
+}
+
+app.get('/api/observatorio/planilha-controle', async (req, res) => {
   // Stream de progresso via Server-Sent Events: cada aba lida emite uma etapa,
   // mais uma etapa final de classificação dos processos.
   res.setHeader('Content-Type', 'text/event-stream');
@@ -1193,11 +1306,14 @@ app.get('/api/observatorio/planilha-controle', async (_req, res) => {
       return res.end();
     }
 
+    const pastaBase = (req.query.pasta || '').toString().trim();
+
     const anoAtual = new Date().getFullYear();
     const anos = [];
     for (let ano = 2022; ano <= anoAtual; ano++) anos.push(ano);
 
-    const totalEtapas = anos.length + 1;
+    // Etapas: N abas + classificação + (se houver pasta) leitura dos 2 xlsx + comparação
+    const totalEtapas = anos.length + 1 + (pastaBase ? 3 : 0);
     let etapa = 0;
 
     // Colunas exatas e por prefixo (a coluna de data tem título longo e variável no Sheets)
@@ -1317,11 +1433,51 @@ app.get('/api/observatorio/planilha-controle', async (_req, res) => {
       }
     }
 
+    // Cruzamento com os arquivos "Dados Visão Licitação.xlsx" e "Dados Visão Execução.xlsx"
+    // gerados pelo script R, se o usuário informou a pasta da base.
+    let mapaLicitacao = new Map();
+    let mapaExecucao = new Map();
+    const arquivosComErro = [];
+
+    if (pastaBase) {
+      const caminhoLicitacao = path.join(pastaBase, 'Dados Visão Licitação.xlsx');
+      const caminhoExecucao = path.join(pastaBase, 'Dados Visão Execução.xlsx');
+
+      etapa++;
+      send('progress', { current: etapa, total: totalEtapas, label: 'Lendo "Dados Visão Licitação.xlsx"...' });
+      try {
+        const linhas = await lerAbaXlsx(caminhoLicitacao, 'Mapa de licitações');
+        if (!linhas) throw new Error('Aba "Mapa de licitações" não encontrada');
+        mapaLicitacao = indexarPorProcesso(linhas, 'Processo', 'resultado');
+      } catch (err) {
+        arquivosComErro.push({ arquivo: 'Dados Visão Licitação.xlsx', erro: err.message });
+      }
+
+      etapa++;
+      send('progress', { current: etapa, total: totalEtapas, label: 'Lendo "Dados Visão Execução.xlsx"...' });
+      try {
+        const linhas = await lerAbaXlsx(caminhoExecucao, 'Mapa de licitações');
+        if (!linhas) throw new Error('Aba "Mapa de licitações" não encontrada');
+        mapaExecucao = indexarPorProcesso(linhas, 'processo', 'executado');
+      } catch (err) {
+        arquivosComErro.push({ arquivo: 'Dados Visão Execução.xlsx', erro: err.message });
+      }
+
+      etapa++;
+      send('progress', { current: etapa, total: totalEtapas, label: 'Comparando processos com a base...' });
+    }
+
+    for (const reg of resultados) {
+      classificarStatus(reg, mapaLicitacao, mapaExecucao);
+    }
+
     send('done', {
       anos,
       total: resultados.length,
       registros: resultados,
       abasComErro,
+      arquivosComErro,
+      comparou: Boolean(pastaBase),
     });
     res.end();
   } catch (error) {

@@ -86,6 +86,14 @@ function executarObservatorio(button) {
         showToast('Sem conexão com a internet.', 'warning', 4000, 'Observatório');
         return;
     }
+    const pastaInput = document.getElementById('powerbi-pasta');
+    if (!pastaInput || !validateSingleField(pastaInput)) {
+        showToast('Informe um caminho válido para a pasta da base de dados antes de executar.', 'warning', 4000, 'Observatório');
+        if (pastaInput) pastaInput.focus();
+        return;
+    }
+    const pasta = pastaInput.value.trim();
+
     const status = document.getElementById('powerbi-observatorio-status');
     const result = document.getElementById('powerbi-observatorio-result');
     const tbody = document.getElementById('powerbi-observatorio-tbody');
@@ -99,7 +107,7 @@ function executarObservatorio(button) {
     downloadBtn.hidden = true;
     mostrarProgressoObservatorio();
 
-    const es = new EventSource('/api/observatorio/planilha-controle');
+    const es = new EventSource(`/api/observatorio/planilha-controle?pasta=${encodeURIComponent(pasta)}`);
     let finalizado = false;
 
     const finalizar = (msgErro) => {
@@ -131,8 +139,8 @@ function executarObservatorio(button) {
                 <td>${escapeHtml(r.processo)}</td>
                 <td>${escapeHtml(r.situacao)}</td>
                 <td>${escapeHtml(r.dataFinalizacao)}</td>
-                <td>${escapeHtml(r.obsLicitacao)}</td>
-                <td>${escapeHtml(r.obsExecucao)}</td>
+                <td>${renderObservatorioBadge(r.obsLicitacao, r.obsLicitacaoStatus)}</td>
+                <td>${renderObservatorioBadge(r.obsExecucao, r.obsExecucaoStatus)}</td>
             `;
             fragment.appendChild(tr);
         }
@@ -144,6 +152,10 @@ function executarObservatorio(button) {
         if (data.abasComErro && data.abasComErro.length) {
             const detalhes = data.abasComErro.map(e => `${e.ano} (${e.erro})`).join('; ');
             partes.push(`Abas ignoradas: ${detalhes}.`);
+        }
+        if (data.arquivosComErro && data.arquivosComErro.length) {
+            const detalhes = data.arquivosComErro.map(a => `${a.arquivo} (${a.erro})`).join('; ');
+            partes.push(`Comparação não realizada para: ${detalhes}.`);
         }
         status.textContent = partes.join(' ');
         finalizar();
@@ -166,17 +178,49 @@ function escapeHtml(str) {
     }[c]));
 }
 
+const OBSERVATORIO_STATUS_INFO = {
+    atendido:   { variant: 'success',   titulo: 'Arquivo já incluído na base' },
+    pendente:   { variant: 'warning',   titulo: 'Incluir o arquivo correspondente na base' },
+    divergente: { variant: 'danger',    titulo: 'Divergência entre a Planilha de Controle e a base — verificar' },
+    na:         { variant: 'secondary', titulo: 'Não se aplica' },
+    analise:    { variant: '',          titulo: 'Em análise' },
+};
+
+function renderObservatorioBadge(texto, status) {
+    if (!texto) return '';
+    const info = OBSERVATORIO_STATUS_INFO[status] || OBSERVATORIO_STATUS_INFO.analise;
+    if (!info.variant) return escapeHtml(texto);
+    return `<span class="badge text-bg-${info.variant}" title="${escapeHtml(info.titulo)}">${escapeHtml(texto)}</span>`;
+}
+
+const OBSERVATORIO_STATUS_LABEL = {
+    atendido: 'Atendido',
+    pendente: 'Pendente',
+    divergente: 'Divergente',
+    na: 'Não se aplica',
+    analise: 'Em análise',
+};
+
 function baixarObservatorioCsv() {
     if (!observatorioRegistros.length) return;
 
-    const cabecalho = ['Ano', 'Processo (CAPL)', 'Situação', 'Data de finalização', 'Observatório - Licitação', 'Observatório - Execução'];
+    const cabecalho = [
+        'Ano', 'Processo (CAPL)', 'Situação', 'Data de finalização',
+        'Observatório - Licitação', 'Status Licitação',
+        'Observatório - Execução', 'Status Execução',
+    ];
     const escapeCsv = v => {
         const s = String(v ?? '');
         return /[",;\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
+    const statusLabel = s => OBSERVATORIO_STATUS_LABEL[s] || '';
     const linhas = [cabecalho.map(escapeCsv).join(';')];
     for (const r of observatorioRegistros) {
-        linhas.push([r.ano, r.processo, r.situacao, r.dataFinalizacao, r.obsLicitacao, r.obsExecucao].map(escapeCsv).join(';'));
+        linhas.push([
+            r.ano, r.processo, r.situacao, r.dataFinalizacao,
+            r.obsLicitacao, statusLabel(r.obsLicitacaoStatus),
+            r.obsExecucao, statusLabel(r.obsExecucaoStatus),
+        ].map(escapeCsv).join(';'));
     }
 
     const blob = new Blob(['\uFEFF' + linhas.join('\r\n')], { type: 'text/csv;charset=utf-8' });
