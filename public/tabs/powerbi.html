@@ -144,4 +144,56 @@
             </div>
         </form>
     </div>
+
+    <div class="col-sm-12">
+        <!-- Observatório a partir da Planilha de Controle -->
+        <form id="form-powerbi-observatorio" class="script-form shadow-sm">
+            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
+                data-bs-target="#powerbi-observatorio-collapse" aria-expanded="true"
+                aria-controls="powerbi-observatorio-collapse">
+                <span><i class="material-symbols-outlined">visibility</i> Observatório (Planilha de Controle)</span>
+                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            </h4>
+            <div class="collapse show" id="powerbi-observatorio-collapse">
+                <p class="text-muted small mb-2">
+                    Lê as abas <em>Licitação YYYY</em> da Planilha de Controle (de 2022 ao ano corrente),
+                    extrai os processos e classifica cada um para os painéis de Licitação e Execução.
+                </p>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"
+                        id="btn-run-powerbi-observatorio" onclick="executarObservatorio(this)">
+                        Recuperar dados
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap"
+                        id="btn-download-powerbi-observatorio" onclick="baixarObservatorioCsv()" hidden>
+                        <i class="material-symbols-outlined">download</i> Baixar CSV
+                    </button>
+                </div>
+                <div id="powerbi-observatorio-progress-container" class="progress mt-2 d-none"
+                    style="height: 16px; overflow: visible; position: relative;">
+                    <div id="powerbi-observatorio-progress-bar"
+                        class="progress-bar progress-bar-striped progress-bar-animated text-bg-info" role="progressbar"
+                        style="width: 0%;">
+                        <span class="progress-percent-popup">0%</span>
+                    </div>
+                </div>
+                <div id="powerbi-observatorio-status" class="small text-muted mt-2"></div>
+                <div id="powerbi-observatorio-result" class="table-responsive mt-2" hidden>
+                    <table class="table table-sm table-striped table-hover align-middle small mb-0">
+                        <thead>
+                            <tr>
+                                <th>Ano</th>
+                                <th>Processo</th>
+                                <th>Situação</th>
+                                <th>Data finalização</th>
+                                <th>Observatório - Licitação</th>
+                                <th>Observatório - Execução</th>
+                            </tr>
+                        </thead>
+                        <tbody id="powerbi-observatorio-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>

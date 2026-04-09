@@ -969,7 +969,7 @@ app.get('/api/npm-outdated', async (_req, res) => {
 
     let stdoutData = '';
     proc.stdout.on('data', (data) => { stdoutData += data.toString(); });
-    proc.stderr.on('data', () => {});
+    proc.stderr.on('data', () => { });
 
     await new Promise(resolve => { proc.on('close', resolve); });
 
@@ -1107,6 +1107,228 @@ app.get('/api/app-config', (_req, res) => {
     manualSite: process.env.COMPRAS_MANUAL_SITE || '',
     backgroundRefreshTime: parseInt(process.env.COMPRAS_HOME_BACKGROUND_REFRESH_TIME, 10) || 0,
   });
+});
+
+// API - Observatório (planilha de controle)
+// Lê as abas "Licitação YYYY" da Planilha de Controle (Google Sheets) e
+// retorna os processos com as colunas Observatório - Licitação/Execução
+// preenchidas conforme regras de negócio definidas em powerbi.html.
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') { field += '"'; i++; }
+        else inQuotes = false;
+      } else field += ch;
+    } else {
+      if (ch === '"') inQuotes = true;
+      else if (ch === ',') { row.push(field); field = ''; }
+      else if (ch === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else if (ch === '\r') { /* ignora */ }
+      else field += ch;
+    }
+  }
+  if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+async function buscarAbaCsv(spreadsheetId, sheetName) {
+  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+  const response = await fetch(url, { redirect: 'follow' });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status} ao acessar a aba "${sheetName}"`);
+  }
+  const text = await response.text();
+  if (text.trim().startsWith('<')) {
+    throw new Error(`A aba "${sheetName}" não pôde ser lida (planilha pode não estar pública).`);
+  }
+  return parseCsv(text);
+}
+
+function extrairIdPlanilha(url) {
+  const match = (url || '').match(/\/d\/([a-zA-Z0-9-_]+)/);
+  return match ? match[1] : null;
+}
+
+function parseDataFinalizacao(valor) {
+  if (!valor) return null;
+  const trimmed = String(valor).trim();
+  if (!trimmed || trimmed === '#N/D' || /processo em andamento/i.test(trimmed)) return null;
+  // Aceita YYYY-MM-DD e DD/MM/YYYY
+  const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) return new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]));
+  const brMatch = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (brMatch) return new Date(Number(brMatch[3]), Number(brMatch[2]) - 1, Number(brMatch[1]));
+  const generic = new Date(trimmed);
+  return isNaN(generic.getTime()) ? null : generic;
+}
+
+app.get('/api/observatorio/planilha-controle', async (_req, res) => {
+  // Stream de progresso via Server-Sent Events: cada aba lida emite uma etapa,
+  // mais uma etapa final de classificação dos processos.
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  const send = (event, payload) => {
+    res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
+  };
+
+  try {
+    const url = process.env.COMPRAS_URL_PLANILHA_CONTROLE;
+    if (!url) {
+      send('fail', { message: 'COMPRAS_URL_PLANILHA_CONTROLE não definido no .env' });
+      return res.end();
+    }
+    const spreadsheetId = extrairIdPlanilha(url);
+    if (!spreadsheetId) {
+      send('fail', { message: 'URL da planilha de controle inválida' });
+      return res.end();
+    }
+
+    const anoAtual = new Date().getFullYear();
+    const anos = [];
+    for (let ano = 2022; ano <= anoAtual; ano++) anos.push(ano);
+
+    const totalEtapas = anos.length + 1;
+    let etapa = 0;
+
+    // Colunas exatas e por prefixo (a coluna de data tem título longo e variável no Sheets)
+    const COLUNAS_EXATAS = {
+      processo: 'Processo (CAPL)',
+      situacao: 'Situação',
+      obsLicitacao: 'Observatório - Licitação',
+      obsExecucao: 'Observatório - Execução',
+    };
+    const COLUNAS_PREFIXO = {
+      dataFinalizacao: 'Data de finalização',
+    };
+
+    const resultados = [];
+    const abasComErro = [];
+
+    // Posição padrão da coluna "Data de finalização" quando o título não vier
+    // no cabeçalho (célula mesclada nas abas mais antigas faz o gviz devolver vazio).
+    const DATA_FINALIZACAO_FALLBACK_IDX = 24;
+
+    const normalizar = s => (s || '').replace(/\s+/g, ' ').trim();
+    const prefixoDataFinalizacao = normalizar(COLUNAS_PREFIXO.dataFinalizacao);
+
+    // Primeira passada: baixa todas as abas e calcula índices de colunas exatas.
+    const abasCarregadas = [];
+    let idxDataFinalizacaoAprendido = -1;
+
+    for (const ano of anos) {
+      etapa++;
+      send('progress', { current: etapa, total: totalEtapas, label: `Lendo aba "Licitação ${ano}"...` });
+      const sheetName = `Licitação ${ano}`;
+      let linhas;
+      try {
+        linhas = await buscarAbaCsv(spreadsheetId, sheetName);
+      } catch (err) {
+        abasComErro.push({ ano, erro: err.message });
+        continue;
+      }
+
+      if (linhas.length < 3) continue;
+
+      // Linha 1 (índice 0) é descartada; linha 2 (índice 1) contém os nomes das colunas
+      // Normaliza espaços/quebras de linha porque títulos no Sheets podem ter Alt+Enter
+      const cabecalho = linhas[1].map(normalizar);
+      const idx = {};
+      for (const [chave, nome] of Object.entries(COLUNAS_EXATAS)) {
+        idx[chave] = cabecalho.indexOf(normalizar(nome));
+      }
+      if (idx.processo === -1) {
+        abasComErro.push({ ano, erro: 'Coluna "Processo (CAPL)" não encontrada' });
+        continue;
+      }
+
+      const idxDataFinalizacaoLocal = cabecalho.findIndex(h => h.startsWith(prefixoDataFinalizacao));
+      if (idxDataFinalizacaoLocal !== -1 && idxDataFinalizacaoAprendido === -1) {
+        idxDataFinalizacaoAprendido = idxDataFinalizacaoLocal;
+      }
+
+      abasCarregadas.push({ ano, linhas, idx });
+    }
+
+    etapa++;
+    send('progress', { current: etapa, total: totalEtapas, label: 'Classificando processos...' });
+
+    // Aplica o índice aprendido (ou o fallback fixo) para todas as abas.
+    const idxDataFinalizacao = idxDataFinalizacaoAprendido !== -1
+      ? idxDataFinalizacaoAprendido
+      : DATA_FINALIZACAO_FALLBACK_IDX;
+
+    for (const { ano, linhas, idx } of abasCarregadas) {
+      idx.dataFinalizacao = idxDataFinalizacao;
+      for (let i = 2; i < linhas.length; i++) {
+        const linha = linhas[i];
+        const processo = (linha[idx.processo] || '').trim();
+        if (!processo) continue;
+        resultados.push({
+          ano,
+          processo,
+          situacao: (linha[idx.situacao] || '').trim(),
+          dataFinalizacao: (linha[idx.dataFinalizacao] || '').trim(),
+          obsLicitacao: '',
+          obsExecucao: '',
+        });
+      }
+    }
+
+    // Identifica processos migrados para o ano seguinte
+    const processosPorAno = new Map();
+    for (const reg of resultados) {
+      if (!processosPorAno.has(reg.ano)) processosPorAno.set(reg.ano, new Set());
+      processosPorAno.get(reg.ano).add(reg.processo);
+    }
+
+    const hoje = new Date();
+    const umAnoAtras = new Date(hoje.getFullYear() - 1, hoje.getMonth(), hoje.getDate());
+
+    for (const reg of resultados) {
+      const proxAno = processosPorAno.get(reg.ano + 1);
+      const migrado = proxAno && proxAno.has(reg.processo);
+
+      if (migrado) {
+        reg.obsLicitacao = 'Migrado para o ano seguinte';
+        reg.obsExecucao = 'Migrado para o ano seguinte';
+        continue;
+      }
+
+      const situacao = reg.situacao;
+      if (situacao === 'Inativo') {
+        reg.obsLicitacao = 'Inativo';
+        reg.obsExecucao = 'Inativo';
+      } else if (situacao === 'PROAD') {
+        const dataFim = parseDataFinalizacao(reg.dataFinalizacao);
+        reg.obsLicitacao = dataFim ? 'Incluir Pós DPL' : 'Incluir Pré DPL';
+        if (dataFim && dataFim < umAnoAtras) {
+          reg.obsExecucao = 'Incluir Execução';
+        }
+      }
+    }
+
+    send('done', {
+      anos,
+      total: resultados.length,
+      registros: resultados,
+      abasComErro,
+    });
+    res.end();
+  } catch (error) {
+    logger.error(`Erro ao processar planilha de controle: ${error.message}`, 'Observatório', error);
+    send('fail', { message: error.message });
+    res.end();
+  }
 });
 
 const server = app.listen(PORT, async () => {
@@ -1337,7 +1559,7 @@ async function executeNpmUpdate(ws) {
 
     let stdoutData = '';
     outdatedProcess.stdout.on('data', (data) => { stdoutData += data.toString(); });
-    outdatedProcess.stderr.on('data', () => {});
+    outdatedProcess.stderr.on('data', () => { });
 
     await new Promise(resolve => { outdatedProcess.on('close', resolve); });
 
