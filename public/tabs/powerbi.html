@@ -163,8 +163,8 @@
                         id="btn-run-powerbi-observatorio" onclick="executarObservatorio(this)">
                         Verificar
                     </button>
-                    <button type="button" class="btn btn-sm btn-warning text-nowrap"
-                        id="btn-filtro-problemas" onclick="toggleFiltroProblemas(this)" hidden>
+                    <button type="button" class="btn btn-sm btn-warning text-nowrap" id="btn-filtro-problemas"
+                        onclick="toggleFiltroProblemas(this)" hidden>
                         <i class="material-symbols-outlined">warning</i> Problemas
                     </button>
                     <button type="button" class="btn btn-sm btn-secondary text-nowrap"
@@ -195,23 +195,48 @@
                         </button>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-sm table-striped table-hover align-middle small mb-0">
-                            <thead>
+                        <table class="table table-sm table-striped table-hover small mb-0">
+                            <thead class="align-top">
                                 <tr>
-                                    <th class="obs-col-sortable" data-col="ano" onclick="ordenarObservatorio('ano')">Ano <i class="material-symbols-outlined sort-icon">unfold_more</i></th>
-                                    <th class="obs-col-sortable" data-col="processo" onclick="ordenarObservatorio('processo')">Processo <i class="material-symbols-outlined sort-icon">unfold_more</i></th>
-                                    <th class="obs-col-sortable" data-col="situacao" onclick="ordenarObservatorio('situacao')">Situação <i class="material-symbols-outlined sort-icon">unfold_more</i></th>
-                                    <th class="obs-col-sortable" data-col="data" onclick="ordenarObservatorio('data')">Data finalização <i class="material-symbols-outlined sort-icon">unfold_more</i></th>
-                                    <th class="obs-col-sortable" data-col="licitacao" onclick="ordenarObservatorio('licitacao')">Observatório - Licitação <i class="material-symbols-outlined sort-icon">unfold_more</i></th>
-                                    <th class="obs-col-sortable" data-col="execucao" onclick="ordenarObservatorio('execucao')">Observatório - Execução <i class="material-symbols-outlined sort-icon">unfold_more</i></th>
+                                    <th class="obs-col-sortable" data-col="ano" onclick="ordenarObservatorio('ano')">Ano
+                                        <i class="material-symbols-outlined sort-icon">unfold_more</i>
+                                    </th>
+                                    <th class="obs-col-sortable" data-col="processo"
+                                        onclick="ordenarObservatorio('processo')">Processo <i
+                                            class="material-symbols-outlined sort-icon">unfold_more</i></th>
+                                    <th class="obs-col-sortable" data-col="situacao"
+                                        onclick="ordenarObservatorio('situacao')">Situação <i
+                                            class="material-symbols-outlined sort-icon">unfold_more</i></th>
+                                    <th class="obs-col-sortable" data-col="data" onclick="ordenarObservatorio('data')">
+                                        Data finalização <i class="material-symbols-outlined sort-icon">unfold_more</i>
+                                    </th>
+                                    <th class="obs-col-sortable" data-col="licitacao"
+                                        onclick="ordenarObservatorio('licitacao')">Observatório - Licitação <i
+                                            class="material-symbols-outlined sort-icon">unfold_more</i></th>
+                                    <th class="obs-col-sortable" data-col="execucao"
+                                        onclick="ordenarObservatorio('execucao')">Observatório - Execução <i
+                                            class="material-symbols-outlined sort-icon">unfold_more</i></th>
                                 </tr>
-                                <tr id="observatorio-filter-row">
-                                    <th><select id="filtro-obs-ano" class="form-select form-select-sm"><option value="">Todos</option></select></th>
-                                    <th><input type="text" id="filtro-obs-processo" class="form-control form-control-sm" placeholder="Buscar..."></th>
-                                    <th><select id="filtro-obs-situacao" class="form-select form-select-sm"><option value="">Todas</option></select></th>
-                                    <th><input type="text" id="filtro-obs-data" class="form-control form-control-sm" placeholder="Filtrar..."></th>
-                                    <th><select id="filtro-obs-licitacao" class="form-select form-select-sm"><option value="">Todos</option></select></th>
-                                    <th><select id="filtro-obs-execucao" class="form-select form-select-sm"><option value="">Todos</option></select></th>
+                                <tr class="observatorio-filter-row" id="observatorio-filter-row">
+                                    <th data-col="ano"><select id="filtro-obs-ano" class="form-select form-select-sm">
+                                            <option value="">Todos</option>
+                                        </select></th>
+                                    <th data-col="processo"><input type="text" id="filtro-obs-processo"
+                                            class="form-control form-control-sm" placeholder="Buscar..."></th>
+                                    <th data-col="situacao"><select id="filtro-obs-situacao"
+                                            class="form-select form-select-sm">
+                                            <option value="">Todas</option>
+                                        </select></th>
+                                    <th data-col="data"><input type="text" id="filtro-obs-data"
+                                            class="form-control form-control-sm" placeholder="Filtrar..."></th>
+                                    <th data-col="licitacao"><select id="filtro-obs-licitacao"
+                                            class="form-select form-select-sm">
+                                            <option value="">Todos</option>
+                                        </select></th>
+                                    <th data-col="execucao"><select id="filtro-obs-execucao"
+                                            class="form-select form-select-sm">
+                                            <option value="">Todos</option>
+                                        </select></th>
                                 </tr>
                             </thead>
                             <tbody id="powerbi-observatorio-tbody"></tbody>
@@ -224,8 +249,9 @@
                                 · Ordenado por <strong id="observatorio-sort-label-bottom"></strong>
                             </span>
                         </span>
-                        <button type="button" class="obs-tool-btn obs-tool-btn--danger" id="btn-limpar-filtros-obs-bar-bottom"
-                            onclick="limparFiltrosEOrdenacaoObservatorio()" title="Limpar filtros e ordenação" hidden>
+                        <button type="button" class="obs-tool-btn obs-tool-btn--danger"
+                            id="btn-limpar-filtros-obs-bar-bottom" onclick="limparFiltrosEOrdenacaoObservatorio()"
+                            title="Limpar filtros e ordenação" hidden>
                             <i class="material-symbols-outlined">ink_eraser</i>
                         </button>
                     </div>

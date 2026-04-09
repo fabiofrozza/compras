@@ -215,16 +215,23 @@ function atualizarDestaqueCabecalhos() {
         execucao: observatorioFiltroProblemas || !!document.getElementById('filtro-obs-execucao').value,
     };
 
-    document.querySelectorAll('#powerbi-observatorio-result th[data-col]').forEach(th => {
+    // Cabeçalhos (Linha 1): Destaca se tiver filtro OU ordenação
+    document.querySelectorAll('#powerbi-observatorio-result thead tr:first-child th[data-col]').forEach(th => {
         const col = th.dataset.col;
         const temFiltroOuOrdenacao = filtrosAtivos[col] || (observatorioOrdenacao.coluna === col);
-        th.classList.toggle('text-primary', temFiltroOuOrdenacao);
+        th.classList.toggle('obs-header-highlight', temFiltroOuOrdenacao);
+    });
+
+    // Células de filtro (Linha 2): Destaca se tiver filtro
+    document.querySelectorAll('#observatorio-filter-row th[data-col]').forEach(th => {
+        const col = th.dataset.col;
+        th.classList.toggle('obs-filter-highlight', filtrosAtivos[col]);
     });
 }
 
 function getObservatorioSortValue(r, coluna) {
     switch (coluna) {
-        case 'ano':      return r.ano;
+        case 'ano': return r.ano;
         case 'processo': return r.processo.toLowerCase();
         case 'situacao': return (r.situacao ?? '').toLowerCase();
         case 'data': {
@@ -232,7 +239,7 @@ function getObservatorioSortValue(r, coluna) {
             return y && m && d ? `${y}${m}${d}` : '';
         }
         case 'licitacao': return (r.obsLicitacao ?? '').toLowerCase();
-        case 'execucao':  return (r.obsExecucao ?? '').toLowerCase();
+        case 'execucao': return (r.obsExecucao ?? '').toLowerCase();
         default: return '';
     }
 }
@@ -384,18 +391,18 @@ function escapeHtml(str) {
 }
 
 const OBSERVATORIO_STATUS_INFO = {
-    atendido:   { variant: 'success',   titulo: 'Arquivo já incluído na base' },
-    pendente:   { variant: 'warning',   titulo: 'Incluir o arquivo correspondente na base' },
-    divergente: { variant: 'danger',    titulo: 'Divergência entre a Planilha de Controle e a base — verificar' },
-    na:         { variant: 'secondary', titulo: 'Não se aplica' },
-    analise:    { variant: '',          titulo: 'Em análise' },
+    atendido: { variant: 'success', titulo: 'Arquivo já incluído na base' },
+    pendente: { variant: 'warning', titulo: 'Incluir o arquivo correspondente na base' },
+    divergente: { variant: 'danger', titulo: 'Divergência entre a Planilha de Controle e a base — verificar' },
+    na: { variant: 'secondary', titulo: 'Não se aplica' },
+    analise: { variant: '', titulo: 'Em análise' },
 };
 
 function renderObservatorioBadge(texto, status) {
     if (!texto) return '';
     const info = OBSERVATORIO_STATUS_INFO[status] || OBSERVATORIO_STATUS_INFO.analise;
     if (!info.variant) return escapeHtml(texto);
-    return `<span class="badge text-bg-${info.variant}" title="${escapeHtml(info.titulo)}">${escapeHtml(texto)}</span>`;
+    return `<span class="badge text-bg-${info.variant} text-wrap" title="${escapeHtml(info.titulo)}">${escapeHtml(texto)}</span>`;
 }
 
 const OBSERVATORIO_STATUS_LABEL = {

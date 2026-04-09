@@ -251,8 +251,9 @@
 }
 
 .btn-sm .material-symbols-outlined {
-    font-size: 20px;
+    font-size: 16px;
     font-variation-settings: 'opsz' 48;
+    vertical-align: sub;
 }
 
 /* Estilos de Abas de Importação no Formulário */
@@ -370,9 +371,6 @@
     border: none;
     padding: 0 2px;
     line-height: 1;
-    color: var(--bs-secondary-color);
-    cursor: pointer;
-    opacity: 0.6;
 }
 
 .obs-tool-btn:hover {
@@ -394,34 +392,43 @@
     vertical-align: middle;
 }
 
-#observatorio-filter-row th {
+.observatorio-filter-row th {
     padding: 4px 4px 6px;
     border-top: 2px solid var(--bs-border-color);
     font-weight: normal;
+    background-color: var(--compras-text-primary);
 }
 
-#observatorio-filter-row .form-select:disabled {
+.observatorio-filter-row .form-select:disabled {
     opacity: 0.4;
 }
 
 .obs-col-sortable {
     cursor: pointer;
     user-select: none;
-    white-space: nowrap;
-}
-
-.obs-col-sortable:hover {
-    background-color: var(--bs-tertiary-bg);
+    background-color: var(--compras-text-primary) !important;
+    color: var(--compras-contrast) !important;
+    border-radius: 6px;
+    padding: 4px !important;
 }
 
 .obs-col-sortable .sort-icon {
     font-size: 14px;
     vertical-align: middle;
-    opacity: 0.3;
 }
 
-.obs-col-sortable.sorted .sort-icon {
-    opacity: 1;
+.obs-header-highlight {
+    background-color: var(--bs-primary) !important;
+    color: white !important;
+}
+
+.obs-filter-highlight input,
+.obs-filter-highlight select {
+    background-color: var(--bs-primary) !important;
+}
+
+.obs-filter-highlight select option:not(:checked) {
+    background-color: var(--bs-body-bg);
 }
 
 /* ==========================================================================
