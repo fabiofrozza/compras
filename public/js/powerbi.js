@@ -333,7 +333,11 @@ function executarObservatorio(button) {
         if (msgErro) {
             status.textContent = `Erro: ${msgErro}`;
             status.classList.add('text-danger');
-            showToast(`Falha ao recuperar dados: ${msgErro}`, 'error', 5000, 'Observatório');
+            addNotification({
+                message: `Falha ao recuperar dados: ${msgErro}`,
+                type: 'error',
+                source: 'Observatório'
+            });
         }
     };
 
@@ -370,6 +374,15 @@ function executarObservatorio(button) {
             partes.push(`Comparação não realizada para: ${detalhes}.`);
         }
         status.textContent = partes.join(' ');
+
+        // Notificar sucesso no painel de notificações
+        const mensagem = `Planilha de Controle carregada com sucesso. ${data.total} processo(s) encontrado(s).`;
+        addNotification({
+            message: mensagem,
+            type: 'success',
+            source: 'Observatório'
+        });
+
         finalizar();
     });
 
