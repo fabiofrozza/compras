@@ -110,6 +110,49 @@ function filePassesFilter(file, patterns, filterNameContains) {
   return matchFilePattern(file, patterns);
 }
 
+async function listFilesWithStats(folderPath, filterFn) {
+  const entries = await fs.readdir(folderPath);
+  const filtered = filterFn ? entries.filter(filterFn) : entries;
+  return Promise.all(filtered.map(async (name) => {
+    const stats = await fs.stat(path.join(folderPath, name));
+    return { name, isDirectory: stats.isDirectory(), size: stats.size, modifiedDate: stats.mtime };
+  }));
+}
+
+async function deleteFilesInFolder(folderPath, filterFn) {
+  const files = await fs.readdir(folderPath);
+  let deletedCount = 0;
+  for (const file of files) {
+    if (isProtectedFile(file)) continue;
+    if (filterFn && !filterFn(file)) continue;
+    const filePath = path.join(folderPath, file);
+    const stats = await fs.stat(filePath);
+    if (stats.isFile()) {
+      await fs.unlink(filePath);
+      deletedCount++;
+    }
+  }
+  return deletedCount;
+}
+
+async function validateAndDeleteFile(filePath, baseDir) {
+  if (!isPathSafe(filePath, baseDir)) {
+    return { error: 'Acesso negado', statusCode: 403 };
+  }
+  if (isProtectedFile(path.basename(filePath))) {
+    return { error: 'Este tipo de arquivo não pode ser excluído.', statusCode: 403 };
+  }
+  try { await fs.access(filePath); } catch {
+    return { error: 'Arquivo não encontrado', statusCode: 404 };
+  }
+  const stats = await fs.stat(filePath);
+  if (!stats.isFile()) {
+    return { error: 'O caminho não é um arquivo', statusCode: 400 };
+  }
+  await fs.unlink(filePath);
+  return { success: true };
+}
+
 // Suppliers paths
 const FORNECEDORES_DADOS = path.join(SCRIPTS_PATH, 'fornecedores', 'DADOS');
 const FORNECEDORES_IMPORTAR = path.join(SCRIPTS_PATH, 'fornecedores', 'PARA_IMPORTAR');
@@ -166,9 +209,6 @@ async function listPregaoFiles(pregao) {
     return { error: 'Pasta do pregão não encontrada', statusCode: 404 };
   }
 
-  const arquivos = await fs.readdir(pastaPath);
-  const xlsxFiles = arquivos.filter(f => /^[^~].*\.xlsx?$/i.test(f));
-
   const statusName = `PE_${pregao}_STATUS.json`;
   let errosPorArquivo = [];
   let resultado = null;
@@ -181,21 +221,16 @@ async function listPregaoFiles(pregao) {
     }
   } catch { /* sem arquivo de status ou erro de parse */ }
 
-  const fileDetails = await Promise.all(xlsxFiles.map(async (file) => {
-    const filePath = path.join(pastaPath, file);
-    const stats = await fs.stat(filePath);
-    const upperFileName = file.toUpperCase();
-    const erro = errosPorArquivo.find(e => upperFileName === e.arquivo?.toUpperCase());
-
+  const baseFiles = await listFilesWithStats(pastaPath, f => /^[^~].*\.xlsx?$/i.test(f));
+  const fileDetails = baseFiles.map(file => {
+    const erro = errosPorArquivo.find(e => file.name.toUpperCase() === e.arquivo?.toUpperCase());
     return {
-      name: file,
-      size: stats.size,
-      modifiedDate: stats.mtime,
+      ...file,
+      fullPath: path.join(pastaPath, file.name),
       hasError: !!erro,
       errorType: erro?.tipo || null,
-      fullPath: filePath
     };
-  }));
+  });
 
   return {
     arquivos: fileDetails,
@@ -210,14 +245,10 @@ async function listImportFiles() {
   if (!result) throw new Error('Erro ao resolver pasta de importação');
   const { folderPath: importarPath, created } = result;
 
-  const arquivos = await fs.readdir(importarPath);
-  const csvFiles = arquivos.filter(f => f.endsWith('.csv'));
+  const baseFiles = await listFilesWithStats(importarPath, f => f.endsWith('.csv'));
 
-  const fileDetails = await Promise.all(csvFiles.map(async (file) => {
-    const filePath = path.join(importarPath, file);
-    const stats = await fs.stat(filePath);
-
-    const match = file.match(/^PE_(.+)\.csv$/i);
+  const fileDetails = await Promise.all(baseFiles.map(async (file) => {
+    const match = file.name.match(/^PE_(.+)\.csv$/i);
     const pregao = match ? match[1] : '';
 
     const statusName = `PE_${pregao}_STATUS.json`;
@@ -236,13 +267,11 @@ async function listImportFiles() {
     } catch { /* sem conferência */ }
 
     return {
-      name: file,
+      ...file,
+      fullPath: path.join(importarPath, file.name),
       pregao,
-      size: stats.size,
-      modifiedDate: stats.mtime,
       hasError,
       hasConferencia,
-      fullPath: filePath,
       conferenciaPath: hasConferencia ? confName : null
     };
   }));
@@ -268,17 +297,7 @@ async function deletePregao(pregao) {
     return { error: 'Pasta do pregão não encontrada', statusCode: 404 };
   }
 
-  const files = await fs.readdir(pastaPath);
-  let deletedCount = 0;
-  for (const file of files) {
-    if (isProtectedFile(file)) continue;
-    const filePath = path.join(pastaPath, file);
-    const stats = await fs.stat(filePath);
-    if (stats.isFile()) {
-      await fs.unlink(filePath);
-      deletedCount++;
-    }
-  }
+  const deletedCount = await deleteFilesInFolder(pastaPath);
 
   const remaining = await fs.readdir(pastaPath);
   if (remaining.length === 0) {
@@ -290,10 +309,6 @@ async function deletePregao(pregao) {
 }
 
 async function deleteSupplierFile(filePath) {
-  if (!isPathSafe(filePath, SCRIPTS_PATH)) {
-    return { error: 'Acesso negado', statusCode: 403 };
-  }
-
   const relativePath = path.relative(SCRIPTS_PATH, path.resolve(filePath));
   const parts = relativePath.split(path.sep);
   const innerFolder = parts.length >= 2 ? parts[1] : '';
@@ -301,25 +316,11 @@ async function deleteSupplierFile(filePath) {
     return { error: 'A exclusão nesta pasta não é permitida por segurança.', statusCode: 403 };
   }
 
-  const fileName = path.basename(filePath);
-  if (isProtectedFile(fileName)) {
-    return { error: 'Este tipo de arquivo não pode ser excluído.', statusCode: 403 };
+  const result = await validateAndDeleteFile(filePath, SCRIPTS_PATH);
+  if (result.success) {
+    logger.info(`Arquivo excluído: ${filePath}`, 'Fornecedores');
   }
-
-  try {
-    await fs.access(filePath);
-  } catch {
-    return { error: 'Arquivo não encontrado', statusCode: 404 };
-  }
-
-  const stats = await fs.stat(filePath);
-  if (!stats.isFile()) {
-    return { error: 'O caminho não é um arquivo', statusCode: 400 };
-  }
-
-  await fs.unlink(filePath);
-  logger.info(`Arquivo excluído: ${filePath}`, 'Fornecedores');
-  return { success: true, message: 'Arquivo excluído com sucesso' };
+  return result;
 }
 
 async function moveSupplierFiles(pregao, os) {
@@ -378,6 +379,9 @@ module.exports = {
   resolveScriptFolder,
   parseFilters,
   filePassesFilter,
+  listFilesWithStats,
+  deleteFilesInFolder,
+  validateAndDeleteFile,
   listPregoes,
   listPregaoFiles,
   listImportFiles,
