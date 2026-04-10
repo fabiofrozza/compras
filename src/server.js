@@ -5,130 +5,30 @@ const path = require('path');
 const fs = require('fs').promises;
 const os = require('os');
 const dns = require('dns');
-const { spawn, execSync } = require('child_process');
 const Logger = require('./utils/logger');
 const { executarMailmerge } = require('./services/mailmerge');
+const { registerConsoleRoutes, handleConsoleMessage } = require('./services/consoleService');
+const {
+  SCRIPTS_PATH,
+  ALLOWED_DELETE_FOLDERS,
+  isPathSafe,
+  isProtectedFile,
+  openInInterface,
+  resolveScriptFolder,
+  parseFilters,
+  filePassesFilter,
+} = require('./services/files');
 
 let logConsentEnabled = true; // null/true = salvar logs (permissivo por padrão); false = opt-out
 
 const logger = new Logger({ minLevel: process.env.COMPRAS_LOGGER_MIN_LEVEL || 'debug' });
 
-const { registerConsoleRoutes, handleConsoleMessage } = require('./services/consoleService');
 const app = express();
 const PORT = process.env.COMPRAS_PORT || 3000;
-const SCRIPTS_PATH = path.resolve(path.join(__dirname, '..', 'scripts'));
-const ALLOWED_DELETE_FOLDERS = [
-  'atas_finalizadas',
-  'sicaf',
-  'arquivos_gerados',
-  'tr',
-  'listas',
-  'mapas',
-  'arquivos_importar',
-  'relatorios',
-  'resumo_pedidos',
-  'log',
-  'temp',
-  'para_importar',
-  'dados'
-];
 
 // Middlewares
 app.use(express.json({ limit: '5mb' }));
 app.use(express.static(path.join(__dirname, '..', 'public')));
-
-// Utilitário para evitar Path Traversal
-function isPathSafe(targetPath, baseDir) {
-  const realPath = path.resolve(path.normalize(targetPath));
-  const safeBase = path.resolve(path.normalize(baseDir));
-  return realPath.toLowerCase().startsWith(safeBase.toLowerCase());
-}
-
-// Dupla proteção: Nunca apagar scripts de código (.R, .js) ou o arquivo de dados de atas
-function isProtectedFile(filename) {
-  return filename.endsWith('.R') || filename.endsWith('.js') || filename.toLowerCase() === 'dados_atas.xlsx';
-}
-
-function matchFilePattern(filename, patterns) {
-  if (!patterns || patterns.length === 0) return true;
-
-  return patterns.some(pattern => {
-    let p = pattern.trim();
-    if (!p || p === '*') return true;
-
-    // Se não tem curingas e não começa com ponto, assume que é extensão
-    if (!p.includes('*') && !p.includes('?') && !p.startsWith('.')) {
-      return filename.toLowerCase().endsWith('.' + p.toLowerCase());
-    }
-
-    if (p.startsWith('.')) {
-      return filename.toLowerCase().endsWith(p.toLowerCase());
-    }
-
-    // Se tem curingas mas não tem ponto, trata como padrão de extensão (ex: "xls*" → "*.xls*")
-    if (!p.includes('.') && !p.startsWith('*')) {
-      p = '*.' + p;
-    }
-
-    const regexString = '^' + p.replace(/[.+^${}()|[\]\\]/g, '\\$&')
-      .replace(/\*/g, '.*')
-      .replace(/\?/g, '.') + '$';
-    return new RegExp(regexString, 'i').test(filename);
-  });
-}
-
-function abrirNaInterface(targetPath, isFile = false) {
-  if (process.platform === 'win32') {
-    const isUrl = /^https?:\/\//i.test(targetPath);
-    const winPath = isUrl ? targetPath : path.normalize(targetPath);
-    if (isFile) spawn('cmd', ['/c', 'start', '', winPath]);
-    else spawn('explorer', [winPath]);
-  } else if (process.platform === 'darwin') {
-    spawn('open', [targetPath]);
-  } else {
-    spawn('xdg-open', [targetPath]);
-  }
-}
-
-// Retorna null com o erro já respondido via res quando o caminho é inválido.
-// Caso contrário, retorna { folderPath, created } onde created indica se a pasta foi criada agora.
-async function resolverPastaScript(res, scriptName, innerFolder, context) {
-  let mappedFolder = innerFolder;
-  if (innerFolder === 'RAIZ') {
-    mappedFolder = '.';
-  }
-  const folderPath = path.join(SCRIPTS_PATH, scriptName, mappedFolder);
-
-  if (!isPathSafe(folderPath, SCRIPTS_PATH)) {
-    res.status(403).json({ error: 'Acesso negado: fora do diretório permitido' });
-    return null;
-  }
-
-  let created = false;
-  try {
-    await fs.access(folderPath);
-  } catch {
-    await fs.mkdir(folderPath, { recursive: true });
-    logger.debug(`Pasta criada: ${folderPath}`, context);
-    created = true;
-  }
-
-  return { folderPath, created };
-}
-
-function parsearFiltros(extensions, nameContains) {
-  return {
-    patterns: extensions ? extensions.split(',') : null,
-    filterNameContains: nameContains ? nameContains.toLowerCase().split('_') : []
-  };
-}
-
-function arquivoPassaNoFiltro(file, patterns, filterNameContains) {
-  if (filterNameContains.length > 0) {
-    if (!filterNameContains.every(term => file.toLowerCase().includes(term.trim()))) return false;
-  }
-  return matchFilePattern(file, patterns);
-}
 
 
 // API - Open folder
@@ -153,7 +53,7 @@ app.post('/api/open-folder', async (req, res) => {
     }
 
     try {
-      abrirNaInterface(folderPath);
+      openInInterface(folderPath);
       logger.debug(`Pasta aberta: ${folderPath}`, 'API');
     } catch (spawnError) {
       logger.error(`Erro ao abrir pasta: ${spawnError.message}`, 'API', spawnError);
@@ -192,7 +92,7 @@ app.post('/api/open-file', async (req, res) => {
     }
 
     try {
-      abrirNaInterface(filePath, true);
+      openInInterface(filePath, true);
       logger.debug(`Arquivo aberto: ${filePath}`, 'API');
     } catch (spawnError) {
       logger.error(`Erro ao abrir arquivo: ${spawnError.message}`, 'API', spawnError);
@@ -246,13 +146,13 @@ app.get('/api/list-files/:scriptName/:innerFolder', async (req, res) => {
     const { scriptName, innerFolder } = req.params;
     const { extensions, nameContains, sort } = req.query;
 
-    const result = await resolverPastaScript(res, scriptName, innerFolder, 'ListFiles');
+    const result = await resolveScriptFolder(res, scriptName, innerFolder, 'ListFiles');
     if (!result) return;
     const { folderPath, created } = result;
 
-    const { patterns, filterNameContains } = parsearFiltros(extensions, nameContains);
+    const { patterns, filterNameContains } = parseFilters(extensions, nameContains);
     const files = await fs.readdir(folderPath);
-    const filteredFiles = files.filter(file => arquivoPassaNoFiltro(file, patterns, filterNameContains));
+    const filteredFiles = files.filter(file => filePassesFilter(file, patterns, filterNameContains));
 
     const fileDetails = await Promise.all(
       filteredFiles.map(async (file) => {
@@ -293,18 +193,18 @@ app.delete('/api/clear-folder/:scriptName/:innerFolder', async (req, res) => {
       return res.status(403).json({ error: 'A exclusão nesta pasta não é permitida por segurança.' });
     }
 
-    const result = await resolverPastaScript(res, scriptName, innerFolder, 'ClearFolder');
+    const result = await resolveScriptFolder(res, scriptName, innerFolder, 'ClearFolder');
     if (!result) return;
     const { folderPath } = result;
 
-    const { patterns, filterNameContains } = parsearFiltros(extensions, nameContains);
+    const { patterns, filterNameContains } = parseFilters(extensions, nameContains);
     const files = await fs.readdir(folderPath);
     let deletedCount = 0;
 
     for (const file of files) {
       // Dupla proteção: Nunca apagar scripts de código ou arquivos protegidos
       if (isProtectedFile(file)) continue;
-      if (!arquivoPassaNoFiltro(file, patterns, filterNameContains)) continue;
+      if (!filePassesFilter(file, patterns, filterNameContains)) continue;
 
       const filePath = path.join(folderPath, file);
       const stats = await fs.stat(filePath);
@@ -340,7 +240,7 @@ app.delete('/api/delete-file/:scriptName/:innerFolder', async (req, res) => {
       return res.status(403).json({ error: 'A exclusão nesta pasta não é permitida por segurança.' });
     }
 
-    const result = await resolverPastaScript(res, scriptName, innerFolder, 'DeleteFile');
+    const result = await resolveScriptFolder(res, scriptName, innerFolder, 'DeleteFile');
     if (!result) return;
     const { folderPath } = result;
 
@@ -493,7 +393,7 @@ const FORNECEDORES_IMPORTAR = path.join(SCRIPTS_PATH, 'fornecedores', 'PARA_IMPO
 // Lista pregões (pastas em DADOS) com status de processamento
 app.get('/api/fornecedores/pregoes', async (_req, res) => {
   try {
-    const result = await resolverPastaScript(res, 'fornecedores', 'DADOS', 'FornecedoresPregoes');
+    const result = await resolveScriptFolder(res, 'fornecedores', 'DADOS', 'FornecedoresPregoes');
     if (!result) return;
     const { folderPath: dadosPath, created } = result;
 
@@ -599,7 +499,7 @@ app.get('/api/fornecedores/pregao/:pregao/arquivos', async (req, res) => {
 // Lista arquivos para importar (PARA_IMPORTAR)
 app.get('/api/fornecedores/importar', async (_req, res) => {
   try {
-    const result = await resolverPastaScript(res, 'fornecedores', 'PARA_IMPORTAR', 'FornecedoresImportar');
+    const result = await resolveScriptFolder(res, 'fornecedores', 'PARA_IMPORTAR', 'FornecedoresImportar');
     if (!result) return;
     const { folderPath: importarPath, created } = result;
 
@@ -893,7 +793,7 @@ const server = app.listen(PORT, async () => {
   logger.info(`==============================================`);
   logger.debug(`Pasta: ${__dirname}`, 'Server');
 
-  abrirNaInterface(`http://localhost:${PORT}`);
+  openInInterface(`http://localhost:${PORT}`);
 
   function parseClientLabel(ip, userAgent) {
     const isLocal = ['::1', '127.0.0.1', '::ffff:127.0.0.1'].includes(ip);
