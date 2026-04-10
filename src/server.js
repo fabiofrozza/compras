@@ -8,6 +8,7 @@ const dns = require('dns');
 const Logger = require('./utils/logger');
 const { executarMailmerge } = require('./services/mailmerge');
 const { registerConsoleRoutes, handleConsoleMessage } = require('./services/consoleService');
+const { validateLink } = require('./services/spreadsheet');
 const {
   SCRIPTS_PATH,
   ALLOWED_DELETE_FOLDERS,
@@ -17,6 +18,12 @@ const {
   resolveScriptFolder,
   parseFilters,
   filePassesFilter,
+  listPregoes,
+  listPregaoFiles,
+  listImportFiles,
+  deletePregao,
+  deleteSupplierFile,
+  moveSupplierFiles,
 } = require('./services/files');
 
 let logConsentEnabled = true; // null/true = salvar logs (permissivo por padrão); false = opt-out
@@ -280,106 +287,13 @@ app.delete('/api/delete-file/:scriptName/:innerFolder', async (req, res) => {
 
 // API - Validate Link (proxy server-side para evitar CORS)
 app.post('/api/validate-link', async (req, res) => {
-  const { url } = req.body;
-
-  if (!url) {
-    return res.json({
-      isValid: false,
-      status: 'info',
-      msg: 'Informe o link da aba LISTA FINAL e aguarde.',
-    });
-  }
-
   try {
-    new URL(url);
-  } catch {
-    return res.json({
-      isValid: false,
-      status: 'error',
-      msg: 'Link inválido.',
-    });
-  }
-
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: { 'User-Agent': 'Mozilla/5.0' }
-    });
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      const httpMessages = {
-        401: 'Sem permissão para acessar a planilha. Verifique se o link é público.',
-        403: 'Acesso negado à planilha. Verifique as permissões de compartilhamento.',
-        404: 'Planilha não encontrada. Verifique se o link está correto.',
-        429: 'Muitas requisições ao servidor. Aguarde um momento e tente novamente.',
-      };
-      const msg = httpMessages[response.status]
-        || (response.status >= 500 ? 'Erro no servidor do Google. Tente novamente mais tarde.' : `Erro ao acessar o link (HTTP ${response.status}).`);
-      return res.json({
-        isValid: false,
-        status: 'error',
-        msg,
-      });
-    }
-
-    const htmlContent = await response.text();
-
-    if (htmlContent.includes('LISTA FINAL')) {
-      const inputValueRegex = /<input[^>]*value="([^"]+)"[^>]*>/gi;
-      const inputValues = [];
-      let inputMatch;
-      while ((inputMatch = inputValueRegex.exec(htmlContent)) !== null) {
-        if (inputMatch[1] && inputMatch[1].trim()) {
-          inputValues.push(inputMatch[1].trim());
-        }
-      }
-      const grupoMateriais = inputValues.length > 0 ? inputValues.join(', ') : 'Grupo não identificado';
-
-      const regexSPA = /23080\.\d{6}\/\d{4}-\d{2}/g;
-      const processosSPA = [...new Set(htmlContent.match(regexSPA) || [])].sort();
-      // Busca "VALIDAÇÃO MANUAL" apenas dentro de células da tabela (<td>),
-      // ignorando metadados, nomes de abas e filter views no HTML.
-      const tdContentRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
-      let temValidacaoManual = false;
-      let tdMatch;
-      while ((tdMatch = tdContentRegex.exec(htmlContent)) !== null) {
-        if (tdMatch[1].includes('VALIDAÇÃO MANUAL')) {
-          temValidacaoManual = true;
-          break;
-        }
-      }
-
-      return res.json({
-        isValid: true,
-        status: 'success',
-        msg: grupoMateriais,
-        processosSPA,
-        temValidacaoManual,
-      });
-    } else {
-      return res.json({
-        isValid: true,
-        status: 'warning',
-        msg: 'Este não parece ser um link de planilha de inserção de demandas.',
-        processosSPA: [],
-      });
-    }
-
+    const { url } = req.body;
+    const result = await validateLink(url);
+    res.json(result);
   } catch (error) {
-    logger.error(`Erro ao validar link: ${error.message}`, 'ValidateLink');
-    const isTimeout = error.name === 'AbortError';
-    return res.json({
-      isValid: false,
-      status: 'error',
-      msg: isTimeout
-        ? 'A requisição excedeu o tempo limite. Verifique sua conexão ou tente novamente.'
-        : 'Não foi possível acessar o link informado. Verifique sua conexão.',
-      error: error.message,
-    });
+    logger.error(`Erro ao validar link: ${error.message}`, 'ValidateLink', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -387,223 +301,64 @@ app.post('/api/validate-link', async (req, res) => {
 // API - Fornecedores
 // =============================================
 
-const FORNECEDORES_DADOS = path.join(SCRIPTS_PATH, 'fornecedores', 'DADOS');
-const FORNECEDORES_IMPORTAR = path.join(SCRIPTS_PATH, 'fornecedores', 'PARA_IMPORTAR');
-
-// Lista pregões (pastas em DADOS) com status de processamento
 app.get('/api/fornecedores/pregoes', async (_req, res) => {
   try {
-    const result = await resolveScriptFolder(res, 'fornecedores', 'DADOS', 'FornecedoresPregoes');
+    const result = await listPregoes(res);
     if (!result) return;
-    const { folderPath: dadosPath, created } = result;
-
-    const entries = await fs.readdir(dadosPath, { withFileTypes: true });
-    const folders = entries.filter(e => e.isDirectory()).map(e => e.name);
-
-    // Para cada pregão, verificar se já foi processado e se há erros
-    const pregoes = await Promise.all(folders.map(async (nome) => {
-      const pastaPath = path.join(dadosPath, nome);
-      const arquivos = await fs.readdir(pastaPath);
-      const xlsxFiles = arquivos.filter(f => /^[^~].*\.xlsx?$/i.test(f) && !/_CONFERENCIA\.xlsx$/i.test(f));
-
-      // Ler status.json da pasta do pregão
-      const statusName = `PE_${nome}_STATUS.json`;
-      let resultado = null;
-
-      try {
-        const statusContent = await fs.readFile(path.join(dadosPath, nome, statusName), 'utf-8');
-        const statusData = JSON.parse(statusContent);
-        resultado = statusData.resultado || null;
-      } catch { /* sem arquivo de status */ }
-
-      // Status para o card: 'pendente', 'sucesso', 'parcial', 'sem_saida'
-      let status = 'pendente';
-      if (resultado === 'sucesso') status = 'sucesso';
-      else if (resultado === 'parcial') status = 'parcial';
-      else if (resultado === 'sem_saida') status = 'sem_saida';
-
-      return {
-        nome,
-        qtdArquivos: xlsxFiles.length,
-        resultado,
-        status
-      };
-    }));
-
-    pregoes.sort((a, b) => a.nome.localeCompare(b.nome));
-    res.json({ pregoes, folderPath: dadosPath, folderCreated: created });
+    res.json(result);
   } catch (error) {
     logger.error(`Erro ao listar pregões: ${error.message}`, 'Fornecedores', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Lista arquivos de um pregão específico
 app.get('/api/fornecedores/pregao/:pregao/arquivos', async (req, res) => {
   try {
     const { pregao } = req.params;
-    const pastaPath = path.join(FORNECEDORES_DADOS, pregao);
+    const result = await listPregaoFiles(pregao);
 
-    if (!isPathSafe(pastaPath, SCRIPTS_PATH)) {
-      return res.status(403).json({ error: 'Acesso negado' });
+    if (result.error) {
+      return res.status(result.statusCode).json({ error: result.error });
     }
 
-    try { await fs.access(pastaPath); } catch {
-      return res.status(404).json({ error: 'Pasta do pregão não encontrada' });
-    }
-
-    const arquivos = await fs.readdir(pastaPath);
-    const xlsxFiles = arquivos.filter(f => /^[^~].*\.xlsx?$/i.test(f));
-
-    // Verificar erros por arquivo lendo o _STATUS.json da pasta do pregão
-    const statusName = `PE_${pregao}_STATUS.json`;
-    let errosPorArquivo = [];
-    let resultado = null;
-    try {
-      const statusContent = await fs.readFile(path.join(FORNECEDORES_DADOS, pregao, statusName), 'utf-8');
-      const statusData = JSON.parse(statusContent);
-      resultado = statusData.resultado || null;
-      if (Array.isArray(statusData.erros)) {
-        errosPorArquivo = statusData.erros;
-      }
-    } catch { /* sem arquivo de status ou erro de parse */ }
-
-    const fileDetails = await Promise.all(xlsxFiles.map(async (file) => {
-      const filePath = path.join(pastaPath, file);
-      const stats = await fs.stat(filePath);
-      const upperFileName = file.toUpperCase();
-      const erro = errosPorArquivo.find(e => upperFileName === e.arquivo?.toUpperCase());
-
-      return {
-        name: file,
-        size: stats.size,
-        modifiedDate: stats.mtime,
-        hasError: !!erro,
-        errorType: erro?.tipo || null,
-        fullPath: filePath
-      };
-    }));
-
-    res.json({
-      arquivos: fileDetails,
-      folderPath: pastaPath,
-      pregao,
-      resultado
-    });
+    res.json(result);
   } catch (error) {
     logger.error(`Erro ao listar arquivos do pregão: ${error.message}`, 'Fornecedores', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Lista arquivos para importar (PARA_IMPORTAR)
 app.get('/api/fornecedores/importar', async (_req, res) => {
   try {
-    const result = await resolveScriptFolder(res, 'fornecedores', 'PARA_IMPORTAR', 'FornecedoresImportar');
-    if (!result) return;
-    const { folderPath: importarPath, created } = result;
-
-    const arquivos = await fs.readdir(importarPath);
-    const csvFiles = arquivos.filter(f => f.endsWith('.csv'));
-
-    const fileDetails = await Promise.all(csvFiles.map(async (file) => {
-      const filePath = path.join(importarPath, file);
-      const stats = await fs.stat(filePath);
-
-      // Extrair número do pregão do nome: PE_XXXXX.csv
-      const match = file.match(/^PE_(.+)\.csv$/i);
-      const pregao = match ? match[1] : '';
-
-      // Verificar se há erro usando o STATUS.json da pasta do pregão
-      const statusName = `PE_${pregao}_STATUS.json`;
-      let hasError = null;
-      try {
-        const statusContent = await fs.readFile(path.join(FORNECEDORES_DADOS, pregao, statusName), 'utf-8');
-        const statusData = JSON.parse(statusContent);
-        hasError = statusData.resultado === 'parcial';
-      } catch { /* fallback silencioso: pasta do pregão não existe */ }
-
-      // Verificar se há arquivo de conferência
-      const confName = path.join(FORNECEDORES_DADOS, pregao, `PE_${pregao}_CONFERENCIA.xlsx`);
-      let hasConferencia = false;
-      try {
-        await fs.access(confName);
-        hasConferencia = true;
-      } catch { /* sem conferência */ }
-
-      return {
-        name: file,
-        pregao,
-        size: stats.size,
-        modifiedDate: stats.mtime,
-        hasError,
-        hasConferencia,
-        fullPath: filePath,
-        conferenciaPath: hasConferencia ? confName : null
-      };
-    }));
-
-    fileDetails.sort((a, b) => b.name.localeCompare(a.name));
-    res.json({ arquivos: fileDetails, folderPath: importarPath, folderCreated: created });
+    const result = await listImportFiles();
+    res.json(result);
   } catch (error) {
     logger.error(`Erro ao listar arquivos importar: ${error.message}`, 'Fornecedores', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Deletar pasta do pregão (exclui apenas arquivos permitidos, depois remove a pasta se vazia)
 app.delete('/api/fornecedores/pregao/:pregao', async (req, res) => {
   try {
     const { pregao } = req.params;
 
-    // Mesma checagem da API genérica: só permitir exclusão em pastas autorizadas
     if (!ALLOWED_DELETE_FOLDERS.includes('dados')) {
       return res.status(403).json({ error: 'A exclusão nesta pasta não é permitida por segurança.' });
     }
 
-    // Prevent path traversal via pregão name
-    if (pregao.includes('/') || pregao.includes('\\') || pregao === '..' || pregao === '.') {
-      return res.status(400).json({ error: 'Nome de pregão inválido' });
+    const result = await deletePregao(pregao);
+
+    if (result.error) {
+      return res.status(result.statusCode).json({ error: result.error });
     }
 
-    const pastaPath = path.join(FORNECEDORES_DADOS, pregao);
-
-    if (!isPathSafe(pastaPath, SCRIPTS_PATH)) {
-      return res.status(403).json({ error: 'Acesso negado' });
-    }
-
-    try { await fs.access(pastaPath); } catch {
-      return res.status(404).json({ error: 'Pasta do pregão não encontrada' });
-    }
-
-    // Dupla proteção: Nunca apagar scripts de código ou arquivos protegidos
-    const files = await fs.readdir(pastaPath);
-    let deletedCount = 0;
-    for (const file of files) {
-      if (isProtectedFile(file)) continue;
-      const filePath = path.join(pastaPath, file);
-      const stats = await fs.stat(filePath);
-      if (stats.isFile()) {
-        await fs.unlink(filePath);
-        deletedCount++;
-      }
-    }
-
-    // Remover a pasta somente se ficou vazia
-    const remaining = await fs.readdir(pastaPath);
-    if (remaining.length === 0) {
-      await fs.rmdir(pastaPath);
-    }
-
-    logger.info(`Pregão ${pregao}: ${deletedCount} arquivo(s) excluído(s)`, 'Fornecedores');
-    res.json({ success: true, message: `Pregão ${pregao} excluído com sucesso` });
+    res.json(result);
   } catch (error) {
     logger.error(`Erro ao excluir pregão: ${error.message}`, 'Fornecedores', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Deletar arquivo individual
 app.delete('/api/fornecedores/arquivo', async (req, res) => {
   try {
     const { filePath } = req.body;
@@ -612,44 +367,19 @@ app.delete('/api/fornecedores/arquivo', async (req, res) => {
       return res.status(400).json({ error: 'Caminho do arquivo não fornecido' });
     }
 
-    if (!isPathSafe(filePath, SCRIPTS_PATH)) {
-      return res.status(403).json({ error: 'Acesso negado' });
+    const result = await deleteSupplierFile(filePath);
+
+    if (result.error) {
+      return res.status(result.statusCode).json({ error: result.error });
     }
 
-    // Mesma checagem da API genérica: verificar se a pasta-pai está na lista permitida
-    const relativePath = path.relative(SCRIPTS_PATH, path.resolve(filePath));
-    const parts = relativePath.split(path.sep);
-    // Estrutura esperada: fornecedores/DADOS|PARA_IMPORTAR/..., checar a subpasta (parts[1])
-    const innerFolder = parts.length >= 2 ? parts[1] : '';
-    if (!ALLOWED_DELETE_FOLDERS.includes(innerFolder.toLowerCase())) {
-      return res.status(403).json({ error: 'A exclusão nesta pasta não é permitida por segurança.' });
-    }
-
-    // Nunca apagar scripts de código ou arquivos protegidos
-    const fileName = path.basename(filePath);
-    if (isProtectedFile(fileName)) {
-      return res.status(403).json({ error: 'Este tipo de arquivo não pode ser excluído.' });
-    }
-
-    try { await fs.access(filePath); } catch {
-      return res.status(404).json({ error: 'Arquivo não encontrado' });
-    }
-
-    const stats = await fs.stat(filePath);
-    if (!stats.isFile()) {
-      return res.status(400).json({ error: 'O caminho não é um arquivo' });
-    }
-
-    await fs.unlink(filePath);
-    logger.info(`Arquivo excluído: ${filePath}`, 'Fornecedores');
-    res.json({ success: true, message: 'Arquivo excluído com sucesso' });
+    res.json(result);
   } catch (error) {
     logger.error(`Erro ao excluir arquivo: ${error.message}`, 'Fornecedores', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Mover arquivos para pasta Documentos do usuário
 app.post('/api/fornecedores/mover', async (req, res) => {
   try {
     const { pregao } = req.body;
@@ -658,47 +388,13 @@ app.post('/api/fornecedores/mover', async (req, res) => {
       return res.status(400).json({ error: 'Número do pregão não fornecido' });
     }
 
-    const csvName = `PE_${pregao}.csv`;
-    const confName = `PE_${pregao}_CONFERENCIA.xlsx`;
-    const docsPath = path.join(os.homedir(), 'Documents');
+    const result = await moveSupplierFiles(pregao, os);
 
-    try { await fs.access(docsPath); } catch {
-      await fs.mkdir(docsPath, { recursive: true });
+    if (result.error) {
+      return res.status(result.statusCode).json({ error: result.error });
     }
 
-    let movedFiles = [];
-
-    // Mover CSV
-    const csvSrc = path.join(FORNECEDORES_IMPORTAR, csvName);
-    try {
-      await fs.access(csvSrc);
-      const csvDest = path.join(docsPath, csvName);
-      await fs.copyFile(csvSrc, csvDest);
-      await fs.unlink(csvSrc);
-      movedFiles.push(csvName);
-    } catch { /* CSV não encontrado */ }
-
-    // Mover CONFERENCIA
-    const confSrc = path.join(FORNECEDORES_IMPORTAR, confName);
-    try {
-      await fs.access(confSrc);
-      const confDest = path.join(docsPath, confName);
-      await fs.copyFile(confSrc, confDest);
-      await fs.unlink(confSrc);
-      movedFiles.push(confName);
-    } catch { /* Conferência não encontrada */ }
-
-    if (movedFiles.length === 0) {
-      return res.status(404).json({ error: 'Nenhum arquivo encontrado para mover' });
-    }
-
-    logger.info(`Arquivos movidos para Documentos: ${movedFiles.join(', ')}`, 'Fornecedores');
-    res.json({
-      success: true,
-      message: `${movedFiles.length} arquivo(s) movido(s) para Documentos`,
-      movedFiles,
-      destination: docsPath
-    });
+    res.json(result);
   } catch (error) {
     logger.error(`Erro ao mover arquivos: ${error.message}`, 'Fornecedores', error);
     res.status(500).json({ error: error.message });
