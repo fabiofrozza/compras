@@ -1,13 +1,13 @@
 // --- Constante centralizada de abas ---
 const TAB_LIST = [
-    { id: 'home', label: 'Página inicial', icon: 'home', hidden: true },
+    { id: 'home', label: 'Página inicial', icon: 'home', hiddenAppButton: true, separator: 'after', hiddenHomeCard: true },
     { id: 'atas', label: 'Atas', icon: 'description', description: 'Gere as Atas de Registro de Preços', color: 'text-primary' },
     { id: 'catmat', label: 'Catmat', icon: 'percent_discount', description: 'Verifique as margens de preferência dos itens do TR', color: 'text-info' },
     { id: 'fornecedores', label: 'Fornecedores', icon: 'storefront', description: 'Atualize os dados dos fornecedores', color: 'text-success' },
     { id: 'importacao', label: 'Importação', icon: 'upload_file', description: 'Gere os arquivos para importação dos pedidos e relatórios gerenciais', color: 'text-warning' },
     { id: 'mapas', label: 'Mapas', icon: 'shopping_basket', description: 'Transforme Mapas de licitação em listas prévias' },
     { id: 'powerbi', label: 'Power BI', icon: 'add_chart', description: 'Gere os dados para o Observatório', color: 'text-danger', separator: 'after' },
-    { id: 'instalacao', label: 'Instalação', icon: 'build' },
+    { id: 'instalacao', label: 'Instalação', icon: 'build', hiddenHomeCard: true },
 ];
 
 // --- Lazy Loading de Scripts e Estilos sob demanda ---
@@ -106,7 +106,7 @@ function buildNavbarApps() {
     const container = document.createElement('div');
     container.className = 'navbar-apps';
 
-    TAB_LIST.filter(tab => tab.id !== 'instalacao').forEach(tab => {
+    TAB_LIST.filter(tab => !tab.hiddenNavbar).forEach(tab => {
         const btn = document.createElement('button');
         btn.className = 'navbar-app-btn';
         btn.dataset.tabId = tab.id;
@@ -114,6 +114,13 @@ function buildNavbarApps() {
         btn.style.setProperty('--color', tab.color);
         btn.innerHTML = `<i class="material-symbols-outlined">${tab.icon}</i><span class="navbar-app-label">${tab.label}</span>`;
         container.appendChild(btn);
+
+        if (tab.separator === 'after') {
+            const separator = document.createElement('div');
+            separator.className = 'header-separator';
+            separator.setAttribute('role', 'separator');
+            container.appendChild(separator);
+        }
     });
 
     center.appendChild(container);
@@ -145,7 +152,7 @@ function buildHomeCards() {
     const preferredTab = appState?.preferences?.preferredTab || '';
 
     grid.innerHTML = TAB_LIST
-        .filter(tab => !tab.hidden && tab.id !== 'instalacao')
+        .filter(tab => !tab.hiddenHomeCard)
         .map(tab => {
             const colorClass = tab.color ? ` ${tab.color}` : '';
             const isPreferred = preferredTab && tab.id === preferredTab;
@@ -207,7 +214,7 @@ function buildAppLauncher() {
     const grid = document.getElementById('app-launcher-grid');
     if (!grid) return;
 
-    grid.innerHTML = TAB_LIST.filter(tab => !tab.hidden).map(tab => {
+    grid.innerHTML = TAB_LIST.filter(tab => !tab.hiddenAppButton).map(tab => {
         const button = `<button class="app-launcher-item" data-tab-id="${tab.id}" aria-label="${tab.label}">
             <div class="app-launcher-icon">
                 <i class="material-symbols-outlined">${tab.icon}</i>
