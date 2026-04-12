@@ -1,5 +1,83 @@
 const darkModeBtn = document.getElementById('darkModeBtn');
 
+// ====== CABEÇALHOS DE SCRIPT-FORM ======
+
+function initScriptFormHeaders(container) {
+    const headers = container.querySelectorAll('.script-form-header:not([data-initialized])');
+    headers.forEach(h4 => {
+        const icon = h4.dataset.comprasIcon;
+        const title = h4.dataset.comprasTitle;
+        const helpText = h4.dataset.comprasHelp;
+        const titleId = h4.dataset.comprasTitleId;
+
+        // Localiza o div.collapse antes de inserir qualquer elemento
+        const collapseDiv = h4.parentElement.querySelector(':scope > .collapse');
+        const collapseId = collapseDiv?.id;
+
+        // Título: ícone + texto
+        const titleSpan = document.createElement('span');
+        const iconEl = document.createElement('i');
+        iconEl.className = 'material-symbols-outlined';
+        iconEl.textContent = icon;
+        titleSpan.appendChild(iconEl);
+        titleSpan.append(' ');
+        if (titleId) {
+            const textSpan = document.createElement('span');
+            textSpan.id = titleId;
+            textSpan.textContent = title;
+            titleSpan.appendChild(textSpan);
+        } else {
+            titleSpan.append(title);
+        }
+
+        // Container de botões
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.className = 'script-form-header-buttons';
+
+        // Botão de ajuda (se data-compras-help presente)
+        if (helpText) {
+            const helpId = collapseId
+                ? collapseId.replace('-collapse', '-help')
+                : `help-${crypto.randomUUID().slice(0, 8)}`;
+            const anchorName = `--${helpId}`;
+
+            const helpBtn = document.createElement('button');
+            helpBtn.type = 'button';
+            helpBtn.className = 'form-header-help';
+            helpBtn.setAttribute('popovertarget', helpId);
+            helpBtn.style.setProperty('anchor-name', anchorName);
+            helpBtn.innerHTML = '<i class="material-symbols-outlined">help</i>';
+            buttonsDiv.appendChild(helpBtn);
+
+            const popoverDiv = document.createElement('div');
+            popoverDiv.setAttribute('popover', '');
+            popoverDiv.id = helpId;
+            popoverDiv.className = 'form-help-popover';
+            popoverDiv.style.setProperty('position-anchor', anchorName);
+            popoverDiv.textContent = helpText;
+            h4.after(popoverDiv);
+        }
+
+        // Botão de colapsar (sempre presente quando há div.collapse)
+        if (collapseId) {
+            const collapseBtn = document.createElement('button');
+            collapseBtn.type = 'button';
+            collapseBtn.className = 'form-collapse-btn';
+            collapseBtn.setAttribute('data-bs-toggle', 'collapse');
+            collapseBtn.setAttribute('data-bs-target', `#${collapseId}`);
+            collapseBtn.setAttribute('aria-expanded', 'true');
+            collapseBtn.setAttribute('aria-controls', collapseId);
+            collapseBtn.innerHTML = '<i class="material-symbols-outlined text-secondary">unfold_more</i>';
+            buttonsDiv.appendChild(collapseBtn);
+        }
+
+        h4.innerHTML = '';
+        h4.appendChild(titleSpan);
+        h4.appendChild(buttonsDiv);
+        h4.setAttribute('data-initialized', 'true');
+    });
+}
+
 // ====== TELA INTEIRA ======
 
 function toggleFullscreen() {

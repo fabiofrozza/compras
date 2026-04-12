@@ -276,6 +276,7 @@ document.addEventListener('shown.bs.tab', async (event) => {
 
                     if (tabIdForScript === 'home') buildHomeCards();
 
+                    initScriptFormHeaders(targetPane);
                     targetPane.setAttribute('data-loaded', 'true');
                 } catch (error) {
                     console.error('Erro no lazy loading:', error);
