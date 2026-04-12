@@ -54,17 +54,25 @@ function createRequiredFieldsTooltip() {
 
 function initializeTooltips() {
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
-        container: 'body',
-        trigger: 'hover',
-        customClass: 'custom-tooltip'
-    }));
+    tooltipTriggerList.forEach(tooltipTriggerEl => {
+        // Evita inicializar múltiplas vezes o mesmo elemento
+        if (!bootstrap.Tooltip.getInstance(tooltipTriggerEl)) {
+            new bootstrap.Tooltip(tooltipTriggerEl, {
+                container: 'body',
+                trigger: 'hover',
+                customClass: 'custom-tooltip'
+            });
+        }
+    });
 }
 
 function removeTooltip(element) {
-    // Ocultar tooltip antes de remover o elemento do DOM
+    // Ocultar e destruir tooltip antes de remover o elemento do DOM
     const tooltip = bootstrap.Tooltip.getInstance(element);
-    if (tooltip) tooltip.hide();
+    if (tooltip) {
+        tooltip.hide();
+        tooltip.dispose();
+    }
 }
 
 initializeTooltips();

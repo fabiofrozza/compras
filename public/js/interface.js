@@ -417,16 +417,26 @@ async function buildHelpPanel() {
 // tooltips "fantasmas" na tela. Esta varredura periódica remove tooltips
 // cujo trigger (referenciado via aria-describedby) não existe mais no DOM.
 function cleanupOrphanTooltips() {
-    document.querySelectorAll('body > .tooltip').forEach(tooltipEl => {
+    // Busca tooltips em qualquer lugar do documento, não apenas no body direto
+    document.querySelectorAll('.tooltip').forEach(tooltipEl => {
         const id = tooltipEl.id;
-        const trigger = id ? document.querySelector(`[aria-describedby="${id}"]`) : null;
-        if (!trigger || !document.body.contains(trigger)) {
-            tooltipEl.remove();
+        // Usa ~= para encontrar o id em uma lista (aria-describedby pode ter vários ids)
+        const trigger = id ? document.querySelector(`[aria-describedby~="${id}"]`) : null;
+
+        // Se o trigger não existe, não está no DOM ou está oculto (ex: aba trocada), removemos a tooltip
+        if (!trigger || !document.body.contains(trigger) || trigger.getClientRects().length === 0) {
+            // Tenta dispose via Bootstrap se o trigger ainda existir, senão remove direto o elemento
+            const instance = trigger ? bootstrap.Tooltip.getInstance(trigger) : null;
+            if (instance) {
+                instance.dispose();
+            } else {
+                tooltipEl.remove();
+            }
         }
     });
 }
 
-setInterval(cleanupOrphanTooltips, 2000);
+setInterval(cleanupOrphanTooltips, 1000);
 
 function limparFormulario(formId) {
     const form = document.getElementById(formId);
