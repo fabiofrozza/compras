@@ -54,7 +54,7 @@ function initScriptFormHeaders(container) {
             popoverDiv.id = helpId;
             popoverDiv.className = 'form-help-popover';
             popoverDiv.style.setProperty('position-anchor', anchorName);
-            popoverDiv.textContent = helpText;
+            popoverDiv.innerHTML = helpText;
             h4.after(popoverDiv);
         }
 
@@ -67,7 +67,7 @@ function initScriptFormHeaders(container) {
             collapseBtn.setAttribute('data-bs-target', `#${collapseId}`);
             collapseBtn.setAttribute('aria-expanded', 'true');
             collapseBtn.setAttribute('aria-controls', collapseId);
-            collapseBtn.innerHTML = '<i class="material-symbols-outlined text-secondary">unfold_more</i>';
+            collapseBtn.innerHTML = '<i class="material-symbols-outlined"></i>';
             buttonsDiv.appendChild(collapseBtn);
         }
 
@@ -75,6 +75,7 @@ function initScriptFormHeaders(container) {
         h4.appendChild(titleSpan);
         h4.appendChild(buttonsDiv);
         h4.setAttribute('data-initialized', 'true');
+        ['comprasIcon', 'comprasTitle', 'comprasHelp', 'comprasTitleId'].forEach(attr => delete h4.dataset[attr]);
     });
 }
 
@@ -224,7 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const cfg = await fetch('/api/app-config').then(r => r.json());
         const refreshMs = (cfg.backgroundRefreshTime || 0) * 1000;
         if (refreshMs > 0) setInterval(setHomeBackground, refreshMs);
-    } catch (_) {}
+    } catch (_) { }
 });
 
 // Event delegation para .card-link - funciona mesmo em conteúdo carregado dinamicamente
