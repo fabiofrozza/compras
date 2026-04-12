@@ -23,8 +23,8 @@
                     <div class="col-sm-12">
                         <!-- Formulário de seleção do painel -->
                         <form id="form-powerbi-panel" class="script-form shadow-sm">
-                            <h4 class="script-form-header"
-                                data-compras-icon="show_chart" data-compras-title="Painel do Observatório">
+                            <h4 class="script-form-header" data-compras-icon="show_chart"
+                                data-compras-title="Painel do Observatório">
                             </h4>
                             <div class="collapse show" id="powerbi-painel-collapse">
                                 <div class="form-group">
@@ -111,8 +111,9 @@
                     <div class="col-sm-6">
                         <!-- Pasta da base de dados -->
                         <form id="form-powerbi-path" class="script-form shadow-sm">
-                            <h4 class="script-form-header"
-                                data-compras-icon="table_chart" data-compras-title="Base de dados">
+                            <h4 class="script-form-header" data-compras-icon="table_chart"
+                                data-compras-title="Base de dados"
+                                data-compras-help="Informe o caminho completo da pasta raiz da base de dados do Power BI. Essa pasta deve conter as subpastas <em>Mapa de licitações</em> e <em>Execução AF Empenho</em>. Os arquivos gerados serão salvos nessa mesma pasta.">
                             </h4>
 
                             <div class="collapse show" id="powerbi-base-collapse">
@@ -141,8 +142,8 @@
                     <div class="col-sm-6">
                         <!-- Formulário de manutenção -->
                         <form id="form-powerbi-manutencao" class="script-form shadow-sm">
-                            <h4 class="script-form-header"
-                                data-compras-icon="build" data-compras-title="Manutenção">
+                            <h4 class="script-form-header" data-compras-icon="build" data-compras-title="Manutenção"
+                                data-compras-help="Renomeia os arquivos das pastas <em>Mapa de licitações</em> e <em>Execução AF Empenho</em> conforme o padrão <code>TIPO - ANO - ETAPA - PROCESSO - PREGÃO</code>. Os arquivos já são renomeados ao gerar os dados para o Observatório, mas esta opção apenas renomeia sem gerar dados.">
                             </h4>
                             <div class="collapse show" id="powerbi-manutencao-collapse">
                                 <div class="form-group">
@@ -154,10 +155,8 @@
                                             <div>
                                                 <div class="option-card-title">Renomear arquivos</div>
                                                 <div class="option-card-description">Os arquivos das pastas 'Mapa de
-                                                    licitações' e
-                                                    'Execução AF Empenho' serão renomeados conforme o padrão TIPO - ANO
-                                                    - ETAPA -
-                                                    PROCESSO - PREGÃO.</div>
+                                                    licitações' e 'Execução AF Empenho' serão renomeados conforme o
+                                                    padrão TIPO - ANO - ETAPA - PROCESSO - PREGÃO.</div>
                                             </div>
                                             <input class="form-check-input" type="radio" name="powerbi-tipo"
                                                 value="renomear" checked>
@@ -181,9 +180,9 @@
                     <div class="col-sm-12">
                         <!-- Observatório a partir da Planilha de Controle -->
                         <form id="form-powerbi-observatorio" class="script-form shadow-sm">
-                            <h4 class="script-form-header"
-                                data-compras-icon="visibility" data-compras-title="Observatório - Status"
-                                data-compras-help="Verifica se os processos da Planilha de Controle estão incluídos na pasta da base de dados.">
+                            <h4 class="script-form-header" data-compras-icon="visibility"
+                                data-compras-title="Observatório - Status"
+                                data-compras-help="Verifica se os processos listados na Planilha de Controle possuem arquivos correspondentes nas pastas <em>Mapa de licitações</em> (Observatório - Licitação) e <em>Execução AF Empenho</em> (Observatório - Execução) da base de dados. Após a verificação, use o botão <strong>Problemas</strong> para filtrar apenas processos com pendências (se houver).">
                             </h4>
                             <div class="collapse show" id="powerbi-observatorio-collapse">
                                 <div class="form-buttons">

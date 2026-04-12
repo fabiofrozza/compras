@@ -3,8 +3,8 @@
     <div class="col-sm-6">
         <!-- Quadro Pregões -->
         <div class="script-form shadow-sm">
-            <h4 class="script-form-header"
-                data-compras-icon="folder" data-compras-title="Pregões">
+            <h4 class="script-form-header" data-compras-icon="folder" data-compras-title="Pregões" data-compras-help="Lista os pregões disponíveis na pasta de dados. Cada entrada corresponde a uma subpasta com os arquivos enviados pelos fornecedores.
+                <br><br>Selecione o pregão desejado para visualizar os arquivos disponíveis e obter os dados.">
             </h4>
             <div class="collapse show" id="fornecedores-pregoes-collapse">
                 <div id="fornecedores-pregoes-list" class="fornecedores-grid-list" data-validate-rule="file-selectable"
@@ -20,8 +20,7 @@
         </div>
         <!-- Quadro Conteúdo da Pasta -->
         <div class="script-form shadow-sm">
-            <h4 class="script-form-header"
-                data-compras-icon="folder_open" data-compras-title="Conteúdo da pasta"
+            <h4 class="script-form-header" data-compras-icon="folder_open" data-compras-title="Conteúdo da pasta"
                 data-compras-title-id="conteudo-pasta-titulo">
             </h4>
             <div class="collapse show" id="fornecedores-conteudo-collapse">
@@ -38,8 +37,7 @@
     <div class="col-sm-6">
         <!-- Quadro Informações do Pregão -->
         <div class="script-form shadow-sm">
-            <h4 class="script-form-header"
-                data-compras-icon="info" data-compras-title="Informações do Pregão">
+            <h4 class="script-form-header" data-compras-icon="info" data-compras-title="Informações do Pregão">
             </h4>
             <div class="collapse show" id="fornecedores-info-collapse">
                 <div id="fornecedores-info-pregao">
@@ -93,8 +91,11 @@
 
         <!-- Quadro Arquivos a Importar -->
         <div class="script-form shadow-sm">
-            <h4 class="script-form-header"
-                data-compras-icon="table_chart" data-compras-title="Arquivos a importar">
+            <h4 class="script-form-header" data-compras-icon="table_chart" data-compras-title="Arquivos a importar"
+                data-compras-help="Arquivo .csv pronto para importação no MATL.
+                <br><br>Clique no botão 'Abrir arquivo de conferência' para verificar se os dados foram obtidos corretamente.
+                <br><br>Clique no botão 'Mover para pasta Documentos' para que o MATL localize o arquivo.
+                <br><br>Após a importação, a pasta com os dados e o arquivo de importação podem ser excluídos.">
             </h4>
             <div class="collapse show" id="fornecedores-importar-collapse">
                 <div id="fornecedores-importar-list" class="files-list-style fornecedores-importar-list">

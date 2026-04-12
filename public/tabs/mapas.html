@@ -3,8 +3,8 @@
     <div class="col">
         <!-- Mapas a processar -->
         <div class="script-form shadow-sm">
-            <h4 class="script-form-header"
-                data-compras-icon="gavel" data-compras-title="Mapas a processar">
+            <h4 class="script-form-header" data-compras-icon="gavel" data-compras-title="Mapas a processar"
+                data-compras-help="Coloque nesta pasta os arquivos Excel dos Mapas de Licitação obtidos no Solar. O script processa todos os arquivos encontrados e gera as listas prévias formatadas.">
             </h4>
             <div class="collapse show" id="mapas-a-processar-collapse">
                 <div id="mapas-mapas-a-processar" data-extensions="xls*" class="files-list" data-folder="mapas"
@@ -16,8 +16,7 @@
     <div class="col">
         <!-- Forma de geração -->
         <form id="form-mapas" class="script-form shadow-sm">
-            <h4 class="script-form-header"
-                data-compras-icon="filter_alt" data-compras-title="Forma de geração">
+            <h4 class="script-form-header" data-compras-icon="filter_alt" data-compras-title="Forma de geração">
             </h4>
             <div class="collapse show" id="mapas-forma-geracao-collapse">
                 <div class="form-group">
@@ -28,7 +27,8 @@
                             </i>
                             <div>
                                 <div class="option-card-title">Agrupada</div>
-                                <div class="option-card-description">Lista única com todos os itens</div>
+                                <div class="option-card-description">gera uma única lista consolidando todos os itens de
+                                    todos os mapas presentes na pasta. Útil para visão geral do processo</div>
                             </div>
                             <input class="form-check-input" type="radio" name="mapas-estilo" value="grupo" checked>
                         </label>
@@ -38,7 +38,9 @@
                             </i>
                             <div>
                                 <div class="option-card-title">Por processo</div>
-                                <div class="option-card-description">Listas separadas por processo</div>
+                                <div class="option-card-description">gera uma lista separada para cada processo/mapa
+                                    encontrado. Útil quando há múltiplos processos distintos a serem controlados
+                                    individualmente</div>
                             </div>
                             <input class="form-check-input" type="radio" name="mapas-estilo" value="processo">
                         </label>
@@ -54,8 +56,7 @@
         </form>
         <!-- Listas processadas -->
         <div class="script-form shadow-sm">
-            <h4 class="script-form-header"
-                data-compras-icon="list" data-compras-title="Listas processadas">
+            <h4 class="script-form-header" data-compras-icon="list" data-compras-title="Listas processadas">
             </h4>
             <div class="collapse show" id="mapas-listas-collapse">
                 <div id="mapas-listas-processadas" class="files-list" data-folder="listas" data-selectable="false">

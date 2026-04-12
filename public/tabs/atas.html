@@ -24,8 +24,15 @@
                         <div class="col">
                             <!-- Formulário com Informações do Pregão -->
                             <form id="form-info-pregao" class="script-form shadow-sm">
-                                <h4 class="script-form-header"
-                                    data-compras-icon="gavel" data-compras-title="Informações do Pregão">
+                                <h4 class="script-form-header" data-compras-icon="gavel"
+                                    data-compras-title="Informações do Pregão" data-compras-help="Preencha os dados do pregão conforme o Diário Oficial da União (DOU) e o Termo de Referência:<br>
+                                    <ul>
+                                        <li><strong>Número/Ano</strong>: número sequencial e ano do pregão eletrônico.</li>
+                                        <li><strong>Processo SPA</strong>: número completo no formato <code>23080.XXXXXX/XXXX-XX</code>, sem pontuação extra.</li>
+                                        <li><strong>Data Pregão DOU</strong>: data da publicação do resultado/homologação no DOU.</li>
+                                        <li><strong>Primeira Ata/Ano</strong>: número da primeira ata a ser gerada; as seguintes são numeradas automaticamente conforme os relatórios SICAF encontrados.</li>
+                                        <li><strong>Objeto</strong>: descrição do objeto conforme o Edital, a ser inserida após &quot;REGISTRAR PREÇO...&quot; na ata.</li>
+                                    </ul>">
                                 </h4>
 
                                 <div class="collapse show" id="form-info-pregao-collapse">
@@ -104,8 +111,10 @@
                         <div class="col">
                             <!-- Lista de Relatórios SICAF -->
                             <div class="script-form shadow-sm">
-                                <h4 class="script-form-header"
-                                    data-compras-icon="contact_page" data-compras-title="Relatórios SICAF">
+                                <h4 class="script-form-header" data-compras-icon="contact_page"
+                                    data-compras-title="Relatórios SICAF"
+                                    data-compras-help="Coloque nesta pasta os relatórios de credenciamento obtidos no SICAF em PDF de todos os fornecedores vencedores do pregão.
+                                    <br><br>Obs.: nomeie-os em ordem alfabética ou com o número da respectiva Ata, para evitar inconsistências.">
                                 </h4>
 
                                 <div class="collapse show" id="atas-relatorios-sicaf-collapse">
@@ -122,8 +131,9 @@
                             </div>
                             <!-- Status Dados -->
                             <div class="script-form shadow-sm">
-                                <h4 class="script-form-header"
-                                    data-compras-icon="analytics" data-compras-title="Dados obtidos">
+                                <h4 class="script-form-header" data-compras-icon="analytics"
+                                    data-compras-title="Dados obtidos"
+                                    data-compras-help="Arquivo com os dados obtidos do pregão e dos fornecedores. Antes de gerar as Atas na próxima aba, verifique se o arquivo refere-se ao pregão correto (<em>duplo-clique abre o arquivo</em>).">
                                 </h4>
                                 <div class="collapse show" id="dados-obtidos-collapse">
                                     <div id="status-dados-atas">
@@ -183,8 +193,11 @@
                         <div class="col">
                             <!-- Modelos de Ata -->
                             <div id="form-atas-modelos" class="script-form shadow-sm">
-                                <h4 class="script-form-header"
-                                    data-compras-icon="text_snippet" data-compras-title="Modelos de Ata">
+                                <h4 class="script-form-header" data-compras-icon="text_snippet"
+                                    data-compras-title="Modelos de Ata"
+                                    data-compras-help="Selecione o modelo de ata em formato <em>.docx</em> a ser utilizado. 
+                                    <br><br>O modelo deve conter marcadores de mesclagem (<em>&amp;lt;&amp;lt;nome_do_campo&amp;gt;&amp;gt;</em>) correspondentes aos campos extraídos dos relatórios SICAF e das informações do pregão.
+                                    <br><br>Cada &amp;lt;&amp;lt;nome_do_campo&amp;gt;&amp;gt; corresponde aos nomes das colunas do arquivo <em>dados_atas.xlsx</em>">
                                 </h4>
 
                                 <div class="collapse show" id="atas-modelos-collapse">
@@ -200,8 +213,14 @@
                         <div class="col">
                             <!-- Lista de Tabelas -->
                             <div class="script-form shadow-sm">
-                                <h4 class="script-form-header"
-                                    data-compras-icon="table_chart" data-compras-title="Tabelas de Itens">
+                                <h4 class="script-form-header" data-compras-icon="table_chart"
+                                    data-compras-title="Tabelas de Itens"
+                                    data-compras-help="Lista dos itens do Termo de Referência de cada fornecedor do pregão. 
+                                    São mesclados com o modelo de ata selecionado para a edição da Ata.
+                                    <br><br>Observações:
+                                    <ul>
+                                        <li>nomeie-os em ordem alfabética ou com o número da respectiva Ata, para evitar inconsistências.</li>
+                                        <li>este arquivo é opcional. Caso não esteja presente, a Ata será gerada sem a tabela de itens, que deverá ser posteriormente incluída manualmente.">
                                 </h4>
 
                                 <div class="collapse show" id="atas-tabelas-collapse">
@@ -219,8 +238,8 @@
                             </div>
                             <!-- Atas Finalizadas -->
                             <div class="script-form shadow-sm">
-                                <h4 class="script-form-header"
-                                    data-compras-icon="assignment_turned_in" data-compras-title="Atas finalizadas">
+                                <h4 class="script-form-header" data-compras-icon="assignment_turned_in"
+                                    data-compras-title="Atas finalizadas">
                                 </h4>
                                 <div class="collapse show" id="atas-finalizadas-collapse">
                                     <div id="atas-finalizadas" class="files-list" data-folder="atas_finalizadas"
