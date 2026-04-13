@@ -136,22 +136,7 @@ async function verificarStatusDadosAtas() {
         if (statusText) statusText.textContent = 'Erro ao verificar arquivos';
     }
 
-    atualizarBotaoGerarAtas();
-}
-
-function atualizarBotaoGerarAtas() {
-    const statusContainer = document.getElementById('status-dados-atas');
-    const btnGerar = document.getElementById('btn-form-atas-modelos');
-    if (!btnGerar || !statusContainer) return;
-
-    const modeloSelecionado = selectedFiles['atas-modelos'];
-
-    const reasons = [];
-    if (!atasData.dadosDisponiveis) reasons.push('Dados do SICAF não disponíveis');
-    if (!modeloSelecionado) reasons.push('Selecione um modelo de ata');
-
-    btnGerar.disabled = reasons.length > 0;
-    updateButtonTooltip(btnGerar, reasons);
+    if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
 }
 
 function setupAtasListeners() {
@@ -182,12 +167,6 @@ function setupAtasListeners() {
         });
     }
 
-    // Listener global para seleção de arquivos (disparado pelo file_system.js)
-    document.addEventListener('file-selected', (e) => {
-        if (e.detail && e.detail.containerId === 'atas-modelos') {
-            atualizarBotaoGerarAtas();
-        }
-    });
 }
 
 function executarMailmergeAtas() {

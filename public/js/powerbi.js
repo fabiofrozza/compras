@@ -1,28 +1,5 @@
 const POWERBI_OPCOES_INTERNET = ['planejamento', 'paalteracoes', 'todos'];
 
-function atualizarBotaoPowerBIPanel() {
-    const btn = document.getElementById('btn-run-powerbi-panel');
-    if (!btn) return;
-
-    const reasons = [];
-    const hasInvalidFields = Array.from(document.querySelectorAll('#form-powerbi-path [data-field]'))
-        .some(f => f.classList.contains('is-invalid'));
-    if (hasInvalidFields) reasons.push('Preencha os campos obrigatórios');
-
-    const selected = document.querySelector('#form-powerbi-panel input[name="powerbi-tipo"]:checked');
-    const necessitaInternet = !selected || POWERBI_OPCOES_INTERNET.includes(selected.value);
-    if (necessitaInternet && !navigator.onLine) reasons.push('Sem conexão com a internet');
-
-    btn.disabled = reasons.length > 0;
-    updateButtonTooltip(btn, reasons);
-}
-
-document.addEventListener('change', (e) => {
-    if (e.target.name === 'powerbi-tipo' && e.target.closest('#form-powerbi-panel')) {
-        atualizarBotaoPowerBIPanel();
-    }
-});
-
 function executarPowerBI(button) {
     const form = button ? button.closest('form') : document;
     const selected = form.querySelector('input[name="powerbi-tipo"]:checked');
@@ -314,6 +291,7 @@ function executarObservatorio(button) {
     const tbody = document.getElementById('powerbi-observatorio-tbody');
     const downloadBtn = document.getElementById('btn-download-powerbi-observatorio');
 
+    button.dataset.executing = 'true';
     button.disabled = true;
     status.textContent = 'Acessando a Planilha de Controle...';
     status.classList.remove('text-danger');
@@ -329,7 +307,8 @@ function executarObservatorio(button) {
         finalizado = true;
         es.close();
         esconderProgressoObservatorio();
-        button.disabled = false;
+        delete button.dataset.executing;
+        if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
         if (msgErro) {
             status.textContent = `Erro: ${msgErro}`;
             status.classList.add('text-danger');

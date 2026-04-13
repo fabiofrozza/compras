@@ -1,4 +1,5 @@
 let pregaoSelecionado = null;
+let pregaoFolderFileCount = 0; // qtd de arquivos na pasta do pregão selecionado
 let pregoesDadosFolderPath = '';
 let importarFolderPath = '';
 
@@ -150,6 +151,7 @@ function setupRefreshPregoesButton(container) {
 
 function selecionarPregao(nome) {
     pregaoSelecionado = nome;
+    pregaoFolderFileCount = 0; // será atualizado por atualizarInfoPregao
 
     // Atualizar visual de seleção
     document.querySelectorAll('.item-card[data-pregao]').forEach(card => {
@@ -381,8 +383,8 @@ async function atualizarInfoPregao(nome) {
 
         if (elQtd) elQtd.textContent = pregao.qtdArquivos;
 
-        const btn = document.getElementById('btn-obter-dados-fornecedores');
-        if (btn) btn.disabled = pregao.qtdArquivos === 0;
+        pregaoFolderFileCount = pregao.qtdArquivos;
+        if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
 
         if (pregao.qtdArquivos === 0) {
             elQtd.closest('.dashboard-widget').classList.add('border-danger');
@@ -429,8 +431,8 @@ function limparInfoPregao() {
         }
     });
 
-    const btn = document.getElementById('btn-obter-dados-fornecedores');
-    if (btn) btn.disabled = true;
+    pregaoFolderFileCount = 0;
+    if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
 }
 
 // ====== ARQUIVOS A IMPORTAR ======
@@ -571,6 +573,7 @@ async function selecionarImportar(pregao) {
     } else {
         // Pasta do pregão não existe - limpar seleção e atualizar listas
         pregaoSelecionado = null;
+        pregaoFolderFileCount = 0;
         document.querySelectorAll('.item-card[data-pregao]').forEach(card => {
             card.classList.remove('item-selected', 'selected');
         });

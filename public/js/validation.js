@@ -1,13 +1,283 @@
+// ─── BUTTON REGISTRY ────────────────────────────────────────────────────────
+//
+// Cada entrada mapeia um botão às condições que devem ser satisfeitas para
+// habilitá-lo. Quando uma condição falha, seu `label` vira razão no tooltip.
+//
+// Tipos de condição:
+//   server   — AppState.serverConnected
+//   r        — AppState.rAvailable
+//   internet — navigator.onLine
+//   form     — todos [data-field] de #formId sem is-invalid e obrigatórios preenchidos
+//   file-selected  — selectedFiles[containerId] truthy
+//   folder-not-empty — #containerId tem pelo menos 1 tr[id] ou .item-card
+//   custom   — função check() → boolean (não bloqueia se o elemento não existe ainda)
+//
+// activeWhen (opcional) — função que retorna false para desativar a condição
+// (condição inativa = passa automaticamente, sem bloquear o botão)
+//
+const BUTTON_REGISTRY = {
+
+    // ── Atas ──────────────────────────────────────────────────────────────────
+
+    'btn-form-info-pregao': {
+        conditions: [
+            { type: 'form', formId: 'form-info-pregao', label: 'Preencha as informações do pregão' },
+            { type: 'folder-not-empty', containerId: 'atas-relatorios-sicaf', label: 'Adicione relatórios SICAF à pasta' },
+            { type: 'r',      label: 'R não encontrado — instale pela aba Instalação' },
+            { type: 'server', label: 'Sem conexão com o servidor' },
+        ],
+    },
+
+    'btn-form-atas-modelos': {
+        conditions: [
+            { type: 'custom', check: () => typeof atasData !== 'undefined' && atasData.dadosDisponiveis, label: 'Dados do SICAF não disponíveis — execute "Obter dados dos SICAF" primeiro' },
+            { type: 'file-selected', containerId: 'atas-modelos', label: 'Selecione um modelo de ata' },
+            { type: 'server', label: 'Sem conexão com o servidor' },
+        ],
+    },
+
+    // ── CATMAT ────────────────────────────────────────────────────────────────
+
+    'btn-form-itens-tr': {
+        conditions: [
+            { type: 'file-selected', containerId: 'catmat-lista-itens-tr', label: 'Selecione um arquivo em Itens do TR' },
+            {
+                type: 'custom',
+                check: () => {
+                    const container = document.getElementById('catmat-arquivos-auxiliares');
+                    if (!container) return true;
+                    return container.textContent.includes('Margens.xlsx');
+                },
+                label: 'Margens.xlsx não encontrado na pasta de arquivos auxiliares',
+            },
+            {
+                type: 'custom',
+                check: () => {
+                    const selected = document.querySelector('input[name="catmat-metodo"]:checked');
+                    if (selected?.value !== 'lista') return true; // condição só para modo lista
+                    const container = document.getElementById('catmat-arquivos-auxiliares');
+                    if (!container) return true;
+                    return container.textContent.includes('Lista CATMAT.xlsx');
+                },
+                label: 'Lista CATMAT.xlsx não encontrado na pasta de arquivos auxiliares',
+            },
+            { type: 'r',      label: 'R não encontrado — instale pela aba Instalação' },
+            { type: 'internet', label: 'Sem conexão com a internet', activeWhen: () => document.querySelector('input[name="catmat-metodo"]:checked')?.value === 'api' },
+            { type: 'server', label: 'Sem conexão com o servidor' },
+        ],
+    },
+
+    // ── Fornecedores ──────────────────────────────────────────────────────────
+
+    'btn-obter-dados-fornecedores': {
+        conditions: [
+            {
+                type: 'custom',
+                check: () => typeof pregaoSelecionado === 'undefined' || !!pregaoSelecionado,
+                label: 'Selecione um pregão',
+            },
+            {
+                type: 'custom',
+                check: () => typeof pregaoFolderFileCount === 'undefined' || pregaoFolderFileCount > 0,
+                label: 'A pasta do pregão selecionado está vazia',
+            },
+            { type: 'r',      label: 'R não encontrado — instale pela aba Instalação' },
+            { type: 'server', label: 'Sem conexão com o servidor' },
+        ],
+    },
+
+    // ── Importação ────────────────────────────────────────────────────────────
+
+    'btn-importacao-arquivos': {
+        conditions: [
+            { type: 'custom', check: () => typeof importacaoLinkValido === 'undefined' || importacaoLinkValido, label: 'Informe um link válido da planilha' },
+            { type: 'form',   formId: 'form-importacao-config', label: 'Preencha os campos de configuração' },
+            {
+                type: 'custom',
+                check: () => {
+                    const badge = document.getElementById('badge-processos');
+                    return !badge || !badge.classList.contains('d-none');
+                },
+                label: 'Nenhum processo encontrado na planilha',
+            },
+            { type: 'r',       label: 'R não encontrado — instale pela aba Instalação' },
+            { type: 'internet', label: 'Sem conexão com a internet' },
+            { type: 'server',   label: 'Sem conexão com o servidor' },
+        ],
+    },
+
+    'btn-importacao-resumo': {
+        conditions: [
+            { type: 'custom', check: () => typeof importacaoLinkValido === 'undefined' || importacaoLinkValido, label: 'Informe um link válido da planilha' },
+            { type: 'form',   formId: 'form-importacao-config', label: 'Preencha os campos de configuração' },
+            {
+                type: 'custom',
+                check: () => {
+                    const badge = document.getElementById('badge-processos');
+                    return !badge || !badge.classList.contains('d-none');
+                },
+                label: 'Nenhum processo encontrado na planilha',
+            },
+            { type: 'folder-not-empty', containerId: 'importacao-resumos-pdf', label: 'Nenhum arquivo PDF em "Prints das telas dos pedidos"' },
+            { type: 'r',       label: 'R não encontrado — instale pela aba Instalação' },
+            { type: 'internet', label: 'Sem conexão com a internet' },
+            { type: 'server',   label: 'Sem conexão com o servidor' },
+        ],
+    },
+
+    'btn-importacao-relatorio': {
+        conditions: [
+            { type: 'custom', check: () => typeof importacaoLinkValido === 'undefined' || importacaoLinkValido, label: 'Informe um link válido da planilha' },
+            { type: 'form',   formId: 'form-importacao-config', label: 'Preencha os campos de configuração' },
+            {
+                type: 'custom',
+                check: () => {
+                    const badge = document.getElementById('badge-processos');
+                    return !badge || !badge.classList.contains('d-none');
+                },
+                label: 'Nenhum processo encontrado na planilha',
+            },
+            { type: 'r',       label: 'R não encontrado — instale pela aba Instalação' },
+            { type: 'internet', label: 'Sem conexão com a internet' },
+            { type: 'server',   label: 'Sem conexão com o servidor' },
+        ],
+    },
+
+    // ── Mapas ─────────────────────────────────────────────────────────────────
+
+    'btn-run-mapas': {
+        conditions: [
+            { type: 'folder-not-empty', containerId: 'mapas-mapas-a-processar', label: 'Adicione mapas à pasta "Mapas a processar"' },
+            { type: 'r',      label: 'R não encontrado — instale pela aba Instalação' },
+            { type: 'server', label: 'Sem conexão com o servidor' },
+        ],
+    },
+
+    // ── Power BI ──────────────────────────────────────────────────────────────
+
+    'btn-run-powerbi-panel': {
+        conditions: [
+            { type: 'form', formId: 'form-powerbi-path', label: 'Informe o caminho da pasta da base de dados' },
+            { type: 'r',      label: 'R não encontrado — instale pela aba Instalação' },
+            {
+                type: 'internet',
+                label: 'Sem conexão com a internet',
+                // Necessita internet para todos os modos exceto 'licitacao' e 'execucao'
+                activeWhen: () => {
+                    if (typeof POWERBI_OPCOES_INTERNET === 'undefined') return true;
+                    const sel = document.querySelector('#form-powerbi-panel input[name="powerbi-tipo"]:checked');
+                    return !sel || POWERBI_OPCOES_INTERNET.includes(sel.value);
+                },
+            },
+            { type: 'server', label: 'Sem conexão com o servidor' },
+        ],
+    },
+
+    'btn-run-powerbi-maintenance': {
+        conditions: [
+            { type: 'form', formId: 'form-powerbi-path', label: 'Informe o caminho da pasta da base de dados' },
+            { type: 'r',      label: 'R não encontrado — instale pela aba Instalação' },
+            { type: 'server', label: 'Sem conexão com o servidor' },
+        ],
+    },
+
+    'btn-run-powerbi-observatorio': {
+        conditions: [
+            { type: 'form', formId: 'form-powerbi-path', label: 'Informe o caminho da pasta da base de dados' },
+            { type: 'internet', label: 'Sem conexão com a internet' },
+            { type: 'server',   label: 'Sem conexão com o servidor' },
+        ],
+    },
+
+    // ── Instalação ────────────────────────────────────────────────────────────
+
+    'btn-run-instalacao': {
+        conditions: [
+            { type: 'r',       label: 'R não encontrado — instale o R antes de usar esta opção' },
+            { type: 'internet', label: 'Sem conexão com a internet' },
+            { type: 'server',   label: 'Sem conexão com o servidor' },
+        ],
+    },
+
+    'btn-run-npm_update': {
+        conditions: [
+            { type: 'internet', label: 'Sem conexão com a internet' },
+            { type: 'server',   label: 'Sem conexão com o servidor' },
+        ],
+    },
+};
+
+// ─── CONDITION CHECKER ───────────────────────────────────────────────────────
+
+function checkCondition(cond) {
+    // Condição desativada (ex: internet só para modo API) → passa automaticamente
+    if (cond.activeWhen && !cond.activeWhen()) return true;
+
+    switch (cond.type) {
+        case 'server':
+            return AppState.serverConnected;
+
+        case 'r':
+            return AppState.rAvailable;
+
+        case 'internet':
+            return navigator.onLine;
+
+        case 'form': {
+            const fields = document.querySelectorAll(`#${cond.formId} [data-field]`);
+            if (fields.length === 0) return true;
+            return !Array.from(fields).some(f =>
+                f.classList.contains('is-invalid') || (f.hasAttribute('required') && !f.value)
+            );
+        }
+
+        case 'file-selected':
+            return !!selectedFiles[cond.containerId];
+
+        case 'folder-not-empty': {
+            const container = document.getElementById(cond.containerId);
+            if (!container) return true; // aba não carregada ainda
+            return container.querySelectorAll('tr[id], .item-card').length > 0;
+        }
+
+        case 'custom':
+            try { return cond.check(); } catch { return true; }
+
+        default:
+            return true;
+    }
+}
+
+// ─── BUTTON EVALUATION ENGINE ────────────────────────────────────────────────
+
+function evaluateButton(buttonId) {
+    const config = BUTTON_REGISTRY[buttonId];
+    const button = document.getElementById(buttonId);
+    if (!button || !config) return;
+
+    // Não sobrescreve botões em execução (ex: Observatório durante SSE)
+    if (button.dataset.executing === 'true') return;
+
+    const reasons = config.conditions
+        .filter(cond => !checkCondition(cond))
+        .map(cond => cond.label);
+
+    button.disabled = reasons.length > 0;
+    updateButtonTooltip(button, reasons);
+}
+
+function evaluateAllButtons() {
+    Object.keys(BUTTON_REGISTRY).forEach(evaluateButton);
+    atualizarIndicadoresSubTabs();
+}
+
+// ─── FIELD VALIDATION ────────────────────────────────────────────────────────
+
 function validateTabFields(abaName) {
     const fields = Array.from(document.querySelectorAll(`#${abaName} [data-field]`));
     fields.forEach(field => validateSingleField(field));
 }
 
-/**
- * Valida um campo individual e aplica a classe is-invalid se necessário
- * @param {HTMLElement} field - O campo a validar
- * @returns {boolean} true se válido, false caso contrário
- */
 function validateSingleField(field) {
     const { value, dataset: { validateRule, regexPattern }, attributes } = field;
     const isRequired = field.hasAttribute('required');
@@ -53,7 +323,7 @@ function validateSingleField(field) {
 
     field.classList.toggle('is-invalid', hasError);
     toggleValidationMsg(field, hasError);
-    setButtonState(field);
+    evaluateAllButtons();
 
     return !hasError;
 }
@@ -96,6 +366,8 @@ function toggleValidationMsg(field, hasError) {
     }
     feedback.classList.toggle('show', hasError);
 }
+
+// ─── TOOLTIP HELPERS ─────────────────────────────────────────────────────────
 
 // Envolve um botão num wrapper <span> para permitir tooltip em botões disabled
 function wrapButtonForTooltip(button) {
@@ -141,66 +413,7 @@ function updateButtonTooltip(button, reasons) {
     }
 }
 
-function setButtonState(field) {
-    const formElement = field.closest('.script-form');
-    if (!formElement) return;
-
-    const formId = formElement.id;
-
-    if (formId === 'form-powerbi-path') {
-        const hasInvalidFields = Array.from(document.querySelectorAll(`#${formId} [data-field]`)).some(f => f.classList.contains('is-invalid'));
-        const btnMaintenance = document.getElementById('btn-run-powerbi-maintenance');
-        if (btnMaintenance) btnMaintenance.disabled = hasInvalidFields;
-        if (typeof atualizarBotaoPowerBIPanel === 'function') atualizarBotaoPowerBIPanel();
-        return;
-    }
-
-    if (formId === 'form-importacao-link' || formId === 'importacaoTabsForm') {
-        if (typeof verificarLiberacaoBotoesImportacao === 'function') verificarLiberacaoBotoesImportacao();
-        return;
-    }
-
-    const button = document.getElementById('btn-' + formId);
-
-    if (!button) return;
-
-    const hasInvalidFields = Array.from(document.querySelectorAll(`#${formId} [data-field]`)).some(f => f.classList.contains('is-invalid'));
-
-    const reasons = [];
-    if (hasInvalidFields) reasons.push('Preencha os campos obrigatórios');
-
-    if (button.id === 'btn-form-atas-modelos') {
-        if (!atasData.dadosDisponiveis) reasons.push('Dados do SICAF não disponíveis');
-    }
-
-    if (button.id === 'btn-form-itens-tr') {
-        const selected = document.querySelector('input[name="catmat-metodo"]:checked');
-        if (selected?.value === 'api' && !navigator.onLine) reasons.push('Sem conexão com a internet');
-    }
-
-    button.disabled = reasons.length > 0;
-    updateButtonTooltip(button, reasons);
-}
-
-function atualizarBotaoCatmat() {
-    const btn = document.getElementById('btn-form-itens-tr');
-    if (!btn) return;
-
-    const reasons = [];
-    const hasInvalidFields = Array.from(document.querySelectorAll('#form-itens-tr [data-field]'))
-        .some(f => f.classList.contains('is-invalid'));
-    if (hasInvalidFields) reasons.push('Selecione um arquivo na lista');
-
-    const selected = document.querySelector('input[name="catmat-metodo"]:checked');
-    if (selected?.value === 'api' && !navigator.onLine) reasons.push('Sem conexão com a internet');
-
-    btn.disabled = reasons.length > 0;
-    updateButtonTooltip(btn, reasons);
-}
-
-document.addEventListener('change', (e) => {
-    if (e.target.name === 'catmat-metodo') atualizarBotaoCatmat();
-});
+// ─── LIVE VALIDATION SETUP ───────────────────────────────────────────────────
 
 function setupLiveValidation(aba) {
     const container = document.querySelector('#' + aba);
@@ -213,7 +426,25 @@ function setupLiveValidation(aba) {
             });
         });
     });
+    evaluateAllButtons();
 }
+
+// ─── GLOBAL EVENT LISTENERS ──────────────────────────────────────────────────
+
+// Seleção de arquivo em file-list selecionável
+document.addEventListener('file-selected', () => evaluateAllButtons());
+
+// Carregamento/atualização de pasta
+document.addEventListener('files-loaded', () => evaluateAllButtons());
+
+// Mudança de modo (catmat, powerbi) afeta condições ativas
+document.addEventListener('change', (e) => {
+    if (e.target.name === 'catmat-metodo' || e.target.name === 'powerbi-tipo') {
+        evaluateAllButtons();
+    }
+});
+
+// ─── SUB-TABS INDICATOR ──────────────────────────────────────────────────────
 
 /**
  * Verifica cada tab-pane de sub-tabs e marca o nav-link correspondente

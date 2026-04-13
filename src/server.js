@@ -5,7 +5,7 @@ const path = require('path');
 const os = require('os');
 const dns = require('dns');
 const Logger = require('./utils/logger');
-const { registerConsoleRoutes, handleConsoleMessage } = require('./services/consoleService');
+const { registerConsoleRoutes, handleConsoleMessage, checkRAvailable } = require('./services/consoleService');
 const { registerFileRoutes } = require('./services/fileRoutes');
 const { isPathSafe, openInInterface } = require('./services/files');
 
@@ -159,6 +159,12 @@ const server = app.listen(PORT, async () => {
 
     logger.info(`Cliente conectado: ${clientLabel} (Total: ${clientCount})`, 'WebSocket');
     logger.debug(`IP: ${ip} | Navegador: ${userAgent}`, 'WebSocket');
+
+    checkRAvailable().then(available => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'r-status', available }));
+      }
+    });
 
     // Tentar resolver hostname via DNS reverso
     const cleanIp = ip.replace(/^::ffff:/, '');

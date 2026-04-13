@@ -7,16 +7,24 @@ let wsDisconnectedAlertShown = false;
 let wsDisconnectedNotifId = null;
 let internetOfflineNotifId = null;
 
+// Estado global da aplicação — fonte de verdade para condições que não derivam do DOM
+const AppState = {
+    serverConnected: false,
+    rAvailable: false,
+};
+
+function setState(patch) {
+    Object.assign(AppState, patch);
+    if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
+}
+
 function handleInternetOffline() {
     if (internetOfflineNotifId === null) {
         showToast('Sem conexão com a internet', 'warning', 5000, 'Sistema');
         addNotification({ message: 'Sem conexão com a internet.', type: 'warning', source: 'Sistema' })
             .then(id => { internetOfflineNotifId = id; });
     }
-    if (typeof atualizarBotaoPowerBIPanel === 'function') atualizarBotaoPowerBIPanel();
-    if (typeof verificarLiberacaoBotoesImportacao === 'function') verificarLiberacaoBotoesImportacao();
-    if (typeof atualizarBotoesInstalacao === 'function') atualizarBotoesInstalacao();
-    if (typeof atualizarBotaoCatmat === 'function') atualizarBotaoCatmat();
+    if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
 }
 
 function handleInternetOnline() {
@@ -25,10 +33,7 @@ function handleInternetOnline() {
         dismissNotification(internetOfflineNotifId);
         internetOfflineNotifId = null;
     }
-    if (typeof atualizarBotaoPowerBIPanel === 'function') atualizarBotaoPowerBIPanel();
-    if (typeof verificarLiberacaoBotoesImportacao === 'function') verificarLiberacaoBotoesImportacao();
-    if (typeof atualizarBotoesInstalacao === 'function') atualizarBotoesInstalacao();
-    if (typeof atualizarBotaoCatmat === 'function') atualizarBotaoCatmat();
+    if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
 }
 
 window.addEventListener('offline', handleInternetOffline);
@@ -46,11 +51,17 @@ function connectWebSocket() {
             }
         }
         wsDisconnectedAlertShown = false;
+        setState({ serverConnected: true });
     };
 
     ws.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
+
+            if (data.type === 'r-status') {
+                setState({ rAvailable: data.available });
+                return;
+            }
 
             // Processar output e progresso apenas se o console estiver visível
             if (consoleContainer && consoleContainer.classList.contains('show')) {
@@ -137,6 +148,7 @@ function connectWebSocket() {
     };
 
     ws.onclose = () => {
+        setState({ serverConnected: false });
         if (isScriptRunning) hideScriptRunningOverlay();
         if (!wsDisconnectedAlertShown) {
             wsDisconnectedAlertShown = true;

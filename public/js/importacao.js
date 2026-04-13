@@ -26,21 +26,14 @@ function configurarValidacaoContinuaImportacao() {
                 linkInput.classList.remove('is-valid', 'is-invalid');
                 atualizarFeedbackPlanilha('info', 'Informe o link da aba LISTA FINAL e aguarde.');
             }
-            verificarLiberacaoBotoesImportacao();
+            if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
         });
     }
 
     if (configForm) {
-        configForm.addEventListener('input', verificarLiberacaoBotoesImportacao);
-        configForm.addEventListener('change', verificarLiberacaoBotoesImportacao);
+        configForm.addEventListener('input', () => { if (typeof evaluateAllButtons === 'function') evaluateAllButtons(); });
+        configForm.addEventListener('change', () => { if (typeof evaluateAllButtons === 'function') evaluateAllButtons(); });
     }
-
-    // Quando a lista de arquivos é atualizada, recalcular os botões
-    document.addEventListener('files-loaded', (e) => {
-        if (e.detail && e.detail.containerId === 'importacao-resumos-pdf') {
-            verificarLiberacaoBotoesImportacao();
-        }
-    });
 }
 
 function revalidarLinkGoogle() {
@@ -171,7 +164,7 @@ function atualizarFeedbackPlanilha(tipo, mensagem) {
         ocultarResultadoImportacao();
     }
 
-    verificarLiberacaoBotoesImportacao();
+    if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
 }
 
 function atualizarWidgetsExtras(processos, temValidacaoManual) {
@@ -190,6 +183,8 @@ function atualizarWidgetsExtras(processos, temValidacaoManual) {
     if (badgeValidacao) {
         badgeValidacao.classList.toggle('d-none', !temValidacaoManual);
     }
+
+    if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
 }
 
 function popularComboProcessosSPA(processos) {
@@ -205,42 +200,6 @@ function popularComboProcessosSPA(processos) {
     });
 }
 
-function verificarLiberacaoBotoesImportacao() {
-    const formFields = document.querySelectorAll('#form-importacao-link [data-field], #form-importacao-config [data-field]');
-    let formValido = true;
-
-    formFields.forEach(field => {
-        if (field.classList.contains('is-invalid') || (field.hasAttribute('required') && !field.value)) {
-            formValido = false;
-        }
-    });
-
-    atualizarIndicadoresSubTabs();
-
-    const reasons = [];
-    if (!importacaoLinkValido) reasons.push('Informe um link válido do Comprasnet');
-    if (!formValido) reasons.push('Preencha os campos obrigatórios');
-    if (!navigator.onLine) reasons.push('Sem conexão com a internet');
-
-    const btnArquivos = document.getElementById('btn-importacao-arquivos');
-    const btnResumo = document.getElementById('btn-importacao-resumo');
-    const btnRelatorio = document.getElementById('btn-importacao-relatorio');
-
-    [btnArquivos, btnRelatorio].forEach(btn => {
-        if (!btn) return;
-        btn.disabled = reasons.length > 0;
-        updateButtonTooltip(btn, reasons);
-    });
-
-    if (btnResumo) {
-        const listaPdf = document.getElementById('importacao-resumos-pdf');
-        const temArquivosPdf = listaPdf && listaPdf.querySelectorAll('table tr').length > 0;
-        const resumoReasons = [...reasons];
-        if (!temArquivosPdf) resumoReasons.push('Nenhum arquivo PDF disponível');
-        btnResumo.disabled = resumoReasons.length > 0;
-        updateButtonTooltip(btnResumo, resumoReasons);
-    }
-}
 
 function ocultarResultadoImportacao() {
     const resultadoCol = document.getElementById('importacao-resultado-col');
