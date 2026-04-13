@@ -440,9 +440,59 @@ Easter Egg: game character bumps the bell notifications
 }
 
 /* ==========================================================================
-Modal pop-up
+Tooltips, Popovers e Modal pop-up
 ========================================================================== */
+
+.custom-tooltip {
+    --bs-tooltip-bg: var(--bs-warning-border-subtle);
+    --bs-tooltip-color: var(--bs-primary-text-emphasis);
+    --bs-tooltip-opacity: 1;
+    font-size: 75%;
+}
+
+[popover].form-help-popover {
+    position: absolute;
+    position-area: left bottom;
+    max-width: 500px;
+    padding: 10px 10px 10px 40px;
+    border-radius: 6px;
+    border: 1px solid var(--bs-border-color);
+    font-size: 0.875rem;
+    box-shadow: var(--bs-box-shadow);
+    color: var(--compras-text-primary);
+    background-color: var(--compras-contrast);
+}
+
+[popover].form-help-popover::before {
+    font-family: 'Material Symbols Outlined';
+    content: 'help';
+    font-variation-settings: 'FILL' 1, 'wght' 700;
+    position: absolute;
+    font-size: 20px;
+    top: 8px;
+    left: 10px;
+}
 
 .modal-detail {
     background-color: color-mix(in srgb, var(--compras-theme) 75%, white);
+}
+
+.tooltip-title {
+    color: var(--compras-error);
+}
+
+.tooltip-title::before {
+    font-family: 'Material Symbols Outlined';
+    content: 'error';
+    font-variation-settings: 'FILL' 1, 'wght' 700;
+    color: var(--compras-error);
+    position: absolute;
+    font-size: 20px;
+    top: -16px;
+    left: -12px;
+}
+
+.tooltip-list {
+    padding-top: 8px;
+    padding-left: 16px;
 }

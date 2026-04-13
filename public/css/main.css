@@ -70,13 +70,6 @@ MAIN CONTENT
     gap: 10px;
 }
 
-.custom-tooltip {
-    --bs-tooltip-bg: var(--bs-warning-border-subtle);
-    --bs-tooltip-color: var(--bs-primary-text-emphasis);
-    --bs-tooltip-opacity: 1;
-    font-size: 75%;
-}
-
 /* Material Symbols - utilities */
 .material-symbols-outlined {
     font-size: inherit;

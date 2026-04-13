@@ -415,29 +415,6 @@
     content: 'keyboard_arrow_down';
 }
 
-[popover].form-help-popover {
-    position: absolute;
-    position-area: left bottom;
-    max-width: 500px;
-    padding: 10px 10px 10px 40px;
-    border-radius: 6px;
-    border: 1px solid var(--bs-border-color);
-    font-size: 0.875rem;
-    box-shadow: var(--bs-box-shadow);
-    color: var(--compras-text-primary);
-    background-color: var(--compras-contrast);
-}
-
-[popover].form-help-popover::before {
-    font-family: 'Material Symbols Outlined';
-    content: 'help';
-    font-variation-settings: 'FILL' 1, 'wght' 700;
-    position: absolute;
-    font-size: 20px;
-    top: 8px;
-    left: 10px;
-}
-
 /* Info bar e filtros da tabela Observatório */
 .obs-tool-btn {
     background: none;
