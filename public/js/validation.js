@@ -15,6 +15,14 @@
 // activeWhen (opcional) — função que retorna false para desativar a condição
 // (condição inativa = passa automaticamente, sem bloquear o botão)
 //
+
+const rMessage = 'R não encontrado. Instale pela aba "Instalação"';
+const internetMessage = 'Sem conexão com a internet';
+const serverMessage = 'Sem conexão com o servidor. Execute novamente "start.cmd" para reiniciá-lo';
+const powerbiMessage = 'Informe o caminho da pasta da base de dados';
+const processoMessage = 'Nenhum processo encontrado na planilha. Certifique-se que o link informado é o da aba "LISTA FINAL"';
+const configuracaoMessage = 'Preencha os campos de configuração';
+const linkMessage = 'Informe um link válido da aba "LISTA FINAL" da planilha de inserção de demandas do Google Drive';
 const BUTTON_REGISTRY = {
 
     // ── Atas ──────────────────────────────────────────────────────────────────
@@ -22,17 +30,17 @@ const BUTTON_REGISTRY = {
     'btn-form-info-pregao': {
         conditions: [
             { type: 'form', formId: 'form-info-pregao', label: 'Preencha as informações do pregão' },
-            { type: 'folder-not-empty', containerId: 'atas-relatorios-sicaf', label: 'Adicione relatórios SICAF à pasta' },
-            { type: 'r',      label: 'R não encontrado — instale pela aba Instalação' },
-            { type: 'server', label: 'Sem conexão com o servidor' },
+            { type: 'folder-not-empty', containerId: 'atas-relatorios-sicaf', label: 'Coloque os relatórios de credenciamento do SICAF na pasta' },
+            { type: 'r', label: rMessage },
+            { type: 'server', label: serverMessage },
         ],
     },
 
     'btn-form-atas-modelos': {
         conditions: [
-            { type: 'custom', check: () => typeof atasData !== 'undefined' && atasData.dadosDisponiveis, label: 'Dados do SICAF não disponíveis — execute "Obter dados dos SICAF" primeiro' },
+            { type: 'custom', check: () => typeof atasData !== 'undefined' && atasData.dadosDisponiveis, label: 'Dados não disponíveis. Execute "Obter dados dos SICAF" primeiro' },
             { type: 'file-selected', containerId: 'atas-modelos', label: 'Selecione um modelo de ata' },
-            { type: 'server', label: 'Sem conexão com o servidor' },
+            { type: 'server', label: serverMessage },
         ],
     },
 
@@ -40,7 +48,7 @@ const BUTTON_REGISTRY = {
 
     'btn-form-itens-tr': {
         conditions: [
-            { type: 'file-selected', containerId: 'catmat-lista-itens-tr', label: 'Selecione um arquivo em Itens do TR' },
+            { type: 'file-selected', containerId: 'catmat-lista-itens-tr', label: 'Selecione um arquivo em "Itens do TR"' },
             {
                 type: 'custom',
                 check: () => {
@@ -48,7 +56,7 @@ const BUTTON_REGISTRY = {
                     if (!container) return true;
                     return container.textContent.includes('Margens.xlsx');
                 },
-                label: 'Margens.xlsx não encontrado na pasta de arquivos auxiliares',
+                label: '"Margens.xlsx" não encontrado na pasta de arquivos auxiliares',
             },
             {
                 type: 'custom',
@@ -59,11 +67,11 @@ const BUTTON_REGISTRY = {
                     if (!container) return true;
                     return container.textContent.includes('Lista CATMAT.xlsx');
                 },
-                label: 'Lista CATMAT.xlsx não encontrado na pasta de arquivos auxiliares',
+                label: '"Lista CATMAT.xlsx" não encontrado na pasta de arquivos auxiliares',
             },
-            { type: 'r',      label: 'R não encontrado — instale pela aba Instalação' },
-            { type: 'internet', label: 'Sem conexão com a internet', activeWhen: () => document.querySelector('input[name="catmat-metodo"]:checked')?.value === 'api' },
-            { type: 'server', label: 'Sem conexão com o servidor' },
+            { type: 'r', label: rMessage },
+            { type: 'internet', label: internetMessage, activeWhen: () => document.querySelector('input[name="catmat-metodo"]:checked')?.value === 'api' },
+            { type: 'server', label: serverMessage },
         ],
     },
 
@@ -80,9 +88,10 @@ const BUTTON_REGISTRY = {
                 type: 'custom',
                 check: () => typeof pregaoFolderFileCount === 'undefined' || pregaoFolderFileCount > 0,
                 label: 'A pasta do pregão selecionado está vazia',
+                activeWhen: () => typeof pregaoSelecionado !== 'undefined' && !!pregaoSelecionado,
             },
-            { type: 'r',      label: 'R não encontrado — instale pela aba Instalação' },
-            { type: 'server', label: 'Sem conexão com o servidor' },
+            { type: 'r', label: rMessage },
+            { type: 'server', label: serverMessage },
         ],
     },
 
@@ -90,56 +99,50 @@ const BUTTON_REGISTRY = {
 
     'btn-importacao-arquivos': {
         conditions: [
-            { type: 'custom', check: () => typeof importacaoLinkValido === 'undefined' || importacaoLinkValido, label: 'Informe um link válido da planilha' },
-            { type: 'form',   formId: 'form-importacao-config', label: 'Preencha os campos de configuração' },
+            { type: 'custom', check: () => typeof importacaoLinkValido === 'undefined' || importacaoLinkValido, label: linkMessage },
+            { type: 'form', formId: 'form-importacao-config', label: configuracaoMessage },
             {
                 type: 'custom',
                 check: () => {
                     const badge = document.getElementById('badge-processos');
                     return !badge || !badge.classList.contains('d-none');
                 },
-                label: 'Nenhum processo encontrado na planilha',
+                label: processoMessage,
+                activeWhen: () => typeof importacaoLinkValido !== 'undefined' && importacaoLinkValido
             },
-            { type: 'r',       label: 'R não encontrado — instale pela aba Instalação' },
-            { type: 'internet', label: 'Sem conexão com a internet' },
-            { type: 'server',   label: 'Sem conexão com o servidor' },
+            { type: 'r', label: rMessage },
+            { type: 'internet', label: internetMessage },
+            { type: 'server', label: serverMessage },
         ],
     },
 
     'btn-importacao-resumo': {
         conditions: [
-            { type: 'custom', check: () => typeof importacaoLinkValido === 'undefined' || importacaoLinkValido, label: 'Informe um link válido da planilha' },
-            { type: 'form',   formId: 'form-importacao-config', label: 'Preencha os campos de configuração' },
+            { type: 'custom', check: () => typeof importacaoLinkValido === 'undefined' || importacaoLinkValido, label: linkMessage },
+            { type: 'form', formId: 'form-importacao-config', label: configuracaoMessage },
             {
                 type: 'custom',
                 check: () => {
                     const badge = document.getElementById('badge-processos');
                     return !badge || !badge.classList.contains('d-none');
                 },
-                label: 'Nenhum processo encontrado na planilha',
+                label: processoMessage,
+                activeWhen: () => typeof importacaoLinkValido !== 'undefined' && importacaoLinkValido
             },
-            { type: 'folder-not-empty', containerId: 'importacao-resumos-pdf', label: 'Nenhum arquivo PDF em "Prints das telas dos pedidos"' },
-            { type: 'r',       label: 'R não encontrado — instale pela aba Instalação' },
-            { type: 'internet', label: 'Sem conexão com a internet' },
-            { type: 'server',   label: 'Sem conexão com o servidor' },
+            { type: 'folder-not-empty', containerId: 'importacao-resumos-pdf', label: 'Nenhum arquivo .pdf em "Prints das telas dos pedidos"' },
+            { type: 'r', label: rMessage },
+            { type: 'internet', label: internetMessage },
+            { type: 'server', label: serverMessage },
         ],
     },
 
     'btn-importacao-relatorio': {
         conditions: [
-            { type: 'custom', check: () => typeof importacaoLinkValido === 'undefined' || importacaoLinkValido, label: 'Informe um link válido da planilha' },
-            { type: 'form',   formId: 'form-importacao-config', label: 'Preencha os campos de configuração' },
-            {
-                type: 'custom',
-                check: () => {
-                    const badge = document.getElementById('badge-processos');
-                    return !badge || !badge.classList.contains('d-none');
-                },
-                label: 'Nenhum processo encontrado na planilha',
-            },
-            { type: 'r',       label: 'R não encontrado — instale pela aba Instalação' },
-            { type: 'internet', label: 'Sem conexão com a internet' },
-            { type: 'server',   label: 'Sem conexão com o servidor' },
+            { type: 'custom', check: () => typeof importacaoLinkValido === 'undefined' || importacaoLinkValido, label: linkMessage },
+            { type: 'form', formId: 'form-importacao-config', label: configuracaoMessage },
+            { type: 'r', label: rMessage },
+            { type: 'internet', label: internetMessage },
+            { type: 'server', label: serverMessage },
         ],
     },
 
@@ -147,9 +150,9 @@ const BUTTON_REGISTRY = {
 
     'btn-run-mapas': {
         conditions: [
-            { type: 'folder-not-empty', containerId: 'mapas-mapas-a-processar', label: 'Adicione mapas à pasta "Mapas a processar"' },
-            { type: 'r',      label: 'R não encontrado — instale pela aba Instalação' },
-            { type: 'server', label: 'Sem conexão com o servidor' },
+            { type: 'folder-not-empty', containerId: 'mapas-mapas-a-processar', label: 'Coloque os mapas de licitação obtidos no Solar na pasta' },
+            { type: 'r', label: rMessage },
+            { type: 'server', label: serverMessage },
         ],
     },
 
@@ -157,11 +160,11 @@ const BUTTON_REGISTRY = {
 
     'btn-run-powerbi-panel': {
         conditions: [
-            { type: 'form', formId: 'form-powerbi-path', label: 'Informe o caminho da pasta da base de dados' },
-            { type: 'r',      label: 'R não encontrado — instale pela aba Instalação' },
+            { type: 'form', formId: 'form-powerbi-path', label: powerbiMessage },
+            { type: 'r', label: rMessage },
             {
                 type: 'internet',
-                label: 'Sem conexão com a internet',
+                label: internetMessage,
                 // Necessita internet para todos os modos exceto 'licitacao' e 'execucao'
                 activeWhen: () => {
                     if (typeof POWERBI_OPCOES_INTERNET === 'undefined') return true;
@@ -169,23 +172,23 @@ const BUTTON_REGISTRY = {
                     return !sel || POWERBI_OPCOES_INTERNET.includes(sel.value);
                 },
             },
-            { type: 'server', label: 'Sem conexão com o servidor' },
+            { type: 'server', label: serverMessage },
         ],
     },
 
     'btn-run-powerbi-maintenance': {
         conditions: [
-            { type: 'form', formId: 'form-powerbi-path', label: 'Informe o caminho da pasta da base de dados' },
-            { type: 'r',      label: 'R não encontrado — instale pela aba Instalação' },
-            { type: 'server', label: 'Sem conexão com o servidor' },
+            { type: 'form', formId: 'form-powerbi-path', label: powerbiMessage },
+            { type: 'r', label: rMessage },
+            { type: 'server', label: serverMessage },
         ],
     },
 
     'btn-run-powerbi-observatorio': {
         conditions: [
-            { type: 'form', formId: 'form-powerbi-path', label: 'Informe o caminho da pasta da base de dados' },
-            { type: 'internet', label: 'Sem conexão com a internet' },
-            { type: 'server',   label: 'Sem conexão com o servidor' },
+            { type: 'form', formId: 'form-powerbi-path', label: powerbiMessage },
+            { type: 'internet', label: internetMessage },
+            { type: 'server', label: serverMessage },
         ],
     },
 
@@ -193,16 +196,16 @@ const BUTTON_REGISTRY = {
 
     'btn-run-instalacao': {
         conditions: [
-            { type: 'r',       label: 'R não encontrado — instale o R antes de usar esta opção' },
-            { type: 'internet', label: 'Sem conexão com a internet' },
-            { type: 'server',   label: 'Sem conexão com o servidor' },
+            { type: 'r', label: rMessage },
+            { type: 'internet', label: internetMessage },
+            { type: 'server', label: serverMessage },
         ],
     },
 
     'btn-run-npm_update': {
         conditions: [
-            { type: 'internet', label: 'Sem conexão com a internet' },
-            { type: 'server',   label: 'Sem conexão com o servidor' },
+            { type: 'internet', label: internetMessage },
+            { type: 'server', label: serverMessage },
         ],
     },
 };
@@ -237,7 +240,7 @@ function checkCondition(cond) {
         case 'folder-not-empty': {
             const container = document.getElementById(cond.containerId);
             if (!container) return true; // aba não carregada ainda
-            return container.querySelectorAll('tr[id], .item-card').length > 0;
+            return container.querySelectorAll('tr[data-filepath], .item-card').length > 0;
         }
 
         case 'custom':
@@ -393,9 +396,9 @@ function updateButtonTooltip(button, reasons) {
         return;
     }
 
-    const title = reasons.length === 1
-        ? reasons[0]
-        : reasons.map(r => `• ${r}`).join('<br>');
+    const header = '<span class="tooltip-title"><strong>Botão indisponível</strong></span><br>';
+    const body = '<ul class="tooltip-list">' + reasons.map(r => `<li>${r}</li>`).join('') + '</ul>';
+    const title = header + body;
 
     wrapper.setAttribute('data-bs-toggle', 'tooltip');
     wrapper.setAttribute('data-bs-html', true);
