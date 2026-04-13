@@ -450,6 +450,37 @@ Tooltips, Popovers e Modal pop-up
     font-size: 75%;
 }
 
+.custom-tooltip:has(.tooltip-error-title) {
+    --bs-tooltip-bg: var(--compras-error);
+}
+
+.tooltip-error-title {
+    color: white;
+    width: 100%;
+    padding-top: 2px;
+    padding-left: 20px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid white !important;
+}
+
+.tooltip-error-title::before {
+    font-family: 'Material Symbols Outlined';
+    content: 'error';
+    font-variation-settings: 'FILL' 1, 'wght' 700;
+    position: absolute;
+    font-size: 16px;
+    top: 2px;
+    left: 6px;
+}
+
+.tooltip-error-list {
+    padding-top: 8px;
+    padding-left: 20px;
+    padding-right: 10px;
+    margin-bottom: 0;
+    color: white;
+}
+
 [popover].form-help-popover {
     position: absolute;
     position-area: left bottom;
@@ -475,24 +506,4 @@ Tooltips, Popovers e Modal pop-up
 
 .modal-detail {
     background-color: color-mix(in srgb, var(--compras-theme) 75%, white);
-}
-
-.tooltip-title {
-    color: var(--compras-error);
-}
-
-.tooltip-title::before {
-    font-family: 'Material Symbols Outlined';
-    content: 'error';
-    font-variation-settings: 'FILL' 1, 'wght' 700;
-    color: var(--compras-error);
-    position: absolute;
-    font-size: 20px;
-    top: -16px;
-    left: -12px;
-}
-
-.tooltip-list {
-    padding-top: 8px;
-    padding-left: 16px;
 }

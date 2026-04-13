@@ -396,8 +396,8 @@ function updateButtonTooltip(button, reasons) {
         return;
     }
 
-    const header = '<span class="tooltip-title"><strong>Botão indisponível</strong></span><br>';
-    const body = '<ul class="tooltip-list">' + reasons.map(r => `<li>${r}</li>`).join('') + '</ul>';
+    const header = '<div class="tooltip-error-title"><strong>Botão indisponível</strong></div>';
+    const body = '<ul class="tooltip-error-list">' + reasons.map(r => `<li>${r}</li>`).join('') + '</ul>';
     const title = header + body;
 
     wrapper.setAttribute('data-bs-toggle', 'tooltip');
