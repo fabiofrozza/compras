@@ -6,6 +6,7 @@ let selectedFiles = {}; // Armazena arquivos selecionados por containerId
 let wsDisconnectedAlertShown = false;
 let wsDisconnectedNotifId = null;
 let internetOfflineNotifId = null;
+let rNotFoundNotifId = null;
 
 // Estado global da aplicação — fonte de verdade para condições que não derivam do DOM
 const AppState = {
@@ -60,6 +61,24 @@ function connectWebSocket() {
 
             if (data.type === 'r-status') {
                 setState({ rAvailable: data.available });
+                if (!data.available && rNotFoundNotifId === null) {
+                    showToast('R não encontrado. Acesse a aba Instalação para baixar e instalar.', 'warning', 8000, 'Sistema');
+                    addNotification({
+                        message: 'R não está instalado neste computador. Sem ele, não é possível executar os scripts da aplicação.',
+                        type: 'warning',
+                        source: 'Sistema',
+                        actions: [{
+                            label: 'Ir para Instalação',
+                            callback: () => {
+                                const tabBtn = document.getElementById('instalacao-tab');
+                                if (tabBtn) new bootstrap.Tab(tabBtn).show();
+                            }
+                        }]
+                    }).then(id => { rNotFoundNotifId = id; });
+                } else if (data.available && rNotFoundNotifId !== null) {
+                    dismissNotification(rNotFoundNotifId);
+                    rNotFoundNotifId = null;
+                }
                 return;
             }
 
@@ -102,6 +121,23 @@ function connectWebSocket() {
                     type: data.type,
                     source: data.scriptName
                 });
+
+                // Sugestão extra: ao falhar um script R, orientar o usuário a atualizar pacotes
+                const nonRScripts = ['npm_update', 'atas_mailmerge'];
+                if (data.type === 'error' && data.scriptName && !nonRScripts.includes(data.scriptName)) {
+                    addNotification({
+                        message: 'Se o erro persistir, tente atualizar os pacotes R na aba Instalação.',
+                        type: 'info',
+                        source: 'Sistema',
+                        actions: [{
+                            label: 'Ir para Instalação',
+                            callback: () => {
+                                const tabBtn = document.getElementById('instalacao-tab');
+                                if (tabBtn) new bootstrap.Tab(tabBtn).show();
+                            }
+                        }]
+                    });
+                }
 
                 handleScriptResult({
                     status: data.type,
