@@ -57,8 +57,8 @@ function ensureConsoleDOM() {
   const logsDrawerHTML = `
     <div id="logs-drawer" class="logs-drawer d-none shadow-lg collapsed">
         <div class="logs-drawer-header" onclick="toggleLogsDrawer()">
-            <span class="logs-drawer-title">
-                <i class="material-symbols-outlined me-2" data-bs-toggle="tooltip" data-bs-title="Exibir logs das últimas execuções">description</i>
+            <span class="logs-drawer-title" data-bs-toggle="tooltip" data-bs-title="Logs das últimas execuções">
+                <i class="material-symbols-outlined me-2">bug_report</i>
                 <span>Logs</span>
             </span>
             <div class="logs-drawer-actions">
@@ -66,8 +66,7 @@ function ensureConsoleDOM() {
                     data-bs-title="Reabrir console" style="display:none" onclick="event.stopPropagation(); reopenConsole();">
                     <i class="material-symbols-outlined">terminal</i>
                 </button>
-                <button class="logs-drawer-action-btn btn-minimize-logs-drawer" data-bs-toggle="tooltip"
-                    data-bs-title="Minimizar" onclick="event.stopPropagation(); toggleLogsDrawer();">
+                <button class="logs-drawer-action-btn btn-minimize-logs-drawer" onclick="event.stopPropagation(); toggleLogsDrawer();">
                     <i class="material-symbols-outlined">minimize</i>
                 </button>
             </div>
@@ -81,6 +80,9 @@ function ensureConsoleDOM() {
 
   // Inserir no body (antes dos scripts)
   document.body.insertAdjacentHTML('beforeend', overlayHTML + consoleHTML + logsDrawerHTML);
+
+  // Registra tooltips dos elementos recém-inseridos dinamicamente
+  if (typeof initializeTooltips === 'function') initializeTooltips();
 
   consoleContainer = document.getElementById('console-container');
   consoleHeader = document.getElementById('console-header');
