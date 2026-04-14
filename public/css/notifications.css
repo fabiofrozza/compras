@@ -457,7 +457,7 @@ Tooltips, Popovers e Modal pop-up
 .tooltip-error-title {
     color: white;
     width: 100%;
-    padding-top: 2px;
+    padding-top: 0px;
     padding-left: 20px;
     padding-bottom: 4px;
     border-bottom: 1px solid white !important;
@@ -465,8 +465,8 @@ Tooltips, Popovers e Modal pop-up
 
 .tooltip-error-title::before {
     font-family: 'Material Symbols Outlined';
-    content: 'error';
-    font-variation-settings: 'FILL' 1, 'wght' 700;
+    content: 'close';
+    font-variation-settings: 'FILL' 0, 'wght' 700;
     position: absolute;
     font-size: 16px;
     top: 2px;
