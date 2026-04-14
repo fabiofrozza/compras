@@ -344,6 +344,9 @@ document.addEventListener('shown.bs.tab', async (event) => {
                 inicializarFornecedores();
             }
 
+            // Guard: após awaits anteriores, verificar se esta aba ainda é a ativa
+            if (!tabButton.classList.contains('active')) return;
+
             if (globalComputerName && (tabId === 'atas' || tabId === 'catmat' || tabId === 'fornecedores' || tabId === 'importacao' || tabId === 'mapas' || tabId === 'powerbi' || tabId === 'instalacao')) {
                 if (typeof ensureConsoleDOM === 'function') ensureConsoleDOM();
 
