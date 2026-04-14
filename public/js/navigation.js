@@ -1,13 +1,13 @@
 // --- Constante centralizada de abas ---
 const TAB_LIST = [
     { id: 'home', label: 'Página inicial', icon: 'home', hiddenAppButton: true, separator: 'after', hiddenHomeCard: true },
-    { id: 'atas', label: 'Atas', icon: 'description', description: 'Gere as Atas de Registro de Preços', color: 'text-primary' },
-    { id: 'catmat', label: 'Catmat', icon: 'percent_discount', description: 'Verifique as margens de preferência dos itens do TR', color: 'text-info' },
-    { id: 'fornecedores', label: 'Fornecedores', icon: 'storefront', description: 'Atualize os dados dos fornecedores', color: 'text-success' },
-    { id: 'importacao', label: 'Importação', icon: 'upload_file', description: 'Gere os arquivos para importação dos pedidos e relatórios gerenciais', color: 'text-warning' },
-    { id: 'mapas', label: 'Mapas', icon: 'shopping_basket', description: 'Transforme Mapas de licitação em listas prévias' },
-    { id: 'powerbi', label: 'Power BI', icon: 'add_chart', description: 'Gere os dados para o Observatório', color: 'text-danger', separator: 'after' },
-    { id: 'instalacao', label: 'Instalação', icon: 'build', hiddenHomeCard: true },
+    { id: 'atas', label: 'Atas', icon: 'description', description: 'Gere as Atas de Registro de Preços', color: 'text-primary', logsDrawer: true },
+    { id: 'catmat', label: 'Catmat', icon: 'percent_discount', description: 'Verifique as margens de preferência dos itens do TR', color: 'text-info', logsDrawer: true },
+    { id: 'fornecedores', label: 'Fornecedores', icon: 'storefront', description: 'Atualize os dados dos fornecedores', color: 'text-success', logsDrawer: true },
+    { id: 'importacao', label: 'Importação', icon: 'upload_file', description: 'Gere os arquivos para importação dos pedidos e relatórios gerenciais', color: 'text-warning', logsDrawer: true },
+    { id: 'mapas', label: 'Mapas', icon: 'shopping_basket', description: 'Transforme Mapas de licitação em listas prévias', logsDrawer: true },
+    { id: 'powerbi', label: 'Power BI', icon: 'add_chart', description: 'Gere os dados para o Observatório', color: 'text-danger', separator: 'after', logsDrawer: true },
+    { id: 'instalacao', label: 'Instalação', icon: 'build', hiddenHomeCard: true, logsDrawer: true },
 ];
 
 // --- Lazy Loading de Scripts e Estilos sob demanda ---
@@ -347,7 +347,8 @@ document.addEventListener('shown.bs.tab', async (event) => {
             // Guard: após awaits anteriores, verificar se esta aba ainda é a ativa
             if (!tabButton.classList.contains('active')) return;
 
-            if (globalComputerName && (tabId === 'atas' || tabId === 'catmat' || tabId === 'fornecedores' || tabId === 'importacao' || tabId === 'mapas' || tabId === 'powerbi' || tabId === 'instalacao')) {
+            const tabConfig = TAB_LIST.find(t => t.id === tabId);
+            if (globalComputerName && tabConfig?.logsDrawer) {
                 if (typeof ensureConsoleDOM === 'function') ensureConsoleDOM();
 
                 const logsList = document.getElementById('logs-file-list');
