@@ -3,7 +3,7 @@ title: "`r ifelse(importacao$validacao_manual, '[⚠ PRELIMINAR]{.vermelho} - ',
 subtitle: |
   | Grupo `r dados$info$grupo`
   | Etapa `r dados$info$etapa` - `r dados$info$ano`
-author: "`r Sys.getenv('COMPRAS_DEPARTMENT_NAME')`"
+author: "`r Sys.getenv('COMPRAS_COORDINATION_NAME')`"
 output:
   html_document:
     theme:

@@ -97,7 +97,7 @@ config_main <- function() {
       set_config(.config = list(status = list(inicio = TRUE)))
 
       # Lê arquivo com definições exclusivas da empresa
-      readRenviron(".Renviron")
+      readRenviron(file.path("..", "..", ".env"))
 
       # Chama demais scripts compartilhados
       source("logging.R")
@@ -568,7 +568,7 @@ config_ambiente <- function(script_nome, pasta = NULL) {
       # planilha de grupos do Catálogo de Materiais
       catalogo = Sys.getenv("COMPRAS_url_catalogo"),
       # planilha de Controle de Processos
-      controle = Sys.getenv("COMPRAS_url_controle"),
+      controle = Sys.getenv("COMPRAS_URL_PLANILHA_CONTROLE"),
       # planilha de Processos Administrativos
       pa = Sys.getenv("COMPRAS_url_pa"),
       # API dos Dados Abertos do Compras.gov.br para consulta aos Catmat e NCM

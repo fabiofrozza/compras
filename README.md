@@ -27,9 +27,7 @@ Aplicação web local que permite execução de scripts para auxiliar meus coleg
 
 1. [Baixe o conteúdo deste repositório](https://github.com/fabiofrozza/compras/archive/refs/heads/main.zip) e extraia na pasta desejada.
 
-1. Renomeie os seguintes arquivos e edite-os no Bloco de Notas, seguindo as instruções no seu interior:
-   * na pasta raiz: `.env-MODELO` para `.env`
-   * na pasta `scripts/_common`: `.Renviron-MODELO` para `.Renviron`
+1. Renomeie o arquivo `.env-MODELO` para `.env` e edite-o no Bloco de Notas, seguindo as instruções no seu interior.
 
 1. Substitua as seguintes imagens pelas da sua empresa:
    * `public/img/company.png`
