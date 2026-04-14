@@ -396,7 +396,7 @@ function updateButtonTooltip(button, reasons) {
         return;
     }
 
-    const header = '<div class="tooltip-error-title"><strong>Botão indisponível</strong></div>';
+    const header = '<div class="tooltip-error-title">Botão indisponível</div>';
     const body = '<ul class="tooltip-error-list">' + reasons.map(r => `<li>${r}</li>`).join('') + '</ul>';
     const title = header + body;
 
@@ -408,9 +408,7 @@ function updateButtonTooltip(button, reasons) {
         existingTooltip.setContent({ '.tooltip-inner': title });
     } else {
         new bootstrap.Tooltip(wrapper, {
-            container: 'body',
-            trigger: 'hover focus',
-            html: true,
+            ...TOOLTIP_DEFAULTS,
             customClass: 'custom-tooltip tooltip-disabled-btn'
         });
     }

@@ -102,11 +102,7 @@ document.addEventListener('fullscreenchange', () => {
     }
     const tooltip = bootstrap.Tooltip.getInstance(btn);
     if (tooltip) tooltip.dispose();
-    new bootstrap.Tooltip(btn, {
-        container: 'body',
-        trigger: 'hover',
-        customClass: 'custom-tooltip'
-    });
+    new bootstrap.Tooltip(btn, { ...TOOLTIP_DEFAULTS });
 });
 
 function applyDarkMode(darkModeEnabled = null) {
@@ -188,11 +184,7 @@ async function setHomeBackground(bgSource) {
             credit.setAttribute('data-bs-title', creditTooltip);
             const bsTooltip = bootstrap.Tooltip.getInstance(credit);
             if (bsTooltip) bsTooltip.dispose();
-            new bootstrap.Tooltip(credit, {
-                container: 'body',
-                trigger: 'hover',
-                customClass: 'custom-tooltip'
-            });
+            new bootstrap.Tooltip(credit, { ...TOOLTIP_DEFAULTS });
         };
 
         applyCredit();

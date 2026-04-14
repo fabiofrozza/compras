@@ -1,3 +1,11 @@
+const TOOLTIP_DEFAULTS = {
+    container: 'body',
+    trigger: 'hover focus',
+    html: true,
+    customClass: 'custom-tooltip',
+    delay: { show: 300, hide: 100 }
+};
+
 function showToast(message, type = 'success', duration, source = 'origem não informada') {
     const container = document.getElementById('toast-container');
     const defaultDurations = {
@@ -57,11 +65,7 @@ function initializeTooltips() {
     tooltipTriggerList.forEach(tooltipTriggerEl => {
         // Evita inicializar múltiplas vezes o mesmo elemento
         if (!bootstrap.Tooltip.getInstance(tooltipTriggerEl)) {
-            new bootstrap.Tooltip(tooltipTriggerEl, {
-                container: 'body',
-                trigger: 'hover',
-                customClass: 'custom-tooltip'
-            });
+            new bootstrap.Tooltip(tooltipTriggerEl, { ...TOOLTIP_DEFAULTS });
         }
     });
 }
