@@ -21,8 +21,8 @@ MAIN CONTENT
 /* Chrome, Safari, Edge - webkit scrollbar API */
 @supports selector(::-webkit-scrollbar) {
     *::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+        width: 10px;
+        height: 16px;
     }
 
     *::-webkit-scrollbar-button {
@@ -36,12 +36,16 @@ MAIN CONTENT
     }
 
     *::-webkit-scrollbar-track {
-        background: transparent;
+        background-color: var(--compras-contrast);
+        border: 1px solid var(--compras-text-primary);
+        border-radius: 24px;
     }
 
     *::-webkit-scrollbar-thumb {
         background: var(--compras-text-primary);
-        border-radius: 3px;
+        border-radius: 24px;
+        border: 3px solid transparent;
+        background-clip: content-box;
     }
 }
 
