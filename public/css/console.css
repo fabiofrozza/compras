@@ -366,8 +366,8 @@ body.dragging-console {
 .logs-drawer {
     position: fixed;
     bottom: 0;
-    right: var(--compras-padding-main);
-    width: 40vw;
+    left: var(--compras-padding-main);
+    width: 45vw;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
     display: flex;
