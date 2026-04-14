@@ -262,6 +262,11 @@ document.addEventListener('shown.bs.tab', async (event) => {
                 } catch (error) {
                     console.error('Erro ao carregar recursos da aba:', error);
                 }
+            } else if (earlyTabId === 'home') {
+                // Esconde o drawer imediatamente (síncrono) antes de qualquer await,
+                // evitando race condition com handlers de inicialização ainda em execução.
+                const logsDrawer = document.getElementById('logs-drawer');
+                if (logsDrawer) logsDrawer.classList.add('d-none');
             }
         }
 
