@@ -84,6 +84,7 @@ app.get('/api/app-config', (_req, res) => {
     departmentSite: process.env.COMPRAS_DEPARTMENT_SITE || '',
     manualSite: process.env.COMPRAS_MANUAL_SITE || '',
     backgroundRefreshTime: parseInt(process.env.COMPRAS_HOME_BACKGROUND_REFRESH_TIME, 10) || 0,
+    isDev: process.env.NODE_ENV === 'development',
   });
 });
 

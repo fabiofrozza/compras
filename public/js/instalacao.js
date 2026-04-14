@@ -291,5 +291,14 @@ async function carregarNpmPackages() {
 
 carregarInfoR();
 carregarInfoNode();
-carregarInfoNpm();
-carregarNpmPackages();
+
+fetch('/api/app-config')
+    .then(r => r.json())
+    .then(cfg => {
+        if (cfg.isDev) {
+            document.getElementById('npm-packages-panel')?.classList.remove('d-none');
+            carregarInfoNpm();
+            carregarNpmPackages();
+        }
+    })
+    .catch(() => { /* sem bloco npm em caso de falha */ });

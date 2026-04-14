@@ -1,6 +1,104 @@
 <!DOCTYPE html>
 <div class="row">
     <div class="col">
+        <!-- Informações do R -->
+        <div id="r-info-panel" class="script-form shadow-sm">
+            <h4 class="script-form-header" data-compras-icon="code_blocks" data-compras-title="Informações do R">
+            </h4>
+            <div class="collapse show" id="instalacao-r-info-collapse">
+                <div class="form-group">
+                    <div class="custom-spinner-container" id="r-info-loading">
+                        <div class="custom-spinner text-primary">
+                            <div class="spinner-border spinner-border-sm"></div>
+                            <span role="status">Verificando R...</span>
+                        </div>
+                    </div>
+                    <div id="r-info-content" class="d-none">
+                        <div class="dashboard-widget-grid">
+                            <div class="dashboard-widget">
+                                <div class="widget-icon">
+                                    <i class="material-symbols-outlined">terminal</i>
+                                </div>
+                                <div class="widget-content">
+                                    <span class="widget-label">Versão Instalada</span>
+                                    <span class="widget-value" id="r-info-version">-</span>
+                                </div>
+                            </div>
+                            <div class="dashboard-widget">
+                                <div class="widget-icon">
+                                    <i class="material-symbols-outlined">update</i>
+                                </div>
+                                <div class="widget-content">
+                                    <span class="widget-label">Versão Mais Recente</span>
+                                    <span class="widget-value">
+                                        <span id="r-info-latest">-</span>
+                                        <span id="r-info-status" class="badge ms-2"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="dashboard-widget widget-full">
+                                <div class="widget-icon">
+                                    <i class="material-symbols-outlined">folder</i>
+                                </div>
+                                <div class="widget-content">
+                                    <span class="widget-label">Local de Instalação</span>
+                                    <span class="widget-value" id="r-info-path">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-sm btn-outline-primary btn-run text-nowrap d-none"
+                        id="btn-download-r" onclick="downloadR()">
+                        Baixar R
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Pacotes R -->
+        <form id="form-instalacao" class="script-form shadow-sm">
+            <h4 class="script-form-header" data-compras-icon="package_2" data-compras-title="Pacotes R">
+            </h4>
+            <div class="collapse show" id="instalacao-pacotes-collapse">
+                <div class="form-group">
+                    <div class="option-card-group">
+                        <label class="option-card">
+                            <i class="material-symbols-outlined option-card-icon">
+                                install_desktop
+                            </i>
+                            <div>
+                                <div class="option-card-title">Instalar pacotes</div>
+                                <div class="option-card-description">Instala todos os pacotes R necessários para o
+                                    funcionamento da aplicação. Execute esta opção no primeiro uso.</div>
+                            </div>
+                            <input class="form-check-input" type="radio" name="instalacao-modo" value="instalar"
+                                checked>
+                        </label>
+                        <label class="option-card">
+                            <i class="material-symbols-outlined option-card-icon">
+                                event_repeat
+                            </i>
+                            <div>
+                                <div class="option-card-title">Atualizar pacotes</div>
+                                <div class="option-card-description">Atualiza os pacotes R para a versão mais recente
+                                    disponível. Utilize quando os scripts apresentarem erros relacionados a versões
+                                    desatualizadas.</div>
+                            </div>
+                            <input class="form-check-input" type="radio" name="instalacao-modo" value="atualizar">
+                        </label>
+                    </div>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-run-instalacao"
+                        onclick="executarInstalacaoSelecionada()">
+                        Executar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col">
         <!-- Informações do Node.js -->
         <div id="node-info-panel" class="script-form shadow-sm">
             <h4 class="script-form-header" data-compras-icon="hub" data-compras-title="Informações do Node.js">
@@ -50,8 +148,8 @@
                 </div>
             </div>
         </div>
-        <!-- Pacotes Node.js -->
-        <div id="npm-packages-panel" class="script-form shadow-sm">
+        <!-- Pacotes Node.js (apenas em modo desenvolvimento) -->
+        <div id="npm-packages-panel" class="script-form shadow-sm d-none">
             <h4 class="script-form-header" data-compras-icon="package_2" data-compras-title="Pacotes Node.js">
             </h4>
             <div class="collapse show" id="instalacao-npm-collapse">
@@ -108,103 +206,5 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="col">
-        <!-- Informações do R -->
-        <div id="r-info-panel" class="script-form shadow-sm">
-            <h4 class="script-form-header" data-compras-icon="info" data-compras-title="Informações do R">
-            </h4>
-            <div class="collapse show" id="instalacao-r-info-collapse">
-                <div class="form-group">
-                    <div class="custom-spinner-container" id="r-info-loading">
-                        <div class="custom-spinner text-primary">
-                            <div class="spinner-border spinner-border-sm"></div>
-                            <span role="status">Verificando R...</span>
-                        </div>
-                    </div>
-                    <div id="r-info-content" class="d-none">
-                        <div class="dashboard-widget-grid">
-                            <div class="dashboard-widget">
-                                <div class="widget-icon">
-                                    <i class="material-symbols-outlined">terminal</i>
-                                </div>
-                                <div class="widget-content">
-                                    <span class="widget-label">Versão Instalada</span>
-                                    <span class="widget-value" id="r-info-version">-</span>
-                                </div>
-                            </div>
-                            <div class="dashboard-widget">
-                                <div class="widget-icon">
-                                    <i class="material-symbols-outlined">update</i>
-                                </div>
-                                <div class="widget-content">
-                                    <span class="widget-label">Versão Mais Recente</span>
-                                    <span class="widget-value">
-                                        <span id="r-info-latest">-</span>
-                                        <span id="r-info-status" class="badge ms-2"></span>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="dashboard-widget widget-full">
-                                <div class="widget-icon">
-                                    <i class="material-symbols-outlined">folder</i>
-                                </div>
-                                <div class="widget-content">
-                                    <span class="widget-label">Local de Instalação</span>
-                                    <span class="widget-value" id="r-info-path">-</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-buttons">
-                    <button type="button" class="btn btn-sm btn-outline-primary btn-run text-nowrap d-none"
-                        id="btn-download-r" onclick="downloadR()">
-                        Baixar R
-                    </button>
-                </div>
-            </div>
-        </div>
-        <!-- Pacotes R -->
-        <form id="form-instalacao" class="script-form shadow-sm">
-            <h4 class="script-form-header" data-compras-icon="build" data-compras-title="Pacotes R">
-            </h4>
-            <div class="collapse show" id="instalacao-pacotes-collapse">
-                <div class="form-group">
-                    <div class="option-card-group">
-                        <label class="option-card">
-                            <i class="material-symbols-outlined option-card-icon">
-                                install_desktop
-                            </i>
-                            <div>
-                                <div class="option-card-title">Instalar pacotes</div>
-                                <div class="option-card-description">Instala todos os pacotes R necessários para o
-                                    funcionamento da aplicação. Execute esta opção no primeiro uso.</div>
-                            </div>
-                            <input class="form-check-input" type="radio" name="instalacao-modo" value="instalar"
-                                checked>
-                        </label>
-                        <label class="option-card">
-                            <i class="material-symbols-outlined option-card-icon">
-                                event_repeat
-                            </i>
-                            <div>
-                                <div class="option-card-title">Atualizar pacotes</div>
-                                <div class="option-card-description">Atualiza os pacotes R para a versão mais recente
-                                    disponível. Utilize quando os scripts apresentarem erros relacionados a versões
-                                    desatualizadas.</div>
-                            </div>
-                            <input class="form-check-input" type="radio" name="instalacao-modo" value="atualizar">
-                        </label>
-                    </div>
-                </div>
-                <div class="form-buttons">
-                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-run-instalacao"
-                        onclick="executarInstalacaoSelecionada()">
-                        Executar
-                    </button>
-                </div>
-            </div>
-        </form>
     </div>
 </div>
