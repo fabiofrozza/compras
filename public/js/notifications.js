@@ -1,6 +1,6 @@
 const TOOLTIP_DEFAULTS = {
     container: 'body',
-    trigger: 'hover focus',
+    trigger: 'hover',
     html: true,
     customClass: 'custom-tooltip',
     delay: { show: 300, hide: 100 }
