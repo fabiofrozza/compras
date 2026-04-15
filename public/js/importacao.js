@@ -17,6 +17,8 @@ function configurarValidacaoContinuaImportacao() {
     const configForm = document.getElementById('form-importacao-config');
 
     if (linkInput) {
+        linkInput.addEventListener('focus', () => linkInput.select());
+        linkInput.addEventListener('paste', () => setTimeout(() => linkInput.dispatchEvent(new Event('change')), 0));
         linkInput.addEventListener('change', validarLinkGoogle);
         linkInput.addEventListener('input', () => {
             importacaoLastValidatedLink = '';
