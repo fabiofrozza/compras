@@ -429,6 +429,7 @@ body.dragging-console {
     font-weight: 600;
     color: var(--compras-text-primary);
     cursor: pointer;
+    user-select: none;
 }
 
 .logs-drawer-header i {

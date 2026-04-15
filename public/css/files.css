@@ -147,6 +147,7 @@
 
 .files-table tbody tr {
     cursor: pointer;
+    user-select: none;
 }
 
 .files-table tbody tr.selected {
@@ -214,6 +215,7 @@
     border: 2px solid var(--bs-border-color);
     border-radius: 8px;
     cursor: pointer;
+    user-select: none;
     background-color: Field;
     transition: all 0.2s ease;
     text-align: center;
