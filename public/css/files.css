@@ -75,47 +75,55 @@
 }
 
 .folder-path-actions {
-    display: none;
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
+    display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 10px;
-    padding-left: 16px;
-    background: linear-gradient(to right, transparent, color-mix(in srgb, var(--compras-theme) 50%, white) 20%);
+    flex-shrink: 0;
 }
 
-.files-list:hover .folder-path-actions,
-.files-list-style:hover .folder-path-actions,
-.fornecedores-grid-list:hover .folder-path-actions {
-    display: flex;
-}
+/* Botões auxiliares das tabelas */
 
 .folder-path-btn {
     display: flex;
-    padding: 0;
+}
+
+.form-sub-container .form-sub-btn,
+.folder-path-btn,
+.file-row-btn {
+    padding: 3px;
     border: none;
+    border-radius: 4px;
     background: none;
     color: var(--bs-primary);
     cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
+    opacity: 0.5;
+    filter: grayscale(1);
+    transition: opacity 0.2s ease, filter 0.2s ease, background-color 0.2s ease;
     line-height: 1;
 }
 
-.folder-path-btn:hover {
+.form-sub-container .form-sub-btn:hover,
+.folder-path-btn:hover,
+.file-row-btn:hover {
     opacity: 1;
+    filter: grayscale(0);
+    background-color: color-mix(in srgb, currentColor 12%, transparent);
 }
 
-.folder-path-btn .material-symbols-outlined {
+.form-sub-container .form-sub-btn .material-symbols-outlined,
+.folder-path-btn .material-symbols-outlined,
+.file-row-btn i {
     font-size: 1rem;
 }
 
 .folder-path-btn:disabled {
     opacity: 0 !important;
     pointer-events: none;
+}
+
+.table-btn-column {
+    text-align: right;
+    padding-right: 4px !important;
 }
 
 /* Files table */
@@ -141,6 +149,11 @@
     cursor: pointer;
 }
 
+.files-table tbody tr.selected {
+    background-color: color-mix(in srgb, var(--file-color) 50%, var(--compras-contrast));
+    border-left: 4px solid var(--file-color);
+}
+
 /* File icons */
 
 .file-icon {
@@ -151,34 +164,35 @@
 .file-icon i {
     vertical-align: baseline !important;
     font-variation-settings: 'opsz' 48;
+    color: var(--file-color);
 }
 
-.file-word {
-    color: #2B579A;
+.files-table tbody tr:has(.file-word) {
+    --file-color: #2B579A;
 }
 
-.file-excel {
-    color: #217346;
+.files-table tbody tr:has(.file-excel) {
+    --file-color: #217346;
 }
 
-.file-pdf {
-    color: #D30015;
+.files-table tbody tr:has(.file-pdf) {
+    --file-color: #D30015;
 }
 
-.file-text {
-    color: #777;
+.files-table tbody tr:has(.file-text) {
+    --file-color: #777;
 }
 
-.file-image {
-    color: #FF6B6B;
+.files-table tbody tr:has(.file-image) {
+    --file-color: #FF6B6B;
 }
 
-.file-archive {
-    color: #FF6B35;
+.files-table tbody tr:has(.file-archive) {
+    --file-color: #FF6B35;
 }
 
-.file-code {
-    color: #276DC3;
+.files-table tbody tr:has(.file-code) {
+    --file-color: #276DC3;
 }
 
 /* Items grid (pregões e visualização em grid de arquivos) */
@@ -247,7 +261,7 @@
 
 .item-card-status {
     position: absolute;
-    top: 6px;
+    top: 8px;
     right: 6px;
 }
 
@@ -279,42 +293,9 @@
 }
 
 .item-card-delete {
-    top: 20px;
+    top: 26px;
 }
 
 .item-card-open {
-    top: 0px;
-}
-
-.item-card-delete:hover,
-.item-card-open:hover {
-    opacity: 1 !important;
-}
-
-/* Botões auxiliares das tabelas */
-
-.table-btn-column {
-    text-align: right;
-}
-
-.file-row-btn {
-    --bs-btn-padding-y: 0;
-    --bs-btn-padding-x: 0;
-    border: none;
-    background: none;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.file-row-btn i {
-    font-size: 16px !important;
-}
-
-.files-table tbody tr:hover .file-row-btn,
-.item-card:hover .file-row-btn {
-    opacity: 0.7;
-}
-
-.file-row-btn:hover {
-    opacity: 1 !important;
+    top: 6px;
 }

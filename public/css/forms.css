@@ -85,31 +85,11 @@
 }
 
 .form-sub-container .form-sub-btn {
-    display: none;
+    display: flex;
     position: absolute;
     top: 4px;
     right: 4px;
-    padding: 0;
-    border: none;
-    background: none;
-    color: var(--bs-danger);
-    cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-    line-height: 1;
-}
-
-.form-sub-container .form-sub-btn:hover {
-    opacity: 1;
-}
-
-.form-sub-container:hover .form-sub-btn {
-    display: flex;
-}
-
-.form-sub-container .form-sub-btn .material-symbols-outlined {
-    font-size: 1.5rem;
-    font-variation-settings: 'FILL' 1, 'wght' 400;
+    color: var(--bs-danger) !important;
 }
 
 /* Grid de formulários */
