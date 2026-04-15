@@ -18,11 +18,11 @@
 
 .files-list.view-grid {
     padding: 8px;
-}
 
-.files-list.view-grid .folder-path-container {
-    margin: -8px -8px 8px;
-    border-radius: 5px 5px 0 0;
+    .folder-path-container {
+        margin: -8px -8px 8px;
+        border-radius: 5px 5px 0 0;
+    }
 }
 
 .files-list:not(.is-invalid):has(.selectable),
@@ -133,26 +133,26 @@
     border-collapse: collapse;
     font-size: 12px;
     background-color: Field;
-}
 
-.files-table td {
-    padding: 2px;
-    vertical-align: top;
-    word-break: break-all;
-}
+    td {
+        padding: 2px;
+        vertical-align: top;
+        word-break: break-all;
+    }
 
-.files-table tbody tr:hover {
-    background: var(--compras-contrast);
-}
+    tbody tr {
+        cursor: pointer;
+        user-select: none;
 
-.files-table tbody tr {
-    cursor: pointer;
-    user-select: none;
-}
+        &:hover {
+            background: var(--compras-contrast);
+        }
 
-.files-table tbody tr.selected {
-    background-color: color-mix(in srgb, var(--file-color) 50%, var(--compras-contrast));
-    border-left: 4px solid var(--file-color);
+        &.selected {
+            background-color: color-mix(in srgb, var(--file-color) 50%, var(--compras-contrast));
+            border-left: 4px solid var(--file-color);
+        }
+    }
 }
 
 /* File icons */
@@ -160,40 +160,43 @@
 .file-icon {
     margin-left: 6px;
     font-size: 1rem;
+
+    i {
+        vertical-align: baseline !important;
+        font-variation-settings: 'opsz' 48;
+        color: var(--file-color);
+    }
 }
 
-.file-icon i {
-    vertical-align: baseline !important;
-    font-variation-settings: 'opsz' 48;
-    color: var(--file-color);
-}
+.files-table tbody tr,
+.item-card {
+    &:has(.file-word) {
+        --file-color: #2B579A;
+    }
 
-.files-table tbody tr:has(.file-word) {
-    --file-color: #2B579A;
-}
+    &:has(.file-excel) {
+        --file-color: #217346;
+    }
 
-.files-table tbody tr:has(.file-excel) {
-    --file-color: #217346;
-}
+    &:has(.file-pdf) {
+        --file-color: #D30015;
+    }
 
-.files-table tbody tr:has(.file-pdf) {
-    --file-color: #D30015;
-}
+    &:has(.file-text) {
+        --file-color: #777;
+    }
 
-.files-table tbody tr:has(.file-text) {
-    --file-color: #777;
-}
+    &:has(.file-image) {
+        --file-color: #FF6B6B;
+    }
 
-.files-table tbody tr:has(.file-image) {
-    --file-color: #FF6B6B;
-}
+    &:has(.file-archive) {
+        --file-color: #FF6B35;
+    }
 
-.files-table tbody tr:has(.file-archive) {
-    --file-color: #FF6B35;
-}
-
-.files-table tbody tr:has(.file-code) {
-    --file-color: #276DC3;
+    &:has(.file-code) {
+        --file-color: #276DC3;
+    }
 }
 
 /* Items grid (pregões e visualização em grid de arquivos) */
@@ -219,37 +222,50 @@
     background-color: Field;
     transition: all 0.2s ease;
     text-align: center;
-}
 
-.item-card.item-selected {
-    border-color: var(--bs-primary);
-    background-color: var(--bs-primary-bg-subtle);
+    &.item-selected {
+        border-color: var(--bs-primary);
+        background-color: var(--bs-primary-bg-subtle);
+    }
+
+    &.status-pendente {
+        .item-card-icon i,
+        .item-card-status i {
+            color: var(--compras-pending);
+        }
+    }
+
+    &.status-sucesso {
+        .item-card-icon i,
+        .item-card-status i {
+            color: var(--compras-success);
+        }
+    }
+
+    &.status-parcial {
+        .item-card-icon i,
+        .item-card-status i {
+            color: var(--compras-warning);
+        }
+    }
+
+    &.status-sem_saida {
+        .item-card-icon i,
+        .item-card-status i {
+            color: var(--compras-error);
+        }
+    }
 }
 
 .item-card-icon {
     font-size: 2rem;
     margin-bottom: 4px;
-}
 
-.item-card-icon i {
-    font-size: 2rem;
-    font-variation-settings: 'FILL' 1;
-}
-
-.item-card.status-pendente .item-card-icon i {
-    color: var(--compras-pending);
-}
-
-.item-card.status-sucesso .item-card-icon i {
-    color: var(--compras-success);
-}
-
-.item-card.status-parcial .item-card-icon i {
-    color: var(--compras-warning);
-}
-
-.item-card.status-sem_saida .item-card-icon i {
-    color: var(--compras-error);
+    i {
+        font-size: 2rem;
+        font-variation-settings: 'FILL' 1;
+        color: var(--file-color);
+    }
 }
 
 .item-card-name {
@@ -265,27 +281,11 @@
     position: absolute;
     top: 8px;
     right: 6px;
-}
 
-.item-card-status i {
-    font-size: 14px;
-    vertical-align: top;
-}
-
-.item-card.status-pendente .item-card-status i {
-    color: var(--compras-pending);
-}
-
-.item-card.status-sucesso .item-card-status i {
-    color: var(--compras-success);
-}
-
-.item-card.status-parcial .item-card-status i {
-    color: var(--compras-warning);
-}
-
-.item-card.status-sem_saida .item-card-status i {
-    color: var(--compras-error);
+    i {
+        font-size: 14px;
+        vertical-align: top;
+    }
 }
 
 .item-card-delete,
