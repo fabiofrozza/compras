@@ -44,14 +44,7 @@ async function carregarPregoes() {
     const container = document.getElementById('fornecedores-pregoes-list');
     if (!container) return;
 
-    container.innerHTML = `
-        <div class="custom-spinner-container">
-            <div class="custom-spinner text-primary">
-                <div class="spinner-border"></div>
-                <span role="status">Carregando pregões...</span>
-            </div>
-        </div>
-    `;
+    container.innerHTML = customSpinnerHTML('Carregando pregões...');
 
     try {
         const response = await fetch('/api/fornecedores/pregoes');
@@ -207,14 +200,7 @@ async function carregarConteudoPasta(pregao) {
 
     if (titulo) titulo.textContent = `Fornecedores - Pregão ${pregao}`;
 
-    container.innerHTML = `
-        <div class="custom-spinner-container">
-            <div class="custom-spinner text-primary">
-                <div class="spinner-border"></div>
-                <span role="status">Carregando arquivos...</span>
-            </div>
-        </div>
-    `;
+    container.innerHTML = customSpinnerHTML('Carregando arquivos...');
 
     try {
         const response = await fetch(`/api/fornecedores/pregao/${pregao}/arquivos`);
@@ -474,14 +460,7 @@ async function carregarImportar() {
     const container = document.getElementById('fornecedores-importar-list');
     if (!container) return;
 
-    container.innerHTML = `
-        <div class="custom-spinner-container">
-            <div class="custom-spinner text-primary">
-                <div class="spinner-border"></div>
-                <span role="status">Carregando arquivos...</span>
-            </div>
-        </div>
-    `;
+    container.innerHTML = customSpinnerHTML('Carregando arquivos...');
 
     try {
         const response = await fetch('/api/fornecedores/importar');

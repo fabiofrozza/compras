@@ -1,5 +1,16 @@
 const darkModeBtn = document.getElementById('darkModeBtn');
 
+// ====== SPINNER ======
+
+function customSpinnerHTML(message, color = 'primary') {
+    return `<div class="custom-spinner-container">
+                <div class="custom-spinner text-${color}">
+                    <div class="spinner-border"></div>
+                    <span role="status">${message}</span>
+                </div>
+            </div>`;
+}
+
 // ====== CABEÇALHOS DE SCRIPT-FORM ======
 
 function initScriptFormHeaders(container) {

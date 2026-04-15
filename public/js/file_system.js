@@ -150,14 +150,7 @@ async function clearFolderFiles(containerId, folderPath, scriptName, innerFolder
     if (!confirmed) return;
 
     try {
-        filesList.innerHTML = `
-            <div class="custom-spinner-container">
-                <div class="custom-spinner text-danger">
-                    <div class="spinner-border"></div>
-                    <span role="status">Excluindo arquivos...</span>
-                </div>
-            </div>
-        `;
+        filesList.innerHTML = customSpinnerHTML('Excluindo arquivos...', 'danger');
 
         let url = `/api/clear-folder/${scriptName}/${innerFolder}`;
         let params = new URLSearchParams();
@@ -352,14 +345,7 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
     filesList.classList.toggle('view-grid', viewMode === 'grid');
 
     try {
-        filesList.innerHTML = `
-            <div class="custom-spinner-container">
-                <div class="custom-spinner text-primary">
-                    <div class="spinner-border"></div>
-                    <span role="status">Atualizando lista de arquivos...</span>
-                </div>
-            </div>
-        `;
+        filesList.innerHTML = customSpinnerHTML('Atualizando lista de arquivos...');
 
         let url = `/api/list-files/${scriptName}/${innerFolder}`;
         let params = new URLSearchParams();

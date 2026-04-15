@@ -289,6 +289,11 @@ async function carregarNpmPackages() {
     }
 }
 
+document.getElementById('r-info-loading').innerHTML = customSpinnerHTML('Verificando R...');
+document.getElementById('node-info-loading').innerHTML = customSpinnerHTML('Verificando Node.js...');
+document.getElementById('npm-version-loading').innerHTML = customSpinnerHTML('Verificando npm...');
+document.getElementById('npm-packages-loading').innerHTML = customSpinnerHTML('Verificando pacotes...');
+
 carregarInfoR();
 carregarInfoNode();
 

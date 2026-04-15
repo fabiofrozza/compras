@@ -87,12 +87,7 @@ function buildTabPanes() {
         const activeClass = isDefault ? ' show active' : ' fade';
         return `
             <div class="tab-pane${activeClass}" id="${tab.id}" role="tabpanel" aria-labelledby="${tab.id}-tab" data-load-url="tabs/${tab.id}.html">
-                <div class="custom-spinner-container">
-                    <div class="custom-spinner text-primary">
-                        <div class="spinner-border"></div>
-                        <span role="status">Carregando aba...</span>
-                    </div>
-                </div>
+                ${customSpinnerHTML('Carregando aba...')}
             </div>`;
     }).join('');
 }
