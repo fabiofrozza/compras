@@ -58,20 +58,42 @@
 }
 
 .btn-tooltip-wrapper {
-    display: inline-block;
-}
-
-.btn-tooltip-wrapper:has(button:disabled) {
-    cursor: not-allowed;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .btn-tooltip-wrapper>button:disabled {
     pointer-events: none;
 }
 
+.btn-unavailable-icon {
+    font-size: 1.1rem;
+    color: var(--compras-error);
+    cursor: help;
+    flex-shrink: 0;
+    font-variation-settings: 'FILL' 1;
+    pointer-events: auto;
+}
+
 .tooltip-disabled-btn .tooltip-inner {
     text-align: left;
     white-space: pre-wrap;
+}
+
+/* Container for help/required icons inside form labels */
+.label-icons {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 6px;
+    cursor: help;
+    font-size: 90%;
+    line-height: .75;
+}
+
+.form-label-help {
+    pointer-events: auto;
 }
 
 .form-sub-container {
