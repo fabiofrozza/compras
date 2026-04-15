@@ -90,13 +90,15 @@
 
                 <div class="tab-pane fade show active" id="content-arquivos-importacao" role="tabpanel">
                     <div class="row">
-                        <div class="col">
-                            <h4>Arquivos para importar</h4>
+                        <div class="col-sm-6">
+                            <h4 class="script-form-header" data-compras-icon="upload_file"
+                                data-compras-title="Arquivos para importar"></h4>
                             <div id="importacao-arquivos-csv" class="files-list" data-folder="ARQUIVOS_IMPORTAR"
                                 data-extensions="csv" data-selectable="false"></div>
                         </div>
-                        <div class="col">
-                            <h4>Descrição de itens a ajustar</h4>
+                        <div class="col-sm-6">
+                            <h4 class="script-form-header" data-compras-icon="edit_note"
+                                data-compras-title="Descrição de itens a ajustar"></h4>
                             <div id="importacao-arquivos-xlsx" class="files-list" data-folder="ARQUIVOS_IMPORTAR"
                                 data-extensions="xlsx" data-selectable="false"></div>
                         </div>
@@ -111,13 +113,15 @@
 
                 <div class="tab-pane fade" id="content-resumo-pedidos" role="tabpanel">
                     <div class="row">
-                        <div class="col">
-                            <h4>Prints das telas dos pedidos</h4>
+                        <div class="col-sm-6">
+                            <h4 class="script-form-header" data-compras-icon="screenshot"
+                                data-compras-title="Prints das telas dos pedidos"></h4>
                             <div id="importacao-resumos-pdf" class="files-list" data-folder="RESUMO_PEDIDOS"
                                 data-extensions="pdf" data-selectable="false"></div>
                         </div>
-                        <div class="col">
-                            <h4>Resumos gerados</h4>
+                        <div class="col-sm-6">
+                            <h4 class="script-form-header" data-compras-icon="description"
+                                data-compras-title="Resumos gerados"></h4>
                             <div id="importacao-resumos-xlsx" class="files-list" data-folder="RESUMO_PEDIDOS"
                                 data-extensions="xlsx" data-selectable="false"></div>
                         </div>
@@ -144,13 +148,15 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col">
-                            <h4>Planilha auxiliar para DFD</h4>
+                        <div class="col-sm-6">
+                            <h4 class="script-form-header" data-compras-icon="table_chart"
+                                data-compras-title="Planilha auxiliar para DFD"></h4>
                             <div id="importacao-relatorios-xlsx" class="files-list" data-folder="RELATORIOS"
                                 data-extensions="xlsx" data-selectable="false"></div>
                         </div>
-                        <div class="col">
-                            <h4>Relatórios gerenciais</h4>
+                        <div class="col-sm-6">
+                            <h4 class="script-form-header" data-compras-icon="analytics"
+                                data-compras-title="Relatórios gerenciais"></h4>
                             <div id="importacao-relatorios-pdf" class="files-list" data-folder="RELATORIOS"
                                 data-extensions="pdf" data-selectable="false"></div>
                         </div>
@@ -176,7 +182,7 @@
                                 <div class="form-group">
                                     <label for="importacao-val-min" class="form-label" data-bs-toggle="tooltip"
                                         data-bs-title="Valor mínimo total do item para inclusão no processo">
-                                        Valor Mínimo
+                                        Valor mínimo do item
                                     </label>
                                     <input type="number" class="form-control form-control-sm" id="importacao-val-min"
                                         data-field="valor_minimo" data-validate-rule="numeric" min="1" required
@@ -187,7 +193,7 @@
                                 <div class="form-group">
                                     <label for="importacao-qtd-min" class="form-label" data-bs-toggle="tooltip"
                                         data-bs-title="Quantidade mínima demandada do item para inclusão no processo">
-                                        Qtd. Mínima
+                                        Quantidade mínima do item
                                     </label>
                                     <input type="number" class="form-control form-control-sm" id="importacao-qtd-min"
                                         data-field="qtd_minima" data-validate-rule="numeric" min="1" required
@@ -198,7 +204,7 @@
                                 <div class="form-group">
                                     <label for="importacao-celula" class="form-label" data-bs-toggle="tooltip"
                                         data-bs-title="Célula da LISTA FINAL onde inicia a área de inserção dos quantitativos pelas Unidades (ex: Q6)">
-                                        Célula Inicial
+                                        Célula inicial da inserção dos quantitativos
                                     </label>
                                     <input type="text" class="form-control form-control-sm" id="importacao-celula"
                                         data-field="celula_inicial" data-validate-rule="pattern"
@@ -213,7 +219,7 @@
                                 <div class="form-group">
                                     <label for="importacao-qtd-un" class="form-label" data-bs-toggle="tooltip"
                                         data-bs-title="Quantidade de colunas de Unidades requerentes (incluindo ocultas)">
-                                        Qtd. Unidades
+                                        Quantidade de Unidades requerentes
                                     </label>
                                     <input type="number" class="form-control form-control-sm" id="importacao-qtd-un"
                                         data-field="qtd_unidades" min="1" data-validate-rule="numeric" min="1" required
@@ -224,7 +230,7 @@
                                 <div class="form-group">
                                     <label for="importacao-aba-menu" class="form-label" data-bs-toggle="tooltip"
                                         data-bs-title="Nome da aba Menu na planilha (apenas letras, números e espaços)">
-                                        Aba Menu
+                                        Nome da Aba Menu
                                     </label>
                                     <input type="text" class="form-control form-control-sm" id="importacao-aba-menu"
                                         data-field="aba_menu" placeholder="Ex: Menu" required
@@ -235,7 +241,7 @@
                                 <div class="form-group">
                                     <label for="importacao-aba-lista" class="form-label" data-bs-toggle="tooltip"
                                         data-bs-title="Nome da aba LISTA FINAL na planilha (apenas letras, números e espaços)">
-                                        Aba LISTA FINAL
+                                        Nome da Aba LISTA FINAL
                                     </label>
                                     <input type="text" class="form-control form-control-sm" id="importacao-aba-lista"
                                         data-field="aba_lista_final" placeholder="Ex: LISTA FINAL" value="LISTA FINAL"
