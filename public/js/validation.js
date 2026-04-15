@@ -387,12 +387,20 @@ function updateButtonTooltip(button, reasons) {
         ? button.parentElement
         : wrapButtonForTooltip(button);
 
-    const existingTooltip = bootstrap.Tooltip.getInstance(wrapper);
+    // Clean up any legacy tooltip on the wrapper itself
+    const wrapperTooltip = bootstrap.Tooltip.getInstance(wrapper);
+    if (wrapperTooltip) wrapperTooltip.dispose();
+    wrapper.removeAttribute('data-bs-toggle');
+    wrapper.removeAttribute('data-bs-title');
+
+    let warningIcon = wrapper.querySelector('.btn-unavailable-icon');
 
     if (reasons.length === 0) {
-        if (existingTooltip) existingTooltip.dispose();
-        wrapper.removeAttribute('data-bs-toggle');
-        wrapper.removeAttribute('data-bs-title');
+        if (warningIcon) {
+            const iconTooltip = bootstrap.Tooltip.getInstance(warningIcon);
+            if (iconTooltip) iconTooltip.dispose();
+            warningIcon.remove();
+        }
         return;
     }
 
@@ -400,14 +408,21 @@ function updateButtonTooltip(button, reasons) {
     const body = '<ul class="tooltip-error-list">' + reasons.map(r => `<li>${r}</li>`).join('') + '</ul>';
     const title = header + body;
 
-    wrapper.setAttribute('data-bs-toggle', 'tooltip');
-    wrapper.setAttribute('data-bs-html', true);
-    wrapper.setAttribute('data-bs-title', title);
+    if (!warningIcon) {
+        warningIcon = document.createElement('i');
+        warningIcon.className = 'material-symbols-outlined btn-unavailable-icon';
+        warningIcon.textContent = 'cancel';
+        wrapper.insertBefore(warningIcon, button);
+    }
 
-    if (existingTooltip) {
-        existingTooltip.setContent({ '.tooltip-inner': title });
+    warningIcon.setAttribute('data-bs-html', 'true');
+    warningIcon.setAttribute('data-bs-title', title);
+
+    const existingIconTooltip = bootstrap.Tooltip.getInstance(warningIcon);
+    if (existingIconTooltip) {
+        existingIconTooltip.setContent({ '.tooltip-inner': title });
     } else {
-        new bootstrap.Tooltip(wrapper, {
+        new bootstrap.Tooltip(warningIcon, {
             ...TOOLTIP_DEFAULTS,
             customClass: 'custom-tooltip tooltip-disabled-btn'
         });
