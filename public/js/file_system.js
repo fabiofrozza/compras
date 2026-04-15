@@ -241,11 +241,16 @@ function refreshFileList(containerId, scriptName) {
     const fileList = document.getElementById(containerId);
 
     if (!scriptName) {
-        const mainTabPane = fileList.closest('.tab-pane[data-load-url]');
-        if (mainTabPane) {
-            scriptName = mainTabPane.id;
+        if (fileList.dataset.scriptName) {
+            scriptName = fileList.dataset.scriptName;
         } else {
-            scriptName = fileList.closest('.tab-pane').id;
+            const mainTabPane = fileList.closest('.tab-pane[data-load-url]');
+            if (mainTabPane) {
+                scriptName = mainTabPane.id;
+            } else {
+                const tabPane = fileList.closest('.tab-pane');
+                scriptName = tabPane ? tabPane.id : null;
+            }
         }
     }
 
