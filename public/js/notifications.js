@@ -1,3 +1,11 @@
+const TOOLTIP_DEFAULTS = {
+    container: 'body',
+    trigger: 'hover',
+    html: true,
+    customClass: 'custom-tooltip',
+    delay: { show: 300, hide: 100 }
+};
+
 function showToast(message, type = 'success', duration, source = 'origem não informada') {
     const container = document.getElementById('toast-container');
     const defaultDurations = {
@@ -36,17 +44,53 @@ function showToast(message, type = 'success', duration, source = 'origem não in
     setTimeout(removeToast, duration);
 }
 
+function getLabelIconsContainer(labelEl) {
+    let container = labelEl.querySelector(':scope > .label-icons');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'label-icons';
+        labelEl.appendChild(container);
+    }
+    return container;
+}
+
+function transformLabelTooltips() {
+    document.querySelectorAll('label[data-bs-toggle="tooltip"]').forEach(label => {
+        const title = label.getAttribute('data-bs-title');
+        if (!title) return;
+
+        // Descarta instância prévia, caso initializeTooltips tenha rodado antes
+        const existing = bootstrap.Tooltip.getInstance(label);
+        if (existing) existing.dispose();
+
+        label.removeAttribute('data-bs-toggle');
+        label.removeAttribute('data-bs-title');
+
+        const icon = document.createElement('i');
+        icon.className = 'material-symbols-outlined form-label-help';
+        icon.textContent = 'help';
+        icon.setAttribute('data-bs-toggle', 'tooltip');
+        icon.setAttribute('data-bs-title', title);
+        getLabelIconsContainer(label).appendChild(icon);
+    });
+}
+
 function createRequiredFieldsTooltip() {
-    const requiredFields = document.querySelectorAll('label:has(+ [data-validate-rule]):not(:has(.indicator-required)), label:has(+ :required):not(:has(.indicator-required)), label:has(+ * :required):not(:has(.indicator-required)), h4:has(+ [data-validate-rule], + * [data-validate-rule], + :required, + * :required):not(:has(.indicator-required))');
+    transformLabelTooltips();
+    const requiredFields = document.querySelectorAll('label:has(+ [data-validate-rule]):not(:has(.indicator-required)), label:has(+ :required):not(:has(.indicator-required)), label:has(+ * :required):not(:has(.indicator-required)), h4:has(~ [data-validate-rule], ~ * [data-validate-rule], ~ :required, ~ * :required):not(:has(.indicator-required))');
     requiredFields.forEach(field => {
         const asteriskSpan = document.createElement('span');
         asteriskSpan.className = 'indicator-required';
         asteriskSpan.dataset.bsTitle = 'Campo obrigatório';
         asteriskSpan.dataset.bsToggle = 'tooltip';
-        asteriskSpan.innerHTML = '<i class="material-symbols-outlined">emergency</i>'
+        asteriskSpan.innerHTML = '<i class="material-symbols-outlined">emergency</i>';
 
-        const titleSpan = field.querySelector(':scope > span');
-        (titleSpan || field).appendChild(asteriskSpan);
+        if (field.tagName === 'LABEL') {
+            getLabelIconsContainer(field).appendChild(asteriskSpan);
+        } else {
+            const titleSpan = field.querySelector(':scope > span');
+            (titleSpan || field).appendChild(asteriskSpan);
+        }
     });
 
     initializeTooltips();
@@ -54,17 +98,21 @@ function createRequiredFieldsTooltip() {
 
 function initializeTooltips() {
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
-        container: 'body',
-        trigger: 'hover',
-        customClass: 'custom-tooltip'
-    }));
+    tooltipTriggerList.forEach(tooltipTriggerEl => {
+        // Evita inicializar múltiplas vezes o mesmo elemento
+        if (!bootstrap.Tooltip.getInstance(tooltipTriggerEl)) {
+            new bootstrap.Tooltip(tooltipTriggerEl, { ...TOOLTIP_DEFAULTS });
+        }
+    });
 }
 
 function removeTooltip(element) {
-    // Ocultar tooltip antes de remover o elemento do DOM
+    // Ocultar e destruir tooltip antes de remover o elemento do DOM
     const tooltip = bootstrap.Tooltip.getInstance(element);
-    if (tooltip) tooltip.hide();
+    if (tooltip) {
+        tooltip.hide();
+        tooltip.dispose();
+    }
 }
 
 initializeTooltips();

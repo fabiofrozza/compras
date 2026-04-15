@@ -91,11 +91,10 @@ body {
 
 .indicator-required {
     color: var(--compras-error);
-    cursor: help;
-    margin-left: 3px;
 }
 
-.indicator-required i {
+h4 .indicator-required i {
+    margin-left: 4px;
     font-size: .75rem !important;
     vertical-align: baseline !important;
 }

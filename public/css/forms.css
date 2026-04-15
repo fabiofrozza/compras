@@ -9,6 +9,13 @@
     margin-bottom: 24px;
 }
 
+.script-form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: default;
+}
+
 .script-form h4,
 .sub-tabs .nav-link {
     font-size: 1em;
@@ -31,6 +38,12 @@
     padding-bottom: 8px;
 }
 
+.script-form-header-buttons {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
 .form-group {
     margin-bottom: 12px;
     display: flex;
@@ -45,20 +58,42 @@
 }
 
 .btn-tooltip-wrapper {
-    display: inline-block;
-}
-
-.btn-tooltip-wrapper:has(button:disabled) {
-    cursor: not-allowed;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .btn-tooltip-wrapper>button:disabled {
     pointer-events: none;
 }
 
+.btn-unavailable-icon {
+    font-size: 1.1rem;
+    color: var(--compras-error);
+    cursor: help;
+    flex-shrink: 0;
+    font-variation-settings: 'FILL' 1;
+    pointer-events: auto;
+}
+
 .tooltip-disabled-btn .tooltip-inner {
     text-align: left;
     white-space: pre-wrap;
+}
+
+/* Container for help/required icons inside form labels */
+.label-icons {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 6px;
+    cursor: help;
+    font-size: 90%;
+    line-height: .75;
+}
+
+.form-label-help {
+    pointer-events: auto;
 }
 
 .form-sub-container {
@@ -72,31 +107,11 @@
 }
 
 .form-sub-container .form-sub-btn {
-    display: none;
+    display: flex;
     position: absolute;
     top: 4px;
     right: 4px;
-    padding: 0;
-    border: none;
-    background: none;
-    color: var(--bs-danger);
-    cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-    line-height: 1;
-}
-
-.form-sub-container .form-sub-btn:hover {
-    opacity: 1;
-}
-
-.form-sub-container:hover .form-sub-btn {
-    display: flex;
-}
-
-.form-sub-container .form-sub-btn .material-symbols-outlined {
-    font-size: 1.5rem;
-    font-variation-settings: 'FILL' 1, 'wght' 400;
+    color: var(--bs-danger) !important;
 }
 
 /* Grid de formulários */
@@ -251,8 +266,9 @@
 }
 
 .btn-sm .material-symbols-outlined {
-    font-size: 20px;
+    font-size: 16px;
     font-variation-settings: 'opsz' 48;
+    vertical-align: sub;
 }
 
 /* Estilos de Abas de Importação no Formulário */
@@ -364,15 +380,49 @@
     color: var(--bs-secondary-color);
 }
 
+/* Botão de ajuda no cabeçalho de formulários */
+.form-header-help,
+.form-collapse-btn {
+    background: none;
+    border: none;
+    line-height: 1;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all .25s ease;
+    color: var(--compras-text-primary);
+    cursor: pointer;
+}
+
+.form-header-help:hover,
+.form-collapse-btn:hover {
+    background-color: rgba(128, 128, 128, 0.15);
+}
+
+.form-header-help .material-symbols-outlined {
+    font-size: 1rem;
+    vertical-align: middle;
+}
+
+.form-collapse-btn .material-symbols-outlined {
+    font-size: 1.25rem;
+    vertical-align: top;
+    font-variation-settings: 'opsz' 48;
+}
+
+.form-collapse-btn .material-symbols-outlined::before {
+    content: 'keyboard_arrow_up';
+}
+
+.form-collapse-btn.collapsed .material-symbols-outlined::before {
+    content: 'keyboard_arrow_down';
+}
+
 /* Info bar e filtros da tabela Observatório */
 .obs-tool-btn {
     background: none;
     border: none;
     padding: 0 2px;
     line-height: 1;
-    color: var(--bs-secondary-color);
-    cursor: pointer;
-    opacity: 0.6;
 }
 
 .obs-tool-btn:hover {
@@ -394,34 +444,43 @@
     vertical-align: middle;
 }
 
-#observatorio-filter-row th {
+.observatorio-filter-row th {
     padding: 4px 4px 6px;
     border-top: 2px solid var(--bs-border-color);
     font-weight: normal;
+    background-color: var(--compras-text-primary);
 }
 
-#observatorio-filter-row .form-select:disabled {
+.observatorio-filter-row .form-select:disabled {
     opacity: 0.4;
 }
 
 .obs-col-sortable {
     cursor: pointer;
     user-select: none;
-    white-space: nowrap;
-}
-
-.obs-col-sortable:hover {
-    background-color: var(--bs-tertiary-bg);
+    background-color: var(--compras-text-primary) !important;
+    color: var(--compras-contrast) !important;
+    border-radius: 6px;
+    padding: 4px !important;
 }
 
 .obs-col-sortable .sort-icon {
     font-size: 14px;
     vertical-align: middle;
-    opacity: 0.3;
 }
 
-.obs-col-sortable.sorted .sort-icon {
-    opacity: 1;
+.obs-header-highlight {
+    background-color: var(--bs-primary) !important;
+    color: white !important;
+}
+
+.obs-filter-highlight input,
+.obs-filter-highlight select {
+    background-color: var(--bs-primary) !important;
+}
+
+.obs-filter-highlight select option:not(:checked) {
+    background-color: var(--bs-body-bg);
 }
 
 /* ==========================================================================

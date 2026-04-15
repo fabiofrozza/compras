@@ -343,6 +343,7 @@ HEADER PANELS (Settings / User / Notifications / App Launcher)
     width: 100%;
     text-align: left;
     cursor: pointer;
+    user-select: none;
 }
 
 .help-link-list li a:hover,
@@ -425,6 +426,7 @@ APP LAUNCHER (Grid de Aplicativos)
     background: transparent;
     border-radius: 12px;
     cursor: pointer;
+    user-select: none;
     transition: all 300ms ease-in-out;
     color: var(--compras-text-primary);
 }

@@ -1,13 +1,286 @@
+// ─── BUTTON REGISTRY ────────────────────────────────────────────────────────
+//
+// Cada entrada mapeia um botão às condições que devem ser satisfeitas para
+// habilitá-lo. Quando uma condição falha, seu `label` vira razão no tooltip.
+//
+// Tipos de condição:
+//   server   — AppState.serverConnected
+//   r        — AppState.rAvailable
+//   internet — navigator.onLine
+//   form     — todos [data-field] de #formId sem is-invalid e obrigatórios preenchidos
+//   file-selected  — selectedFiles[containerId] truthy
+//   folder-not-empty — #containerId tem pelo menos 1 tr[id] ou .item-card
+//   custom   — função check() → boolean (não bloqueia se o elemento não existe ainda)
+//
+// activeWhen (opcional) — função que retorna false para desativar a condição
+// (condição inativa = passa automaticamente, sem bloquear o botão)
+//
+
+const rMessage = 'R não encontrado. Instale pela aba "Instalação"';
+const internetMessage = 'Sem conexão com a internet';
+const serverMessage = 'Sem conexão com o servidor. Execute novamente "start.cmd" para reiniciá-lo';
+const powerbiMessage = 'Informe o caminho da pasta da base de dados';
+const processoMessage = 'Nenhum processo encontrado na planilha. Certifique-se que o link informado é o da aba "LISTA FINAL"';
+const configuracaoMessage = 'Preencha os campos de configuração';
+const linkMessage = 'Informe um link válido da aba "LISTA FINAL" da planilha de inserção de demandas do Google Drive';
+const BUTTON_REGISTRY = {
+
+    // ── Atas ──────────────────────────────────────────────────────────────────
+
+    'btn-form-info-pregao': {
+        conditions: [
+            { type: 'form', formId: 'form-info-pregao', label: 'Preencha as informações do pregão' },
+            { type: 'folder-not-empty', containerId: 'atas-relatorios-sicaf', label: 'Coloque os relatórios de credenciamento do SICAF na pasta' },
+            { type: 'r', label: rMessage },
+            { type: 'server', label: serverMessage },
+        ],
+    },
+
+    'btn-form-atas-modelos': {
+        conditions: [
+            { type: 'custom', check: () => typeof atasData !== 'undefined' && atasData.dadosDisponiveis, label: 'Dados não disponíveis. Execute "Obter dados dos SICAF" primeiro' },
+            { type: 'file-selected', containerId: 'atas-modelos', label: 'Selecione um modelo de ata' },
+            { type: 'server', label: serverMessage },
+        ],
+    },
+
+    // ── CATMAT ────────────────────────────────────────────────────────────────
+
+    'btn-form-itens-tr': {
+        conditions: [
+            { type: 'file-selected', containerId: 'catmat-lista-itens-tr', label: 'Selecione um arquivo em "Itens do TR"' },
+            {
+                type: 'custom',
+                check: () => {
+                    const container = document.getElementById('catmat-arquivos-auxiliares');
+                    if (!container) return true;
+                    return container.textContent.includes('Margens.xlsx');
+                },
+                label: '"Margens.xlsx" não encontrado na pasta de arquivos auxiliares',
+            },
+            {
+                type: 'custom',
+                check: () => {
+                    const selected = document.querySelector('input[name="catmat-metodo"]:checked');
+                    if (selected?.value !== 'lista') return true; // condição só para modo lista
+                    const container = document.getElementById('catmat-arquivos-auxiliares');
+                    if (!container) return true;
+                    return container.textContent.includes('Lista CATMAT.xlsx');
+                },
+                label: '"Lista CATMAT.xlsx" não encontrado na pasta de arquivos auxiliares',
+            },
+            { type: 'r', label: rMessage },
+            { type: 'internet', label: internetMessage, activeWhen: () => document.querySelector('input[name="catmat-metodo"]:checked')?.value === 'api' },
+            { type: 'server', label: serverMessage },
+        ],
+    },
+
+    // ── Fornecedores ──────────────────────────────────────────────────────────
+
+    'btn-obter-dados-fornecedores': {
+        conditions: [
+            {
+                type: 'custom',
+                check: () => typeof pregaoSelecionado === 'undefined' || !!pregaoSelecionado,
+                label: 'Selecione um pregão',
+            },
+            {
+                type: 'custom',
+                check: () => typeof pregaoFolderFileCount === 'undefined' || pregaoFolderFileCount > 0,
+                label: 'A pasta do pregão selecionado está vazia',
+                activeWhen: () => typeof pregaoSelecionado !== 'undefined' && !!pregaoSelecionado,
+            },
+            { type: 'r', label: rMessage },
+            { type: 'server', label: serverMessage },
+        ],
+    },
+
+    // ── Importação ────────────────────────────────────────────────────────────
+
+    'btn-importacao-arquivos': {
+        conditions: [
+            { type: 'custom', check: () => typeof importacaoLinkValido === 'undefined' || importacaoLinkValido, label: linkMessage },
+            { type: 'form', formId: 'form-importacao-config', label: configuracaoMessage },
+            {
+                type: 'custom',
+                check: () => {
+                    const badge = document.getElementById('badge-processos');
+                    return !badge || !badge.classList.contains('d-none');
+                },
+                label: processoMessage,
+                activeWhen: () => typeof importacaoLinkValido !== 'undefined' && importacaoLinkValido
+            },
+            { type: 'r', label: rMessage },
+            { type: 'internet', label: internetMessage },
+            { type: 'server', label: serverMessage },
+        ],
+    },
+
+    'btn-importacao-resumo': {
+        conditions: [
+            { type: 'custom', check: () => typeof importacaoLinkValido === 'undefined' || importacaoLinkValido, label: linkMessage },
+            { type: 'form', formId: 'form-importacao-config', label: configuracaoMessage },
+            {
+                type: 'custom',
+                check: () => {
+                    const badge = document.getElementById('badge-processos');
+                    return !badge || !badge.classList.contains('d-none');
+                },
+                label: processoMessage,
+                activeWhen: () => typeof importacaoLinkValido !== 'undefined' && importacaoLinkValido
+            },
+            { type: 'folder-not-empty', containerId: 'importacao-resumos-pdf', label: 'Nenhum arquivo .pdf em "Prints das telas dos pedidos"' },
+            { type: 'r', label: rMessage },
+            { type: 'internet', label: internetMessage },
+            { type: 'server', label: serverMessage },
+        ],
+    },
+
+    'btn-importacao-relatorio': {
+        conditions: [
+            { type: 'custom', check: () => typeof importacaoLinkValido === 'undefined' || importacaoLinkValido, label: linkMessage },
+            { type: 'form', formId: 'form-importacao-config', label: configuracaoMessage },
+            { type: 'r', label: rMessage },
+            { type: 'internet', label: internetMessage },
+            { type: 'server', label: serverMessage },
+        ],
+    },
+
+    // ── Mapas ─────────────────────────────────────────────────────────────────
+
+    'btn-run-mapas': {
+        conditions: [
+            { type: 'folder-not-empty', containerId: 'mapas-mapas-a-processar', label: 'Coloque os mapas de licitação obtidos no Solar na pasta' },
+            { type: 'r', label: rMessage },
+            { type: 'server', label: serverMessage },
+        ],
+    },
+
+    // ── Power BI ──────────────────────────────────────────────────────────────
+
+    'btn-run-powerbi-panel': {
+        conditions: [
+            { type: 'form', formId: 'form-powerbi-path', label: powerbiMessage },
+            { type: 'r', label: rMessage },
+            {
+                type: 'internet',
+                label: internetMessage,
+                // Necessita internet para todos os modos exceto 'licitacao' e 'execucao'
+                activeWhen: () => {
+                    if (typeof POWERBI_OPCOES_INTERNET === 'undefined') return true;
+                    const sel = document.querySelector('#form-powerbi-panel input[name="powerbi-tipo"]:checked');
+                    return !sel || POWERBI_OPCOES_INTERNET.includes(sel.value);
+                },
+            },
+            { type: 'server', label: serverMessage },
+        ],
+    },
+
+    'btn-run-powerbi-maintenance': {
+        conditions: [
+            { type: 'form', formId: 'form-powerbi-path', label: powerbiMessage },
+            { type: 'r', label: rMessage },
+            { type: 'server', label: serverMessage },
+        ],
+    },
+
+    'btn-run-powerbi-observatorio': {
+        conditions: [
+            { type: 'form', formId: 'form-powerbi-path', label: powerbiMessage },
+            { type: 'internet', label: internetMessage },
+            { type: 'server', label: serverMessage },
+        ],
+    },
+
+    // ── Instalação ────────────────────────────────────────────────────────────
+
+    'btn-run-instalacao': {
+        conditions: [
+            { type: 'r', label: rMessage },
+            { type: 'internet', label: internetMessage },
+            { type: 'server', label: serverMessage },
+        ],
+    },
+
+    'btn-run-npm_update': {
+        conditions: [
+            { type: 'internet', label: internetMessage },
+            { type: 'server', label: serverMessage },
+        ],
+    },
+};
+
+// ─── CONDITION CHECKER ───────────────────────────────────────────────────────
+
+function checkCondition(cond) {
+    // Condição desativada (ex: internet só para modo API) → passa automaticamente
+    if (cond.activeWhen && !cond.activeWhen()) return true;
+
+    switch (cond.type) {
+        case 'server':
+            return AppState.serverConnected;
+
+        case 'r':
+            return AppState.rAvailable;
+
+        case 'internet':
+            return navigator.onLine;
+
+        case 'form': {
+            const fields = document.querySelectorAll(`#${cond.formId} [data-field]`);
+            if (fields.length === 0) return true;
+            return !Array.from(fields).some(f =>
+                f.classList.contains('is-invalid') || (f.hasAttribute('required') && !f.value)
+            );
+        }
+
+        case 'file-selected':
+            return !!selectedFiles[cond.containerId];
+
+        case 'folder-not-empty': {
+            const container = document.getElementById(cond.containerId);
+            if (!container) return true; // aba não carregada ainda
+            return container.querySelectorAll('tr[data-filepath], .item-card').length > 0;
+        }
+
+        case 'custom':
+            try { return cond.check(); } catch { return true; }
+
+        default:
+            return true;
+    }
+}
+
+// ─── BUTTON EVALUATION ENGINE ────────────────────────────────────────────────
+
+function evaluateButton(buttonId) {
+    const config = BUTTON_REGISTRY[buttonId];
+    const button = document.getElementById(buttonId);
+    if (!button || !config) return;
+
+    // Não sobrescreve botões em execução (ex: Observatório durante SSE)
+    if (button.dataset.executing === 'true') return;
+
+    const reasons = config.conditions
+        .filter(cond => !checkCondition(cond))
+        .map(cond => cond.label);
+
+    button.disabled = reasons.length > 0;
+    updateButtonTooltip(button, reasons);
+}
+
+function evaluateAllButtons() {
+    Object.keys(BUTTON_REGISTRY).forEach(evaluateButton);
+    atualizarIndicadoresSubTabs();
+}
+
+// ─── FIELD VALIDATION ────────────────────────────────────────────────────────
+
 function validateTabFields(abaName) {
     const fields = Array.from(document.querySelectorAll(`#${abaName} [data-field]`));
     fields.forEach(field => validateSingleField(field));
 }
 
-/**
- * Valida um campo individual e aplica a classe is-invalid se necessário
- * @param {HTMLElement} field - O campo a validar
- * @returns {boolean} true se válido, false caso contrário
- */
 function validateSingleField(field) {
     const { value, dataset: { validateRule, regexPattern }, attributes } = field;
     const isRequired = field.hasAttribute('required');
@@ -53,7 +326,7 @@ function validateSingleField(field) {
 
     field.classList.toggle('is-invalid', hasError);
     toggleValidationMsg(field, hasError);
-    setButtonState(field);
+    evaluateAllButtons();
 
     return !hasError;
 }
@@ -97,6 +370,8 @@ function toggleValidationMsg(field, hasError) {
     feedback.classList.toggle('show', hasError);
 }
 
+// ─── TOOLTIP HELPERS ─────────────────────────────────────────────────────────
+
 // Envolve um botão num wrapper <span> para permitir tooltip em botões disabled
 function wrapButtonForTooltip(button) {
     if (button.parentElement?.classList.contains('btn-tooltip-wrapper')) return button.parentElement;
@@ -112,95 +387,49 @@ function updateButtonTooltip(button, reasons) {
         ? button.parentElement
         : wrapButtonForTooltip(button);
 
-    const existingTooltip = bootstrap.Tooltip.getInstance(wrapper);
+    // Clean up any legacy tooltip on the wrapper itself
+    const wrapperTooltip = bootstrap.Tooltip.getInstance(wrapper);
+    if (wrapperTooltip) wrapperTooltip.dispose();
+    wrapper.removeAttribute('data-bs-toggle');
+    wrapper.removeAttribute('data-bs-title');
+
+    let warningIcon = wrapper.querySelector('.btn-unavailable-icon');
 
     if (reasons.length === 0) {
-        if (existingTooltip) existingTooltip.dispose();
-        wrapper.removeAttribute('data-bs-toggle');
-        wrapper.removeAttribute('data-bs-title');
+        if (warningIcon) {
+            const iconTooltip = bootstrap.Tooltip.getInstance(warningIcon);
+            if (iconTooltip) iconTooltip.dispose();
+            warningIcon.remove();
+        }
         return;
     }
 
-    const title = reasons.length === 1
-        ? reasons[0]
-        : reasons.map(r => `• ${r}`).join('<br>');
+    const header = '<div class="tooltip-error-title">Botão indisponível</div>';
+    const body = '<ul class="tooltip-error-list">' + reasons.map(r => `<li>${r}</li>`).join('') + '</ul>';
+    const title = header + body;
 
-    wrapper.setAttribute('data-bs-toggle', 'tooltip');
-    wrapper.setAttribute('data-bs-html', true);
-    wrapper.setAttribute('data-bs-title', title);
+    if (!warningIcon) {
+        warningIcon = document.createElement('i');
+        warningIcon.className = 'material-symbols-outlined btn-unavailable-icon';
+        warningIcon.textContent = 'cancel';
+        wrapper.insertBefore(warningIcon, button);
+    }
 
-    if (existingTooltip) {
-        existingTooltip.setContent({ '.tooltip-inner': title });
+    warningIcon.setAttribute('data-bs-html', 'true');
+    warningIcon.setAttribute('data-bs-title', title);
+
+    const existingIconTooltip = bootstrap.Tooltip.getInstance(warningIcon);
+    if (existingIconTooltip) {
+        existingIconTooltip.setContent({ '.tooltip-inner': title });
     } else {
-        new bootstrap.Tooltip(wrapper, {
-            container: 'body',
-            trigger: 'hover focus',
-            html: true,
+        new bootstrap.Tooltip(warningIcon, {
+            ...TOOLTIP_DEFAULTS,
             customClass: 'custom-tooltip tooltip-disabled-btn'
         });
     }
 }
 
-function setButtonState(field) {
-    const formElement = field.closest('.script-form');
-    if (!formElement) return;
-
-    const formId = formElement.id;
-
-    if (formId === 'form-powerbi-path') {
-        const hasInvalidFields = Array.from(document.querySelectorAll(`#${formId} [data-field]`)).some(f => f.classList.contains('is-invalid'));
-        const btnMaintenance = document.getElementById('btn-run-powerbi-maintenance');
-        if (btnMaintenance) btnMaintenance.disabled = hasInvalidFields;
-        if (typeof atualizarBotaoPowerBIPanel === 'function') atualizarBotaoPowerBIPanel();
-        return;
-    }
-
-    if (formId === 'form-importacao-link' || formId === 'importacaoTabsForm') {
-        if (typeof verificarLiberacaoBotoesImportacao === 'function') verificarLiberacaoBotoesImportacao();
-        return;
-    }
-
-    const button = document.getElementById('btn-' + formId);
-
-    if (!button) return;
-
-    const hasInvalidFields = Array.from(document.querySelectorAll(`#${formId} [data-field]`)).some(f => f.classList.contains('is-invalid'));
-
-    const reasons = [];
-    if (hasInvalidFields) reasons.push('Preencha os campos obrigatórios');
-
-    if (button.id === 'btn-form-atas-modelos') {
-        if (!atasData.dadosDisponiveis) reasons.push('Dados do SICAF não disponíveis');
-    }
-
-    if (button.id === 'btn-form-itens-tr') {
-        const selected = document.querySelector('input[name="catmat-metodo"]:checked');
-        if (selected?.value === 'api' && !navigator.onLine) reasons.push('Sem conexão com a internet');
-    }
-
-    button.disabled = reasons.length > 0;
-    updateButtonTooltip(button, reasons);
-}
-
-function atualizarBotaoCatmat() {
-    const btn = document.getElementById('btn-form-itens-tr');
-    if (!btn) return;
-
-    const reasons = [];
-    const hasInvalidFields = Array.from(document.querySelectorAll('#form-itens-tr [data-field]'))
-        .some(f => f.classList.contains('is-invalid'));
-    if (hasInvalidFields) reasons.push('Selecione um arquivo na lista');
-
-    const selected = document.querySelector('input[name="catmat-metodo"]:checked');
-    if (selected?.value === 'api' && !navigator.onLine) reasons.push('Sem conexão com a internet');
-
-    btn.disabled = reasons.length > 0;
-    updateButtonTooltip(btn, reasons);
-}
-
-document.addEventListener('change', (e) => {
-    if (e.target.name === 'catmat-metodo') atualizarBotaoCatmat();
-});
+// ─── LIVE VALIDATION SETUP ───────────────────────────────────────────────────
 
 function setupLiveValidation(aba) {
     const container = document.querySelector('#' + aba);
@@ -213,7 +442,25 @@ function setupLiveValidation(aba) {
             });
         });
     });
+    evaluateAllButtons();
 }
+
+// ─── GLOBAL EVENT LISTENERS ──────────────────────────────────────────────────
+
+// Seleção de arquivo em file-list selecionável
+document.addEventListener('file-selected', () => evaluateAllButtons());
+
+// Carregamento/atualização de pasta
+document.addEventListener('files-loaded', () => evaluateAllButtons());
+
+// Mudança de modo (catmat, powerbi) afeta condições ativas
+document.addEventListener('change', (e) => {
+    if (e.target.name === 'catmat-metodo' || e.target.name === 'powerbi-tipo') {
+        evaluateAllButtons();
+    }
+});
+
+// ─── SUB-TABS INDICATOR ──────────────────────────────────────────────────────
 
 /**
  * Verifica cada tab-pane de sub-tabs e marca o nav-link correspondente

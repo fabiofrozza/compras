@@ -3,32 +3,19 @@
     <div class="col-sm-6">
         <!-- Quadro Pregões -->
         <div class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#fornecedores-pregoes-collapse" aria-expanded="true"
-                aria-controls="fornecedores-pregoes-collapse">
-                <span><i class="material-symbols-outlined">folder</i> Pregões</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            <h4 class="script-form-header" data-compras-icon="folder" data-compras-title="Pregões" data-compras-help="Lista os pregões disponíveis na pasta de dados. Cada entrada corresponde a uma subpasta com os arquivos enviados pelos fornecedores.
+                <br><br>Selecione o pregão desejado para visualizar os arquivos disponíveis e obter os dados.">
             </h4>
             <div class="collapse show" id="fornecedores-pregoes-collapse">
                 <div id="fornecedores-pregoes-list" class="fornecedores-grid-list" data-validate-rule="file-selectable"
                     data-field="lista-pregoes" required data-validation-msg="Selecione um pregão.">
-                    <div class="custom-spinner-container">
-                        <div class="custom-spinner text-primary">
-                            <div class="spinner-border"></div>
-                            <span role="status">Carregando pregões...</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
         <!-- Quadro Conteúdo da Pasta -->
         <div class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#fornecedores-conteudo-collapse" aria-expanded="true"
-                aria-controls="fornecedores-conteudo-collapse">
-                <span><i class="material-symbols-outlined">folder_open</i> <span id="conteudo-pasta-titulo">Conteúdo da
-                        pasta</span></span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            <h4 class="script-form-header" data-compras-icon="folder_open" data-compras-title="Conteúdo da pasta"
+                data-compras-title-id="conteudo-pasta-titulo">
             </h4>
             <div class="collapse show" id="fornecedores-conteudo-collapse">
                 <div id="fornecedores-conteudo-list" class="files-list-style">
@@ -44,11 +31,7 @@
     <div class="col-sm-6">
         <!-- Quadro Informações do Pregão -->
         <div class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#fornecedores-info-collapse" aria-expanded="true"
-                aria-controls="fornecedores-info-collapse">
-                <span><i class="material-symbols-outlined">info</i> Informações do Pregão</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            <h4 class="script-form-header" data-compras-icon="info" data-compras-title="Informações do Pregão">
             </h4>
             <div class="collapse show" id="fornecedores-info-collapse">
                 <div id="fornecedores-info-pregao">
@@ -102,20 +85,14 @@
 
         <!-- Quadro Arquivos a Importar -->
         <div class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#fornecedores-importar-collapse" aria-expanded="true"
-                aria-controls="fornecedores-importar-collapse">
-                <span><i class="material-symbols-outlined">table_chart</i> Arquivos a importar</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            <h4 class="script-form-header" data-compras-icon="table_chart" data-compras-title="Arquivos a importar"
+                data-compras-help="Arquivo .csv pronto para importação no MATL.
+                <br><br>Clique no botão 'Abrir arquivo de conferência' para verificar se os dados foram obtidos corretamente.
+                <br><br>Clique no botão 'Mover para pasta Documentos' para que o MATL localize o arquivo.
+                <br><br>Após a importação, a pasta com os dados e o arquivo de importação podem ser excluídos.">
             </h4>
             <div class="collapse show" id="fornecedores-importar-collapse">
                 <div id="fornecedores-importar-list" class="files-list-style fornecedores-importar-list">
-                    <div class="custom-spinner-container">
-                        <div class="custom-spinner text-primary">
-                            <div class="spinner-border"></div>
-                            <span role="status">Carregando arquivos...</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

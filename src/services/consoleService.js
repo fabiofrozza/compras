@@ -735,4 +735,9 @@ function handleConsoleMessage(ws, data, l, isPathSafeFn, logConsentEnabled) {
     executeNpmUpdate(ws);
   }
 }
-module.exports = { registerConsoleRoutes, handleConsoleMessage };
+async function checkRAvailable() {
+  const rpath = await getRScriptPath();
+  return rpath !== null;
+}
+
+module.exports = { registerConsoleRoutes, handleConsoleMessage, checkRAvailable };

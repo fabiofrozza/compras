@@ -27,9 +27,7 @@ A local web application that runs scripts to assist my colleagues in activities 
 
 1. [Download the content of this repository](https://github.com/fabiofrozza/compras/archive/refs/heads/main.zip) and extract it to the desired folder.
 
-1. Rename the following files and edit them in Notepad, following the instructions inside:
-   * in the root folder: `.env-MODELO` to `.env`
-   * in the `scripts/_common` folder: `.Renviron-MODELO` to `.Renviron`
+1. Rename the `.env-MODELO` file to `.env` and edit it in Notepad, following the instructions inside.
 
 1. Replace the following images with your company's:
    * `public/img/company.png`

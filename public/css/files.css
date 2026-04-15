@@ -18,11 +18,11 @@
 
 .files-list.view-grid {
     padding: 8px;
-}
 
-.files-list.view-grid .folder-path-container {
-    margin: -8px -8px 8px;
-    border-radius: 5px 5px 0 0;
+    .folder-path-container {
+        margin: -8px -8px 8px;
+        border-radius: 5px 5px 0 0;
+    }
 }
 
 .files-list:not(.is-invalid):has(.selectable),
@@ -75,47 +75,55 @@
 }
 
 .folder-path-actions {
-    display: none;
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
+    display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 10px;
-    padding-left: 16px;
-    background: linear-gradient(to right, transparent, color-mix(in srgb, var(--compras-theme) 50%, white) 20%);
+    flex-shrink: 0;
 }
 
-.files-list:hover .folder-path-actions,
-.files-list-style:hover .folder-path-actions,
-.fornecedores-grid-list:hover .folder-path-actions {
-    display: flex;
-}
+/* Botões auxiliares das tabelas */
 
 .folder-path-btn {
     display: flex;
-    padding: 0;
+}
+
+.form-sub-container .form-sub-btn,
+.folder-path-btn,
+.file-row-btn {
+    padding: 3px;
     border: none;
+    border-radius: 4px;
     background: none;
     color: var(--bs-primary);
     cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
+    opacity: 0.5;
+    filter: grayscale(1);
+    transition: opacity 0.2s ease, filter 0.2s ease, background-color 0.2s ease;
     line-height: 1;
 }
 
-.folder-path-btn:hover {
+.form-sub-container .form-sub-btn:hover,
+.folder-path-btn:hover,
+.file-row-btn:hover {
     opacity: 1;
+    filter: grayscale(0);
+    background-color: color-mix(in srgb, currentColor 12%, transparent);
 }
 
-.folder-path-btn .material-symbols-outlined {
+.form-sub-container .form-sub-btn .material-symbols-outlined,
+.folder-path-btn .material-symbols-outlined,
+.file-row-btn i {
     font-size: 1rem;
 }
 
 .folder-path-btn:disabled {
     opacity: 0 !important;
     pointer-events: none;
+}
+
+.table-btn-column {
+    text-align: right;
+    padding-right: 4px !important;
 }
 
 /* Files table */
@@ -125,20 +133,26 @@
     border-collapse: collapse;
     font-size: 12px;
     background-color: Field;
-}
 
-.files-table td {
-    padding: 2px;
-    vertical-align: top;
-    word-break: break-all;
-}
+    td {
+        padding: 2px;
+        vertical-align: top;
+        word-break: break-all;
+    }
 
-.files-table tbody tr:hover {
-    background: var(--compras-contrast);
-}
+    tbody tr {
+        cursor: pointer;
+        user-select: none;
 
-.files-table tbody tr {
-    cursor: pointer;
+        &:hover {
+            background: var(--compras-contrast);
+        }
+
+        &.selected {
+            background-color: color-mix(in srgb, var(--file-color) 50%, var(--compras-contrast));
+            border-left: 4px solid var(--file-color);
+        }
+    }
 }
 
 /* File icons */
@@ -146,39 +160,43 @@
 .file-icon {
     margin-left: 6px;
     font-size: 1rem;
+
+    i {
+        vertical-align: baseline !important;
+        font-variation-settings: 'opsz' 48;
+        color: var(--file-color);
+    }
 }
 
-.file-icon i {
-    vertical-align: baseline !important;
-    font-variation-settings: 'opsz' 48;
-}
+.files-table tbody tr,
+.item-card {
+    &:has(.file-word) {
+        --file-color: #2B579A;
+    }
 
-.file-word {
-    color: #2B579A;
-}
+    &:has(.file-excel) {
+        --file-color: #217346;
+    }
 
-.file-excel {
-    color: #217346;
-}
+    &:has(.file-pdf) {
+        --file-color: #D30015;
+    }
 
-.file-pdf {
-    color: #D30015;
-}
+    &:has(.file-text) {
+        --file-color: #777;
+    }
 
-.file-text {
-    color: #777;
-}
+    &:has(.file-image) {
+        --file-color: #FF6B6B;
+    }
 
-.file-image {
-    color: #FF6B6B;
-}
+    &:has(.file-archive) {
+        --file-color: #FF6B35;
+    }
 
-.file-archive {
-    color: #FF6B35;
-}
-
-.file-code {
-    color: #276DC3;
+    &:has(.file-code) {
+        --file-color: #276DC3;
+    }
 }
 
 /* Items grid (pregões e visualização em grid de arquivos) */
@@ -200,40 +218,54 @@
     border: 2px solid var(--bs-border-color);
     border-radius: 8px;
     cursor: pointer;
+    user-select: none;
     background-color: Field;
     transition: all 0.2s ease;
     text-align: center;
-}
 
-.item-card.item-selected {
-    border-color: var(--bs-primary);
-    background-color: var(--bs-primary-bg-subtle);
+    &.item-selected {
+        border-color: var(--bs-primary);
+        background-color: var(--bs-primary-bg-subtle);
+    }
+
+    &.status-pendente {
+        .item-card-icon i,
+        .item-card-status i {
+            color: var(--compras-pending);
+        }
+    }
+
+    &.status-sucesso {
+        .item-card-icon i,
+        .item-card-status i {
+            color: var(--compras-success);
+        }
+    }
+
+    &.status-parcial {
+        .item-card-icon i,
+        .item-card-status i {
+            color: var(--compras-warning);
+        }
+    }
+
+    &.status-sem_saida {
+        .item-card-icon i,
+        .item-card-status i {
+            color: var(--compras-error);
+        }
+    }
 }
 
 .item-card-icon {
     font-size: 2rem;
     margin-bottom: 4px;
-}
 
-.item-card-icon i {
-    font-size: 2rem;
-    font-variation-settings: 'FILL' 1;
-}
-
-.item-card.status-pendente .item-card-icon i {
-    color: var(--compras-pending);
-}
-
-.item-card.status-sucesso .item-card-icon i {
-    color: var(--compras-success);
-}
-
-.item-card.status-parcial .item-card-icon i {
-    color: var(--compras-warning);
-}
-
-.item-card.status-sem_saida .item-card-icon i {
-    color: var(--compras-error);
+    i {
+        font-size: 2rem;
+        font-variation-settings: 'FILL' 1;
+        color: var(--file-color);
+    }
 }
 
 .item-card-name {
@@ -247,29 +279,13 @@
 
 .item-card-status {
     position: absolute;
-    top: 6px;
+    top: 8px;
     right: 6px;
-}
 
-.item-card-status i {
-    font-size: 14px;
-    vertical-align: top;
-}
-
-.item-card.status-pendente .item-card-status i {
-    color: var(--compras-pending);
-}
-
-.item-card.status-sucesso .item-card-status i {
-    color: var(--compras-success);
-}
-
-.item-card.status-parcial .item-card-status i {
-    color: var(--compras-warning);
-}
-
-.item-card.status-sem_saida .item-card-status i {
-    color: var(--compras-error);
+    i {
+        font-size: 14px;
+        vertical-align: top;
+    }
 }
 
 .item-card-delete,
@@ -279,42 +295,9 @@
 }
 
 .item-card-delete {
-    top: 20px;
+    top: 26px;
 }
 
 .item-card-open {
-    top: 0px;
-}
-
-.item-card-delete:hover,
-.item-card-open:hover {
-    opacity: 1 !important;
-}
-
-/* Botões auxiliares das tabelas */
-
-.table-btn-column {
-    text-align: right;
-}
-
-.file-row-btn {
-    --bs-btn-padding-y: 0;
-    --bs-btn-padding-x: 0;
-    border: none;
-    background: none;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.file-row-btn i {
-    font-size: 16px !important;
-}
-
-.files-table tbody tr:hover .file-row-btn,
-.item-card:hover .file-row-btn {
-    opacity: 0.7;
-}
-
-.file-row-btn:hover {
-    opacity: 1 !important;
+    top: 6px;
 }

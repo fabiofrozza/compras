@@ -1,138 +1,13 @@
 <!DOCTYPE html>
 <div class="row">
     <div class="col">
-        <!-- Informações do Node.js -->
-        <div id="node-info-panel" class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#instalacao-node-info-collapse" aria-expanded="true"
-                aria-controls="instalacao-node-info-collapse">
-                <span><i class="material-symbols-outlined">hub</i> Informações do Node.js</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
-            </h4>
-            <div class="collapse show" id="instalacao-node-info-collapse">
-                <div class="form-group">
-                    <div class="custom-spinner-container" id="node-info-loading">
-                        <div class="custom-spinner text-primary">
-                            <div class="spinner-border spinner-border-sm"></div>
-                            <span role="status">Verificando Node.js...</span>
-                        </div>
-                    </div>
-                    <div id="node-info-content" class="d-none">
-                        <div class="dashboard-widget-grid">
-                            <div class="dashboard-widget">
-                                <div class="widget-icon">
-                                    <i class="material-symbols-outlined">terminal</i>
-                                </div>
-                                <div class="widget-content">
-                                    <span class="widget-label">Versão Instalada</span>
-                                    <span class="widget-value" id="node-info-version">-</span>
-                                </div>
-                            </div>
-                            <div class="dashboard-widget">
-                                <div class="widget-icon">
-                                    <i class="material-symbols-outlined">update</i>
-                                </div>
-                                <div class="widget-content">
-                                    <span class="widget-label">Versão Mais Recente</span>
-                                    <span class="widget-value">
-                                        <span id="node-info-latest">-</span>
-                                        <span id="node-info-status" class="badge ms-2"></span>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="dashboard-widget widget-full">
-                                <div class="widget-icon">
-                                    <i class="material-symbols-outlined">folder</i>
-                                </div>
-                                <div class="widget-content">
-                                    <span class="widget-label">Local de Instalação</span>
-                                    <span class="widget-value" id="node-info-path">-</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Pacotes Node.js -->
-        <div id="npm-packages-panel" class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#instalacao-npm-collapse" aria-expanded="true" aria-controls="instalacao-npm-collapse">
-                <span><i class="material-symbols-outlined">package_2</i> Pacotes Node.js</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
-            </h4>
-            <div class="collapse show" id="instalacao-npm-collapse">
-                <div class="form-group">
-                    <div class="custom-spinner-container" id="npm-version-loading">
-                        <div class="custom-spinner text-primary">
-                            <div class="spinner-border spinner-border-sm"></div>
-                            <span role="status">Verificando npm...</span>
-                        </div>
-                    </div>
-                    <div id="npm-version-content" class="d-none">
-                        <div class="dashboard-widget-grid">
-                            <div class="dashboard-widget">
-                                <div class="widget-icon">
-                                    <i class="material-symbols-outlined">terminal</i>
-                                </div>
-                                <div class="widget-content">
-                                    <span class="widget-label">Versão do npm</span>
-                                    <span class="widget-value">
-                                        <span id="npm-info-version">-</span>
-                                        <span id="npm-info-status" class="badge ms-2"></span>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="dashboard-widget">
-                                <div class="widget-icon">
-                                    <i class="material-symbols-outlined">update</i>
-                                </div>
-                                <div class="widget-content">
-                                    <span class="widget-label">Versão Mais Recente</span>
-                                    <span class="widget-value" id="npm-info-latest">-</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="custom-spinner-container" id="npm-packages-loading">
-                        <div class="custom-spinner text-primary">
-                            <div class="spinner-border spinner-border-sm"></div>
-                            <span role="status">Verificando pacotes...</span>
-                        </div>
-                    </div>
-                    <div id="npm-packages-content" class="form-sub-container d-none">
-                        <div id="npm-packages-status"></div>
-                        <div id="npm-packages-list" class="mt-2"></div>
-                    </div>
-                </div>
-                <div class="form-buttons">
-                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap d-none"
-                        id="btn-run-npm_update" onclick="executarNpmUpdate()">
-                        Atualizar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col">
         <!-- Informações do R -->
         <div id="r-info-panel" class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#instalacao-r-info-collapse" aria-expanded="true"
-                aria-controls="instalacao-r-info-collapse">
-                <span><i class="material-symbols-outlined">info</i> Informações do R</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            <h4 class="script-form-header" data-compras-icon="code_blocks" data-compras-title="Informações do R">
             </h4>
             <div class="collapse show" id="instalacao-r-info-collapse">
                 <div class="form-group">
-                    <div class="custom-spinner-container" id="r-info-loading">
-                        <div class="custom-spinner text-primary">
-                            <div class="spinner-border spinner-border-sm"></div>
-                            <span role="status">Verificando R...</span>
-                        </div>
-                    </div>
+                    <div id="r-info-loading"></div>
                     <div id="r-info-content" class="d-none">
                         <div class="dashboard-widget-grid">
                             <div class="dashboard-widget">
@@ -169,8 +44,8 @@
                     </div>
                 </div>
                 <div class="form-buttons">
-                    <button type="button" class="btn btn-sm btn-outline-primary btn-run text-nowrap d-none"
-                        id="btn-download-r" onclick="downloadR()">
+                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap d-none" id="btn-download-r"
+                        onclick="downloadR()">
                         Baixar R
                     </button>
                 </div>
@@ -178,11 +53,7 @@
         </div>
         <!-- Pacotes R -->
         <form id="form-instalacao" class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#instalacao-pacotes-collapse" aria-expanded="true"
-                aria-controls="instalacao-pacotes-collapse">
-                <span><i class="material-symbols-outlined">build</i> Pacotes R</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            <h4 class="script-form-header" data-compras-icon="package_2" data-compras-title="Pacotes R">
             </h4>
             <div class="collapse show" id="instalacao-pacotes-collapse">
                 <div class="form-group">
@@ -221,5 +92,99 @@
                 </div>
             </div>
         </form>
+    </div>
+    <div class="col">
+        <!-- Informações do Node.js -->
+        <div id="node-info-panel" class="script-form shadow-sm">
+            <h4 class="script-form-header" data-compras-icon="hub" data-compras-title="Informações do Node.js">
+            </h4>
+            <div class="collapse show" id="instalacao-node-info-collapse">
+                <div class="form-group">
+                    <div id="node-info-loading"></div>
+                    <div id="node-info-content" class="d-none">
+                        <div class="dashboard-widget-grid">
+                            <div class="dashboard-widget">
+                                <div class="widget-icon">
+                                    <i class="material-symbols-outlined">terminal</i>
+                                </div>
+                                <div class="widget-content">
+                                    <span class="widget-label">Versão Instalada</span>
+                                    <span class="widget-value" id="node-info-version">-</span>
+                                </div>
+                            </div>
+                            <div class="dashboard-widget">
+                                <div class="widget-icon">
+                                    <i class="material-symbols-outlined">update</i>
+                                </div>
+                                <div class="widget-content">
+                                    <span class="widget-label">Versão Mais Recente</span>
+                                    <span class="widget-value">
+                                        <span id="node-info-latest">-</span>
+                                        <span id="node-info-status" class="badge ms-2"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="dashboard-widget widget-full">
+                                <div class="widget-icon">
+                                    <i class="material-symbols-outlined">folder</i>
+                                </div>
+                                <div class="widget-content">
+                                    <span class="widget-label">Local de Instalação</span>
+                                    <span class="widget-value" id="node-info-path">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Pacotes Node.js (apenas em modo desenvolvimento) -->
+        <div id="npm-packages-panel" class="script-form shadow-sm d-none">
+            <h4 class="script-form-header" data-compras-icon="package_2" data-compras-title="Pacotes Node.js">
+            </h4>
+            <div class="collapse show" id="instalacao-npm-collapse">
+                <div class="form-group">
+                    <div id="npm-version-loading"></div>
+                    <div id="npm-version-content" class="d-none">
+                        <div class="dashboard-widget-grid">
+                            <div class="dashboard-widget">
+                                <div class="widget-icon">
+                                    <i class="material-symbols-outlined">terminal</i>
+                                </div>
+                                <div class="widget-content">
+                                    <span class="widget-label">Versão do npm</span>
+                                    <span class="widget-value">
+                                        <span id="npm-info-version">-</span>
+                                        <span id="npm-info-status" class="badge ms-2"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="dashboard-widget">
+                                <div class="widget-icon">
+                                    <i class="material-symbols-outlined">update</i>
+                                </div>
+                                <div class="widget-content">
+                                    <span class="widget-label">Versão Mais Recente</span>
+                                    <span class="widget-value" id="npm-info-latest">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div id="npm-packages-loading"></div>
+                    <div id="npm-packages-content" class="form-sub-container d-none">
+                        <div id="npm-packages-status"></div>
+                        <div id="npm-packages-list" class="mt-2"></div>
+                    </div>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap d-none"
+                        id="btn-run-npm_update" onclick="executarNpmUpdate()">
+                        Atualizar
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

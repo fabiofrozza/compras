@@ -1,15 +1,5 @@
 let _rDownloadUrl = '';
 
-function atualizarBotoesInstalacao() {
-    ['btn-run-instalacao', 'btn-download-r', 'btn-run-npm_update'].forEach(id => {
-        const btn = document.getElementById(id);
-        if (!btn) return;
-        const reasons = !navigator.onLine ? ['Sem conexão com a internet'] : [];
-        btn.disabled = reasons.length > 0;
-        updateButtonTooltip(btn, reasons);
-    });
-}
-
 function executarInstalacao(modo) {
     runRScript('instalacao', { modo });
 }
@@ -299,7 +289,21 @@ async function carregarNpmPackages() {
     }
 }
 
+document.getElementById('r-info-loading').innerHTML = customSpinnerHTML('Verificando R...');
+document.getElementById('node-info-loading').innerHTML = customSpinnerHTML('Verificando Node.js...');
+document.getElementById('npm-version-loading').innerHTML = customSpinnerHTML('Verificando npm...');
+document.getElementById('npm-packages-loading').innerHTML = customSpinnerHTML('Verificando pacotes...');
+
 carregarInfoR();
 carregarInfoNode();
-carregarInfoNpm();
-carregarNpmPackages();
+
+fetch('/api/app-config')
+    .then(r => r.json())
+    .then(cfg => {
+        if (cfg.isDev) {
+            document.getElementById('npm-packages-panel')?.classList.remove('d-none');
+            carregarInfoNpm();
+            carregarNpmPackages();
+        }
+    })
+    .catch(() => { /* sem bloco npm em caso de falha */ });

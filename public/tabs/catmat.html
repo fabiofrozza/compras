@@ -3,11 +3,8 @@
     <div class="col">
         <!-- Itens do TR -->
         <div id="form-itens-tr" class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#catmat-itens-tr-collapse" aria-expanded="true"
-                aria-controls="catmat-itens-tr-collapse">
-                <span><i class="material-symbols-outlined">shopping_basket</i> Itens do TR</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            <h4 class="script-form-header" data-compras-icon="shopping_basket" data-compras-title="Itens do TR"
+                data-compras-help="Selecione o arquivo Excel obtido no Solar contendo os itens do Termo de Referência.">
             </h4>
             <div class="collapse show" id="catmat-itens-tr-collapse">
                 <div id="catmat-lista-itens-tr" class="files-list" data-field="lista-itens-tr" data-extensions="xls*"
@@ -18,11 +15,12 @@
         </div>
         <!-- Arquivos auxiliares -->
         <div class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#catmat-auxiliares-collapse" aria-expanded="true"
-                aria-controls="catmat-auxiliares-collapse">
-                <span><i class="material-symbols-outlined">folder</i> Arquivos auxiliares</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            <h4 class="script-form-header" data-compras-icon="folder" data-compras-title="Arquivos auxiliares"
+                data-compras-help="
+Para a consulta local, são obrigatórios os seguintes arquivos (nomeados exatamente como mostrados a seguir).<br>
+<ul><li><strong>Lista CATMAT.xlsx</strong>: obtida do site oficial do Governo, contendo as colunas (a partir da linha 3) Código do Grupo, Nome do Grupo, Código da Classe, Nome da Classe, Código do PDM, Nome do PDM, Código do Item, Descrição do Item e Código NCM.
+</li><li><strong>Margens.xlsx</strong>: contendo as colunas NCM, Descrição, Regra de origem, Margem normal, Regra de qualificação e Margem adicional.</li></ul>
+<em>Para a consulta via API, somente <strong>Margens.xlsx</strong> é obrigatório.</em>">
             </h4>
             <div class="collapse show" id="catmat-auxiliares-collapse">
                 <div id="catmat-arquivos-auxiliares" class="files-list" data-folder="_fontes" data-selectable="false">
@@ -33,11 +31,7 @@
     <div class="col">
         <!-- Escolha para execução -->
         <form id="form-catmat" class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#catmat-forma-consulta-collapse" aria-expanded="true"
-                aria-controls="catmat-forma-consulta-collapse">
-                <span><i class="material-symbols-outlined">filter_alt</i> Forma de consulta</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            <h4 class="script-form-header" data-compras-icon="filter_alt" data-compras-title="Forma de consulta">
             </h4>
             <div class="collapse show" id="catmat-forma-consulta-collapse">
                 <div class="form-group">
@@ -48,7 +42,8 @@
                             </i>
                             <div>
                                 <div class="option-card-title">Lista de CATMATs</div>
-                                <div class="option-card-description">Consulta ao arquivo local</div>
+                                <div class="option-card-description">Consulta ao arquivo local presente na pasta de
+                                    arquivos auxiliares</div>
                             </div>
                             <input class="form-check-input" type="radio" name="catmat-metodo" value="lista" checked>
                         </label>
@@ -58,7 +53,8 @@
                             </i>
                             <div>
                                 <div class="option-card-title">API</div>
-                                <div class="option-card-description">Consulta direta aos Dados Abertos</div>
+                                <div class="option-card-description">Consulta direta aos Dados Abertos do Governo
+                                    Federal</div>
                             </div>
                             <input class="form-check-input" type="radio" name="catmat-metodo" value="api">
                         </label>
@@ -74,10 +70,7 @@
         </form>
         <!-- Listas processadas -->
         <div class="script-form shadow-sm">
-            <h4 class="d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse"
-                data-bs-target="#catmat-margens-collapse" aria-expanded="true" aria-controls="catmat-margens-collapse">
-                <span><i class="material-symbols-outlined">percent</i> Margens de preferência</span>
-                <i class="material-symbols-outlined text-secondary">unfold_more</i>
+            <h4 class="script-form-header" data-compras-icon="percent" data-compras-title="Margens de preferência">
             </h4>
             <div class="collapse show" id="catmat-margens-collapse">
                 <div id="catmat-arquivos-gerados" class="files-list" data-folder="arquivos_gerados"

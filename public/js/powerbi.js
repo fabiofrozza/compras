@@ -1,28 +1,5 @@
 const POWERBI_OPCOES_INTERNET = ['planejamento', 'paalteracoes', 'todos'];
 
-function atualizarBotaoPowerBIPanel() {
-    const btn = document.getElementById('btn-run-powerbi-panel');
-    if (!btn) return;
-
-    const reasons = [];
-    const hasInvalidFields = Array.from(document.querySelectorAll('#form-powerbi-path [data-field]'))
-        .some(f => f.classList.contains('is-invalid'));
-    if (hasInvalidFields) reasons.push('Preencha os campos obrigatórios');
-
-    const selected = document.querySelector('#form-powerbi-panel input[name="powerbi-tipo"]:checked');
-    const necessitaInternet = !selected || POWERBI_OPCOES_INTERNET.includes(selected.value);
-    if (necessitaInternet && !navigator.onLine) reasons.push('Sem conexão com a internet');
-
-    btn.disabled = reasons.length > 0;
-    updateButtonTooltip(btn, reasons);
-}
-
-document.addEventListener('change', (e) => {
-    if (e.target.name === 'powerbi-tipo' && e.target.closest('#form-powerbi-panel')) {
-        atualizarBotaoPowerBIPanel();
-    }
-});
-
 function executarPowerBI(button) {
     const form = button ? button.closest('form') : document;
     const selected = form.querySelector('input[name="powerbi-tipo"]:checked');
@@ -215,16 +192,23 @@ function atualizarDestaqueCabecalhos() {
         execucao: observatorioFiltroProblemas || !!document.getElementById('filtro-obs-execucao').value,
     };
 
-    document.querySelectorAll('#powerbi-observatorio-result th[data-col]').forEach(th => {
+    // Cabeçalhos (Linha 1): Destaca se tiver filtro OU ordenação
+    document.querySelectorAll('#powerbi-observatorio-result thead tr:first-child th[data-col]').forEach(th => {
         const col = th.dataset.col;
         const temFiltroOuOrdenacao = filtrosAtivos[col] || (observatorioOrdenacao.coluna === col);
-        th.classList.toggle('text-primary', temFiltroOuOrdenacao);
+        th.classList.toggle('obs-header-highlight', temFiltroOuOrdenacao);
+    });
+
+    // Células de filtro (Linha 2): Destaca se tiver filtro
+    document.querySelectorAll('#observatorio-filter-row th[data-col]').forEach(th => {
+        const col = th.dataset.col;
+        th.classList.toggle('obs-filter-highlight', filtrosAtivos[col]);
     });
 }
 
 function getObservatorioSortValue(r, coluna) {
     switch (coluna) {
-        case 'ano':      return r.ano;
+        case 'ano': return r.ano;
         case 'processo': return r.processo.toLowerCase();
         case 'situacao': return (r.situacao ?? '').toLowerCase();
         case 'data': {
@@ -232,7 +216,7 @@ function getObservatorioSortValue(r, coluna) {
             return y && m && d ? `${y}${m}${d}` : '';
         }
         case 'licitacao': return (r.obsLicitacao ?? '').toLowerCase();
-        case 'execucao':  return (r.obsExecucao ?? '').toLowerCase();
+        case 'execucao': return (r.obsExecucao ?? '').toLowerCase();
         default: return '';
     }
 }
@@ -307,6 +291,7 @@ function executarObservatorio(button) {
     const tbody = document.getElementById('powerbi-observatorio-tbody');
     const downloadBtn = document.getElementById('btn-download-powerbi-observatorio');
 
+    button.dataset.executing = 'true';
     button.disabled = true;
     status.textContent = 'Acessando a Planilha de Controle...';
     status.classList.remove('text-danger');
@@ -322,11 +307,16 @@ function executarObservatorio(button) {
         finalizado = true;
         es.close();
         esconderProgressoObservatorio();
-        button.disabled = false;
+        delete button.dataset.executing;
+        if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
         if (msgErro) {
             status.textContent = `Erro: ${msgErro}`;
             status.classList.add('text-danger');
-            showToast(`Falha ao recuperar dados: ${msgErro}`, 'error', 5000, 'Observatório');
+            addNotification({
+                message: `Falha ao recuperar dados: ${msgErro}`,
+                type: 'error',
+                source: 'Observatório'
+            });
         }
     };
 
@@ -363,6 +353,15 @@ function executarObservatorio(button) {
             partes.push(`Comparação não realizada para: ${detalhes}.`);
         }
         status.textContent = partes.join(' ');
+
+        // Notificar sucesso no painel de notificações
+        const mensagem = `Planilha de Controle carregada com sucesso. ${data.total} processo(s) encontrado(s).`;
+        addNotification({
+            message: mensagem,
+            type: 'success',
+            source: 'Observatório'
+        });
+
         finalizar();
     });
 
@@ -384,18 +383,18 @@ function escapeHtml(str) {
 }
 
 const OBSERVATORIO_STATUS_INFO = {
-    atendido:   { variant: 'success',   titulo: 'Arquivo já incluído na base' },
-    pendente:   { variant: 'warning',   titulo: 'Incluir o arquivo correspondente na base' },
-    divergente: { variant: 'danger',    titulo: 'Divergência entre a Planilha de Controle e a base — verificar' },
-    na:         { variant: 'secondary', titulo: 'Não se aplica' },
-    analise:    { variant: '',          titulo: 'Em análise' },
+    atendido: { variant: 'success', titulo: 'Arquivo já incluído na base' },
+    pendente: { variant: 'warning', titulo: 'Incluir o arquivo correspondente na base' },
+    divergente: { variant: 'danger', titulo: 'Divergência entre a Planilha de Controle e a base — verificar' },
+    na: { variant: 'secondary', titulo: 'Não se aplica' },
+    analise: { variant: '', titulo: 'Em análise' },
 };
 
 function renderObservatorioBadge(texto, status) {
     if (!texto) return '';
     const info = OBSERVATORIO_STATUS_INFO[status] || OBSERVATORIO_STATUS_INFO.analise;
     if (!info.variant) return escapeHtml(texto);
-    return `<span class="badge text-bg-${info.variant}" title="${escapeHtml(info.titulo)}">${escapeHtml(texto)}</span>`;
+    return `<span class="badge text-bg-${info.variant} text-wrap" title="${escapeHtml(info.titulo)}">${escapeHtml(texto)}</span>`;
 }
 
 const OBSERVATORIO_STATUS_LABEL = {

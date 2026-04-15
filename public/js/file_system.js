@@ -150,14 +150,7 @@ async function clearFolderFiles(containerId, folderPath, scriptName, innerFolder
     if (!confirmed) return;
 
     try {
-        filesList.innerHTML = `
-            <div class="custom-spinner-container">
-                <div class="custom-spinner text-danger">
-                    <div class="spinner-border"></div>
-                    <span role="status">Excluindo arquivos...</span>
-                </div>
-            </div>
-        `;
+        filesList.innerHTML = customSpinnerHTML('Excluindo arquivos...', 'danger');
 
         let url = `/api/clear-folder/${scriptName}/${innerFolder}`;
         let params = new URLSearchParams();
@@ -248,11 +241,16 @@ function refreshFileList(containerId, scriptName) {
     const fileList = document.getElementById(containerId);
 
     if (!scriptName) {
-        const mainTabPane = fileList.closest('.tab-pane[data-load-url]');
-        if (mainTabPane) {
-            scriptName = mainTabPane.id;
+        if (fileList.dataset.scriptName) {
+            scriptName = fileList.dataset.scriptName;
         } else {
-            scriptName = fileList.closest('.tab-pane').id;
+            const mainTabPane = fileList.closest('.tab-pane[data-load-url]');
+            if (mainTabPane) {
+                scriptName = mainTabPane.id;
+            } else {
+                const tabPane = fileList.closest('.tab-pane');
+                scriptName = tabPane ? tabPane.id : null;
+            }
         }
     }
 
@@ -352,14 +350,7 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
     filesList.classList.toggle('view-grid', viewMode === 'grid');
 
     try {
-        filesList.innerHTML = `
-            <div class="custom-spinner-container">
-                <div class="custom-spinner text-primary">
-                    <div class="spinner-border"></div>
-                    <span role="status">Atualizando lista de arquivos...</span>
-                </div>
-            </div>
-        `;
+        filesList.innerHTML = customSpinnerHTML('Atualizando lista de arquivos...');
 
         let url = `/api/list-files/${scriptName}/${innerFolder}`;
         let params = new URLSearchParams();
@@ -421,7 +412,6 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
 
         filesList.innerHTML = filesHTML;
 
-        colorSelectedRow(containerId);
         setupFileListButtons(filesList);
         initializeTooltips();
 
@@ -472,7 +462,6 @@ function setupFileListButtons(filesList) {
 
             filesList = document.getElementById(containerId);
             validateSingleField(filesList);
-            colorSelectedRow(containerId);
         });
     }
 
@@ -502,8 +491,6 @@ function selectFile(containerId, fileName, fileId) {
         const previousTableSelected = container.querySelector('tr.selected');
         if (previousTableSelected) {
             previousTableSelected.classList.remove('selected');
-            previousTableSelected.style.borderLeft = '';
-            previousTableSelected.style.backgroundColor = '';
         }
         const previousCardSelected = container.querySelector('.item-card.item-selected');
         if (previousCardSelected) {
@@ -517,7 +504,6 @@ function selectFile(containerId, fileName, fileId) {
         if (fileRow.classList.contains('item-card')) {
             fileRow.classList.add('item-selected');
         }
-        colorSelectedRow(containerId);
     }
 
     selectedFiles[containerId] = fileName;
@@ -525,32 +511,4 @@ function selectFile(containerId, fileName, fileId) {
     document.dispatchEvent(new CustomEvent('file-selected', {
         detail: { containerId: containerId, fileName: fileName }
     }));
-}
-
-function colorSelectedRow(containerId) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    const fileRow = container.querySelector('tr.selected');
-    if (!fileRow) return;
-
-    // Pegar a cor do ícone da primeira célula
-    const iconElement = fileRow.querySelector('.file-icon i');
-    let iconColor = '#28a745'; // cor padrão
-
-    if (iconElement && iconElement.style.color) {
-        iconColor = iconElement.style.color;
-    }
-
-    fileRow.style.borderLeft = `4px solid ${iconColor}`;
-
-    // Tornar o fundo mais claro aplicando transparência (15%)
-    if (iconColor.startsWith('#')) {
-        fileRow.style.backgroundColor = `${iconColor}26`;
-    } else if (iconColor.startsWith('rgb')) {
-        fileRow.style.backgroundColor = iconColor.replace('rgb', 'rgba').replace(')', ', 0.15)');
-    } else {
-        fileRow.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
-    }
-
 }

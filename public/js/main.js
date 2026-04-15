@@ -6,6 +6,18 @@ let selectedFiles = {}; // Armazena arquivos selecionados por containerId
 let wsDisconnectedAlertShown = false;
 let wsDisconnectedNotifId = null;
 let internetOfflineNotifId = null;
+let rNotFoundNotifId = null;
+
+// Estado global da aplicação — fonte de verdade para condições que não derivam do DOM
+const AppState = {
+    serverConnected: false,
+    rAvailable: false,
+};
+
+function setState(patch) {
+    Object.assign(AppState, patch);
+    if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
+}
 
 function handleInternetOffline() {
     if (internetOfflineNotifId === null) {
@@ -13,10 +25,7 @@ function handleInternetOffline() {
         addNotification({ message: 'Sem conexão com a internet.', type: 'warning', source: 'Sistema' })
             .then(id => { internetOfflineNotifId = id; });
     }
-    if (typeof atualizarBotaoPowerBIPanel === 'function') atualizarBotaoPowerBIPanel();
-    if (typeof verificarLiberacaoBotoesImportacao === 'function') verificarLiberacaoBotoesImportacao();
-    if (typeof atualizarBotoesInstalacao === 'function') atualizarBotoesInstalacao();
-    if (typeof atualizarBotaoCatmat === 'function') atualizarBotaoCatmat();
+    if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
 }
 
 function handleInternetOnline() {
@@ -25,10 +34,7 @@ function handleInternetOnline() {
         dismissNotification(internetOfflineNotifId);
         internetOfflineNotifId = null;
     }
-    if (typeof atualizarBotaoPowerBIPanel === 'function') atualizarBotaoPowerBIPanel();
-    if (typeof verificarLiberacaoBotoesImportacao === 'function') verificarLiberacaoBotoesImportacao();
-    if (typeof atualizarBotoesInstalacao === 'function') atualizarBotoesInstalacao();
-    if (typeof atualizarBotaoCatmat === 'function') atualizarBotaoCatmat();
+    if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
 }
 
 window.addEventListener('offline', handleInternetOffline);
@@ -46,11 +52,35 @@ function connectWebSocket() {
             }
         }
         wsDisconnectedAlertShown = false;
+        setState({ serverConnected: true });
     };
 
     ws.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
+
+            if (data.type === 'r-status') {
+                setState({ rAvailable: data.available });
+                if (!data.available && rNotFoundNotifId === null) {
+                    showToast('R não encontrado. Acesse a aba Instalação para baixar e instalar.', 'warning', 8000, 'Sistema');
+                    addNotification({
+                        message: 'R não está instalado neste computador. Sem ele, não é possível executar os scripts da aplicação.',
+                        type: 'warning',
+                        source: 'Sistema',
+                        actions: [{
+                            label: 'Ir para Instalação',
+                            callback: () => {
+                                const tabBtn = document.getElementById('instalacao-tab');
+                                if (tabBtn) new bootstrap.Tab(tabBtn).show();
+                            }
+                        }]
+                    }).then(id => { rNotFoundNotifId = id; });
+                } else if (data.available && rNotFoundNotifId !== null) {
+                    dismissNotification(rNotFoundNotifId);
+                    rNotFoundNotifId = null;
+                }
+                return;
+            }
 
             // Processar output e progresso apenas se o console estiver visível
             if (consoleContainer && consoleContainer.classList.contains('show')) {
@@ -91,6 +121,23 @@ function connectWebSocket() {
                     type: data.type,
                     source: data.scriptName
                 });
+
+                // Sugestão extra: ao falhar um script R, orientar o usuário a atualizar pacotes
+                const nonRScripts = ['npm_update', 'atas_mailmerge'];
+                if (data.type === 'error' && data.scriptName && !nonRScripts.includes(data.scriptName)) {
+                    addNotification({
+                        message: 'Se o erro persistir, tente atualizar os pacotes R na aba Instalação.',
+                        type: 'info',
+                        source: 'Sistema',
+                        actions: [{
+                            label: 'Ir para Instalação',
+                            callback: () => {
+                                const tabBtn = document.getElementById('instalacao-tab');
+                                if (tabBtn) new bootstrap.Tab(tabBtn).show();
+                            }
+                        }]
+                    });
+                }
 
                 handleScriptResult({
                     status: data.type,
@@ -137,6 +184,7 @@ function connectWebSocket() {
     };
 
     ws.onclose = () => {
+        setState({ serverConnected: false });
         if (isScriptRunning) hideScriptRunningOverlay();
         if (!wsDisconnectedAlertShown) {
             wsDisconnectedAlertShown = true;

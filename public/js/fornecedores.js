@@ -1,4 +1,5 @@
 let pregaoSelecionado = null;
+let pregaoFolderFileCount = 0; // qtd de arquivos na pasta do pregão selecionado
 let pregoesDadosFolderPath = '';
 let importarFolderPath = '';
 
@@ -43,14 +44,7 @@ async function carregarPregoes() {
     const container = document.getElementById('fornecedores-pregoes-list');
     if (!container) return;
 
-    container.innerHTML = `
-        <div class="custom-spinner-container">
-            <div class="custom-spinner text-primary">
-                <div class="spinner-border"></div>
-                <span role="status">Carregando pregões...</span>
-            </div>
-        </div>
-    `;
+    container.innerHTML = customSpinnerHTML('Carregando pregões...');
 
     try {
         const response = await fetch('/api/fornecedores/pregoes');
@@ -150,6 +144,7 @@ function setupRefreshPregoesButton(container) {
 
 function selecionarPregao(nome) {
     pregaoSelecionado = nome;
+    pregaoFolderFileCount = 0; // será atualizado por atualizarInfoPregao
 
     // Atualizar visual de seleção
     document.querySelectorAll('.item-card[data-pregao]').forEach(card => {
@@ -205,14 +200,7 @@ async function carregarConteudoPasta(pregao) {
 
     if (titulo) titulo.textContent = `Fornecedores - Pregão ${pregao}`;
 
-    container.innerHTML = `
-        <div class="custom-spinner-container">
-            <div class="custom-spinner text-primary">
-                <div class="spinner-border"></div>
-                <span role="status">Carregando arquivos...</span>
-            </div>
-        </div>
-    `;
+    container.innerHTML = customSpinnerHTML('Carregando arquivos...');
 
     try {
         const response = await fetch(`/api/fornecedores/pregao/${pregao}/arquivos`);
@@ -381,8 +369,8 @@ async function atualizarInfoPregao(nome) {
 
         if (elQtd) elQtd.textContent = pregao.qtdArquivos;
 
-        const btn = document.getElementById('btn-obter-dados-fornecedores');
-        if (btn) btn.disabled = pregao.qtdArquivos === 0;
+        pregaoFolderFileCount = pregao.qtdArquivos;
+        if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
 
         if (pregao.qtdArquivos === 0) {
             elQtd.closest('.dashboard-widget').classList.add('border-danger');
@@ -429,8 +417,8 @@ function limparInfoPregao() {
         }
     });
 
-    const btn = document.getElementById('btn-obter-dados-fornecedores');
-    if (btn) btn.disabled = true;
+    pregaoFolderFileCount = 0;
+    if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
 }
 
 // ====== ARQUIVOS A IMPORTAR ======
@@ -472,14 +460,7 @@ async function carregarImportar() {
     const container = document.getElementById('fornecedores-importar-list');
     if (!container) return;
 
-    container.innerHTML = `
-        <div class="custom-spinner-container">
-            <div class="custom-spinner text-primary">
-                <div class="spinner-border"></div>
-                <span role="status">Carregando arquivos...</span>
-            </div>
-        </div>
-    `;
+    container.innerHTML = customSpinnerHTML('Carregando arquivos...');
 
     try {
         const response = await fetch('/api/fornecedores/importar');
@@ -571,6 +552,7 @@ async function selecionarImportar(pregao) {
     } else {
         // Pasta do pregão não existe - limpar seleção e atualizar listas
         pregaoSelecionado = null;
+        pregaoFolderFileCount = 0;
         document.querySelectorAll('.item-card[data-pregao]').forEach(card => {
             card.classList.remove('item-selected', 'selected');
         });

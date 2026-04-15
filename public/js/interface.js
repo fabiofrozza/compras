@@ -1,5 +1,95 @@
 const darkModeBtn = document.getElementById('darkModeBtn');
 
+// ====== SPINNER ======
+
+function customSpinnerHTML(message, color = 'primary') {
+    return `<div class="custom-spinner-container">
+                <div class="custom-spinner text-${color}">
+                    <div class="spinner-border"></div>
+                    <span role="status">${message}</span>
+                </div>
+            </div>`;
+}
+
+// ====== CABEÇALHOS DE SCRIPT-FORM ======
+
+function initScriptFormHeaders(container) {
+    const headers = container.querySelectorAll('.script-form-header:not([data-initialized])');
+    headers.forEach(h4 => {
+        const icon = h4.dataset.comprasIcon;
+        const title = h4.dataset.comprasTitle;
+        const helpText = h4.dataset.comprasHelp;
+        const titleId = h4.dataset.comprasTitleId;
+
+        // Localiza o div.collapse antes de inserir qualquer elemento
+        const collapseDiv = h4.parentElement.querySelector(':scope > .collapse');
+        const collapseId = collapseDiv?.id;
+
+        // Título: ícone + texto
+        const titleSpan = document.createElement('span');
+        const iconEl = document.createElement('i');
+        iconEl.className = 'material-symbols-outlined';
+        iconEl.textContent = icon;
+        titleSpan.appendChild(iconEl);
+        titleSpan.append(' ');
+        if (titleId) {
+            const textSpan = document.createElement('span');
+            textSpan.id = titleId;
+            textSpan.textContent = title;
+            titleSpan.appendChild(textSpan);
+        } else {
+            titleSpan.append(title);
+        }
+
+        // Container de botões
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.className = 'script-form-header-buttons';
+
+        // Botão de ajuda (se data-compras-help presente)
+        if (helpText) {
+            const helpId = collapseId
+                ? collapseId.replace('-collapse', '-help')
+                : `help-${crypto.randomUUID().slice(0, 8)}`;
+            const anchorName = `--${helpId}`;
+
+            const helpBtn = document.createElement('button');
+            helpBtn.type = 'button';
+            helpBtn.className = 'form-header-help';
+            helpBtn.setAttribute('popovertarget', helpId);
+            helpBtn.style.setProperty('anchor-name', anchorName);
+            helpBtn.innerHTML = '<i class="material-symbols-outlined">help</i>';
+            buttonsDiv.appendChild(helpBtn);
+
+            const popoverDiv = document.createElement('div');
+            popoverDiv.setAttribute('popover', '');
+            popoverDiv.id = helpId;
+            popoverDiv.className = 'form-help-popover';
+            popoverDiv.style.setProperty('position-anchor', anchorName);
+            popoverDiv.innerHTML = helpText;
+            h4.after(popoverDiv);
+        }
+
+        // Botão de colapsar (sempre presente quando há div.collapse)
+        if (collapseId) {
+            const collapseBtn = document.createElement('button');
+            collapseBtn.type = 'button';
+            collapseBtn.className = 'form-collapse-btn';
+            collapseBtn.setAttribute('data-bs-toggle', 'collapse');
+            collapseBtn.setAttribute('data-bs-target', `#${collapseId}`);
+            collapseBtn.setAttribute('aria-expanded', 'true');
+            collapseBtn.setAttribute('aria-controls', collapseId);
+            collapseBtn.innerHTML = '<i class="material-symbols-outlined"></i>';
+            buttonsDiv.appendChild(collapseBtn);
+        }
+
+        h4.innerHTML = '';
+        h4.appendChild(titleSpan);
+        h4.appendChild(buttonsDiv);
+        h4.setAttribute('data-initialized', 'true');
+        ['comprasIcon', 'comprasTitle', 'comprasHelp', 'comprasTitleId'].forEach(attr => delete h4.dataset[attr]);
+    });
+}
+
 // ====== TELA INTEIRA ======
 
 function toggleFullscreen() {
@@ -23,11 +113,7 @@ document.addEventListener('fullscreenchange', () => {
     }
     const tooltip = bootstrap.Tooltip.getInstance(btn);
     if (tooltip) tooltip.dispose();
-    new bootstrap.Tooltip(btn, {
-        container: 'body',
-        trigger: 'hover',
-        customClass: 'custom-tooltip'
-    });
+    new bootstrap.Tooltip(btn, { ...TOOLTIP_DEFAULTS });
 });
 
 function applyDarkMode(darkModeEnabled = null) {
@@ -109,11 +195,7 @@ async function setHomeBackground(bgSource) {
             credit.setAttribute('data-bs-title', creditTooltip);
             const bsTooltip = bootstrap.Tooltip.getInstance(credit);
             if (bsTooltip) bsTooltip.dispose();
-            new bootstrap.Tooltip(credit, {
-                container: 'body',
-                trigger: 'hover',
-                customClass: 'custom-tooltip'
-            });
+            new bootstrap.Tooltip(credit, { ...TOOLTIP_DEFAULTS });
         };
 
         applyCredit();
@@ -146,7 +228,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const cfg = await fetch('/api/app-config').then(r => r.json());
         const refreshMs = (cfg.backgroundRefreshTime || 0) * 1000;
         if (refreshMs > 0) setInterval(setHomeBackground, refreshMs);
-    } catch (_) {}
+    } catch (_) { }
 });
 
 // Event delegation para .card-link - funciona mesmo em conteúdo carregado dinamicamente
@@ -338,16 +420,26 @@ async function buildHelpPanel() {
 // tooltips "fantasmas" na tela. Esta varredura periódica remove tooltips
 // cujo trigger (referenciado via aria-describedby) não existe mais no DOM.
 function cleanupOrphanTooltips() {
-    document.querySelectorAll('body > .tooltip').forEach(tooltipEl => {
+    // Busca tooltips em qualquer lugar do documento, não apenas no body direto
+    document.querySelectorAll('.tooltip').forEach(tooltipEl => {
         const id = tooltipEl.id;
-        const trigger = id ? document.querySelector(`[aria-describedby="${id}"]`) : null;
-        if (!trigger || !document.body.contains(trigger)) {
-            tooltipEl.remove();
+        // Usa ~= para encontrar o id em uma lista (aria-describedby pode ter vários ids)
+        const trigger = id ? document.querySelector(`[aria-describedby~="${id}"]`) : null;
+
+        // Se o trigger não existe, não está no DOM ou está oculto (ex: aba trocada), removemos a tooltip
+        if (!trigger || !document.body.contains(trigger) || trigger.getClientRects().length === 0) {
+            // Tenta dispose via Bootstrap se o trigger ainda existir, senão remove direto o elemento
+            const instance = trigger ? bootstrap.Tooltip.getInstance(trigger) : null;
+            if (instance) {
+                instance.dispose();
+            } else {
+                tooltipEl.remove();
+            }
         }
     });
 }
 
-setInterval(cleanupOrphanTooltips, 2000);
+setInterval(cleanupOrphanTooltips, 1000);
 
 function limparFormulario(formId) {
     const form = document.getElementById(formId);
