@@ -121,7 +121,8 @@ function applyDarkMode(darkModeEnabled = null) {
     const isDark = darkModeEnabled ?? !document.body.classList.contains('dark');
 
     document.body.classList.toggle('dark', isDark);
-    darkModeBtn.innerHTML = isDark ? '<i class="material-symbols-outlined">light_mode</i>' : '<i class="material-symbols-outlined">dark_mode</i>';
+    const darkModeIcon = darkModeBtn?.querySelector('i');
+    if (darkModeIcon) darkModeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
 
     if (isDark) {
         document.documentElement.setAttribute('data-bs-theme', 'dark');
@@ -323,11 +324,9 @@ async function inicializarPreferenciasPanel() {
 
 document.addEventListener('DOMContentLoaded', () => {
     const companyLogo = document.getElementById('companyLogo');
-    const fullscreenBtn = document.getElementById('fullscreenBtn');
-    const settingsBtn = document.getElementById('settingsBtn');
     const notificationsBtn = document.getElementById('notificationsBtn');
-    const helpBtn = document.getElementById('helpBtn');
     const appLauncherBtn = document.getElementById('appLauncherBtn');
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
     const settingsPanelClose = document.getElementById('settingsPanelClose');
     const notificationsPanelClose = document.getElementById('notificationsPanelClose');
     const helpPanelClose = document.getElementById('helpPanelClose');
@@ -340,11 +339,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (homeTab) new bootstrap.Tab(homeTab).show();
         });
     }
-    if (fullscreenBtn) fullscreenBtn.addEventListener('click', toggleFullscreen);
-    if (settingsBtn) settingsBtn.addEventListener('click', () => openPanel('settings-panel', settingsBtn));
     if (notificationsBtn) notificationsBtn.addEventListener('click', () => openPanel('notifications-panel', notificationsBtn));
-    if (helpBtn) helpBtn.addEventListener('click', () => openPanel('help-panel', helpBtn));
     if (appLauncherBtn) appLauncherBtn.addEventListener('click', () => openPanel('app-launcher-panel', appLauncherBtn));
+    if (hamburgerBtn) hamburgerBtn.addEventListener('click', () => openPanel('hamburger-panel', hamburgerBtn));
     if (settingsPanelClose) settingsPanelClose.addEventListener('click', closeAllPanels);
     if (notificationsPanelClose) notificationsPanelClose.addEventListener('click', closeAllPanels);
     if (helpPanelClose) helpPanelClose.addEventListener('click', closeAllPanels);
