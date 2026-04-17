@@ -89,6 +89,17 @@ body {
     padding-right: 4px;
 }
 
+/* Container for help/required icons appended to labels (used in forms and preferences panel) */
+.label-icons {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 6px;
+    cursor: help;
+    font-size: 90%;
+    line-height: .75;
+}
+
 .indicator-required {
     color: var(--compras-error);
 }

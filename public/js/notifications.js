@@ -54,8 +54,8 @@ function getLabelIconsContainer(labelEl) {
     return container;
 }
 
-function transformLabelTooltips() {
-    document.querySelectorAll('label[data-bs-toggle="tooltip"]').forEach(label => {
+function transformLabelTooltips(container = document) {
+    container.querySelectorAll('label[data-bs-toggle="tooltip"]').forEach(label => {
         const title = label.getAttribute('data-bs-title');
         if (!title) return;
 
@@ -75,9 +75,9 @@ function transformLabelTooltips() {
     });
 }
 
-function createRequiredFieldsTooltip() {
-    transformLabelTooltips();
-    const requiredFields = document.querySelectorAll('label:has(+ [data-validate-rule]):not(:has(.indicator-required)), label:has(+ :required):not(:has(.indicator-required)), label:has(+ * :required):not(:has(.indicator-required)), h4:has(~ [data-validate-rule], ~ * [data-validate-rule], ~ :required, ~ * :required):not(:has(.indicator-required))');
+function createRequiredFieldsTooltip(container = document) {
+    transformLabelTooltips(container);
+    const requiredFields = container.querySelectorAll('label:has(+ [data-validate-rule]):not(:has(.indicator-required)), label:has(+ :required):not(:has(.indicator-required)), label:has(+ * :required):not(:has(.indicator-required)), h4:has(~ [data-validate-rule], ~ * [data-validate-rule], ~ :required, ~ * :required):not(:has(.indicator-required))');
     requiredFields.forEach(field => {
         const asteriskSpan = document.createElement('span');
         asteriskSpan.className = 'indicator-required';
@@ -93,15 +93,28 @@ function createRequiredFieldsTooltip() {
         }
     });
 
-    initializeTooltips();
+    initializeTooltips(container);
 }
 
-function initializeTooltips() {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+function initializeTooltips(container = document) {
+    const tooltipTriggerList = container.querySelectorAll('[data-bs-toggle="tooltip"]');
     tooltipTriggerList.forEach(tooltipTriggerEl => {
         // Evita inicializar múltiplas vezes o mesmo elemento
         if (!bootstrap.Tooltip.getInstance(tooltipTriggerEl)) {
-            new bootstrap.Tooltip(tooltipTriggerEl, { ...TOOLTIP_DEFAULTS });
+            try {
+                // Previne erro do Bootstrap 5 ao inicializar se title não estiver propriamente atrelado
+                const t = tooltipTriggerEl.getAttribute('title');
+                const dt = tooltipTriggerEl.getAttribute('data-bs-title');
+                const dtot = tooltipTriggerEl.getAttribute('data-bs-original-title');
+                const isTitleEmpty = (str) => !str || str.trim() === '';
+
+                if (isTitleEmpty(t) && isTitleEmpty(dt) && isTitleEmpty(dtot)) {
+                    return; // Ignora inicialização silenciosamente (title é nulo ou inteiramente vazio)
+                }
+                new bootstrap.Tooltip(tooltipTriggerEl, { ...TOOLTIP_DEFAULTS });
+            } catch (e) {
+                console.warn('Tooltips: ignoring initialization for', tooltipTriggerEl, e);
+            }
         }
     });
 }
@@ -114,7 +127,7 @@ function removeTooltip(element) {
         tooltip.dispose();
     }
 }
-
+transformLabelTooltips();
 initializeTooltips();
 
 function testToasts() {

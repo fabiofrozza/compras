@@ -330,7 +330,7 @@ document.addEventListener('shown.bs.tab', async (event) => {
             setupLiveValidation(tabId);
             validateTabFields(tabId);
             atualizarIndicadoresSubTabs();
-            createRequiredFieldsTooltip();
+            createRequiredFieldsTooltip(document.getElementById(tabId));
 
             if (tabId === 'atas' && typeof inicializarAtas === 'function') {
                 inicializarAtas();
