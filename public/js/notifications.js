@@ -106,8 +106,10 @@ function initializeTooltips(container = document) {
                 const t = tooltipTriggerEl.getAttribute('title');
                 const dt = tooltipTriggerEl.getAttribute('data-bs-title');
                 const dtot = tooltipTriggerEl.getAttribute('data-bs-original-title');
-                if (t === null && dt === null && dtot === null) {
-                    return; // Ignora inicialização (title é estritamente null)
+                const isTitleEmpty = (str) => !str || str.trim() === '';
+
+                if (isTitleEmpty(t) && isTitleEmpty(dt) && isTitleEmpty(dtot)) {
+                    return; // Ignora inicialização silenciosamente (title é nulo ou inteiramente vazio)
                 }
                 new bootstrap.Tooltip(tooltipTriggerEl, { ...TOOLTIP_DEFAULTS });
             } catch (e) {
