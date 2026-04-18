@@ -12,14 +12,16 @@ const {
   listFilesWithStats,
   deleteFilesInFolder,
   validateAndDeleteFile,
+} = require('../utils/files');
+const {
   listPregoes,
   listPregaoFiles,
   listImportFiles,
   deletePregao,
   deleteSupplierFile,
   moveSupplierFiles,
-} = require('./files');
-const { validateLink } = require('./spreadsheet');
+} = require('../services/fornecedores');
+const { validateLink } = require('../services/spreadsheet');
 
 function registerFileRoutes(app, logger) {
   app.post('/api/open-folder', async (req, res) => {
