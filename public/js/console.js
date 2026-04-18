@@ -119,25 +119,27 @@ function ensureConsoleDOM() {
     }
   });
 
-  // --- Lógica de arrastar e limites ---
+  // Converte a ancoragem inicial (bottom/right da folha de estilos) em top/left
+  // assim que o console fica visível, antes do usuário arrastar ou redimensionar.
+  // Após a conversão, o observer é descartado: manter o ResizeObserver ativo durante
+  // o resize nativo do CSS atrasa o repaint (cada frame força leitura síncrona de layout).
   const consoleResizeObserver = new ResizeObserver(() => {
-    if (!isDragging) {
-      // Garante que a posição esteja em top/left antes de aplicar restrições
-      const styles = getComputedStyle(consoleContainer);
-      if (styles.bottom !== 'auto' || styles.right !== 'auto') {
-        const rect = consoleContainer.getBoundingClientRect();
-        if (rect.width === 0 && rect.height === 0) return;
-        consoleContainer.style.top = rect.top + 'px';
-        consoleContainer.style.left = rect.left + 'px';
-        consoleContainer.style.bottom = 'auto';
-        consoleContainer.style.right = 'auto';
-        enforceConsoleConstraints();
-        clampDimensionsToMax();
-      }
+    if (isDragging) return;
+    const rect = consoleContainer.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) return;
+    if (consoleContainer.style.bottom === 'auto' && consoleContainer.style.right === 'auto') {
+      consoleResizeObserver.disconnect();
+      return;
     }
+    consoleContainer.style.top = Math.round(rect.top) + 'px';
+    consoleContainer.style.left = Math.round(rect.left) + 'px';
+    consoleContainer.style.bottom = 'auto';
+    consoleContainer.style.right = 'auto';
+    enforceConsoleConstraints();
+    consoleResizeObserver.disconnect();
   });
   consoleResizeObserver.observe(consoleContainer);
-  window.addEventListener('resize', () => { enforceConsoleConstraints(); clampDimensionsToMax(); });
+  window.addEventListener('resize', enforceConsoleConstraints);
 }
 
 async function showScriptRunningOverlay() {
@@ -410,11 +412,10 @@ const enforceConsoleConstraints = () => {
   if (!consoleContainer) return;
 
   // Converte bottom/right para top/left se necessário (facilita os cálculos)
-  const styles = getComputedStyle(consoleContainer);
-  if (styles.bottom !== 'auto' || styles.right !== 'auto') {
+  if (consoleContainer.style.bottom !== 'auto' || consoleContainer.style.right !== 'auto') {
     const rect = consoleContainer.getBoundingClientRect();
-    consoleContainer.style.top = rect.top + 'px';
-    consoleContainer.style.left = rect.left + 'px';
+    consoleContainer.style.top = Math.round(rect.top) + 'px';
+    consoleContainer.style.left = Math.round(rect.left) + 'px';
     consoleContainer.style.bottom = 'auto';
     consoleContainer.style.right = 'auto';
   }
@@ -427,14 +428,13 @@ const enforceConsoleConstraints = () => {
   const minLeft = 0;
   const minTop = navbar ? navbar.offsetHeight : 0;
 
-  // Usar Math.round evita que frações de subpixel em rect.top/left façam a condicional abaixo 
+  // Usar Math.round evita que frações de subpixel em rect.top/left façam a condicional abaixo
   // ser acionada recursivamente em loops do ResizeObserver (o que congela o redimensionamento nativo)
   let currentLeft = Math.round(rect.left);
   let currentTop = Math.round(rect.top);
   let currentWidth = Math.round(rect.width);
   let currentHeight = Math.round(rect.height);
 
-  const isBottomRight = getComputedStyle(consoleContainer).bottom !== 'auto' || getComputedStyle(consoleContainer).right !== 'auto';
   let needsPositionUpdate = false;
   let needsSizeUpdate = false;
 
@@ -486,54 +486,14 @@ const enforceConsoleConstraints = () => {
     }
   }
 
-  if (isBottomRight && (needsPositionUpdate || needsSizeUpdate)) {
+  if (needsPositionUpdate) {
     if (consoleContainer.style.left !== `${newLeft}px`) consoleContainer.style.left = `${newLeft}px`;
     if (consoleContainer.style.top !== `${newTop}px`) consoleContainer.style.top = `${newTop}px`;
-    if (consoleContainer.style.bottom !== 'auto') consoleContainer.style.bottom = 'auto';
-    if (consoleContainer.style.right !== 'auto') consoleContainer.style.right = 'auto';
-    if (needsSizeUpdate) {
-      if (consoleContainer.style.width !== `${newWidth}px`) consoleContainer.style.width = `${newWidth}px`;
-      if (consoleContainer.style.height !== `${newHeight}px`) consoleContainer.style.height = `${newHeight}px`;
-    }
-  } else if (!isBottomRight) {
-    if (needsPositionUpdate) {
-      if (consoleContainer.style.left !== `${newLeft}px`) consoleContainer.style.left = `${newLeft}px`;
-      if (consoleContainer.style.top !== `${newTop}px`) consoleContainer.style.top = `${newTop}px`;
-    }
-    if (needsSizeUpdate) {
-      if (consoleContainer.style.width !== `${newWidth}px`) consoleContainer.style.width = `${newWidth}px`;
-      if (consoleContainer.style.height !== `${newHeight}px`) consoleContainer.style.height = `${newHeight}px`;
-    }
   }
-
-  if (!isBottomRight || needsPositionUpdate || needsSizeUpdate) {
-    const newMaxWidth = `${window.innerWidth - newLeft}px`;
-    const newMaxHeight = `${window.innerHeight - newTop}px`;
-    if (consoleContainer.style.maxWidth !== newMaxWidth) consoleContainer.style.maxWidth = newMaxWidth;
-    if (consoleContainer.style.maxHeight !== newMaxHeight) consoleContainer.style.maxHeight = newMaxHeight;
-  } else {
-    const cs = getComputedStyle(consoleContainer);
-    const newMaxWidth = `${window.innerWidth - minLeft - (parseInt(cs.right) || 0)}px`;
-    const newMaxHeight = `${window.innerHeight - minTop - (parseInt(cs.bottom) || 0)}px`;
-    if (consoleContainer.style.maxWidth !== newMaxWidth) consoleContainer.style.maxWidth = newMaxWidth;
-    if (consoleContainer.style.maxHeight !== newMaxHeight) consoleContainer.style.maxHeight = newMaxHeight;
+  if (needsSizeUpdate) {
+    if (consoleContainer.style.width !== `${newWidth}px`) consoleContainer.style.width = `${newWidth}px`;
+    if (consoleContainer.style.height !== `${newHeight}px`) consoleContainer.style.height = `${newHeight}px`;
   }
-};
-
-// Clamps inline CSS width/height to the current maxWidth/maxHeight.
-// Called only after drag or window resize — never during CSS resize — to prevent conflicting with the
-// browser's own resize handling while still avoiding a visual jump when the console is repositioned.
-const clampDimensionsToMax = () => {
-  if (!consoleContainer) return;
-  const effMaxW = parseFloat(consoleContainer.style.maxWidth);
-  const effMaxH = parseFloat(consoleContainer.style.maxHeight);
-  if (isNaN(effMaxW) || isNaN(effMaxH)) return;
-
-  const cssW = parseFloat(consoleContainer.style.width) || consoleContainer.offsetWidth;
-  const cssH = parseFloat(consoleContainer.style.height) || consoleContainer.offsetHeight;
-
-  if (cssW > effMaxW) consoleContainer.style.width = effMaxW + 'px';
-  if (cssH > effMaxH) consoleContainer.style.height = effMaxH + 'px';
 };
 
 const onDragStart = (e) => {
@@ -546,10 +506,10 @@ const onDragStart = (e) => {
   isDragging = true;
 
   // Na primeira vez, o console usa 'bottom'/'right'; convertemos para 'top'/'left' para o arraste funcionar
-  const rect = consoleContainer.getBoundingClientRect();
-  if (getComputedStyle(consoleContainer).bottom !== 'auto' || getComputedStyle(consoleContainer).right !== 'auto') {
-    consoleContainer.style.top = `${rect.top}px`;
-    consoleContainer.style.left = `${rect.left}px`;
+  if (consoleContainer.style.bottom !== 'auto' || consoleContainer.style.right !== 'auto') {
+    const rect = consoleContainer.getBoundingClientRect();
+    consoleContainer.style.top = `${Math.round(rect.top)}px`;
+    consoleContainer.style.left = `${Math.round(rect.left)}px`;
     consoleContainer.style.bottom = 'auto';
     consoleContainer.style.right = 'auto';
     enforceConsoleConstraints();
@@ -578,17 +538,11 @@ const onDragMove = (e) => {
   const maxLeft = window.innerWidth - consoleContainer.offsetWidth;
   const maxTop = window.innerHeight - consoleContainer.offsetHeight;
 
-  let newLeft = point.clientX - offsetX;
-  let newTop = point.clientY - offsetY;
-
-  newLeft = Math.max(minLeft, Math.min(newLeft, maxLeft));
-  newTop = Math.max(minTop, Math.min(newTop, maxTop));
+  let newLeft = Math.round(Math.max(minLeft, Math.min(point.clientX - offsetX, maxLeft)));
+  let newTop = Math.round(Math.max(minTop, Math.min(point.clientY - offsetY, maxTop)));
 
   consoleContainer.style.left = `${newLeft}px`;
   consoleContainer.style.top = `${newTop}px`;
-
-  consoleContainer.style.maxWidth = `${window.innerWidth - newLeft}px`;
-  consoleContainer.style.maxHeight = `${window.innerHeight - newTop}px`;
 };
 
 const onDragEnd = () => {
@@ -597,7 +551,6 @@ const onDragEnd = () => {
   document.body.classList.remove('dragging-console');
   document.removeEventListener('mousemove', onDragMove);
   enforceConsoleConstraints();
-  clampDimensionsToMax();
 };
 
 // Event delegation para .btn-run - permite que botões carregados dinamicamente funcionem
