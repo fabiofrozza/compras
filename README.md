@@ -13,7 +13,15 @@
 
 Aplicação web local que permite execução de scripts para auxiliar meus colegas nas atividades relacionadas a compras públicas.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/fabiofrozza/compras/main/docs/media/home.png" alt="Tela inicial" width="800">
+</p>
+
 ## Funcionalidades
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/fabiofrozza/compras/main/docs/media/app.png" alt="Interface da aplicação" width="800">
+</p>
 
 * **Atas** — geração de Atas de Registro de Preços com base nos relatórios de cadastramento dos fornecedores (obtidos no SICAF) e na lista de itens do Termo de Referência (TR).
 * **CATMAT** — verificação dos CATMATs e das respectivas margens de preferência (se houver) com base na lista de itens do TR.

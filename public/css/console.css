@@ -4,8 +4,8 @@ FLOATING CONSOLE AND LOGS DRAWER
 
 #console-container {
     position: fixed;
-    bottom: var(--compras-padding-main);
-    right: var(--compras-padding-main);
+    bottom: var(--compras-padding-screen);
+    right: var(--compras-padding-screen);
     width: 700px;
     height: 400px;
     min-width: 350px;
@@ -58,7 +58,6 @@ body.dragging-console {
     align-items: baseline;
 }
 
-.console-header .btn-minimize,
 .console-header .btn-close {
     background: transparent;
     border: none;
@@ -66,9 +65,14 @@ body.dragging-console {
     cursor: pointer;
     transition: color 0.2s;
     font-size: 18px;
+
+    & i {
+        vertical-align: baseline;
+    }
 }
 
-.console-header .btn-minimize:hover,
+
+
 .console-header .btn-close:hover {
     color: white;
 }
@@ -186,17 +190,6 @@ body.dragging-console {
     50% {
         transform: translateY(-8px);
     }
-}
-
-#console-container.minimized {
-    height: auto !important;
-    min-height: 0;
-    resize: none;
-}
-
-#console-container.minimized .console-output-wrapper,
-#console-container.minimized #console-summary {
-    display: none !important;
 }
 
 #console-summary {

@@ -13,7 +13,15 @@
 
 A local web application that runs scripts to assist my colleagues in activities related to public procurement.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/fabiofrozza/compras/main/docs/media/home.png" alt="Home screen" width="800">
+</p>
+
 ## Features
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/fabiofrozza/compras/main/docs/media/app.png" alt="Application interface" width="800">
+</p>
 
 * **Atas** — generation of Price Registration Minutes based on supplier registration reports (obtained from SICAF) and the list of items from the Terms of Reference (TR).
 * **CATMAT** — verification of CATMATs and their respective preference margins (if any) based on the list of items from the TR.

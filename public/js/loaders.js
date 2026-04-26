@@ -1653,6 +1653,7 @@ function getLoader(index) {
   document.addEventListener("mousemove", (event) => {
     const eyes = document.querySelector(".eyes");
     const pupil = document.getElementById("pupils");
+    if (!eyes || !pupil) return;
 
     const mouseX = event.clientX;
     const mouseY = event.clientY;

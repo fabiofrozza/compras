@@ -5,9 +5,9 @@ const path = require('path');
 const os = require('os');
 const dns = require('dns');
 const Logger = require('./utils/logger');
-const { registerConsoleRoutes, handleConsoleMessage, checkRAvailable } = require('./services/consoleService');
-const { registerFileRoutes } = require('./services/fileRoutes');
-const { isPathSafe, openInInterface } = require('./services/files');
+const { registerConsoleRoutes, handleConsoleMessage, checkRAvailable } = require('./services/console');
+const { registerFileRoutes } = require('./routes/files');
+const { isPathSafe, openInInterface } = require('./utils/files');
 
 let logConsentEnabled = true; // null/true = salvar logs (permissivo por padrão); false = opt-out
 
@@ -89,7 +89,7 @@ app.get('/api/app-config', (_req, res) => {
 });
 
 // API - Observatório (planilha de controle)
-const { registerObservatorioRoute } = require('./services/observatorioService');
+const { registerObservatorioRoute } = require('./services/observatorio');
 registerObservatorioRoute(app, logger);
 
 const server = app.listen(PORT, async () => {

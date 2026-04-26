@@ -1,6 +1,6 @@
 // Referências para elementos DOM - inicializadas sob demanda via ensureConsoleDOM()
 let consoleContainer, consoleHeader, consoleSummary, summaryTitle, summaryDescription;
-let closeButton, minimizeButton, consoleOutput, scriptRunningOverlay, overlayLoader;
+let closeButton, consoleOutput, scriptRunningOverlay, overlayLoader;
 
 let isScriptRunning = false;
 let hasEverRun = false;
@@ -34,11 +34,7 @@ function ensureConsoleDOM() {
                 <div class="status-circle" id="status-3"></div>
             </div>
             <div class="header-buttons">
-                <button class="btn-minimize" type="button" aria-label="Minimizar" data-bs-toggle="tooltip"
-                    title="Minimizar">
-                    <i class="material-symbols-outlined">minimize</i>
-                </button>
-                <button class="btn-close" type="button" aria-label="Fechar" data-bs-toggle="tooltip" title="Fechar">
+                <button class="btn-close" type="button" aria-label="Fechar">
                     <i class="material-symbols-outlined">close</i>
                 </button>
             </div>
@@ -90,7 +86,6 @@ function ensureConsoleDOM() {
   summaryTitle = consoleSummary.querySelector('h4');
   summaryDescription = consoleSummary.querySelector('p');
   closeButton = consoleContainer.querySelector('.btn-close');
-  minimizeButton = consoleContainer.querySelector('.btn-minimize');
   consoleOutput = document.getElementById('console-output');
   scriptRunningOverlay = document.getElementById('script-running-overlay');
   overlayLoader = document.getElementById('overlay-loader');
@@ -101,21 +96,19 @@ function ensureConsoleDOM() {
     }
   });
 
-  minimizeButton.addEventListener('click', () => {
-    consoleContainer.classList.toggle('minimized');
-    const isMinimized = consoleContainer.classList.contains('minimized');
-    const newTitle = isMinimized ? 'Restaurar' : 'Minimizar';
-    const newIcon = isMinimized ? 'open_in_browser' : 'minimize';
-    minimizeButton.innerHTML = `<i class="material-symbols-outlined">${newIcon}</i>`;
-    minimizeButton.setAttribute('title', newTitle);
-    minimizeButton.setAttribute('aria-label', newTitle);
-    const tooltip = bootstrap.Tooltip.getInstance(minimizeButton);
-    if (tooltip) {
-      tooltip.setContent({ '.tooltip-inner': newTitle });
+  consoleContainer.addEventListener('mousedown', () => { mousedownOnConsole = true; });
+  document.addEventListener('mouseup', (e) => {
+    if (mousedownOnConsole) {
+      if (!e.composedPath().includes(consoleContainer)) justDragged = true;
     }
+    mousedownOnConsole = false;
   });
 
   document.addEventListener('click', (e) => {
+    if (justDragged) {
+      justDragged = false;
+      return;
+    }
     const path = e.composedPath();
     if (consoleContainer.classList.contains('show') && !consoleContainer.classList.contains('running')) {
       if (!path.includes(consoleContainer)) consoleContainer.classList.remove('show');
@@ -126,11 +119,24 @@ function ensureConsoleDOM() {
     }
   });
 
-  // --- Lógica de arrastar e limites ---
+  // Converte a ancoragem inicial (bottom/right da folha de estilos) em top/left
+  // assim que o console fica visível, antes do usuário arrastar ou redimensionar.
+  // Após a conversão, o observer é descartado: manter o ResizeObserver ativo durante
+  // o resize nativo do CSS atrasa o repaint (cada frame força leitura síncrona de layout).
   const consoleResizeObserver = new ResizeObserver(() => {
-    if (!isDragging) {
-      enforceConsoleConstraints();
+    if (isDragging) return;
+    const rect = consoleContainer.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) return;
+    if (consoleContainer.style.bottom === 'auto' && consoleContainer.style.right === 'auto') {
+      consoleResizeObserver.disconnect();
+      return;
     }
+    consoleContainer.style.top = Math.round(rect.top) + 'px';
+    consoleContainer.style.left = Math.round(rect.left) + 'px';
+    consoleContainer.style.bottom = 'auto';
+    consoleContainer.style.right = 'auto';
+    enforceConsoleConstraints();
+    consoleResizeObserver.disconnect();
   });
   consoleResizeObserver.observe(consoleContainer);
   window.addEventListener('resize', enforceConsoleConstraints);
@@ -188,8 +194,6 @@ function prepareConsoleForExecution(scriptName) {
   }
 
   showScriptRunningOverlay();
-  consoleContainer.classList.remove('minimized');
-
   const statusClasses = ['finished-success', 'finished-warning', 'finished-error'];
   statusClasses.forEach(cls => consoleContainer.classList.remove(cls));
 
@@ -400,10 +404,22 @@ function runRScript(scriptName, customParams = null) {
 // --- Lógica de arraste e limites do console ---
 
 let isDragging = false;
+let justDragged = false;
+let mousedownOnConsole = false;
 let offsetX, offsetY;
 
 const enforceConsoleConstraints = () => {
   if (!consoleContainer) return;
+
+  // Converte bottom/right para top/left se necessário (facilita os cálculos)
+  if (consoleContainer.style.bottom !== 'auto' || consoleContainer.style.right !== 'auto') {
+    const rect = consoleContainer.getBoundingClientRect();
+    consoleContainer.style.top = Math.round(rect.top) + 'px';
+    consoleContainer.style.left = Math.round(rect.left) + 'px';
+    consoleContainer.style.bottom = 'auto';
+    consoleContainer.style.right = 'auto';
+  }
+
   const rect = consoleContainer.getBoundingClientRect();
   if (rect.width === 0 && rect.height === 0) return;
 
@@ -412,12 +428,13 @@ const enforceConsoleConstraints = () => {
   const minLeft = 0;
   const minTop = navbar ? navbar.offsetHeight : 0;
 
-  let currentLeft = rect.left;
-  let currentTop = rect.top;
-  let currentWidth = rect.width;
-  let currentHeight = rect.height;
+  // Usar Math.round evita que frações de subpixel em rect.top/left façam a condicional abaixo
+  // ser acionada recursivamente em loops do ResizeObserver (o que congela o redimensionamento nativo)
+  let currentLeft = Math.round(rect.left);
+  let currentTop = Math.round(rect.top);
+  let currentWidth = Math.round(rect.width);
+  let currentHeight = Math.round(rect.height);
 
-  const isBottomRight = getComputedStyle(consoleContainer).bottom !== 'auto' || getComputedStyle(consoleContainer).right !== 'auto';
   let needsPositionUpdate = false;
   let needsSizeUpdate = false;
 
@@ -438,42 +455,44 @@ const enforceConsoleConstraints = () => {
   let newHeight = currentHeight;
 
   if (newLeft + newWidth > window.innerWidth) {
-    newWidth = window.innerWidth - newLeft;
-    needsSizeUpdate = true;
+    const overflowX = (newLeft + newWidth) - window.innerWidth;
+    const availableShiftX = newLeft - minLeft;
+    
+    if (availableShiftX > 0) {
+      const shiftX = Math.min(overflowX, availableShiftX);
+      newLeft -= shiftX;
+      needsPositionUpdate = true;
+    }
+
+    if (newLeft + newWidth > window.innerWidth) {
+      newWidth = window.innerWidth - newLeft;
+      needsSizeUpdate = true;
+    }
   }
 
   if (newTop + newHeight > window.innerHeight) {
-    newHeight = window.innerHeight - newTop;
-    needsSizeUpdate = true;
-  }
+    const overflowY = (newTop + newHeight) - window.innerHeight;
+    const availableShiftY = newTop - minTop;
 
-  if (isBottomRight && (needsPositionUpdate || needsSizeUpdate)) {
-    consoleContainer.style.left = `${newLeft}px`;
-    consoleContainer.style.top = `${newTop}px`;
-    consoleContainer.style.bottom = 'auto';
-    consoleContainer.style.right = 'auto';
-    if (needsSizeUpdate) {
-      consoleContainer.style.width = `${newWidth}px`;
-      consoleContainer.style.height = `${newHeight}px`;
+    if (availableShiftY > 0) {
+      const shiftY = Math.min(overflowY, availableShiftY);
+      newTop -= shiftY;
+      needsPositionUpdate = true;
     }
-  } else if (!isBottomRight) {
-    if (needsPositionUpdate) {
-      consoleContainer.style.left = `${newLeft}px`;
-      consoleContainer.style.top = `${newTop}px`;
-    }
-    if (needsSizeUpdate) {
-      consoleContainer.style.width = `${newWidth}px`;
-      consoleContainer.style.height = `${newHeight}px`;
+
+    if (newTop + newHeight > window.innerHeight) {
+      newHeight = window.innerHeight - newTop;
+      needsSizeUpdate = true;
     }
   }
 
-  if (!isBottomRight || needsPositionUpdate || needsSizeUpdate) {
-    consoleContainer.style.maxWidth = `${window.innerWidth - newLeft}px`;
-    consoleContainer.style.maxHeight = `${window.innerHeight - newTop}px`;
-  } else {
-    const cs = getComputedStyle(consoleContainer);
-    consoleContainer.style.maxWidth = `${window.innerWidth - minLeft - (parseInt(cs.right) || 0)}px`;
-    consoleContainer.style.maxHeight = `${window.innerHeight - minTop - (parseInt(cs.bottom) || 0)}px`;
+  if (needsPositionUpdate) {
+    if (consoleContainer.style.left !== `${newLeft}px`) consoleContainer.style.left = `${newLeft}px`;
+    if (consoleContainer.style.top !== `${newTop}px`) consoleContainer.style.top = `${newTop}px`;
+  }
+  if (needsSizeUpdate) {
+    if (consoleContainer.style.width !== `${newWidth}px`) consoleContainer.style.width = `${newWidth}px`;
+    if (consoleContainer.style.height !== `${newHeight}px`) consoleContainer.style.height = `${newHeight}px`;
   }
 };
 
@@ -487,10 +506,10 @@ const onDragStart = (e) => {
   isDragging = true;
 
   // Na primeira vez, o console usa 'bottom'/'right'; convertemos para 'top'/'left' para o arraste funcionar
-  const rect = consoleContainer.getBoundingClientRect();
-  if (getComputedStyle(consoleContainer).bottom !== 'auto' || getComputedStyle(consoleContainer).right !== 'auto') {
-    consoleContainer.style.top = `${rect.top}px`;
-    consoleContainer.style.left = `${rect.left}px`;
+  if (consoleContainer.style.bottom !== 'auto' || consoleContainer.style.right !== 'auto') {
+    const rect = consoleContainer.getBoundingClientRect();
+    consoleContainer.style.top = `${Math.round(rect.top)}px`;
+    consoleContainer.style.left = `${Math.round(rect.left)}px`;
     consoleContainer.style.bottom = 'auto';
     consoleContainer.style.right = 'auto';
     enforceConsoleConstraints();
@@ -519,21 +538,16 @@ const onDragMove = (e) => {
   const maxLeft = window.innerWidth - consoleContainer.offsetWidth;
   const maxTop = window.innerHeight - consoleContainer.offsetHeight;
 
-  let newLeft = point.clientX - offsetX;
-  let newTop = point.clientY - offsetY;
-
-  newLeft = Math.max(minLeft, Math.min(newLeft, maxLeft));
-  newTop = Math.max(minTop, Math.min(newTop, maxTop));
+  let newLeft = Math.round(Math.max(minLeft, Math.min(point.clientX - offsetX, maxLeft)));
+  let newTop = Math.round(Math.max(minTop, Math.min(point.clientY - offsetY, maxTop)));
 
   consoleContainer.style.left = `${newLeft}px`;
   consoleContainer.style.top = `${newTop}px`;
-
-  consoleContainer.style.maxWidth = `${window.innerWidth - newLeft}px`;
-  consoleContainer.style.maxHeight = `${window.innerHeight - newTop}px`;
 };
 
 const onDragEnd = () => {
   isDragging = false;
+  justDragged = true;
   document.body.classList.remove('dragging-console');
   document.removeEventListener('mousemove', onDragMove);
   enforceConsoleConstraints();
