@@ -307,3 +307,13 @@ fetch('/api/app-config')
         }
     })
     .catch(() => { /* sem bloco npm em caso de falha */ });
+
+const _originalHandleScriptResult = window.handleScriptResult;
+window.handleScriptResult = function(result) {
+    _originalHandleScriptResult(result);
+    if (result.scriptName === 'npm_update' && result.status === 'success') {
+        _npmOutdated = false;
+        carregarInfoNpm();
+        carregarNpmPackages();
+    }
+};
