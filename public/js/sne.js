@@ -81,7 +81,7 @@ function betterValidity(a, b) {
 }
 
 function computeSupplierStatus(certidoes) {
-    if (certidoes.some(c => c.impedido)) return 'erro';
+    if (certidoes.some(c => c.impedido)) return 'impedido';
 
     const typeBest = {};
     const hasParseErrors = certidoes.some(c => c.error);
@@ -102,15 +102,19 @@ function computeSupplierStatus(certidoes) {
         // SICAF ausente ou vencido — verifica cobertura por certidões individuais
         const sicafCert = certidoes.find(c => !c.error && c.type === 'SICAF');
         if (sicafCert?.componentValidity) {
-            // Cada componente vencido no SICAF deve ter uma certidão avulsa válida
+            // Cada componente vencido no SICAF deve ter uma certidão avulsa válida ou ao menos presente.
+            // null = arquivo existe mas não verificável → passa (hasUnverifiable produz 'alerta' adiante).
+            // undefined = arquivo ausente → não cobre → 'erro'.
             sicafCoveredByIndividual = Object.entries(sicafCert.componentValidity).every(([label, cv]) => {
                 if (cv !== 'VENCIDA') return true;
                 const standalone = typeBest[label];
+                if (standalone === null) return true;
                 return standalone && standalone !== 'VENCIDA';
             });
         } else {
             sicafCoveredByIndividual = MANDATORY_INDIVIDUAL.every(t => {
                 const v = typeBest[t];
+                if (v === null) return true;
                 return v && v !== 'VENCIDA';
             });
         }
@@ -120,13 +124,11 @@ function computeSupplierStatus(certidoes) {
     for (const [type, best] of Object.entries(typeBest)) {
         if (type === 'Credenciamento') continue;
         if (type === 'SICAF' && sicafCoveredByIndividual) continue;
-        if (type === 'Municipal') continue;
         if (best === 'VENCIDA') return 'erro';
     }
 
     const hasAVencer = Object.entries(typeBest).some(([type, v]) => {
         if (type === 'SICAF' && sicafCoveredByIndividual) return false;
-        if (type === 'Municipal') return false;
         return v === 'A_VENCER';
     });
     const hasUnverifiable = certidoes.some(c =>
@@ -181,9 +183,10 @@ function renderFornecedores() {
     }
 
     const STATUS_MAP = {
-        ok:     { cssClass: 'status-sucesso',  icon: 'check_circle', tooltip: 'Todas as certidões válidas' },
-        alerta: { cssClass: 'status-parcial',  icon: 'warning',      tooltip: 'Certidões a vencer ou com data não verificada' },
-        erro:   { cssClass: 'status-sem_saida', icon: 'cancel',      tooltip: 'Certidões vencidas ou ausentes' },
+        ok:       { cssClass: 'status-sucesso',  icon: 'check_circle', tooltip: 'Todas as certidões válidas' },
+        alerta:   { cssClass: 'status-parcial',  icon: 'warning',      tooltip: 'Certidões a vencer ou com data não verificada' },
+        erro:     { cssClass: 'status-sem_saida', icon: 'cancel',      tooltip: 'Certidões vencidas ou ausentes' },
+        impedido: { cssClass: 'status-sem_saida', icon: 'gavel',       tooltip: 'Fornecedor impedido de licitar' },
     };
 
     let html = buildFolderPathHTML(displayPath, '', refreshBtn) + '<div class="items-grid">';

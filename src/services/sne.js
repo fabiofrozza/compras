@@ -16,8 +16,7 @@ const TYPE_KEYWORDS = [
   { keywords: ['receita federal', 'pgfn'], type: 'Receita Federal' },
   { keywords: ['fgts', 'cef'], type: 'FGTS' },
   { keywords: ['trabalhista', 'tst'], type: 'Trabalhista' },
-  { keywords: ['receita estadual', 'estadual', 'distrital'], type: 'Estadual' },
-  { keywords: ['receita municipal', 'municipal', 'iss'], type: 'Municipal' },
+  { keywords: ['receita estadual', 'estadual', 'distrital', 'dívida ativa do estado', 'divida ativa do estado'], type: 'Estadual' },
 ];
 
 // Verification rules per cert type — add/edit rules here to extend behavior.
@@ -30,6 +29,10 @@ const CERT_CHECKS = {
       pattern: /Impedimento de Licitar[:\s]+([^:]{1,20})/i,
       expected: /nada\s+consta/i,
       failSuffix: 'IMPEDIDO',
+      // When impediment is detected, confirm scope includes UFSC or federal government.
+      // Captures up to 300 chars after the section heading (appears near end of the document).
+      scopePattern: /Impedimento de Licitar no [Âa]mbito[:\s]+(.{1,300})/i,
+      scopeRequired: /[Óo]rg[aã]os do Governo Federal|Universidade Federal de Santa Catarina/i,
     },
     dates: [
       // "Receita Federal e PGFN22/04/2026Automática" (date immediately after label)
@@ -63,15 +66,12 @@ const CERT_CHECKS = {
     ],
   },
   estadual: {
+    // Both patterns require a colon before the date, preventing false matches when PDF text
+    // extraction outputs labels and values out of order (labels first, then values in a separate column).
     dates: [
-      { label: 'Estadual', pattern: /[Vv][áa]lidade.*?(\d{2}[\/.\-]\d{2}[\/.\-]\d{4})/i },
-      { label: 'Estadual', pattern: /[Vv]alidade[^0-9]*(\d{2}[\/.\-]\d{2}[\/.\-]\d{4})/i },
-    ],
-  },
-  municipal: {
-    dates: [
-      { label: 'Municipal', pattern: /[Vv][áa]lidade.*?\s*(\d{2}[\/.\-]\d{2}[\/.\-]\d{4})/i },
-      { label: 'Municipal', pattern: /[Vv]alidade[^0-9]*(\d{2}[\/.\-]\d{2}[\/.\-]\d{4})/i },
+      { label: 'Estadual', pattern: /[Vv]álida?\s+até\s*:?\s*(\d{2}[\/.\-]\d{2}[\/.\-]\d{4})/i },
+      // Handles "Validade: DD/MM/YYYY" and "Validade (conforme Lei nº xxxx): DD/MM/YYYY"
+      { label: 'Estadual', pattern: /[Vv]alidade[^:]*:\s*(\d{2}[\/.\-]\d{2}[\/.\-]\d{4})/i },
     ],
   },
 };
@@ -109,12 +109,20 @@ function extractCompanyName(rawText) {
     // "Nome (razão social):" — used by SC Estadual and some other certidões
     /Nome\s*\(raz[aã]o\s*social\)\s*:[ \t]*(?:\r?\n[ \t]*)?([^\n\r:]{2,}(?:\r?\n[ \t]+[^\n\r:]+)?)/i,
     /Contribuinte\s*:[ \t]*(?:\r?\n[ \t]*)?([^\n\r:]{2,}(?:\r?\n[ \t]+[^\n\r:]+)?)/i,
+    // Two-column layout: "NOME: CNPJ\nCOMPANY" — CNPJ label on same line as NOME, name on next line
+    /^Nome\s*:[ \t]*CNPJ[^\n\r]*\r?\n[ \t]*([A-Za-zÀ-ÿ][^\n\r:]{2,})/im,
+    // Two-column layout: "NOME:\nCNPJ\nCOMPANY" — CNPJ label on the line right after NOME
+    /^Nome\s*:[ \t]*\r?\n[ \t]*CNPJ[^\n\r]*\r?\n[ \t]*([A-Za-zÀ-ÿ][^\n\r:]{2,})/im,
+    // "Nome: AIVY VARIEDADES LTDA" — Receita Federal uses bare "Nome:" label, value on same line
+    /^Nome\s*:[ \t]*([^\n\r:]{2,})/im,
   ];
+  // Words that are field labels, not company names
+  const LABEL_WORDS = /^(cnpj|cpf|ie|im|insc\.?\s*estadual|insc\.?\s*municipal)$/i;
   for (const p of patterns) {
     const m = rawText.match(p);
     if (m) {
       const name = m[1].replace(/\s+/g, ' ').trim();
-      if (name.length > 1) return name;
+      if (name.length > 1 && !LABEL_WORDS.test(name)) return name;
     }
   }
   return null;
@@ -179,8 +187,15 @@ async function analyzeCertidao(filename, pdfParse) {
   if (checks.impedimento) {
     const m = text.match(checks.impedimento.pattern);
     if (m && !checks.impedimento.expected.test(m[1].trim())) {
-      suffixes.push(checks.impedimento.failSuffix);
-      impedido = true;
+      let scopeMatches = true;
+      if (checks.impedimento.scopePattern) {
+        const sm = text.match(checks.impedimento.scopePattern);
+        scopeMatches = sm ? checks.impedimento.scopeRequired.test(sm[1]) : false;
+      }
+      if (scopeMatches) {
+        suffixes.push(checks.impedimento.failSuffix);
+        impedido = true;
+      }
     }
   }
 
