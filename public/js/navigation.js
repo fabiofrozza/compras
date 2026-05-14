@@ -6,7 +6,8 @@ const TAB_LIST = [
     { id: 'fornecedores', label: 'Fornecedores', icon: 'storefront', description: 'Atualize os dados dos fornecedores', color: 'text-success', logsDrawer: true },
     { id: 'importacao', label: 'Importação', icon: 'upload_file', description: 'Gere os arquivos para importação dos pedidos e relatórios gerenciais', color: 'text-warning', logsDrawer: true },
     { id: 'mapas', label: 'Mapas', icon: 'shopping_basket', description: 'Transforme Mapas de licitação em listas prévias', logsDrawer: true },
-    { id: 'powerbi', label: 'Power BI', icon: 'add_chart', description: 'Gere os dados para o Observatório', color: 'text-danger', separator: 'after', logsDrawer: true },
+    { id: 'powerbi', label: 'Power BI', icon: 'add_chart', description: 'Gere os dados para o Observatório', color: 'text-danger', logsDrawer: true },
+    { id: 'sne', label: 'SNEs', icon: 'receipt', description: 'Organize a documentação para as SNEs', color: 'text-danger', separator: 'after' },
     { id: 'instalacao', label: 'Instalação', icon: 'build', hiddenHomeCard: true, logsDrawer: true },
 ];
 
