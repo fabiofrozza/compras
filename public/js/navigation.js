@@ -52,6 +52,7 @@ const TAB_SCRIPTS = {
     fornecedores: 'js/fornecedores.js',
     importacao: 'js/importacao.js',
     powerbi: 'js/powerbi.js',
+    sne: 'js/sne.js',
     instalacao: 'js/instalacao.js'
 };
 
@@ -343,6 +344,10 @@ document.addEventListener('shown.bs.tab', async (event) => {
 
             if (tabId === 'fornecedores' && typeof inicializarFornecedores === 'function') {
                 inicializarFornecedores();
+            }
+
+            if (tabId === 'sne' && typeof inicializarSne === 'function') {
+                inicializarSne();
             }
 
             // Guard: após awaits anteriores, verificar se esta aba ainda é a ativa

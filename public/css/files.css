@@ -4,7 +4,8 @@
 
 .files-list,
 .files-list-style,
-.fornecedores-grid-list {
+.fornecedores-grid-list,
+.sne-fornecedores-list {
     background-color: color-mix(in srgb, var(--compras-theme) 50%, white);
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;

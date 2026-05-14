@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<div class="row">
+    <div class="col-sm-6">
+        <!-- Quadro Fornecedores -->
+        <div class="script-form shadow-sm">
+            <h4 class="script-form-header" data-compras-icon="business"
+                data-compras-title="Fornecedores"
+                data-compras-help="Lista os fornecedores identificados nas certidões da pasta CERTIDOES. Clique em um fornecedor para visualizar suas certidões.
+                <br><br>Use 'Analisar' para ler os PDFs, verificar validade e renomear os arquivos com CNPJ, razão social e status.">
+            </h4>
+            <div class="collapse show" id="sne-fornecedores-collapse">
+                <div id="sne-fornecedores-list" class="sne-fornecedores-list">
+                </div>
+                <div class="form-buttons">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Ordenar por">
+                        <input type="radio" class="btn-check" name="sne-sort" id="sne-sort-nome" value="nome" checked>
+                        <label class="btn btn-outline-secondary" for="sne-sort-nome">Nome</label>
+                        <input type="radio" class="btn-check" name="sne-sort" id="sne-sort-cnpj" value="cnpj">
+                        <label class="btn btn-outline-secondary" for="sne-sort-cnpj">CNPJ</label>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary text-nowrap" id="btn-analisar-certidoes">
+                        <i class="material-symbols-outlined">search</i> Analisar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6">
+        <!-- Quadro Certidões do Fornecedor -->
+        <div class="script-form shadow-sm">
+            <h4 class="script-form-header" data-compras-icon="picture_as_pdf"
+                data-compras-title="Certidões"
+                data-compras-title-id="sne-certidoes-titulo">
+            </h4>
+            <div class="collapse show" id="sne-certidoes-collapse">
+                <div id="sne-certidoes-list" class="files-list-style">
+                    <div class="alert alert-info" role="alert">
+                        <i class="material-symbols-outlined">info</i> Selecione um fornecedor para ver as certidões
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
