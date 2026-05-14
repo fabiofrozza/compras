@@ -94,9 +94,13 @@ registerObservatorioRoute(app, logger);
 
 const server = app.listen(PORT, async () => {
 
-  const localIp = Object.values(os.networkInterfaces())
-    .flat()
-    .find(iface => iface.family === 'IPv4' && !iface.internal);
+  const isPrivateIp = (addr) =>
+    /^192\.168\./.test(addr) || /^10\./.test(addr) || /^172\.(1[6-9]|2\d|3[01])\./.test(addr);
+
+  const allIfaces = Object.values(os.networkInterfaces()).flat();
+  const localIp =
+    allIfaces.find(iface => iface.family === 'IPv4' && !iface.internal && isPrivateIp(iface.address)) ||
+    allIfaces.find(iface => iface.family === 'IPv4' && !iface.internal);
 
   logger.section('Servidor iniciado');
   logger.info(`==============================================`);
@@ -107,6 +111,7 @@ const server = app.listen(PORT, async () => {
     logger.info(``);
     logger.info(`Acesso pela rede local (outros computadores/celulares):`);
     logger.info(`http://${localIp.address}:${PORT}`);
+    logger.info(`(para funcionar, requer liberação da porta ${PORT} no firewall)`);
   }
   logger.info(``);
   logger.info(`==============================================`);
