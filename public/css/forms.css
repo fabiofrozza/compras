@@ -405,19 +405,27 @@
 
 .sne-fornecedores-list {
     min-height: 100px;
-    max-height: 350px;
-    overflow-y: auto;
+    max-height: 500px;
     padding: 8px;
+    display: flex;
+    flex-direction: column;
 }
 
 .sne-fornecedores-list .folder-path-container {
     margin: -8px -8px 8px;
     border-radius: 5px 5px 0 0;
+    flex-shrink: 0;
+}
+
+.sne-fornecedores-list .items-grid {
+    overflow-y: scroll;
+    min-height: 0;
+    padding-right: 8px;
+    scrollbar-gutter: stable;
 }
 
 .sne-supplier-card {
     padding: 10px 28px 8px 30px !important;
-    min-height: 62px;
 }
 
 .sne-supplier-name {
