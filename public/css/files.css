@@ -230,6 +230,10 @@
     }
 
     &.status-pendente {
+        background-color: light-dark(
+            color-mix(in srgb, var(--compras-pending), white 85%),
+            color-mix(in srgb, var(--compras-pending), black 78%)
+        );
         .item-card-icon i,
         .item-card-status i {
             color: var(--compras-pending);
@@ -237,6 +241,10 @@
     }
 
     &.status-sucesso {
+        background-color: light-dark(
+            color-mix(in srgb, var(--compras-success), white 85%),
+            color-mix(in srgb, var(--compras-success), black 75%)
+        );
         .item-card-icon i,
         .item-card-status i {
             color: var(--compras-success);
@@ -244,6 +252,10 @@
     }
 
     &.status-parcial {
+        background-color: light-dark(
+            color-mix(in srgb, var(--compras-warning), white 85%),
+            color-mix(in srgb, var(--compras-warning), black 78%)
+        );
         .item-card-icon i,
         .item-card-status i {
             color: var(--compras-warning);
@@ -251,6 +263,10 @@
     }
 
     &.status-sem_saida {
+        background-color: light-dark(
+            color-mix(in srgb, var(--compras-error), white 85%),
+            color-mix(in srgb, var(--compras-error), black 75%)
+        );
         .item-card-icon i,
         .item-card-status i {
             color: var(--compras-error);
