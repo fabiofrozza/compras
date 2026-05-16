@@ -159,6 +159,7 @@ function renderFornecedores() {
         setupFolderPathButtons(container);
         setupRefreshFornecedoresButton(container);
         initializeTooltips();
+        evaluateAllButtons();
         return;
     }
 
@@ -226,6 +227,7 @@ function renderFornecedores() {
     setupFolderPathButtons(container);
     setupRefreshFornecedoresButton(container);
     initializeTooltips();
+    evaluateAllButtons();
 }
 
 function setupRefreshFornecedoresButton(container) {
