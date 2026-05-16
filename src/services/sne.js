@@ -225,7 +225,6 @@ async function analyzeCertidao(filename, pdfParse) {
     }
   }
 
-  logger.debug(`"${filename}": type=${type}, cnpj=${cnpj ?? 'null'}, company="${company ?? 'null'}", dates=[${foundDates.join(', ')}]`, 'SNE');
 
   const warnings = [];
   if (!cnpj) warnings.push('CNPJ não encontrado');
@@ -392,7 +391,6 @@ async function renameCertidoes() {
     if (!a.newName) {
       a.renamed = false;
       a.renameSkipped = true;
-      logger.debug(`"${a.filename}": sem nome gerado (type=${a.type ?? 'null'}, cnpj=${a.cnpj ?? 'null'}, company="${a.company ?? 'null'}") — pulado`, 'SNE');
       results.push(a);
       continue;
     }
@@ -412,7 +410,6 @@ async function renameCertidoes() {
         try {
           await fs.rename(path.join(SNE_CERTIDOES, a.filename), path.join(SNE_CERTIDOES, targetName));
           a.renamed = true;
-          logger.debug(`"${a.filename}" → "${targetName}"`, 'SNE');
         } catch (e) {
           a.renamed = false;
           a.renameError = e.message;
@@ -463,7 +460,6 @@ async function renameCertidoes() {
         try {
           await fs.rename(path.join(SNE_CERTIDOES, winner.filename), path.join(SNE_CERTIDOES, targetName));
           winner.renamed = true;
-          logger.debug(`"${winner.filename}" → "${targetName}"`, 'SNE');
         } catch (e) {
           winner.renamed = false;
           winner.renameError = e.message;

@@ -404,31 +404,90 @@ async function analisarCertidoes() {
 
     if (!confirmed) return;
 
-    const btnAnalisar = document.getElementById('btn-analisar-certidoes');
-    if (btnAnalisar) btnAnalisar.disabled = true;
+    prepareConsoleForExecution('sne_analisar');
 
     try {
         const response = await fetch('/api/sne/certidoes/renomear', { method: 'POST' });
         const data = await response.json();
 
         if (!response.ok) {
-            showToast(`Erro ao processar: ${data.error}`, 'error');
+            handleScriptResult({ scriptName: 'sne_analisar', status: 'error', message: data.error || 'Erro ao processar certidões.', log: '' });
             return;
         }
 
         const renamed = data.results.filter(r => r.renamed).length;
         const deleted = data.results.filter(r => r.deleted).length;
-        const failed = data.results.filter(r => r.renameError || r.renameSkipped).length;
+        const errors  = data.results.filter(r => r.renameError).length;
+        const skipped = data.results.filter(r => r.renameSkipped).length;
+        const noChange = data.results.filter(r => r.noChange).length;
+
+        const C = {
+            section: 'color: #6ea8fe; font-weight: bold;',
+            success: 'color: #20c997;',
+            warning: 'color: #ffc107;',
+            error:   'color: #ff6b6b; font-weight: bold;',
+            muted:   'color: #adb5bd;',
+            info:    'color: inherit;',
+        };
+        const line = (style, text) => `<span style="${style}">${text}\n</span>`;
+
+        let log = '';
+        log += line(C.section, '[SNE] Análise e renomeação de certidões');
+        log += line(C.info,    `[SNE] ${data.results.length} arquivo(s) na pasta CERTIDOES`);
+        log += line(C.info,    '');
+
+        for (const r of data.results) {
+            const typeLabel = r.type || 'Tipo desconhecido';
+            const who = r.company || (r.cnpj ? formatCnpj(r.cnpj) : null);
+            const whoStr = who ? ` — ${who}` : '';
+
+            if (r.renamed && r.conflictDuplicated) {
+                log += line(C.warning, `  ⚠ Duplicata renomeada: "${r.filename}"`);
+                log += line(C.warning, `    → "${r.newName}"`);
+            } else if (r.renamed) {
+                log += line(C.success, `  ✓ ${typeLabel}${whoStr}`);
+                log += line(C.muted,   `    "${r.filename}"`);
+                log += line(C.muted,   `    → "${r.newName}"`);
+            } else if (r.deleted) {
+                const kept = r.deletedKeptAs ? ` (mantido: "${r.deletedKeptAs}")` : '';
+                log += line(C.warning, `  ✗ Eliminado (duplicata)${kept}: "${r.filename}"`);
+            } else if (r.renameError) {
+                log += line(C.error, `  ✗ Erro: "${r.filename}": ${r.renameError}`);
+            } else if (r.renameSkipped) {
+                const reason = r.error ? ` (${r.error})` : '';
+                log += line(C.muted, `  — Sem nome${reason}: "${r.filename}"`);
+            } else if (r.noChange) {
+                log += line(C.muted, `  — Sem alteração: "${r.filename}"`);
+            }
+        }
+
+        log += line(C.info, '');
+
+        const summaryParts = [];
+        if (renamed > 0)  summaryParts.push(`${renamed} renomeado(s)`);
+        if (deleted > 0)  summaryParts.push(`${deleted} eliminado(s)`);
+        if (errors > 0)   summaryParts.push(`${errors} com erro`);
+        if (skipped > 0)  summaryParts.push(`${skipped} sem nome`);
+        if (noChange > 0) summaryParts.push(`${noChange} sem alteração`);
+        log += line(C.section, `[SNE] ${summaryParts.join(' · ')}`);
+
+        consoleOutput.innerHTML = log;
+
         const parts = [`${renamed} renomeado(s)`];
         if (deleted > 0) parts.push(`${deleted} eliminado(s) por conflito`);
-        if (failed > 0) parts.push(`${failed} com falha ou sem nome identificado`);
-        showToast(parts.join(', ') + '.', renamed > 0 || deleted > 0 ? 'success' : 'warning', 6000);
+        if (errors + skipped > 0) parts.push(`${errors + skipped} com falha ou sem nome identificado`);
+        const status = (errors + skipped) === 0 ? 'success' : 'warning';
+        handleScriptResult({ scriptName: 'sne_analisar', status, message: parts.join(', ') + '.', log: '' });
+
+        addNotification({
+            message: 'Análise de certidões concluída. ' + parts.join(', ') + '.',
+            type: status === 'success' ? 'success' : 'warning',
+            source: 'SNE',
+        });
 
         carregarFornecedores();
     } catch (error) {
-        showToast(`Erro: ${error.message}`, 'error');
-    } finally {
-        if (btnAnalisar) btnAnalisar.disabled = false;
+        handleScriptResult({ scriptName: 'sne_analisar', status: 'error', message: `Erro: ${error.message}`, log: '' });
     }
 }
 

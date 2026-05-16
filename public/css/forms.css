@@ -430,10 +430,10 @@
 
 .sne-supplier-cnpj {
     font-size: 10px;
-    color: var(--bs-secondary-color);
-    font-family: Consolas, 'Courier New', monospace;
     text-align: center;
-    margin-top: 2px;
+    align-self: stretch;
+    margin: auto -28px 0 -30px;
+    padding-top: 6px;
 }
 
 #sne-certidoes-list .files-table thead th {
