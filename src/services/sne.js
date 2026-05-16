@@ -7,7 +7,7 @@ const logger = new Logger({ minLevel: process.env.COMPRAS_LOGGER_MIN_LEVEL || 'd
 
 const SNE_CERTIDOES = path.join(SCRIPTS_PATH, 'sne', 'CERTIDOES');
 
-const VALIDITY_WARN_DAYS = 5;
+const VALIDITY_WARN_DAYS = parseInt(process.env.COMPRAS_SNE_VALIDITY_WARN_DAYS, 10) || 5;
 
 // Maps filename keywords (priority order) to canonical cert type names
 const TYPE_KEYWORDS = [
