@@ -29,7 +29,7 @@ async function carregarFornecedores() {
     const container = document.getElementById('sne-fornecedores-list');
     if (!container) return;
 
-    container.innerHTML = customSpinnerHTML('Analisando certidões...');
+    container.innerHTML = customSpinnerHTML('Lendo certidões...');
 
     try {
         const response = await fetch('/api/sne/certidoes/analisar');
@@ -183,10 +183,10 @@ function renderFornecedores() {
     }
 
     const STATUS_MAP = {
-        ok:       { cssClass: 'status-sucesso',  icon: 'check_circle', tooltip: 'Todas as certidões válidas' },
-        alerta:   { cssClass: 'status-parcial',  icon: 'warning',      tooltip: 'Certidões a vencer ou com data não verificada' },
-        erro:     { cssClass: 'status-sem_saida', icon: 'cancel',      tooltip: 'Certidões vencidas ou ausentes' },
-        impedido: { cssClass: 'status-sem_saida', icon: 'gavel',       tooltip: 'Fornecedor impedido de licitar' },
+        ok: { cssClass: 'status-sucesso', icon: 'check_circle', tooltip: 'Todas as certidões válidas' },
+        alerta: { cssClass: 'status-parcial', icon: 'warning', tooltip: 'Certidões a vencer ou com data não verificada' },
+        erro: { cssClass: 'status-sem_saida', icon: 'cancel', tooltip: 'Certidões vencidas ou ausentes' },
+        impedido: { cssClass: 'status-sem_saida', icon: 'gavel', tooltip: 'Fornecedor impedido de licitar' },
     };
 
     let html = buildFolderPathHTML(displayPath, '', refreshBtn) + '<div class="items-grid">';
@@ -417,7 +417,7 @@ async function analisarCertidoes() {
 
         const renamed = data.results.filter(r => r.renamed).length;
         const deleted = data.results.filter(r => r.deleted).length;
-        const errors  = data.results.filter(r => r.renameError).length;
+        const errors = data.results.filter(r => r.renameError).length;
         const skipped = data.results.filter(r => r.renameSkipped).length;
         const noChange = data.results.filter(r => r.noChange).length;
 
@@ -425,16 +425,16 @@ async function analisarCertidoes() {
             section: 'color: #6ea8fe; font-weight: bold;',
             success: 'color: #20c997;',
             warning: 'color: #ffc107;',
-            error:   'color: #ff6b6b; font-weight: bold;',
-            muted:   'color: #adb5bd;',
-            info:    'color: inherit;',
+            error: 'color: #ff6b6b; font-weight: bold;',
+            muted: 'color: #adb5bd;',
+            info: 'color: inherit;',
         };
         const line = (style, text) => `<span style="${style}">${text}\n</span>`;
 
         let log = '';
         log += line(C.section, '[SNE] Análise e renomeação de certidões');
-        log += line(C.info,    `[SNE] ${data.results.length} arquivo(s) na pasta CERTIDOES`);
-        log += line(C.info,    '');
+        log += line(C.info, `[SNE] ${data.results.length} arquivo(s) na pasta CERTIDOES`);
+        log += line(C.info, '');
 
         for (const r of data.results) {
             const typeLabel = r.type || 'Tipo desconhecido';
@@ -446,8 +446,8 @@ async function analisarCertidoes() {
                 log += line(C.warning, `    → "${r.newName}"`);
             } else if (r.renamed) {
                 log += line(C.success, `  ✓ ${typeLabel}${whoStr}`);
-                log += line(C.muted,   `    "${r.filename}"`);
-                log += line(C.muted,   `    → "${r.newName}"`);
+                log += line(C.muted, `    "${r.filename}"`);
+                log += line(C.muted, `    → "${r.newName}"`);
             } else if (r.deleted) {
                 const kept = r.deletedKeptAs ? ` (mantido: "${r.deletedKeptAs}")` : '';
                 log += line(C.warning, `  ✗ Eliminado (duplicata)${kept}: "${r.filename}"`);
@@ -464,10 +464,10 @@ async function analisarCertidoes() {
         log += line(C.info, '');
 
         const summaryParts = [];
-        if (renamed > 0)  summaryParts.push(`${renamed} renomeado(s)`);
-        if (deleted > 0)  summaryParts.push(`${deleted} eliminado(s)`);
-        if (errors > 0)   summaryParts.push(`${errors} com erro`);
-        if (skipped > 0)  summaryParts.push(`${skipped} sem nome`);
+        if (renamed > 0) summaryParts.push(`${renamed} renomeado(s)`);
+        if (deleted > 0) summaryParts.push(`${deleted} eliminado(s)`);
+        if (errors > 0) summaryParts.push(`${errors} com erro`);
+        if (skipped > 0) summaryParts.push(`${skipped} sem nome`);
         if (noChange > 0) summaryParts.push(`${noChange} sem alteração`);
         log += line(C.section, `[SNE] ${summaryParts.join(' · ')}`);
 
