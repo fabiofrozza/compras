@@ -30,6 +30,11 @@ function inicializarSne() {
     document.getElementById('tab-sne-empenhos')?.addEventListener('shown.bs.tab', () => {
         if (!sneEmpenhosFolderPath) carregarEmpenhos();
     });
+
+    document.getElementById('btn-atualizar-afs')?.addEventListener('click', carregarAFs);
+    document.getElementById('tab-sne-afs')?.addEventListener('shown.bs.tab', () => {
+        if (sneAfsFolderPath) renderAFs(); else carregarAFs();
+    });
 }
 
 // ====== CARREGAMENTO ======
@@ -496,7 +501,8 @@ async function analisarCertidoes() {
             source: 'SNE',
         });
 
-        carregarFornecedores();
+        await carregarFornecedores();
+        if (sneEmpenhosFolderPath) renderEmpenhos();
     } catch (error) {
         handleScriptResult({ scriptName: 'sne_analisar', status: 'error', message: `Erro: ${error.message}`, log: '' });
     }
@@ -574,8 +580,12 @@ async function carregarEmpenhos() {
     container.innerHTML = customSpinnerHTML('Lendo empenhos...');
 
     try {
-        const response = await fetch('/api/sne/empenhos/analisar');
-        const data = await response.json();
+        const [empenhoResp, afsResp] = await Promise.all([
+            fetch('/api/sne/empenhos/analisar'),
+            fetch('/api/sne/afs'),
+        ]);
+        const data = await empenhoResp.json();
+        const afsData = await afsResp.json();
 
         if (data.error) {
             container.innerHTML = alertHTML('danger', 'error', data.error);
@@ -584,6 +594,12 @@ async function carregarEmpenhos() {
 
         sneEmpenhos = data.results || [];
         sneEmpenhosFolderPath = data.folderPath || '';
+
+        if (!afsData.error) {
+            sneAfsData = afsData.afs || [];
+            sneAfsFolderPath = afsData.folderPath || '';
+        }
+
         renderEmpenhos();
     } catch (error) {
         container.innerHTML = alertHTML('danger', 'error', `Erro ao analisar empenhos: ${error.message}`);
@@ -624,6 +640,7 @@ function renderEmpenhos() {
                         <th>Fornecedor</th>
                         <th class="text-center">Tombamento</th>
                         <th class="text-center">Certidões</th>
+                        <th class="text-center">Pasta SNE</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -637,7 +654,7 @@ function renderEmpenhos() {
             html += `
                 <tr class="text-danger">
                     <td><i class="material-symbols-outlined">error</i></td>
-                    <td class="text-break" colspan="7">${r.filename}: ${r.error}</td>
+                    <td class="text-break" colspan="8">${r.filename}: ${r.error}</td>
                     <td class="table-btn-column text-nowrap">
                         <button class="btn btn-sm text-danger file-row-btn"
                             onclick="excluirEmpenho('${safeFilename}')"
@@ -664,6 +681,17 @@ function renderEmpenhos() {
             statusCell = `<i class="material-symbols-outlined ${cssClass}" data-bs-toggle="tooltip" data-bs-title="${label}">${icon}</i>`;
         }
 
+        let pastaSneCell = '<span class="text-muted">—</span>';
+        if (r.af && r.sneNumber) {
+            const afFolderName = `AF ${r.af.number}-${r.af.year}`;
+            const sneFolderName = `SNE ${r.sneNumber}`;
+            const afData = sneAfsData.find(af => af.name === afFolderName);
+            const sneExists = afData?.snes?.some(s => s.name === sneFolderName);
+            pastaSneCell = sneExists
+                ? `<i class="material-symbols-outlined text-success" data-bs-toggle="tooltip" data-bs-title="Pasta ${sneFolderName} criada">folder</i>`
+                : `<i class="material-symbols-outlined text-muted" data-bs-toggle="tooltip" data-bs-title="Pasta SNE não criada">folder_off</i>`;
+        }
+
         html += `
             <tr>
                 <td><i class="material-symbols-outlined text-muted">receipt_long</i></td>
@@ -674,6 +702,7 @@ function renderEmpenhos() {
                 <td>${r.company || '<span class="text-muted">—</span>'}</td>
                 <td class="text-center">${tombCell}</td>
                 <td class="text-center">${statusCell}</td>
+                <td class="text-center">${pastaSneCell}</td>
                 <td class="table-btn-column text-nowrap">
                     <button class="btn btn-sm text-primary file-row-btn"
                         onclick="openFile('${safeFilePath}')"
@@ -731,16 +760,235 @@ async function excluirEmpenho(filename) {
     }
 }
 
+// ====== AFs ======
+
+let sneAfsData = [];
+let sneAfsFolderPath = '';
+
+async function carregarAFs() {
+    const container = document.getElementById('sne-afs-container');
+    if (!container) return;
+
+    container.innerHTML = customSpinnerHTML('Lendo estrutura de AFs...');
+
+    try {
+        const response = await fetch('/api/sne/afs');
+        const data = await response.json();
+
+        if (data.error) {
+            container.innerHTML = alertHTML('danger', 'error', data.error);
+            return;
+        }
+
+        sneAfsData = data.afs || [];
+        sneAfsFolderPath = data.folderPath || '';
+        renderAFs();
+    } catch (error) {
+        container.innerHTML = alertHTML('danger', 'error', `Erro ao carregar AFs: ${error.message}`);
+    }
+}
+
+function renderAFs() {
+    const container = document.getElementById('sne-afs-container');
+    if (!container) return;
+
+    const displayPath = sneAfsFolderPath.replace(/\\/g, '/');
+    const refreshBtn = `
+        <button class="folder-path-btn btn-refresh-afs"
+            data-bs-toggle="tooltip" data-bs-title="Atualizar lista">
+            <i class="material-symbols-outlined">refresh</i>
+        </button>`;
+
+    if (sneAfsData.length === 0) {
+        container.innerHTML = buildFolderPathHTML(displayPath, '', refreshBtn) +
+            alertHTML('info', 'info', 'Nenhuma AF encontrada. Use <strong>Criar AFs</strong> na aba Empenhos para gerar a estrutura.');
+        setupFolderPathButtons(container);
+        container.querySelector('.btn-refresh-afs')?.addEventListener('click', carregarAFs);
+        initializeTooltips();
+        return;
+    }
+
+    let html = buildFolderPathHTML(displayPath, '', refreshBtn);
+    html += `
+        <div class="files-table-container">
+            <table class="files-table sne-afs-table">
+                <thead>
+                    <tr>
+                        <th colspan="2">AF</th>
+                        <th></th>
+                        <th colspan="2">SNE</th>
+                        <th>Arquivos</th>
+                        <th></th>
+                    </tr>
+                </thead>`;
+
+    for (const af of sneAfsData) {
+        const safeAfName = af.name.replace(/'/g, "\\'");
+        const safeAfPath = af.path.replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
+        const rowspan = Math.max(af.snes.length, 1);
+        const rowspanAttr = rowspan > 1 ? ` rowspan="${rowspan}"` : '';
+
+        const afIconCell = `<td class="sne-af-cell"${rowspanAttr}><i class="material-symbols-outlined text-primary">folder</i></td>`;
+        const afNameCell = `<td class="sne-af-cell fw-semibold"${rowspanAttr}>${af.name}</td>`;
+        const afActionsCell = `<td class="sne-af-cell table-btn-column text-nowrap"${rowspanAttr}>
+                        <button class="btn btn-sm text-primary file-row-btn"
+                            onclick="openFolder('${safeAfPath}')"
+                            data-bs-toggle="tooltip" data-bs-title="Abrir pasta da AF">
+                            <i class="material-symbols-outlined">folder_open</i>
+                        </button>
+                        <button class="btn btn-sm text-danger file-row-btn"
+                            onclick="excluirAFFolder('${safeAfName}')"
+                            data-bs-toggle="tooltip" data-bs-title="Excluir AF">
+                            <i class="material-symbols-outlined">delete</i>
+                        </button>
+                    </td>`;
+
+        html += `<tbody class="sne-af-group">`;
+
+        if (af.snes.length === 0) {
+            html += `<tr>${afIconCell}${afNameCell}${afActionsCell}
+                    <td colspan="4" class="text-muted fst-italic">Sem SNEs</td>
+                </tr>`;
+        } else {
+            for (let i = 0; i < af.snes.length; i++) {
+                const sne = af.snes[i];
+                const safeSneNum = sne.name.replace(/'/g, "\\'");
+                const safeSnePath = sne.path.replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
+
+                const filesHtml = sne.files.length > 0
+                    ? sne.files.map(f => {
+                        const safeFilePath = (sne.path + '\\' + f).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                        return `<div class="sne-file-item">
+                                <i class="material-symbols-outlined text-muted">description</i>
+                                <span>${f}</span>
+                                <button class="btn btn-sm text-primary file-row-btn"
+                                    onclick="openFile('${safeFilePath}')"
+                                    data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">
+                                    <i class="material-symbols-outlined">open_in_new</i>
+                                </button>
+                            </div>`;
+                    }).join('')
+                    : '<span class="text-muted fst-italic">Vazia</span>';
+
+                html += `<tr>`;
+                if (i === 0) html += afIconCell + afNameCell + afActionsCell;
+                html += `
+                    <td><i class="material-symbols-outlined text-muted">receipt_long</i></td>
+                    <td class="text-nowrap">${sne.name}</td>
+                    <td>${filesHtml}</td>
+                    <td class="table-btn-column text-nowrap">
+                        <button class="btn btn-sm text-primary file-row-btn"
+                            onclick="openFolder('${safeSnePath}')"
+                            data-bs-toggle="tooltip" data-bs-title="Abrir pasta da SNE">
+                            <i class="material-symbols-outlined">folder_open</i>
+                        </button>
+                        <button class="btn btn-sm text-danger file-row-btn"
+                            onclick="excluirSNEFolder('${safeAfName}', '${safeSneNum}')"
+                            data-bs-toggle="tooltip" data-bs-title="Excluir SNE">
+                            <i class="material-symbols-outlined">delete</i>
+                        </button>
+                    </td>
+                </tr>`;
+            }
+        }
+
+        html += `</tbody>`;
+    }
+
+    html += `</table></div>`;
+    container.innerHTML = html;
+    setupFolderPathButtons(container);
+    container.querySelector('.btn-refresh-afs')?.addEventListener('click', carregarAFs);
+    initializeTooltips();
+}
+
+async function excluirAFFolder(afName) {
+    const confirmed = await showConfirmationModal({
+        title: 'Excluir AF',
+        message: `Tem certeza que deseja excluir a pasta <strong>${afName}</strong> e todo o seu conteúdo?`,
+        detail: '<i class="material-symbols-outlined me-1">warning</i> Todas as SNEs e arquivos dentro desta AF serão excluídos permanentemente.',
+        confirmText: 'Excluir',
+        confirmColor: 'btn-danger',
+    });
+
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch('/api/sne/afs', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ afName }),
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+            showToast(`Erro ao excluir: ${data.error}`, 'error');
+            return;
+        }
+
+        showToast(data.message, 'success');
+        carregarAFs();
+    } catch (error) {
+        showToast(`Erro ao excluir: ${error.message}`, 'error');
+    }
+}
+
+async function excluirSNEFolder(afName, sneName) {
+    const confirmed = await showConfirmationModal({
+        title: 'Excluir SNE',
+        message: `Tem certeza que deseja excluir a pasta <strong>${sneName}</strong>?`,
+        detail: '<i class="material-symbols-outlined me-1">warning</i> Todos os arquivos dentro desta SNE serão excluídos permanentemente.',
+        confirmText: 'Excluir',
+        confirmColor: 'btn-danger',
+    });
+
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch('/api/sne/afs', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ afName, sneName }),
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+            showToast(`Erro ao excluir: ${data.error}`, 'error');
+            return;
+        }
+
+        showToast(data.message, 'success');
+        carregarAFs();
+    } catch (error) {
+        showToast(`Erro ao excluir: ${error.message}`, 'error');
+    }
+}
+
 async function executarCriarAFs() {
     if (sneEmpenhos.length === 0) {
         showToast('Nenhum empenho carregado. Atualize a lista primeiro.', 'warning');
         return;
     }
 
+    const onlyOk = document.querySelector('input[name="sne-afs-scope"]:checked')?.value === 'ok';
+
+    let filenames = null;
+    let scopeDetail = '';
+
+    if (onlyOk) {
+        const filtered = sneEmpenhos.filter(r => !r.error && r.af && r.sneNumber && getSupplierStatusByCnpj(r.cnpj) === 'ok');
+        if (filtered.length === 0) {
+            showToast('Nenhuma SNE com certidões OK encontrada.', 'warning');
+            return;
+        }
+        filenames = filtered.map(r => r.filename);
+        scopeDetail = `<br><i class="material-symbols-outlined me-1">filter_list</i> Somente certidões OK: <strong>${filenames.length}</strong> de ${sneEmpenhos.length} empenho(s).`;
+    }
+
     const confirmed = await showConfirmationModal({
         title: 'Criar estrutura de AFs',
         message: 'Serão criadas pastas para cada AF e SNE identificados, com as certidões de cada fornecedor copiadas para cada pasta.',
-        detail: `<i class="material-symbols-outlined me-1">folder</i> As pastas serão criadas em <strong>scripts/sne/AFs/</strong>.`,
+        detail: `<i class="material-symbols-outlined me-1">folder</i> As pastas serão criadas em <strong>scripts/sne/AFs/</strong>.${scopeDetail}`,
         confirmText: 'Criar AFs',
         confirmColor: 'btn-primary',
     });
@@ -748,7 +996,11 @@ async function executarCriarAFs() {
     if (!confirmed) return;
 
     try {
-        const response = await fetch('/api/sne/empenhos/criar-afs', { method: 'POST' });
+        const response = await fetch('/api/sne/empenhos/criar-afs', {
+            method: 'POST',
+            headers: filenames ? { 'Content-Type': 'application/json' } : {},
+            body: filenames ? JSON.stringify({ filenames }) : undefined,
+        });
         const data = await response.json();
 
         if (!response.ok) {
@@ -766,6 +1018,15 @@ async function executarCriarAFs() {
             type: status,
             source: 'SNE',
         });
+
+        const afsResp = await fetch('/api/sne/afs');
+        const afsData = await afsResp.json();
+        if (!afsData.error) {
+            sneAfsData = afsData.afs || [];
+            sneAfsFolderPath = afsData.folderPath || '';
+        }
+        renderEmpenhos();
+        renderAFs();
     } catch (error) {
         showToast(`Erro: ${error.message}`, 'error');
     }

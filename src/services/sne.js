@@ -607,8 +607,9 @@ async function analyzeEmpenhos() {
   return { results, folderPath };
 }
 
-async function criarAFs() {
+async function criarAFs(filenames = null) {
   const { results } = await analyzeEmpenhos();
+  const toProcess = filenames ? results.filter(r => filenames.includes(r.filename)) : results;
   await fs.mkdir(SNE_AFS, { recursive: true });
 
   // Map CNPJ → certidão filenames from CERTIDOES folder
@@ -627,7 +628,7 @@ async function criarAFs() {
 
   const created = { afs: new Set(), snes: [], errors: [] };
 
-  for (const r of results) {
+  for (const r of toProcess) {
     if (r.error || !r.af || !r.sneNumber) continue;
 
     const afFolderName = sanitizeFilename(`AF ${r.af.number}-${r.af.year}`);
@@ -665,6 +666,47 @@ async function criarAFs() {
   return { afsPath: SNE_AFS, afs: [...created.afs], snes: created.snes, errors: created.errors };
 }
 
+async function listAFs() {
+  try {
+    await fs.access(SNE_AFS);
+  } catch {
+    await fs.mkdir(SNE_AFS, { recursive: true });
+    return { afs: [], folderPath: SNE_AFS };
+  }
+
+  const afEntries = await fs.readdir(SNE_AFS, { withFileTypes: true });
+  const afFolders = afEntries
+    .filter(e => e.isDirectory())
+    .map(e => e.name)
+    .sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
+
+  const afs = [];
+  for (const afName of afFolders) {
+    const afPath = path.join(SNE_AFS, afName);
+    const sneEntries = await fs.readdir(afPath, { withFileTypes: true });
+    const sneFolders = sneEntries
+      .filter(e => e.isDirectory())
+      .map(e => e.name)
+      .sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
+
+    const snes = [];
+    for (const sneName of sneFolders) {
+      const snePath = path.join(afPath, sneName);
+      const fileEntries = await fs.readdir(snePath, { withFileTypes: true });
+      const files = fileEntries
+        .filter(e => e.isFile())
+        .map(e => e.name)
+        .sort((a, b) => a.localeCompare(b));
+      snes.push({ name: sneName, path: snePath, files });
+    }
+
+    afs.push({ name: afName, path: afPath, snes });
+  }
+
+  logger.info(`AFs listadas: ${afs.length} AF(s)`, 'SNE');
+  return { afs, folderPath: SNE_AFS };
+}
+
 module.exports = {
   SNE_CERTIDOES,
   SNE_EMPENHOS,
@@ -677,4 +719,5 @@ module.exports = {
   listEmpenhos,
   analyzeEmpenhos,
   criarAFs,
+  listAFs,
 };

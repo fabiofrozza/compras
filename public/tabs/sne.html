@@ -14,6 +14,12 @@
                     <i class="material-symbols-outlined">receipt_long</i> Empenhos
                 </button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-sne-afs" data-bs-toggle="tab" data-bs-target="#content-sne-afs"
+                    type="button" role="tab">
+                    <i class="material-symbols-outlined">folder_open</i> AFs
+                </button>
+            </li>
         </ul>
 
         <div class="script-form shadow-sm sub-tabs-content">
@@ -24,7 +30,8 @@
                         <div class="col-sm-6">
                             <!-- Quadro Fornecedores -->
                             <div class="script-form shadow-sm">
-                                <h4 class="script-form-header" data-compras-icon="business" data-compras-title="Fornecedores"
+                                <h4 class="script-form-header" data-compras-icon="business"
+                                    data-compras-title="Fornecedores"
                                     data-compras-help="Lista os fornecedores identificados nas certidões da pasta CERTIDOES. Clique em um fornecedor para visualizar suas certidões.
                                     <br><br>Use 'Analisar' para ler os PDFs, verificar validade e renomear os arquivos com CNPJ, razão social e status.">
                                 </h4>
@@ -33,12 +40,15 @@
                                     </div>
                                     <div class="form-buttons">
                                         <div class="btn-group btn-group-sm" role="group" aria-label="Ordenar por">
-                                            <input type="radio" class="btn-check" name="sne-sort" id="sne-sort-nome" value="nome" checked>
+                                            <input type="radio" class="btn-check" name="sne-sort" id="sne-sort-nome"
+                                                value="nome" checked>
                                             <label class="btn btn-outline-secondary" for="sne-sort-nome">Nome</label>
-                                            <input type="radio" class="btn-check" name="sne-sort" id="sne-sort-cnpj" value="cnpj">
+                                            <input type="radio" class="btn-check" name="sne-sort" id="sne-sort-cnpj"
+                                                value="cnpj">
                                             <label class="btn btn-outline-secondary" for="sne-sort-cnpj">CNPJ</label>
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-primary text-nowrap" id="btn-analisar-certidoes">
+                                        <button type="button" class="btn btn-sm btn-primary text-nowrap"
+                                            id="btn-analisar-certidoes">
                                             Analisar certidões
                                         </button>
                                     </div>
@@ -49,13 +59,14 @@
                         <div class="col-sm-6">
                             <!-- Quadro Certidões do Fornecedor -->
                             <div class="script-form shadow-sm">
-                                <h4 class="script-form-header" data-compras-icon="picture_as_pdf" data-compras-title="Certidões"
-                                    data-compras-title-id="sne-certidoes-titulo">
+                                <h4 class="script-form-header" data-compras-icon="picture_as_pdf"
+                                    data-compras-title="Certidões" data-compras-title-id="sne-certidoes-titulo">
                                 </h4>
                                 <div class="collapse show" id="sne-certidoes-collapse">
                                     <div id="sne-certidoes-list" class="files-list-style">
                                         <div class="alert alert-info" role="alert">
-                                            <i class="material-symbols-outlined">info</i> Selecione um fornecedor para ver as certidões
+                                            <i class="material-symbols-outlined">info</i> Selecione um fornecedor para
+                                            ver as certidões
                                         </div>
                                     </div>
                                 </div>
@@ -69,7 +80,7 @@
                         <div class="col-12">
                             <div class="script-form shadow-sm">
                                 <h4 class="script-form-header" data-compras-icon="receipt_long"
-                                    data-compras-title="SNEs / Empenhos"
+                                    data-compras-title="SNEs"
                                     data-compras-help="Lista as Solicitações de Nota de Empenho (SNEs) encontradas na pasta SNEs.
                                     <br><br>Cada SNE é vinculada a uma Autorização de Fornecimento (AF) e a um fornecedor, identificados no conteúdo do PDF.
                                     <br><br>Use <strong>Criar AFs</strong> para gerar automaticamente a estrutura de pastas por AF/SNE com as certidões de cada fornecedor.">
@@ -81,9 +92,41 @@
                                             id="btn-atualizar-empenhos">
                                             Atualizar
                                         </button>
+                                        <div class="btn-group btn-group-sm" role="group" aria-label="Escopo das AFs">
+                                            <input type="radio" class="btn-check" name="sne-afs-scope"
+                                                id="sne-afs-scope-todas" value="todas" checked>
+                                            <label class="btn btn-outline-secondary"
+                                                for="sne-afs-scope-todas">Todas</label>
+                                            <input type="radio" class="btn-check" name="sne-afs-scope"
+                                                id="sne-afs-scope-ok" value="ok">
+                                            <label class="btn btn-outline-secondary" for="sne-afs-scope-ok">Certidões
+                                                OK</label>
+                                        </div>
                                         <button type="button" class="btn btn-sm btn-primary text-nowrap"
                                             id="btn-criar-afs">
                                             Criar AFs
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="content-sne-afs" role="tabpanel">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="script-form shadow-sm">
+                                <h4 class="script-form-header" data-compras-icon="folder_open" data-compras-title="AFs"
+                                    data-compras-help="Lista as Autorizações de Fornecimento (AFs) e respectivas SNEs na pasta AFs.
+                                    <br><br>A estrutura é gerada pelo botão <strong>Criar AFs</strong> na aba Empenhos: cada AF recebe uma pasta com subpastas por SNE, contendo o empenho e as certidões do fornecedor.">
+                                </h4>
+                                <div class="collapse show" id="sne-afs-collapse">
+                                    <div id="sne-afs-container" class="files-list-style"></div>
+                                    <div class="form-buttons">
+                                        <button type="button" class="btn btn-sm btn-secondary text-nowrap"
+                                            id="btn-atualizar-afs">
+                                            Atualizar
                                         </button>
                                     </div>
                                 </div>

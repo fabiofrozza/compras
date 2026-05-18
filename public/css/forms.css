@@ -405,7 +405,7 @@
 
 .sne-fornecedores-list {
     min-height: 100px;
-    max-height: 500px;
+    max-height: 300px;
     padding: 8px;
     display: flex;
     flex-direction: column;
@@ -442,6 +442,36 @@
     align-self: stretch;
     margin: auto -28px 0 -30px;
     padding-top: 6px;
+}
+
+.sne-afs-table tbody.sne-af-group:not(:first-child) tr:first-child td {
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.sne-af-cell.table-btn-column {
+    text-align: left;
+}
+
+.sne-file-item {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 0;
+    font-size: 11px;
+
+    i {
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .file-row-btn {
+        padding: 0 2px;
+        opacity: 0;
+    }
+
+    &:hover .file-row-btn {
+        opacity: 1;
+    }
 }
 
 #sne-certidoes-list .files-table thead th {

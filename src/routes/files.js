@@ -21,7 +21,7 @@ const {
   deleteSupplierFile,
   moveSupplierFiles,
 } = require('../services/fornecedores');
-const { listCertidoes, analyzeCertidoes, renameCertidoes, analyzeEmpenhos, criarAFs } = require('../services/sne');
+const { listCertidoes, analyzeCertidoes, renameCertidoes, analyzeEmpenhos, criarAFs, listAFs } = require('../services/sne');
 const { validateLink } = require('../services/spreadsheet');
 
 function registerFileRoutes(app, logger) {
@@ -383,9 +383,10 @@ function registerFileRoutes(app, logger) {
     }
   });
 
-  app.post('/api/sne/empenhos/criar-afs', async (_req, res) => {
+  app.post('/api/sne/empenhos/criar-afs', async (req, res) => {
     try {
-      const result = await criarAFs();
+      const { filenames } = req.body || {};
+      const result = await criarAFs(Array.isArray(filenames) ? filenames : null);
       res.json(result);
     } catch (error) {
       logger.error(`Erro ao criar AFs: ${error.message}`, 'SNE', error);
@@ -430,6 +431,48 @@ function registerFileRoutes(app, logger) {
       res.json({ success: true, message, deleted });
     } catch (error) {
       logger.error(`Erro ao excluir empenhos: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/sne/afs', async (_req, res) => {
+    try {
+      const result = await listAFs();
+      res.json(result);
+    } catch (error) {
+      logger.error(`Erro ao listar AFs: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.delete('/api/sne/afs', async (req, res) => {
+    try {
+      const { afName, sneName } = req.body;
+
+      if (!afName || typeof afName !== 'string' || afName.includes('..') || afName.includes('/') || afName.includes('\\')) {
+        return res.status(400).json({ error: 'Nome de AF inválido' });
+      }
+
+      const { SNE_AFS } = require('../services/sne');
+
+      if (sneName !== undefined) {
+        if (typeof sneName !== 'string' || sneName.includes('..') || sneName.includes('/') || sneName.includes('\\')) {
+          return res.status(400).json({ error: 'Nome de SNE inválido' });
+        }
+        const snePath = path.join(SNE_AFS, afName, sneName);
+        if (!isPathSafe(snePath, SNE_AFS)) return res.status(403).json({ error: 'Acesso negado' });
+        await fs.rm(snePath, { recursive: true, force: true });
+        logger.info(`SNE excluída: "${afName}/${sneName}"`, 'SNE');
+        res.json({ success: true, message: `SNE "${sneName}" excluída` });
+      } else {
+        const afPath = path.join(SNE_AFS, afName);
+        if (!isPathSafe(afPath, SNE_AFS)) return res.status(403).json({ error: 'Acesso negado' });
+        await fs.rm(afPath, { recursive: true, force: true });
+        logger.info(`AF excluída: "${afName}"`, 'SNE');
+        res.json({ success: true, message: `AF "${afName}" excluída` });
+      }
+    } catch (error) {
+      logger.error(`Erro ao excluir AF/SNE: ${error.message}`, 'SNE', error);
       res.status(500).json({ error: error.message });
     }
   });
