@@ -52,8 +52,8 @@
 
 .form-buttons {
     display: flex;
-    flex-direction: row-reverse;
     align-items: flex-end;
+    justify-content: flex-end;
     gap: 10px;
 }
 

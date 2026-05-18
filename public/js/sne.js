@@ -305,7 +305,7 @@ function renderCertidoesDoFornecedor(group) {
                     data-bs-title="${validityTooltip(r)}">${icon}</i></td>
                 <td class="text-break">${r.filename}${warnings}</td>
                 <td class="${typeClass}">${typeLabel}</td>
-                <td class="${cssClass}"><small>${getSituacaoLabel(r)}</small></td>
+                <td class="${cssClass}">${getSituacaoLabel(r)}</td>
                 <td class="table-btn-column text-nowrap">
                     <button class="btn btn-sm text-primary file-row-btn"
                         onclick="openFile('${safeFilePath}')"
@@ -554,10 +554,10 @@ function alertHTML(type, icon, message) {
 // ====== EMPENHOS ======
 
 const EMPENHO_STATUS_MAP = {
-    ok:       { cssClass: 'text-success', icon: 'check_circle', label: 'Certidões OK' },
-    alerta:   { cssClass: 'text-warning', icon: 'warning',      label: 'Certidões com alerta' },
-    erro:     { cssClass: 'text-danger',  icon: 'cancel',       label: 'Certidões irregulares' },
-    impedido: { cssClass: 'text-danger',  icon: 'gavel',        label: 'Fornecedor impedido' },
+    ok: { cssClass: 'text-success', icon: 'check_circle', label: 'Certidões OK' },
+    alerta: { cssClass: 'text-warning', icon: 'warning', label: 'Certidões com alerta' },
+    erro: { cssClass: 'text-danger', icon: 'cancel', label: 'Certidões irregulares' },
+    impedido: { cssClass: 'text-danger', icon: 'gavel', label: 'Fornecedor impedido' },
 };
 
 function getSupplierStatusByCnpj(cnpj) {
@@ -649,8 +649,8 @@ function renderEmpenhos() {
             continue;
         }
 
-        const sneNum   = r.sneNumber || '—';
-        const afLabel  = r.af ? `${r.af.number} / ${r.af.year}` : '—';
+        const sneNum = r.sneNumber || '—';
+        const afLabel = r.af ? `${r.af.number} / ${r.af.year}` : '—';
         const cnpjLabel = r.cnpj ? formatCnpj(r.cnpj) : '—';
 
         const tombCell = r.tombamento
@@ -670,7 +670,7 @@ function renderEmpenhos() {
                 <td class="text-break">${r.filename}</td>
                 <td class="text-nowrap">${sneNum}</td>
                 <td class="text-nowrap">${afLabel}</td>
-                <td class="text-nowrap"><small>${cnpjLabel}</small></td>
+                <td class="text-nowrap">${cnpjLabel}</td>
                 <td>${r.company || '<span class="text-muted">—</span>'}</td>
                 <td class="text-center">${tombCell}</td>
                 <td class="text-center">${statusCell}</td>
