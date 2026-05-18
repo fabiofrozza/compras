@@ -4,6 +4,9 @@ let sneSelectedCnpj = null;
 let sneSortBy = 'nome';
 let sneFolderPath = '';
 
+let sneEmpenhos = [];
+let sneEmpenhosFolderPath = '';
+
 const VALIDITY_ORDER = { 'VALIDA': 5, 'SEM_VALIDADE': 4, 'A_VENCER': 3, 'VENCIDA': 1 };
 // Mínimo de certidões individuais para cobrir um SICAF ausente ou vencido
 const MANDATORY_INDIVIDUAL = ['Receita Federal', 'FGTS', 'Trabalhista'];
@@ -14,12 +17,18 @@ function inicializarSne() {
     carregarFornecedores();
 
     document.getElementById('btn-analisar-certidoes')?.addEventListener('click', analisarCertidoes);
+    document.getElementById('btn-atualizar-empenhos')?.addEventListener('click', carregarEmpenhos);
+    document.getElementById('btn-criar-afs')?.addEventListener('click', executarCriarAFs);
 
     document.querySelectorAll('input[name="sne-sort"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
             sneSortBy = e.target.value;
             renderFornecedores();
         });
+    });
+
+    document.getElementById('tab-sne-empenhos')?.addEventListener('shown.bs.tab', () => {
+        if (!sneEmpenhosFolderPath) carregarEmpenhos();
     });
 }
 
@@ -540,4 +549,224 @@ function alertHTML(type, icon, message) {
     return `<div class="alert alert-${type}" role="alert">
         <i class="material-symbols-outlined">${icon}</i> ${message}
     </div>`;
+}
+
+// ====== EMPENHOS ======
+
+const EMPENHO_STATUS_MAP = {
+    ok:       { cssClass: 'text-success', icon: 'check_circle', label: 'Certidões OK' },
+    alerta:   { cssClass: 'text-warning', icon: 'warning',      label: 'Certidões com alerta' },
+    erro:     { cssClass: 'text-danger',  icon: 'cancel',       label: 'Certidões irregulares' },
+    impedido: { cssClass: 'text-danger',  icon: 'gavel',        label: 'Fornecedor impedido' },
+};
+
+function getSupplierStatusByCnpj(cnpj) {
+    if (!cnpj) return null;
+    const group = sneGrouped.get(cnpj);
+    if (!group) return null;
+    return computeSupplierStatus(group.certidoes);
+}
+
+async function carregarEmpenhos() {
+    const container = document.getElementById('sne-empenhos-container');
+    if (!container) return;
+
+    container.innerHTML = customSpinnerHTML('Lendo empenhos...');
+
+    try {
+        const response = await fetch('/api/sne/empenhos/analisar');
+        const data = await response.json();
+
+        if (data.error) {
+            container.innerHTML = alertHTML('danger', 'error', data.error);
+            return;
+        }
+
+        sneEmpenhos = data.results || [];
+        sneEmpenhosFolderPath = data.folderPath || '';
+        renderEmpenhos();
+    } catch (error) {
+        container.innerHTML = alertHTML('danger', 'error', `Erro ao analisar empenhos: ${error.message}`);
+    }
+}
+
+function renderEmpenhos() {
+    const container = document.getElementById('sne-empenhos-container');
+    if (!container) return;
+
+    const displayPath = sneEmpenhosFolderPath.replace(/\\/g, '/');
+
+    const refreshBtn = `
+        <button class="folder-path-btn btn-refresh-empenhos"
+            data-bs-toggle="tooltip" data-bs-title="Atualizar lista">
+            <i class="material-symbols-outlined">refresh</i>
+        </button>`;
+
+    if (sneEmpenhos.length === 0) {
+        container.innerHTML = buildFolderPathHTML(displayPath, '', refreshBtn) +
+            alertHTML('warning', 'warning', 'Nenhum empenho encontrado na pasta SNEs');
+        setupFolderPathButtons(container);
+        setupRefreshEmpenhoButton(container);
+        initializeTooltips();
+        return;
+    }
+
+    let html = buildFolderPathHTML(displayPath, '', refreshBtn);
+    html += `
+        <div class="files-table-container">
+            <table class="files-table">
+                <thead>
+                    <tr>
+                        <th colspan="2">Arquivo</th>
+                        <th>SNE</th>
+                        <th>AF</th>
+                        <th>CNPJ</th>
+                        <th>Fornecedor</th>
+                        <th class="text-center">Tombamento</th>
+                        <th class="text-center">Certidões</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+    for (const r of sneEmpenhos) {
+        const safeFilename = r.filename.replace(/'/g, "\\'");
+        const safeFilePath = (sneEmpenhosFolderPath + '\\' + r.filename).replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
+
+        if (r.error) {
+            html += `
+                <tr class="text-danger">
+                    <td><i class="material-symbols-outlined">error</i></td>
+                    <td class="text-break" colspan="7">${r.filename}: ${r.error}</td>
+                    <td class="table-btn-column text-nowrap">
+                        <button class="btn btn-sm text-danger file-row-btn"
+                            onclick="excluirEmpenho('${safeFilename}')"
+                            data-bs-toggle="tooltip" data-bs-title="Excluir arquivo">
+                            <i class="material-symbols-outlined">delete</i>
+                        </button>
+                    </td>
+                </tr>`;
+            continue;
+        }
+
+        const sneNum   = r.sneNumber || '—';
+        const afLabel  = r.af ? `${r.af.number} / ${r.af.year}` : '—';
+        const cnpjLabel = r.cnpj ? formatCnpj(r.cnpj) : '—';
+
+        const tombCell = r.tombamento
+            ? `<i class="material-symbols-outlined text-warning" data-bs-toggle="tooltip" data-bs-title="Contém tombamento">inventory_2</i>`
+            : `<span class="text-muted">—</span>`;
+
+        const supplierStatus = getSupplierStatusByCnpj(r.cnpj);
+        let statusCell = '<span class="text-muted">—</span>';
+        if (supplierStatus) {
+            const { cssClass, icon, label } = EMPENHO_STATUS_MAP[supplierStatus];
+            statusCell = `<i class="material-symbols-outlined ${cssClass}" data-bs-toggle="tooltip" data-bs-title="${label}">${icon}</i>`;
+        }
+
+        html += `
+            <tr>
+                <td><i class="material-symbols-outlined text-muted">receipt_long</i></td>
+                <td class="text-break">${r.filename}</td>
+                <td class="text-nowrap">${sneNum}</td>
+                <td class="text-nowrap">${afLabel}</td>
+                <td class="text-nowrap"><small>${cnpjLabel}</small></td>
+                <td>${r.company || '<span class="text-muted">—</span>'}</td>
+                <td class="text-center">${tombCell}</td>
+                <td class="text-center">${statusCell}</td>
+                <td class="table-btn-column text-nowrap">
+                    <button class="btn btn-sm text-primary file-row-btn"
+                        onclick="openFile('${safeFilePath}')"
+                        data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">
+                        <i class="material-symbols-outlined">open_in_new</i>
+                    </button>
+                    <button class="btn btn-sm text-danger file-row-btn"
+                        onclick="excluirEmpenho('${safeFilename}')"
+                        data-bs-toggle="tooltip" data-bs-title="Excluir arquivo">
+                        <i class="material-symbols-outlined">delete</i>
+                    </button>
+                </td>
+            </tr>`;
+    }
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+    setupFolderPathButtons(container);
+    setupRefreshEmpenhoButton(container);
+    initializeTooltips();
+}
+
+function setupRefreshEmpenhoButton(container) {
+    container.querySelector('.btn-refresh-empenhos')?.addEventListener('click', carregarEmpenhos);
+}
+
+async function excluirEmpenho(filename) {
+    const confirmed = await showConfirmationModal({
+        title: 'Excluir Empenho',
+        message: `Tem certeza que deseja excluir <strong>${filename}</strong>?`,
+        detail: '<i class="material-symbols-outlined me-1">warning</i> Esta ação não pode ser desfeita.',
+        confirmText: 'Excluir',
+        confirmColor: 'btn-danger',
+    });
+
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch('/api/sne/empenhos', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filenames: [filename] }),
+        });
+        const data = await response.json();
+
+        if (!response.ok && response.status !== 207) {
+            showToast(`Erro ao excluir: ${data.error}`, 'error');
+            return;
+        }
+
+        showToast(data.message, 'success');
+        carregarEmpenhos();
+    } catch (error) {
+        showToast(`Erro ao excluir: ${error.message}`, 'error');
+    }
+}
+
+async function executarCriarAFs() {
+    if (sneEmpenhos.length === 0) {
+        showToast('Nenhum empenho carregado. Atualize a lista primeiro.', 'warning');
+        return;
+    }
+
+    const confirmed = await showConfirmationModal({
+        title: 'Criar estrutura de AFs',
+        message: 'Serão criadas pastas para cada AF e SNE identificados, com as certidões de cada fornecedor copiadas para cada pasta.',
+        detail: `<i class="material-symbols-outlined me-1">folder</i> As pastas serão criadas em <strong>scripts/sne/AFs/</strong>.`,
+        confirmText: 'Criar AFs',
+        confirmColor: 'btn-primary',
+    });
+
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch('/api/sne/empenhos/criar-afs', { method: 'POST' });
+        const data = await response.json();
+
+        if (!response.ok) {
+            showToast(`Erro ao criar AFs: ${data.error}`, 'error');
+            return;
+        }
+
+        const parts = [`${data.afs.length} AF(s)`, `${data.snes.length} SNE(s)`];
+        if (data.errors?.length > 0) parts.push(`${data.errors.length} erro(s)`);
+        const status = data.errors?.length > 0 ? 'warning' : 'success';
+        showToast(`Estrutura criada: ${parts.join(', ')}.`, status);
+
+        addNotification({
+            message: `AFs criadas: ${parts.join(', ')}.`,
+            type: status,
+            source: 'SNE',
+        });
+    } catch (error) {
+        showToast(`Erro: ${error.message}`, 'error');
+    }
 }

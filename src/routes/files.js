@@ -21,7 +21,7 @@ const {
   deleteSupplierFile,
   moveSupplierFiles,
 } = require('../services/fornecedores');
-const { listCertidoes, analyzeCertidoes, renameCertidoes } = require('../services/sne');
+const { listCertidoes, analyzeCertidoes, renameCertidoes, analyzeEmpenhos, criarAFs } = require('../services/sne');
 const { validateLink } = require('../services/spreadsheet');
 
 function registerFileRoutes(app, logger) {
@@ -365,6 +365,71 @@ function registerFileRoutes(app, logger) {
       res.json(result);
     } catch (error) {
       logger.error(`Erro ao renomear certidões: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // =============================================
+  // SNE — Empenhos
+  // =============================================
+
+  app.get('/api/sne/empenhos/analisar', async (_req, res) => {
+    try {
+      const result = await analyzeEmpenhos();
+      res.json(result);
+    } catch (error) {
+      logger.error(`Erro ao analisar empenhos: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/sne/empenhos/criar-afs', async (_req, res) => {
+    try {
+      const result = await criarAFs();
+      res.json(result);
+    } catch (error) {
+      logger.error(`Erro ao criar AFs: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.delete('/api/sne/empenhos', async (req, res) => {
+    try {
+      const { filenames } = req.body;
+      if (!Array.isArray(filenames) || filenames.length === 0) {
+        return res.status(400).json({ error: 'Lista de arquivos não fornecida' });
+      }
+
+      const { SNE_EMPENHOS } = require('../services/sne');
+      let deleted = 0;
+      const errors = [];
+
+      for (const filename of filenames) {
+        if (typeof filename !== 'string' || filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
+          errors.push(`Nome inválido: ${filename}`);
+          continue;
+        }
+        const filePath = path.join(SNE_EMPENHOS, filename);
+        if (!isPathSafe(filePath, SNE_EMPENHOS)) {
+          errors.push(`Acesso negado: ${filename}`);
+          continue;
+        }
+        try {
+          await fs.unlink(filePath);
+          deleted++;
+          logger.info(`Empenho excluído: "${filename}"`, 'SNE');
+        } catch (e) {
+          errors.push(`Erro ao excluir ${filename}: ${e.message}`);
+        }
+      }
+
+      const message = `${deleted} arquivo(s) excluído(s)`;
+      if (errors.length > 0) {
+        return res.status(207).json({ message, deleted, errors });
+      }
+      res.json({ success: true, message, deleted });
+    } catch (error) {
+      logger.error(`Erro ao excluir empenhos: ${error.message}`, 'SNE', error);
       res.status(500).json({ error: error.message });
     }
   });

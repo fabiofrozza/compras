@@ -500,11 +500,181 @@ async function renameCertidoes() {
   return { results, folderPath };
 }
 
+// =============================================
+// SNE — Empenhos
+// =============================================
+
+const SNE_EMPENHOS = path.join(SCRIPTS_PATH, 'sne', 'SNEs');
+const SNE_AFS = path.join(SCRIPTS_PATH, 'sne', 'AFs');
+
+function extractSneNumber(text) {
+  // SNE number is always YYYYXXXXX (9 digits, year-first).
+  // "NOTA DE EMPENHO" is ASCII-safe and always precedes the number on the same line.
+  let m = text.match(/NOTA\s+DE\s+EMPENHO\s+(20\d{7})/i);
+  if (m) return m[1];
+  // Fallback: number appears before the keyword in some PDF column extraction orders
+  m = text.match(/(20\d{7})[^\d]{0,100}EMPENHO/i);
+  return m ? m[1] : null;
+}
+
+function extractAfInfo(text) {
+  const m = text.match(/\bAF:\s*(\d+)\s*\/\s*(\d+)/i);
+  if (!m) return null;
+  return { number: m[1], year: m[2] };
+}
+
+function extractCredorFromText(rawText) {
+  // Line after "credor:" header contains: COMPANY TYPE_CODE CNPJ  (normal column order)
+  //                                    or: CNPJ TYPE_CODE COMPANY  (reversed — PDF reads right-to-left)
+  const m = rawText.match(/credor:[^\n]*\n([^\n]+)/i);
+  if (!m) return { company: null, cnpj: null };
+
+  const line = m[1];
+  const cnpjMatch = line.match(/(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})/);
+  if (!cnpjMatch) return { company: null, cnpj: null };
+
+  const cnpj = cnpjMatch[1].replace(/[.\-\/]/g, '');
+  const cnpjIdx = line.indexOf(cnpjMatch[1]);
+
+  // Normal order: company and type code come before the CNPJ
+  const beforeCnpj = line.slice(0, cnpjIdx);
+  const companyBefore = beforeCnpj.replace(/\s+\d{1,2}\s*$/, '').trim();
+  if (companyBefore.length > 1) return { company: companyBefore, cnpj };
+
+  // Reversed order: CNPJ is first, then a 2-digit type code, then the company name
+  const afterCnpj = line.slice(cnpjIdx + cnpjMatch[1].length);
+  const companyAfter = afterCnpj.replace(/^\d{2}/, '').trim();
+  if (companyAfter.length > 1) return { company: companyAfter, cnpj };
+
+  return { company: null, cnpj };
+}
+
+async function listEmpenhos() {
+  let created = false;
+  try {
+    await fs.access(SNE_EMPENHOS);
+  } catch {
+    await fs.mkdir(SNE_EMPENHOS, { recursive: true });
+    created = true;
+  }
+
+  const entries = await fs.readdir(SNE_EMPENHOS);
+  const files = entries.filter(f => f.toLowerCase().endsWith('.pdf'));
+  files.sort((a, b) => a.localeCompare(b));
+  return { files, folderPath: SNE_EMPENHOS, folderCreated: created };
+}
+
+async function analyzeEmpenhos() {
+  const pdfParse = require('pdf-parse/lib/pdf-parse.js');
+  const { files, folderPath } = await listEmpenhos();
+  const results = [];
+
+  for (const filename of files) {
+    const filePath = path.join(SNE_EMPENHOS, filename);
+    try {
+      const buffer = await fs.readFile(filePath);
+      let rawText = '';
+      try {
+        const pdfData = await pdfParse(buffer);
+        rawText = pdfData.text || '';
+      } catch (e) {
+        logger.warn(`Erro ao parsear PDF "${filename}": ${e.message}`, 'SNE');
+        results.push({ filename, error: 'Erro ao ler PDF' });
+        continue;
+      }
+
+      const text = normalizeText(rawText);
+      const sneNumber = extractSneNumber(text);
+      const af = extractAfInfo(text);
+      const { company, cnpj } = extractCredorFromText(rawText);
+      const tombamento = /tombamento/i.test(text);
+
+      results.push({ filename, sneNumber, af, company, cnpj, tombamento, error: null });
+    } catch (e) {
+      logger.error(`Erro ao processar "${filename}": ${e.message}`, 'SNE');
+      results.push({ filename, error: e.message });
+    }
+  }
+
+  results.sort((a, b) => {
+    const afA = a.af ? `${a.af.year}${a.af.number.padStart(8, '0')}` : 'z';
+    const afB = b.af ? `${b.af.year}${b.af.number.padStart(8, '0')}` : 'z';
+    if (afA !== afB) return afA.localeCompare(afB);
+    return (a.sneNumber || '').localeCompare(b.sneNumber || '');
+  });
+
+  logger.info(`Análise de ${results.length} empenho(s) concluída`, 'SNE');
+  return { results, folderPath };
+}
+
+async function criarAFs() {
+  const { results } = await analyzeEmpenhos();
+  await fs.mkdir(SNE_AFS, { recursive: true });
+
+  // Map CNPJ → certidão filenames from CERTIDOES folder
+  const certidoesEntries = await fs.readdir(SNE_CERTIDOES).catch(() => []);
+  const certidoesByCnpj = new Map();
+  for (const f of certidoesEntries) {
+    if (!f.toLowerCase().endsWith('.pdf')) continue;
+    // After renaming, filename starts with 14-digit CNPJ
+    const cnpjMatch = f.match(/^(\d{14})/);
+    if (!cnpjMatch) continue;
+    const cnpj = cnpjMatch[1];
+    const list = certidoesByCnpj.get(cnpj) || [];
+    list.push(f);
+    certidoesByCnpj.set(cnpj, list);
+  }
+
+  const created = { afs: new Set(), snes: [], errors: [] };
+
+  for (const r of results) {
+    if (r.error || !r.af || !r.sneNumber) continue;
+
+    const afFolderName = sanitizeFilename(`AF ${r.af.number}-${r.af.year}`);
+    const sneFolderName = sanitizeFilename(`SNE ${r.sneNumber}`);
+    const afPath = path.join(SNE_AFS, afFolderName);
+    const snePath = path.join(afPath, sneFolderName);
+
+    try {
+      await fs.mkdir(snePath, { recursive: true });
+      created.afs.add(afFolderName);
+      created.snes.push(`${afFolderName}/${sneFolderName}`);
+
+      try {
+        await fs.copyFile(path.join(SNE_EMPENHOS, r.filename), path.join(snePath, r.filename));
+      } catch (e) {
+        created.errors.push(`Erro ao copiar SNE "${r.filename}": ${e.message}`);
+      }
+
+      const certFiles = r.cnpj ? (certidoesByCnpj.get(r.cnpj) || []) : [];
+      for (const certFile of certFiles) {
+        const src = path.join(SNE_CERTIDOES, certFile);
+        const dst = path.join(snePath, certFile);
+        try {
+          await fs.copyFile(src, dst);
+        } catch (e) {
+          created.errors.push(`Erro ao copiar "${certFile}": ${e.message}`);
+        }
+      }
+    } catch (e) {
+      created.errors.push(`Erro ao criar pasta "${snePath}": ${e.message}`);
+    }
+  }
+
+  logger.info(`AFs criadas: ${created.afs.size} AF(s), ${created.snes.length} SNE(s)`, 'SNE');
+  return { afsPath: SNE_AFS, afs: [...created.afs], snes: created.snes, errors: created.errors };
+}
+
 module.exports = {
   SNE_CERTIDOES,
+  SNE_EMPENHOS,
+  SNE_AFS,
   TYPE_KEYWORDS,
   CERT_CHECKS,
   listCertidoes,
   analyzeCertidoes,
   renameCertidoes,
+  listEmpenhos,
+  analyzeEmpenhos,
+  criarAFs,
 };
