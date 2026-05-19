@@ -573,6 +573,15 @@ function getSupplierStatusByCnpj(cnpj) {
     return computeSupplierStatus(group.certidoes);
 }
 
+function getEmpenhoForSne(afName, sneName) {
+    const afMatch = afName.match(/^AF (\d+)-(\d+)$/);
+    if (!afMatch) return null;
+    const sneNum = sneName.replace(/^SNE /, '');
+    return sneEmpenhos.find(r => !r.error && r.af &&
+        r.af.number === afMatch[1] && r.af.year === afMatch[2] &&
+        r.sneNumber === sneNum) || null;
+}
+
 async function carregarEmpenhos() {
     const container = document.getElementById('sne-empenhos-container');
     if (!container) return;
@@ -817,6 +826,8 @@ function renderAFs() {
                         <th colspan="2">AF</th>
                         <th></th>
                         <th colspan="2">SNE</th>
+                        <th class="text-center">Tombamento</th>
+                        <th class="text-center">Certidões</th>
                         <th>Arquivos</th>
                         <th></th>
                     </tr>
@@ -847,13 +858,26 @@ function renderAFs() {
 
         if (af.snes.length === 0) {
             html += `<tr>${afIconCell}${afNameCell}${afActionsCell}
-                    <td colspan="4" class="text-muted fst-italic">Sem SNEs</td>
+                    <td colspan="6" class="text-muted fst-italic">Sem SNEs</td>
                 </tr>`;
         } else {
             for (let i = 0; i < af.snes.length; i++) {
                 const sne = af.snes[i];
                 const safeSneNum = sne.name.replace(/'/g, "\\'");
                 const safeSnePath = sne.path.replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
+
+                const empenho = getEmpenhoForSne(af.name, sne.name);
+
+                const tombCell = empenho?.tombamento
+                    ? `<i class="material-symbols-outlined text-warning" data-bs-toggle="tooltip" data-bs-title="Contém tombamento">inventory_2</i>`
+                    : `<span class="text-muted">—</span>`;
+
+                const supplierStatus = empenho ? getSupplierStatusByCnpj(empenho.cnpj) : null;
+                let statusCell = '<span class="text-muted">—</span>';
+                if (supplierStatus) {
+                    const { cssClass, icon, label } = EMPENHO_STATUS_MAP[supplierStatus];
+                    statusCell = `<i class="material-symbols-outlined ${cssClass}" data-bs-toggle="tooltip" data-bs-title="${label}">${icon}</i>`;
+                }
 
                 const filesHtml = sne.files.length > 0
                     ? sne.files.map(f => {
@@ -875,6 +899,8 @@ function renderAFs() {
                 html += `
                     <td><i class="material-symbols-outlined text-muted">receipt_long</i></td>
                     <td class="text-nowrap">${sne.name}</td>
+                    <td class="text-center">${tombCell}</td>
+                    <td class="text-center">${statusCell}</td>
                     <td>${filesHtml}</td>
                     <td class="table-btn-column text-nowrap">
                         <button class="btn btn-sm text-primary file-row-btn"
