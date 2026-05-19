@@ -141,6 +141,16 @@
         word-break: break-all;
     }
 
+    thead th {
+        padding: 4px 6px;
+        font-size: 11px;
+        font-weight: 600;
+        background-color: var(--compras-contrast);
+        color: var(--compras-text-primary);
+        user-select: none;
+        white-space: nowrap;
+    }
+
     tbody tr {
         cursor: pointer;
         user-select: none;
@@ -153,6 +163,25 @@
             background-color: color-mix(in srgb, var(--file-color) 50%, var(--compras-contrast));
             border-left: 4px solid var(--file-color);
         }
+    }
+}
+
+.files-col-sortable {
+    cursor: pointer;
+
+    &:hover {
+        background-color: color-mix(in srgb, var(--compras-text-primary) 25%, transparent) !important;
+    }
+
+    &.sorted {
+        background-color: var(--compras-text-primary) !important;
+        color: var(--compras-contrast) !important;
+    }
+
+    .sort-icon {
+        font-size: 14px;
+        vertical-align: middle;
+        margin-left: 2px;
     }
 }
 
