@@ -305,7 +305,7 @@ function renderCertidoesDoFornecedor(group) {
         const safeFilename = r.filename.replace(/'/g, "\\'");
 
         html += `
-            <tr>
+            <tr ondblclick="openFile('${safeFilePath}')">
                 <td><i class="material-symbols-outlined ${cssClass}" data-bs-toggle="tooltip"
                     data-bs-title="${validityTooltip(r)}">${icon}</i></td>
                 <td class="text-break">${r.filename}${warnings}</td>
@@ -702,7 +702,7 @@ function renderEmpenhos() {
         }
 
         html += `
-            <tr>
+            <tr ondblclick="openFile('${safeFilePath}')">
                 <td><i class="material-symbols-outlined text-muted">receipt_long</i></td>
                 <td class="text-break">${r.filename}</td>
                 <td class="text-nowrap">${sneNum}</td>
@@ -882,7 +882,7 @@ function renderAFs() {
                 const filesHtml = sne.files.length > 0
                     ? sne.files.map(f => {
                         const safeFilePath = (sne.path + '\\' + f).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-                        return `<div class="sne-file-item">
+                        return `<div class="sne-file-item" ondblclick="openFile('${safeFilePath}')">
                                 <i class="material-symbols-outlined text-muted">description</i>
                                 <span>${f}</span>
                                 <button class="btn btn-sm text-primary file-row-btn"
