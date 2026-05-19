@@ -148,7 +148,7 @@ function nearestDate(dates) {
   return dates.reduce((dateA, dateB) => parseDate(dateA) <= parseDate(dateB) ? dateA : dateB);
 }
 
-const VALIDITY_ORDER = { VALIDA: 3, A_VENCER: 2, VENCIDA: 1, SEM_VALIDADE: 0 };
+const VALIDITY_SORT_ORDER = { VALIDA: 3, A_VENCER: 2, VENCIDA: 1, SEM_VALIDADE: 0 };
 
 // Remove chars forbidden in Windows filenames
 function sanitizeFilename(str) {
@@ -353,7 +353,7 @@ async function renameCertidoes() {
     }));
 
     withMtime.sort((itemA, itemB) => {
-      const scoreDiff = (VALIDITY_ORDER[itemB.analysis.validity] ?? 0) - (VALIDITY_ORDER[itemA.analysis.validity] ?? 0);
+      const scoreDiff = (VALIDITY_SORT_ORDER[itemB.analysis.validity] ?? 0) - (VALIDITY_SORT_ORDER[itemA.analysis.validity] ?? 0);
       if (scoreDiff !== 0) return scoreDiff;
       const latestDateA = itemA.analysis.dates.length ? itemA.analysis.dates.reduce((dateA, dateB) => parseDate(dateA) >= parseDate(dateB) ? dateA : dateB) : null;
       const latestDateB = itemB.analysis.dates.length ? itemB.analysis.dates.reduce((dateA, dateB) => parseDate(dateA) >= parseDate(dateB) ? dateA : dateB) : null;

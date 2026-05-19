@@ -7,7 +7,7 @@ let sneFolderPath = '';
 let sneEmpenhos = [];
 let sneEmpenhosFolderPath = '';
 
-const VALIDITY_ORDER = { 'VALIDA': 5, 'SEM_VALIDADE': 4, 'A_VENCER': 3, 'VENCIDA': 1 };
+const VALIDITY_COVERAGE_ORDER = { 'VALIDA': 5, 'SEM_VALIDADE': 4, 'A_VENCER': 3, 'VENCIDA': 1 };
 // Mínimo de certidões individuais para cobrir um SICAF ausente ou vencido
 const MANDATORY_INDIVIDUAL = ['Receita Federal', 'FGTS', 'Trabalhista'];
 
@@ -91,7 +91,7 @@ function groupByCnpj(results) {
 // ====== STATUS DO FORNECEDOR ======
 
 function betterValidity(a, b) {
-    return (VALIDITY_ORDER[a] || 0) >= (VALIDITY_ORDER[b] || 0) ? a : b;
+    return (VALIDITY_COVERAGE_ORDER[a] || 0) >= (VALIDITY_COVERAGE_ORDER[b] || 0) ? a : b;
 }
 
 function computeSupplierStatus(certidoes) {
