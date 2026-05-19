@@ -6,6 +6,7 @@ let sneFolderPath = '';
 
 let sneEmpenhos = [];
 let sneEmpenhosFolderPath = '';
+let sneEmpenhosSortState = { column: null, direction: 'asc' };
 
 const VALIDITY_COVERAGE_ORDER = { 'VALIDA': 5, 'SEM_VALIDADE': 4, 'A_VENCER': 3, 'VENCIDA': 1 };
 // Mínimo de certidões individuais para cobrir um SICAF ausente ou vencido
@@ -723,6 +724,39 @@ async function carregarEmpenhos() {
     }
 }
 
+function getSneEmpenhoSortValue(r, column) {
+    switch (column) {
+        case 'arquivo':    return r.filename.toLowerCase();
+        case 'sne':        return parseInt(r.sneNumber || '0', 10);
+        case 'af':         return r.af ? parseInt(r.af.year) * 1e6 + parseInt(r.af.number) : -1;
+        case 'cnpj':       return r.cnpj || '';
+        case 'fornecedor': return (r.company || '').toLowerCase();
+        case 'tombamento': return r.tombamento ? 1 : 0;
+        case 'certidoes': {
+            const order = { ok: 1, alerta: 2, erro: 3, impedido: 4 };
+            return order[getSupplierStatusByCnpj(r.cnpj)] || 0;
+        }
+        case 'pasta-sne': {
+            if (!r.af || !r.sneNumber) return -1;
+            const afData = sneAfsData.find(af => af.name === `AF ${r.af.number}-${r.af.year}`);
+            return afData?.snes?.some(s => s.name === `SNE ${r.sneNumber}`) ? 1 : 0;
+        }
+        default: return '';
+    }
+}
+
+function sortSneEmpenhos(column) {
+    const current = sneEmpenhosSortState;
+    if (current.column === column) {
+        sneEmpenhosSortState = current.direction === 'asc'
+            ? { column, direction: 'desc' }
+            : { column: null, direction: 'asc' };
+    } else {
+        sneEmpenhosSortState = { column, direction: 'asc' };
+    }
+    renderEmpenhos();
+}
+
 function renderEmpenhos() {
     const container = document.getElementById('sne-empenhos-container');
     if (!container) return;
@@ -751,6 +785,24 @@ function renderEmpenhos() {
         return;
     }
 
+    const { column: sortCol, direction: sortDir } = sneEmpenhosSortState;
+    const sortedEmpenhos = sortCol ? [...sneEmpenhos].sort((a, b) => {
+        if (a.error && !b.error) return 1;
+        if (!a.error && b.error) return -1;
+        if (a.error && b.error) return 0;
+        const va = getSneEmpenhoSortValue(a, sortCol);
+        const vb = getSneEmpenhoSortValue(b, sortCol);
+        const cmp = va < vb ? -1 : va > vb ? 1 : 0;
+        return sortDir === 'asc' ? cmp : -cmp;
+    }) : sneEmpenhos;
+
+    const sortTh = (col, label, extraClass = '', extraAttrs = '') => {
+        const active = sortCol === col;
+        const icon = active ? (sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more';
+        const cls = ['files-col-sortable', active ? 'sorted' : '', extraClass].filter(Boolean).join(' ');
+        return `<th class="${cls}" ${extraAttrs} onclick="sortSneEmpenhos('${col}')">${label}<i class="material-symbols-outlined sort-icon">${icon}</i></th>`;
+    };
+
     let html = buildFolderPathHTML(displayPath, deleteBtnEmpenhos, refreshBtn);
     html += `
         <div class="files-table-container">
@@ -760,20 +812,20 @@ function renderEmpenhos() {
                         <th class="sne-select-col text-center">
                             <input type="checkbox" id="sne-select-all" class="form-check-input">
                         </th>
-                        <th colspan="2">Arquivo</th>
-                        <th>SNE</th>
-                        <th>AF</th>
-                        <th>CNPJ</th>
-                        <th>Fornecedor</th>
-                        <th class="text-center">Tombamento</th>
-                        <th class="text-center">Certidões</th>
-                        <th class="text-center">Pasta SNE</th>
+                        ${sortTh('arquivo', 'Arquivo', '', 'colspan="2"')}
+                        ${sortTh('sne', 'SNE')}
+                        ${sortTh('af', 'AF')}
+                        ${sortTh('cnpj', 'CNPJ')}
+                        ${sortTh('fornecedor', 'Fornecedor')}
+                        ${sortTh('tombamento', 'Tombamento', 'text-center')}
+                        ${sortTh('certidoes', 'Certidões', 'text-center')}
+                        ${sortTh('pasta-sne', 'Pasta SNE', 'text-center')}
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>`;
 
-    for (const r of sneEmpenhos) {
+    for (const r of sortedEmpenhos) {
         const safeFilename = r.filename.replace(/'/g, "\\'");
         const safeFilePath = (sneEmpenhosFolderPath + '\\' + r.filename).replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
 
@@ -905,6 +957,7 @@ async function excluirEmpenho(filename) {
 let sneAfsData = [];
 let sneAfsAnalysis = [];
 let sneAfsFolderPath = '';
+let sneAfsSortState = { column: null, direction: 'asc' };
 let snePendingAfScroll = null;
 
 async function carregarAFs() {
@@ -929,6 +982,39 @@ async function carregarAFs() {
     } catch (error) {
         container.innerHTML = alertHTML('danger', 'error', `Erro ao carregar AFs: ${error.message}`);
     }
+}
+
+function getSneAfSortValue(af, column) {
+    switch (column) {
+        case 'af': {
+            const m = af.name.match(/^AF (\d+)-(\d+)$/);
+            return m ? parseInt(m[2]) * 1e6 + parseInt(m[1]) : 0;
+        }
+        case 'tombamento': return af.snes.some(s => s.empenho?.tombamento) ? 1 : 0;
+        case 'certidoes': {
+            const order = { ok: 1, alerta: 2, erro: 3, impedido: 4 };
+            let worst = 0;
+            for (const sne of af.snes) {
+                if (!sne.certidoes?.length) continue;
+                const val = order[computeSupplierStatus(sne.certidoes)] || 0;
+                if (val > worst) worst = val;
+            }
+            return worst;
+        }
+        default: return '';
+    }
+}
+
+function sortAFs(column) {
+    const current = sneAfsSortState;
+    if (current.column === column) {
+        sneAfsSortState = current.direction === 'asc'
+            ? { column, direction: 'desc' }
+            : { column: null, direction: 'asc' };
+    } else {
+        sneAfsSortState = { column, direction: 'asc' };
+    }
+    renderAFs();
 }
 
 function renderAFs() {
@@ -958,23 +1044,38 @@ function renderAFs() {
         return;
     }
 
+    const { column: sortCol, direction: sortDir } = sneAfsSortState;
+    const sortedAfs = sortCol ? [...sneAfsAnalysis].sort((a, b) => {
+        const va = getSneAfSortValue(a, sortCol);
+        const vb = getSneAfSortValue(b, sortCol);
+        const cmp = va < vb ? -1 : va > vb ? 1 : 0;
+        return sortDir === 'asc' ? cmp : -cmp;
+    }) : sneAfsAnalysis;
+
+    const sortTh = (col, label, extraClass = '', extraAttrs = '') => {
+        const active = sortCol === col;
+        const icon = active ? (sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more';
+        const cls = ['files-col-sortable', active ? 'sorted' : '', extraClass].filter(Boolean).join(' ');
+        return `<th class="${cls}" ${extraAttrs} onclick="sortAFs('${col}')">${label}<i class="material-symbols-outlined sort-icon">${icon}</i></th>`;
+    };
+
     let html = buildFolderPathHTML(displayPath, deleteBtnAfs, refreshBtn);
     html += `
         <div class="files-table-container">
             <table class="files-table sne-afs-table">
                 <thead>
                     <tr>
-                        <th colspan="2">AF</th>
+                        ${sortTh('af', 'AF', '', 'colspan="2"')}
                         <th></th>
                         <th colspan="2">SNE</th>
-                        <th class="text-center">Tombamento</th>
-                        <th class="text-center">Certidões</th>
+                        ${sortTh('tombamento', 'Tombamento', 'text-center')}
+                        ${sortTh('certidoes', 'Certidões', 'text-center')}
                         <th>Arquivos</th>
                         <th></th>
                     </tr>
                 </thead>`;
 
-    for (const af of sneAfsAnalysis) {
+    for (const af of sortedAfs) {
         const safeAfName = af.name.replace(/'/g, "\\'");
         const safeAfPath = af.path.replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
         const rowspan = Math.max(af.snes.length, 1);
