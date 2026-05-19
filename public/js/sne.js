@@ -566,11 +566,35 @@ const EMPENHO_STATUS_MAP = {
     impedido: { cssClass: 'text-danger', icon: 'gavel', label: 'Fornecedor impedido' },
 };
 
+function navegarParaCertidoesDoCnpj(cnpj) {
+    if (!cnpj || !sneGrouped.has(cnpj)) return;
+    const tab = document.getElementById('tab-sne-certidoes');
+    if (tab) bootstrap.Tab.getOrCreateInstance(tab).show();
+    selecionarFornecedor(cnpj);
+}
+
 function getSupplierStatusByCnpj(cnpj) {
     if (!cnpj) return null;
     const group = sneGrouped.get(cnpj);
     if (!group) return null;
     return computeSupplierStatus(group.certidoes);
+}
+
+function buildTombCell(hasTombamento) {
+    return hasTombamento
+        ? `<i class="material-symbols-outlined text-warning" data-bs-toggle="tooltip" data-bs-title="Contém tombamento">inventory_2</i>`
+        : `<span class="text-muted">—</span>`;
+}
+
+function buildStatusCell(cnpj) {
+    const supplierStatus = getSupplierStatusByCnpj(cnpj);
+    if (!supplierStatus) return '<span class="text-muted">—</span>';
+    const { cssClass, icon, label } = EMPENHO_STATUS_MAP[supplierStatus];
+    return `<button class="btn btn-sm file-row-btn sne-status-link ${cssClass}"
+        data-bs-toggle="tooltip" data-bs-title="${label}<br><em>Clique para exibir</em>"
+        onclick="event.stopPropagation(); navegarParaCertidoesDoCnpj('${cnpj}')">
+        <i class="material-symbols-outlined">${icon}</i>
+    </button>`;
 }
 
 function getEmpenhoForSne(afName, sneName) {
@@ -679,16 +703,9 @@ function renderEmpenhos() {
         const afLabel = r.af ? `${r.af.number} / ${r.af.year}` : '—';
         const cnpjLabel = r.cnpj ? formatCnpj(r.cnpj) : '—';
 
-        const tombCell = r.tombamento
-            ? `<i class="material-symbols-outlined text-warning" data-bs-toggle="tooltip" data-bs-title="Contém tombamento">inventory_2</i>`
-            : `<span class="text-muted">—</span>`;
+        const tombCell = buildTombCell(r.tombamento);
 
-        const supplierStatus = getSupplierStatusByCnpj(r.cnpj);
-        let statusCell = '<span class="text-muted">—</span>';
-        if (supplierStatus) {
-            const { cssClass, icon, label } = EMPENHO_STATUS_MAP[supplierStatus];
-            statusCell = `<i class="material-symbols-outlined ${cssClass}" data-bs-toggle="tooltip" data-bs-title="${label}">${icon}</i>`;
-        }
+        const statusCell = buildStatusCell(r.cnpj);
 
         let pastaSneCell = '<span class="text-muted">—</span>';
         if (r.af && r.sneNumber) {
@@ -868,16 +885,9 @@ function renderAFs() {
 
                 const empenho = getEmpenhoForSne(af.name, sne.name);
 
-                const tombCell = empenho?.tombamento
-                    ? `<i class="material-symbols-outlined text-warning" data-bs-toggle="tooltip" data-bs-title="Contém tombamento">inventory_2</i>`
-                    : `<span class="text-muted">—</span>`;
+                const tombCell = buildTombCell(empenho?.tombamento);
 
-                const supplierStatus = empenho ? getSupplierStatusByCnpj(empenho.cnpj) : null;
-                let statusCell = '<span class="text-muted">—</span>';
-                if (supplierStatus) {
-                    const { cssClass, icon, label } = EMPENHO_STATUS_MAP[supplierStatus];
-                    statusCell = `<i class="material-symbols-outlined ${cssClass}" data-bs-toggle="tooltip" data-bs-title="${label}">${icon}</i>`;
-                }
+                const statusCell = buildStatusCell(empenho?.cnpj);
 
                 const filesHtml = sne.files.length > 0
                     ? sne.files.map(f => {

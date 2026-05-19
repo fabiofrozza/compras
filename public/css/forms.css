@@ -474,6 +474,11 @@
     }
 }
 
+.file-row-btn.sne-status-link {
+    opacity: 1;
+    filter: none;
+}
+
 #sne-certidoes-list .files-table thead th {
     font-size: 11px;
     font-weight: 600;
