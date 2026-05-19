@@ -633,7 +633,7 @@ function buildAfStatusCell(certidoes, afName, sneName, cnpj) {
     if (!certidoes || certidoes.length === 0) {
         if (!cnpj) return '<span class="text-muted">—</span>';
         return `<button class="btn btn-sm file-row-btn sne-status-link text-muted"
-            data-bs-toggle="tooltip" data-bs-title="Sem certidões — clique para puxar da pasta Certidões"
+            data-bs-toggle="tooltip" data-bs-title="Sem certidões<br><em>Clique para atualizar certidões</em>"
             onclick="${syncOnClick}">
             <i class="material-symbols-outlined">refresh</i>
         </button>`;
