@@ -632,7 +632,7 @@ function buildAfStatusCell(certidoes, afName, sneName, cnpj) {
 
     if (!certidoes || certidoes.length === 0) {
         if (!cnpj) return '<span class="text-muted">—</span>';
-        return `<button class="btn btn-sm file-row-btn text-muted"
+        return `<button class="btn btn-sm file-row-btn sne-status-link text-muted"
             data-bs-toggle="tooltip" data-bs-title="Sem certidões — clique para puxar da pasta Certidões"
             onclick="${syncOnClick}">
             <i class="material-symbols-outlined">refresh</i>
@@ -642,11 +642,7 @@ function buildAfStatusCell(certidoes, afName, sneName, cnpj) {
     const supplierStatus = computeSupplierStatus(certidoes);
     const { cssClass, icon, label } = EMPENHO_STATUS_MAP[supplierStatus];
 
-    if (supplierStatus === 'ok') {
-        return `<i class="material-symbols-outlined ${cssClass}" data-bs-toggle="tooltip" data-bs-title="${label}">${icon}</i>`;
-    }
-
-    return `<button class="btn btn-sm file-row-btn ${cssClass}"
+    return `<button class="btn btn-sm file-row-btn sne-status-link ${cssClass}"
         data-bs-toggle="tooltip" data-bs-title="${label}<br><em>Clique para atualizar certidões</em>"
         onclick="${syncOnClick}">
         <i class="material-symbols-outlined">${icon}</i>
