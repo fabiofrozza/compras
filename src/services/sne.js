@@ -754,6 +754,25 @@ async function analyzeAFs() {
   return { afs, folderPath: SNE_AFS };
 }
 
+async function sincronizarCertidoesSne(afName, sneName, cnpj) {
+  const snePath = path.join(SNE_AFS, afName, sneName);
+
+  const sneEntries = await fs.readdir(snePath);
+  const stale = sneEntries.filter(f => f.toLowerCase().endsWith('.pdf') && f.startsWith(cnpj));
+  for (const f of stale) {
+    await fs.unlink(path.join(snePath, f));
+  }
+
+  const certdoesEntries = await fs.readdir(SNE_CERTIDOES).catch(() => []);
+  const fresh = certdoesEntries.filter(f => f.toLowerCase().endsWith('.pdf') && f.startsWith(cnpj));
+  for (const f of fresh) {
+    await fs.copyFile(path.join(SNE_CERTIDOES, f), path.join(snePath, f));
+  }
+
+  logger.info(`Certidões sincronizadas em "${afName}/${sneName}": ${stale.length} removida(s), ${fresh.length} copiada(s)`, 'SNE');
+  return { removed: stale.length, copied: fresh.length };
+}
+
 async function listAFs() {
   try {
     await fs.access(SNE_AFS);
@@ -809,4 +828,5 @@ module.exports = {
   criarAFs,
   listAFs,
   analyzeAFs,
+  sincronizarCertidoesSne,
 };

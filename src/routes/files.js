@@ -21,7 +21,7 @@ const {
   deleteSupplierFile,
   moveSupplierFiles,
 } = require('../services/fornecedores');
-const { listCertidoes, analyzeCertidoes, renameCertidoes, analyzeEmpenhos, criarAFs, listAFs, analyzeAFs } = require('../services/sne');
+const { listCertidoes, analyzeCertidoes, renameCertidoes, analyzeEmpenhos, criarAFs, listAFs, analyzeAFs, sincronizarCertidoesSne } = require('../services/sne');
 const { validateLink } = require('../services/spreadsheet');
 
 function registerFileRoutes(app, logger) {
@@ -472,6 +472,29 @@ function registerFileRoutes(app, logger) {
       res.json(result);
     } catch (error) {
       logger.error(`Erro ao analisar AFs: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/sne/afs/sincronizar-certidoes', async (req, res) => {
+    try {
+      const { afName, sneName, cnpj } = req.body;
+
+      if (!afName || !sneName || !cnpj) return res.status(400).json({ error: 'Parâmetros inválidos' });
+      if (typeof afName !== 'string' || afName.includes('..') || afName.includes('/') || afName.includes('\\'))
+        return res.status(403).json({ error: 'Acesso negado' });
+      if (typeof sneName !== 'string' || sneName.includes('..') || sneName.includes('/') || sneName.includes('\\'))
+        return res.status(403).json({ error: 'Acesso negado' });
+      if (!/^\d{14}$/.test(cnpj)) return res.status(400).json({ error: 'CNPJ inválido' });
+
+      const { SNE_AFS } = require('../services/sne');
+      const snePath = path.join(SNE_AFS, afName, sneName);
+      if (!isPathSafe(snePath, SNE_AFS)) return res.status(403).json({ error: 'Acesso negado' });
+
+      const result = await sincronizarCertidoesSne(afName, sneName, cnpj);
+      res.json(result);
+    } catch (error) {
+      logger.error(`Erro ao sincronizar certidões: ${error.message}`, 'SNE', error);
       res.status(500).json({ error: error.message });
     }
   });

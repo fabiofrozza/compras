@@ -625,11 +625,65 @@ function buildStatusCell(cnpj) {
     </button>`;
 }
 
-function buildAfStatusCell(certidoes) {
-    if (!certidoes || certidoes.length === 0) return '<span class="text-muted">—</span>';
+function buildAfStatusCell(certidoes, afName, sneName, cnpj) {
+    const safeAf = afName.replace(/'/g, "\\'");
+    const safeSne = sneName.replace(/'/g, "\\'");
+    const syncOnClick = `event.stopPropagation(); sincronizarCertidoesSne('${safeAf}', '${safeSne}')`;
+
+    if (!certidoes || certidoes.length === 0) {
+        if (!cnpj) return '<span class="text-muted">—</span>';
+        return `<button class="btn btn-sm file-row-btn text-muted"
+            data-bs-toggle="tooltip" data-bs-title="Sem certidões — clique para puxar da pasta Certidões"
+            onclick="${syncOnClick}">
+            <i class="material-symbols-outlined">refresh</i>
+        </button>`;
+    }
+
     const supplierStatus = computeSupplierStatus(certidoes);
     const { cssClass, icon, label } = EMPENHO_STATUS_MAP[supplierStatus];
-    return `<i class="material-symbols-outlined ${cssClass}" data-bs-toggle="tooltip" data-bs-title="${label}">${icon}</i>`;
+
+    if (supplierStatus === 'ok') {
+        return `<i class="material-symbols-outlined ${cssClass}" data-bs-toggle="tooltip" data-bs-title="${label}">${icon}</i>`;
+    }
+
+    return `<button class="btn btn-sm file-row-btn ${cssClass}"
+        data-bs-toggle="tooltip" data-bs-title="${label}<br><em>Clique para atualizar certidões</em>"
+        onclick="${syncOnClick}">
+        <i class="material-symbols-outlined">${icon}</i>
+    </button>`;
+}
+
+async function sincronizarCertidoesSne(afName, sneName) {
+    const afData = sneAfsAnalysis.find(af => af.name === afName);
+    const sneData = afData?.snes.find(s => s.name === sneName);
+    const cnpj = sneData?.empenho?.cnpj;
+
+    if (!cnpj) {
+        showToast('CNPJ não identificado no empenho da SNE.', 'warning');
+        return;
+    }
+
+    try {
+        const resp = await fetch('/api/sne/afs/sincronizar-certidoes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ afName, sneName, cnpj }),
+        });
+        const data = await resp.json();
+
+        if (!resp.ok) {
+            showToast(`Erro ao sincronizar: ${data.error}`, 'error');
+            return;
+        }
+
+        const msg = data.copied > 0
+            ? `${data.copied} certidão(ões) atualizada(s) em ${sneName}.`
+            : `Nenhuma certidão encontrada na pasta Certidões para este CNPJ.`;
+        showToast(msg, data.copied > 0 ? 'success' : 'warning');
+        carregarAFs();
+    } catch (e) {
+        showToast(`Erro: ${e.message}`, 'error');
+    }
 }
 
 function getEmpenhoForSne(afName, sneName) {
@@ -959,7 +1013,7 @@ function renderAFs() {
 
                 const tombCell = buildTombCell(sne.empenho?.tombamento);
 
-                const statusCell = buildAfStatusCell(sne.certidoes);
+                const statusCell = buildAfStatusCell(sne.certidoes, af.name, sne.name, sne.empenho?.cnpj);
 
                 const filesHtml = sne.files.length > 0
                     ? sne.files.map(f => {
