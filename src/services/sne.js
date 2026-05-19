@@ -607,7 +607,7 @@ async function analyzeEmpenhos() {
   return { results, folderPath };
 }
 
-async function criarAFs(filenames = null) {
+async function criarAFs(filenames = null, moveSnes = false) {
   const { results } = await analyzeEmpenhos();
   const toProcess = filenames ? results.filter(r => filenames.includes(r.filename)) : results;
   await fs.mkdir(SNE_AFS, { recursive: true });
@@ -641,10 +641,19 @@ async function criarAFs(filenames = null) {
       created.afs.add(afFolderName);
       created.snes.push(`${afFolderName}/${sneFolderName}`);
 
+      const srcSne = path.join(SNE_EMPENHOS, r.filename);
+      const dstSne = path.join(snePath, r.filename);
       try {
-        await fs.copyFile(path.join(SNE_EMPENHOS, r.filename), path.join(snePath, r.filename));
+        if (moveSnes) {
+          await fs.rename(srcSne, dstSne).catch(async () => {
+            await fs.copyFile(srcSne, dstSne);
+            await fs.unlink(srcSne);
+          });
+        } else {
+          await fs.copyFile(srcSne, dstSne);
+        }
       } catch (e) {
-        created.errors.push(`Erro ao copiar SNE "${r.filename}": ${e.message}`);
+        created.errors.push(`Erro ao ${moveSnes ? 'mover' : 'copiar'} SNE "${r.filename}": ${e.message}`);
       }
 
       const certFiles = r.cnpj ? (certidoesByCnpj.get(r.cnpj) || []) : [];

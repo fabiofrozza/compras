@@ -385,8 +385,8 @@ function registerFileRoutes(app, logger) {
 
   app.post('/api/sne/empenhos/criar-afs', async (req, res) => {
     try {
-      const { filenames } = req.body || {};
-      const result = await criarAFs(Array.isArray(filenames) ? filenames : null);
+      const { filenames, moveSnes } = req.body || {};
+      const result = await criarAFs(Array.isArray(filenames) ? filenames : null, moveSnes === true);
       res.json(result);
     } catch (error) {
       logger.error(`Erro ao criar AFs: ${error.message}`, 'SNE', error);

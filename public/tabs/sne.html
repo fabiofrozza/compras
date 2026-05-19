@@ -88,7 +88,7 @@
                                 <div class="collapse show" id="sne-empenhos-collapse">
                                     <div id="sne-empenhos-container" class="files-list-style"></div>
                                     <div class="form-buttons">
-                                        <button type="button" class="btn btn-sm btn-secondary text-nowrap"
+                                        <button type="button" class="btn btn-sm btn-primary text-nowrap"
                                             id="btn-atualizar-empenhos">
                                             Atualizar
                                         </button>
@@ -103,7 +103,19 @@
                                                 OK</label>
                                             <input type="radio" class="btn-check" name="sne-afs-scope"
                                                 id="sne-afs-scope-selecionadas" value="selecionadas">
-                                            <label class="btn btn-outline-secondary" for="sne-afs-scope-selecionadas">Selecionadas</label>
+                                            <label class="btn btn-outline-secondary"
+                                                for="sne-afs-scope-selecionadas">Selecionadas</label>
+                                        </div>
+                                        <div class="btn-group btn-group-sm" role="group"
+                                            aria-label="Ação sobre os empenhos">
+                                            <input type="radio" class="btn-check" name="sne-afs-action"
+                                                id="sne-afs-action-manter" value="manter" checked>
+                                            <label class="btn btn-outline-secondary" for="sne-afs-action-manter">Manter
+                                                SNEs</label>
+                                            <input type="radio" class="btn-check" name="sne-afs-action"
+                                                id="sne-afs-action-mover" value="mover">
+                                            <label class="btn btn-outline-secondary" for="sne-afs-action-mover">Mover
+                                                SNEs</label>
                                         </div>
                                         <button type="button" class="btn btn-sm btn-primary text-nowrap"
                                             id="btn-criar-afs">
@@ -127,7 +139,7 @@
                                 <div class="collapse show" id="sne-afs-collapse">
                                     <div id="sne-afs-container" class="files-list-style"></div>
                                     <div class="form-buttons">
-                                        <button type="button" class="btn btn-sm btn-secondary text-nowrap"
+                                        <button type="button" class="btn btn-sm btn-primary text-nowrap"
                                             id="btn-atualizar-afs">
                                             Atualizar
                                         </button>

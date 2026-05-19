@@ -1087,10 +1087,15 @@ async function executarCriarAFs() {
         scopeDetail = `<br><i class="material-symbols-outlined me-1">checklist</i> Somente selecionadas: <strong>${filenames.length}</strong> de ${sneEmpenhos.length} empenho(s).`;
     }
 
+    const moveSnes = document.querySelector('input[name="sne-afs-action"]:checked')?.value === 'mover';
+    const actionDetail = moveSnes
+        ? `<br><i class="material-symbols-outlined me-1">drive_file_move</i> Os empenhos serão <strong>movidos</strong> para as pastas das AFs.`
+        : '';
+
     const confirmed = await showConfirmationModal({
         title: 'Criar estrutura de AFs',
         message: 'Serão criadas pastas para cada AF e SNE identificados, com as certidões de cada fornecedor copiadas para cada pasta.',
-        detail: `<i class="material-symbols-outlined me-1">folder</i> As pastas serão criadas em <strong>scripts/sne/AFs/</strong>.${scopeDetail}`,
+        detail: `<i class="material-symbols-outlined me-1">folder</i> As pastas serão criadas em <strong>scripts/sne/AFs/</strong>.${scopeDetail}${actionDetail}`,
         confirmText: 'Criar AFs',
         confirmColor: 'btn-primary',
     });
@@ -1100,8 +1105,8 @@ async function executarCriarAFs() {
     try {
         const response = await fetch('/api/sne/empenhos/criar-afs', {
             method: 'POST',
-            headers: filenames ? { 'Content-Type': 'application/json' } : {},
-            body: filenames ? JSON.stringify({ filenames }) : undefined,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...(filenames && { filenames }), moveSnes }),
         });
         const data = await response.json();
 
@@ -1127,7 +1132,11 @@ async function executarCriarAFs() {
             sneAfsData = afsData.afs || [];
             sneAfsFolderPath = afsData.folderPath || '';
         }
-        renderEmpenhos();
+        if (moveSnes) {
+            await carregarEmpenhos();
+        } else {
+            renderEmpenhos();
+        }
         renderAFs();
     } catch (error) {
         showToast(`Erro: ${error.message}`, 'error');
