@@ -427,7 +427,7 @@ function registerFileRoutes(app, logger) {
       }
 
       for (const filename of filenames) {
-        if (typeof filename !== 'string' || filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
+        if (typeof filename !== 'string' || filename.includes('/') || filename.includes('\\')) {
           errors.push(`Nome inválido: ${filename}`);
           continue;
         }
@@ -518,12 +518,12 @@ function registerFileRoutes(app, logger) {
         return res.json({ success: true, message: `${count} AF(s) excluída(s) com sucesso` });
       }
 
-      if (!afName || typeof afName !== 'string' || afName.includes('..') || afName.includes('/') || afName.includes('\\')) {
+      if (!afName || typeof afName !== 'string' || afName.includes('/') || afName.includes('\\')) {
         return res.status(400).json({ error: 'Nome de AF inválido' });
       }
 
       if (sneName !== undefined) {
-        if (typeof sneName !== 'string' || sneName.includes('..') || sneName.includes('/') || sneName.includes('\\')) {
+        if (typeof sneName !== 'string' || sneName.includes('/') || sneName.includes('\\')) {
           return res.status(400).json({ error: 'Nome de SNE inválido' });
         }
         const snePath = path.join(SNE_AFS, afName, sneName);
@@ -577,7 +577,7 @@ function registerFileRoutes(app, logger) {
       }
 
       for (const filename of filenames) {
-        if (typeof filename !== 'string' || filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
+        if (typeof filename !== 'string' || filename.includes('/') || filename.includes('\\')) {
           errors.push(`Nome inválido: ${filename}`);
           continue;
         }
