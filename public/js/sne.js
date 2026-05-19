@@ -167,8 +167,15 @@ function renderFornecedores() {
             <i class="material-symbols-outlined">refresh</i>
         </button>`;
 
+    const deleteBtnCertidoes = `
+        <button class="folder-path-btn text-danger btn-clear-certidoes"
+            data-bs-toggle="tooltip" data-bs-title="Excluir todos os arquivos da pasta"
+            ${sneGrouped.size === 0 ? 'disabled' : ''}>
+            <i class="material-symbols-outlined">delete</i>
+        </button>`;
+
     if (sneGrouped.size === 0) {
-        container.innerHTML = buildFolderPathHTML(displayPath, '', refreshBtn) +
+        container.innerHTML = buildFolderPathHTML(displayPath, deleteBtnCertidoes, refreshBtn) +
             `<div class="alert alert-warning"><i class="material-symbols-outlined">warning</i> Nenhuma certidão encontrada na pasta CERTIDOES</div>`;
         setupFolderPathButtons(container);
         setupRefreshFornecedoresButton(container);
@@ -204,7 +211,7 @@ function renderFornecedores() {
         impedido: { cssClass: 'status-sem_saida', icon: 'gavel', tooltip: 'Fornecedor impedido de licitar' },
     };
 
-    let html = buildFolderPathHTML(displayPath, '', refreshBtn) + '<div class="items-grid">';
+    let html = buildFolderPathHTML(displayPath, deleteBtnCertidoes, refreshBtn) + '<div class="items-grid">';
 
     for (const [key, group] of entries) {
         const status = computeSupplierStatus(group.certidoes);
@@ -245,8 +252,10 @@ function renderFornecedores() {
 }
 
 function setupRefreshFornecedoresButton(container) {
-    container.querySelector('.btn-refresh-fornecedores')?.addEventListener('click', () => {
-        carregarFornecedores();
+    container.querySelector('.btn-refresh-fornecedores')?.addEventListener('click', carregarFornecedores);
+    container.querySelector('.btn-clear-certidoes')?.addEventListener('click', (e) => {
+        removeTooltip(e.currentTarget);
+        excluirTodosCertidoes();
     });
 }
 
@@ -670,8 +679,15 @@ function renderEmpenhos() {
             <i class="material-symbols-outlined">refresh</i>
         </button>`;
 
+    const deleteBtnEmpenhos = `
+        <button class="folder-path-btn text-danger btn-clear-empenhos"
+            data-bs-toggle="tooltip" data-bs-title="Excluir todos os arquivos da pasta"
+            ${sneEmpenhos.length === 0 ? 'disabled' : ''}>
+            <i class="material-symbols-outlined">delete</i>
+        </button>`;
+
     if (sneEmpenhos.length === 0) {
-        container.innerHTML = buildFolderPathHTML(displayPath, '', refreshBtn) +
+        container.innerHTML = buildFolderPathHTML(displayPath, deleteBtnEmpenhos, refreshBtn) +
             alertHTML('warning', 'warning', 'Nenhum empenho encontrado na pasta SNEs');
         setupFolderPathButtons(container);
         setupRefreshEmpenhoButton(container);
@@ -679,7 +695,7 @@ function renderEmpenhos() {
         return;
     }
 
-    let html = buildFolderPathHTML(displayPath, '', refreshBtn);
+    let html = buildFolderPathHTML(displayPath, deleteBtnEmpenhos, refreshBtn);
     html += `
         <div class="files-table-container">
             <table class="files-table sne-empenhos-table">
@@ -791,6 +807,10 @@ function renderEmpenhos() {
 
 function setupRefreshEmpenhoButton(container) {
     container.querySelector('.btn-refresh-empenhos')?.addEventListener('click', carregarEmpenhos);
+    container.querySelector('.btn-clear-empenhos')?.addEventListener('click', (e) => {
+        removeTooltip(e.currentTarget);
+        excluirTodosEmpenhos();
+    });
 }
 
 async function excluirEmpenho(filename) {
@@ -877,16 +897,23 @@ function renderAFs() {
             <i class="material-symbols-outlined">refresh</i>
         </button>`;
 
+    const deleteBtnAfs = `
+        <button class="folder-path-btn text-danger btn-clear-afs"
+            data-bs-toggle="tooltip" data-bs-title="Excluir todos os arquivos da pasta"
+            ${sneAfsData.length === 0 ? 'disabled' : ''}>
+            <i class="material-symbols-outlined">delete</i>
+        </button>`;
+
     if (sneAfsData.length === 0) {
-        container.innerHTML = buildFolderPathHTML(displayPath, '', refreshBtn) +
+        container.innerHTML = buildFolderPathHTML(displayPath, deleteBtnAfs, refreshBtn) +
             alertHTML('info', 'info', 'Nenhuma AF encontrada. Use <strong>Criar AFs</strong> na aba Empenhos para gerar a estrutura.');
         setupFolderPathButtons(container);
-        container.querySelector('.btn-refresh-afs')?.addEventListener('click', carregarAFs);
+        setupRefreshAfsButton(container);
         initializeTooltips();
         return;
     }
 
-    let html = buildFolderPathHTML(displayPath, '', refreshBtn);
+    let html = buildFolderPathHTML(displayPath, deleteBtnAfs, refreshBtn);
     html += `
         <div class="files-table-container">
             <table class="files-table sne-afs-table">
@@ -986,13 +1013,116 @@ function renderAFs() {
     html += `</table></div>`;
     container.innerHTML = html;
     setupFolderPathButtons(container);
-    container.querySelector('.btn-refresh-afs')?.addEventListener('click', carregarAFs);
+    setupRefreshAfsButton(container);
     initializeTooltips();
 
     if (snePendingAfScroll) {
         const afName = snePendingAfScroll;
         snePendingAfScroll = null;
         requestAnimationFrame(() => scrollParaAF(afName));
+    }
+}
+
+function setupRefreshAfsButton(container) {
+    container.querySelector('.btn-refresh-afs')?.addEventListener('click', carregarAFs);
+    container.querySelector('.btn-clear-afs')?.addEventListener('click', (e) => {
+        removeTooltip(e.currentTarget);
+        excluirTodasAFs();
+    });
+}
+
+async function excluirTodosCertidoes() {
+    const confirmed = await showConfirmationModal({
+        title: 'Excluir Todas as Certidões',
+        message: 'Tem certeza que deseja excluir <strong>TODOS</strong> os arquivos da pasta?',
+        detail: '<i class="material-symbols-outlined me-1">warning</i> Todos os arquivos serão excluídos permanentemente.',
+        confirmText: 'Excluir',
+        confirmColor: 'btn-danger',
+    });
+
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch('/api/sne/certidoes', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ deleteAll: true }),
+        });
+        const data = await response.json();
+
+        if (!response.ok && response.status !== 207) {
+            showToast(`Erro ao excluir: ${data.error}`, 'error');
+            return;
+        }
+
+        showToast(data.message, 'success');
+        carregarFornecedores();
+    } catch (error) {
+        showToast(`Erro ao excluir: ${error.message}`, 'error');
+    }
+}
+
+async function excluirTodosEmpenhos() {
+    const confirmed = await showConfirmationModal({
+        title: 'Excluir Todos os Empenhos',
+        message: 'Tem certeza que deseja excluir <strong>TODOS</strong> os arquivos da pasta?',
+        detail: '<i class="material-symbols-outlined me-1">warning</i> Todos os arquivos serão excluídos permanentemente.',
+        confirmText: 'Excluir',
+        confirmColor: 'btn-danger',
+    });
+
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch('/api/sne/empenhos', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ deleteAll: true }),
+        });
+        const data = await response.json();
+
+        if (!response.ok && response.status !== 207) {
+            showToast(`Erro ao excluir: ${data.error}`, 'error');
+            return;
+        }
+
+        showToast(data.message, 'success');
+        carregarEmpenhos();
+    } catch (error) {
+        showToast(`Erro ao excluir: ${error.message}`, 'error');
+    }
+}
+
+async function excluirTodasAFs() {
+    if (sneAfsData.length === 0) return;
+
+    const confirmed = await showConfirmationModal({
+        title: 'Excluir Todas as AFs',
+        message: 'Tem certeza que deseja excluir <strong>TODAS</strong> as AFs da pasta?',
+        detail: `<i class="material-symbols-outlined me-1">warning</i> ${sneAfsData.length} AF(s) e todo o seu conteúdo serão excluídas permanentemente.`,
+        confirmText: 'Excluir',
+        confirmColor: 'btn-danger',
+    });
+
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch('/api/sne/afs', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ deleteAll: true }),
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+            showToast(`Erro ao excluir: ${data.error}`, 'error');
+            return;
+        }
+
+        showToast(data.message, 'success');
+        carregarAFs();
+    } catch (error) {
+        showToast(`Erro ao excluir: ${error.message}`, 'error');
     }
 }
 

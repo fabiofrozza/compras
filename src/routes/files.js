@@ -396,14 +396,35 @@ function registerFileRoutes(app, logger) {
 
   app.delete('/api/sne/empenhos', async (req, res) => {
     try {
-      const { filenames } = req.body;
-      if (!Array.isArray(filenames) || filenames.length === 0) {
-        return res.status(400).json({ error: 'Lista de arquivos não fornecida' });
-      }
+      const { filenames, deleteAll } = req.body;
 
       const { SNE_EMPENHOS } = require('../services/sne');
       let deleted = 0;
       const errors = [];
+
+      if (deleteAll) {
+        const entries = await fs.readdir(SNE_EMPENHOS);
+        for (const filename of entries) {
+          const filePath = path.join(SNE_EMPENHOS, filename);
+          try {
+            const stat = await fs.stat(filePath);
+            if (stat.isFile()) {
+              await fs.unlink(filePath);
+              deleted++;
+              logger.info(`Empenho excluído: "${filename}"`, 'SNE');
+            }
+          } catch (e) {
+            errors.push(`Erro ao excluir ${filename}: ${e.message}`);
+          }
+        }
+        const message = `${deleted} arquivo(s) excluído(s)`;
+        if (errors.length > 0) return res.status(207).json({ message, deleted, errors });
+        return res.json({ success: true, message, deleted });
+      }
+
+      if (!Array.isArray(filenames) || filenames.length === 0) {
+        return res.status(400).json({ error: 'Lista de arquivos não fornecida' });
+      }
 
       for (const filename of filenames) {
         if (typeof filename !== 'string' || filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
@@ -447,13 +468,26 @@ function registerFileRoutes(app, logger) {
 
   app.delete('/api/sne/afs', async (req, res) => {
     try {
-      const { afName, sneName } = req.body;
+      const { afName, sneName, deleteAll } = req.body;
+
+      const { SNE_AFS } = require('../services/sne');
+
+      if (deleteAll) {
+        const entries = await fs.readdir(SNE_AFS, { withFileTypes: true });
+        let count = 0;
+        for (const entry of entries) {
+          if (entry.isDirectory()) {
+            await fs.rm(path.join(SNE_AFS, entry.name), { recursive: true, force: true });
+            count++;
+          }
+        }
+        logger.info(`${count} AF(s) excluída(s)`, 'SNE');
+        return res.json({ success: true, message: `${count} AF(s) excluída(s) com sucesso` });
+      }
 
       if (!afName || typeof afName !== 'string' || afName.includes('..') || afName.includes('/') || afName.includes('\\')) {
         return res.status(400).json({ error: 'Nome de AF inválido' });
       }
-
-      const { SNE_AFS } = require('../services/sne');
 
       if (sneName !== undefined) {
         if (typeof sneName !== 'string' || sneName.includes('..') || sneName.includes('/') || sneName.includes('\\')) {
@@ -479,14 +513,35 @@ function registerFileRoutes(app, logger) {
 
   app.delete('/api/sne/certidoes', async (req, res) => {
     try {
-      const { filenames } = req.body;
-      if (!Array.isArray(filenames) || filenames.length === 0) {
-        return res.status(400).json({ error: 'Lista de arquivos não fornecida' });
-      }
+      const { filenames, deleteAll } = req.body;
 
       const { SNE_CERTIDOES } = require('../services/sne');
       let deleted = 0;
       const errors = [];
+
+      if (deleteAll) {
+        const entries = await fs.readdir(SNE_CERTIDOES);
+        for (const filename of entries) {
+          const filePath = path.join(SNE_CERTIDOES, filename);
+          try {
+            const stat = await fs.stat(filePath);
+            if (stat.isFile()) {
+              await fs.unlink(filePath);
+              deleted++;
+              logger.info(`Certidão excluída: "${filename}"`, 'SNE');
+            }
+          } catch (e) {
+            errors.push(`Erro ao excluir ${filename}: ${e.message}`);
+          }
+        }
+        const message = `${deleted} arquivo(s) excluído(s)`;
+        if (errors.length > 0) return res.status(207).json({ message, deleted, errors });
+        return res.json({ success: true, message, deleted });
+      }
+
+      if (!Array.isArray(filenames) || filenames.length === 0) {
+        return res.status(400).json({ error: 'Lista de arquivos não fornecida' });
+      }
 
       for (const filename of filenames) {
         if (typeof filename !== 'string' || filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
