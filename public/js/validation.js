@@ -79,11 +79,6 @@ const BUTTON_REGISTRY = {
 
     'btn-analisar-certidoes': {
         conditions: [
-            {
-                type: 'custom',
-                check: () => typeof sneGrouped === 'undefined' || sneGrouped.size > 0,
-                label: 'Nenhuma certidão encontrada na pasta CERTIDOES',
-            },
             { type: 'server', label: serverMessage },
         ],
     },
