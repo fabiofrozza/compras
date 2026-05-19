@@ -682,9 +682,12 @@ function renderEmpenhos() {
     let html = buildFolderPathHTML(displayPath, '', refreshBtn);
     html += `
         <div class="files-table-container">
-            <table class="files-table">
+            <table class="files-table sne-empenhos-table">
                 <thead>
                     <tr>
+                        <th class="sne-select-col text-center">
+                            <input type="checkbox" id="sne-select-all" class="form-check-input">
+                        </th>
                         <th colspan="2">Arquivo</th>
                         <th>SNE</th>
                         <th>AF</th>
@@ -705,6 +708,7 @@ function renderEmpenhos() {
         if (r.error) {
             html += `
                 <tr class="text-danger">
+                    <td class="sne-select-col"></td>
                     <td><i class="material-symbols-outlined">error</i></td>
                     <td class="text-break" colspan="8">${r.filename}: ${r.error}</td>
                     <td class="table-btn-column text-nowrap">
@@ -742,8 +746,12 @@ function renderEmpenhos() {
                 : `<i class="material-symbols-outlined text-muted" data-bs-toggle="tooltip" data-bs-title="Pasta SNE não criada">folder_off</i>`;
         }
 
+        const safeFilenameAttr = r.filename.replace(/"/g, '&quot;');
         html += `
             <tr ondblclick="openFile('${safeFilePath}')">
+                <td class="sne-select-col text-center" ondblclick="event.stopPropagation()">
+                    <input type="checkbox" class="form-check-input sne-row-check" data-filename="${safeFilenameAttr}">
+                </td>
                 <td><i class="material-symbols-outlined text-muted">receipt_long</i></td>
                 <td class="text-break">${r.filename}</td>
                 <td class="text-nowrap">${sneNum}</td>
@@ -770,6 +778,12 @@ function renderEmpenhos() {
 
     html += `</tbody></table></div>`;
     container.innerHTML = html;
+
+    const table = container.querySelector('.sne-empenhos-table');
+    table?.querySelector('#sne-select-all')?.addEventListener('change', function () {
+        table.querySelectorAll('.sne-row-check').forEach(cb => { cb.checked = this.checked; });
+    });
+
     setupFolderPathButtons(container);
     setupRefreshEmpenhoButton(container);
     initializeTooltips();
@@ -1050,12 +1064,12 @@ async function executarCriarAFs() {
         return;
     }
 
-    const onlyOk = document.querySelector('input[name="sne-afs-scope"]:checked')?.value === 'ok';
+    const scope = document.querySelector('input[name="sne-afs-scope"]:checked')?.value;
 
     let filenames = null;
     let scopeDetail = '';
 
-    if (onlyOk) {
+    if (scope === 'ok') {
         const filtered = sneEmpenhos.filter(r => !r.error && r.af && r.sneNumber && getSupplierStatusByCnpj(r.cnpj) === 'ok');
         if (filtered.length === 0) {
             showToast('Nenhuma SNE com certidões OK encontrada.', 'warning');
@@ -1063,6 +1077,14 @@ async function executarCriarAFs() {
         }
         filenames = filtered.map(r => r.filename);
         scopeDetail = `<br><i class="material-symbols-outlined me-1">filter_list</i> Somente certidões OK: <strong>${filenames.length}</strong> de ${sneEmpenhos.length} empenho(s).`;
+    } else if (scope === 'selecionadas') {
+        const checked = document.querySelectorAll('.sne-row-check:checked');
+        if (checked.length === 0) {
+            showToast('Selecione pelo menos uma SNE.', 'warning');
+            return;
+        }
+        filenames = Array.from(checked).map(cb => cb.dataset.filename);
+        scopeDetail = `<br><i class="material-symbols-outlined me-1">checklist</i> Somente selecionadas: <strong>${filenames.length}</strong> de ${sneEmpenhos.length} empenho(s).`;
     }
 
     const confirmed = await showConfirmationModal({
