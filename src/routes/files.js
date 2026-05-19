@@ -21,7 +21,7 @@ const {
   deleteSupplierFile,
   moveSupplierFiles,
 } = require('../services/fornecedores');
-const { listCertidoes, analyzeCertidoes, renameCertidoes, analyzeEmpenhos, criarAFs, listAFs } = require('../services/sne');
+const { listCertidoes, analyzeCertidoes, renameCertidoes, analyzeEmpenhos, criarAFs, listAFs, analyzeAFs } = require('../services/sne');
 const { validateLink } = require('../services/spreadsheet');
 
 function registerFileRoutes(app, logger) {
@@ -462,6 +462,16 @@ function registerFileRoutes(app, logger) {
       res.json(result);
     } catch (error) {
       logger.error(`Erro ao listar AFs: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/sne/afs/analisar', async (_req, res) => {
+    try {
+      const result = await analyzeAFs();
+      res.json(result);
+    } catch (error) {
+      logger.error(`Erro ao analisar AFs: ${error.message}`, 'SNE', error);
       res.status(500).json({ error: error.message });
     }
   });

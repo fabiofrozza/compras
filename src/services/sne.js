@@ -155,26 +155,14 @@ function sanitizeFilename(str) {
   return str.replace(/[<>:"/\\|?*\n\r\t]/g, '').trim();
 }
 
-async function analyzeCertidao(filename, pdfParse) {
-  const filePath = path.join(SNE_CERTIDOES, filename);
-  const buffer = await fs.readFile(filePath);
-
-  let rawText = '';
-  try {
-    const data = await pdfParse(buffer);
-    rawText = data.text || '';
-  } catch (e) {
-    logger.warn(`Erro ao parsear PDF "${filename}": ${e.message}`, 'SNE');
-    return { filename, error: 'Erro ao ler PDF', newName: null, type: null };
-  }
-
+function analyzeCertidaoFromRaw(filename, rawText) {
   const text = normalizeText(rawText);
   const type = detectType(text);
   if (!type) {
     return { filename, error: 'Tipo de certidão não identificado', newName: null, type: null };
   }
   const cnpj = extractCnpj(text);
-  const rawCompany = extractCompanyName(rawText); // raw text preserves newlines as delimiters
+  const rawCompany = extractCompanyName(rawText);
   const company = rawCompany && rawCompany.length > 25
     ? rawCompany.slice(0, 25).trimEnd() + '[...]'
     : rawCompany;
@@ -200,14 +188,14 @@ async function analyzeCertidao(filename, pdfParse) {
   }
 
   const foundDates = [];
-  const componentDates = {}; // label → first matching dateStr (for multi-component certs like SICAF)
+  const componentDates = {};
   if (type !== 'Credenciamento' && checks.dates) {
     for (const rule of checks.dates) {
       const m = text.match(rule.pattern);
       if (m) {
         foundDates.push(m[1]);
         if (rule.label && !(rule.label in componentDates)) componentDates[rule.label] = m[1];
-        if (rule.firstMatch) break; // stop after first hit (e.g. FGTS range vs single)
+        if (rule.firstMatch) break;
       }
     }
   }
@@ -224,7 +212,6 @@ async function analyzeCertidao(filename, pdfParse) {
       suffixes.push(validity.label);
     }
   }
-
 
   const warnings = [];
   if (!cnpj) warnings.push('CNPJ não encontrado');
@@ -253,6 +240,22 @@ async function analyzeCertidao(filename, pdfParse) {
     warnings,
     error: null,
   };
+}
+
+async function analyzeCertidao(filename, pdfParse) {
+  const filePath = path.join(SNE_CERTIDOES, filename);
+  const buffer = await fs.readFile(filePath);
+
+  let rawText = '';
+  try {
+    const data = await pdfParse(buffer);
+    rawText = data.text || '';
+  } catch (e) {
+    logger.warn(`Erro ao parsear PDF "${filename}": ${e.message}`, 'SNE');
+    return { filename, error: 'Erro ao ler PDF', newName: null, type: null };
+  }
+
+  return analyzeCertidaoFromRaw(filename, rawText);
 }
 
 function sortByCnpj(certA, certB) {
@@ -675,6 +678,82 @@ async function criarAFs(filenames = null, moveSnes = false) {
   return { afsPath: SNE_AFS, afs: [...created.afs], snes: created.snes, errors: created.errors };
 }
 
+async function analyzeSneFolder(snePath, pdfParse) {
+  const entries = await fs.readdir(snePath, { withFileTypes: true });
+  const allFiles = entries.filter(e => e.isFile()).map(e => e.name).sort((a, b) => a.localeCompare(b));
+  const pdfFiles = allFiles.filter(f => f.toLowerCase().endsWith('.pdf'));
+
+  let empenho = null;
+  const certidoes = [];
+
+  for (const filename of pdfFiles) {
+    const filePath = path.join(snePath, filename);
+    let rawText = '';
+    try {
+      const buffer = await fs.readFile(filePath);
+      const pdfData = await pdfParse(buffer);
+      rawText = pdfData.text || '';
+    } catch (e) {
+      logger.warn(`Erro ao parsear PDF "${filename}": ${e.message}`, 'SNE');
+      certidoes.push({ filename, error: 'Erro ao ler PDF', type: null });
+      continue;
+    }
+
+    const text = normalizeText(rawText);
+    const sneNumber = extractSneNumber(text);
+
+    if (sneNumber && !empenho) {
+      const af = extractAfInfo(text);
+      const { company, cnpj } = extractCredorFromText(rawText);
+      const tombamento = /tombamento/i.test(text);
+      empenho = { filename, sneNumber, af, company, cnpj, tombamento, error: null };
+    } else {
+      certidoes.push(analyzeCertidaoFromRaw(filename, rawText));
+    }
+  }
+
+  return { empenho, certidoes, files: allFiles };
+}
+
+async function analyzeAFs() {
+  const pdfParse = require('pdf-parse/lib/pdf-parse.js');
+
+  try {
+    await fs.access(SNE_AFS);
+  } catch {
+    await fs.mkdir(SNE_AFS, { recursive: true });
+    return { afs: [], folderPath: SNE_AFS };
+  }
+
+  const afEntries = await fs.readdir(SNE_AFS, { withFileTypes: true });
+  const afFolders = afEntries
+    .filter(e => e.isDirectory())
+    .map(e => e.name)
+    .sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
+
+  const afs = [];
+  for (const afName of afFolders) {
+    const afPath = path.join(SNE_AFS, afName);
+    const sneEntries = await fs.readdir(afPath, { withFileTypes: true });
+    const sneFolders = sneEntries
+      .filter(e => e.isDirectory())
+      .map(e => e.name)
+      .sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
+
+    const snes = [];
+    for (const sneName of sneFolders) {
+      const snePath = path.join(afPath, sneName);
+      const { empenho, certidoes, files } = await analyzeSneFolder(snePath, pdfParse);
+      snes.push({ name: sneName, path: snePath, files, empenho, certidoes });
+    }
+
+    afs.push({ name: afName, path: afPath, snes });
+  }
+
+  logger.info(`AFs analisadas: ${afs.length} AF(s)`, 'SNE');
+  return { afs, folderPath: SNE_AFS };
+}
+
 async function listAFs() {
   try {
     await fs.access(SNE_AFS);
@@ -729,4 +808,5 @@ module.exports = {
   analyzeEmpenhos,
   criarAFs,
   listAFs,
+  analyzeAFs,
 };

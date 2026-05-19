@@ -33,7 +33,7 @@ function inicializarSne() {
 
     document.getElementById('btn-atualizar-afs')?.addEventListener('click', carregarAFs);
     document.getElementById('tab-sne-afs')?.addEventListener('shown.bs.tab', () => {
-        if (sneAfsFolderPath && sneEmpenhosFolderPath) renderAFs(); else carregarAFs();
+        if (sneAfsFolderPath) renderAFs(); else carregarAFs();
     });
 }
 
@@ -625,6 +625,13 @@ function buildStatusCell(cnpj) {
     </button>`;
 }
 
+function buildAfStatusCell(certidoes) {
+    if (!certidoes || certidoes.length === 0) return '<span class="text-muted">—</span>';
+    const supplierStatus = computeSupplierStatus(certidoes);
+    const { cssClass, icon, label } = EMPENHO_STATUS_MAP[supplierStatus];
+    return `<i class="material-symbols-outlined ${cssClass}" data-bs-toggle="tooltip" data-bs-title="${label}">${icon}</i>`;
+}
+
 function getEmpenhoForSne(afName, sneName) {
     const afMatch = afName.match(/^AF (\d+)-(\d+)$/);
     if (!afMatch) return null;
@@ -658,7 +665,6 @@ async function carregarEmpenhos() {
 
         if (!afsData.error) {
             sneAfsData = afsData.afs || [];
-            sneAfsFolderPath = afsData.folderPath || '';
         }
 
         renderEmpenhos();
@@ -847,6 +853,7 @@ async function excluirEmpenho(filename) {
 // ====== AFs ======
 
 let sneAfsData = [];
+let sneAfsAnalysis = [];
 let sneAfsFolderPath = '';
 let snePendingAfScroll = null;
 
@@ -854,31 +861,19 @@ async function carregarAFs() {
     const container = document.getElementById('sne-afs-container');
     if (!container) return;
 
-    container.innerHTML = customSpinnerHTML('Lendo estrutura de AFs...');
+    container.innerHTML = customSpinnerHTML('Analisando arquivos das AFs...');
 
     try {
-        const fetchEmpenhos = !sneEmpenhosFolderPath;
-        const requests = [fetch('/api/sne/afs')];
-        if (fetchEmpenhos) requests.push(fetch('/api/sne/empenhos/analisar'));
-
-        const [afsResp, empenhoResp] = await Promise.all(requests);
-        const data = await afsResp.json();
+        const resp = await fetch('/api/sne/afs/analisar');
+        const data = await resp.json();
 
         if (data.error) {
             container.innerHTML = alertHTML('danger', 'error', data.error);
             return;
         }
 
-        sneAfsData = data.afs || [];
+        sneAfsAnalysis = data.afs || [];
         sneAfsFolderPath = data.folderPath || '';
-
-        if (empenhoResp) {
-            const empenhoData = await empenhoResp.json();
-            if (!empenhoData.error) {
-                sneEmpenhos = empenhoData.results || [];
-                sneEmpenhosFolderPath = empenhoData.folderPath || '';
-            }
-        }
 
         renderAFs();
     } catch (error) {
@@ -900,11 +895,11 @@ function renderAFs() {
     const deleteBtnAfs = `
         <button class="folder-path-btn text-danger btn-clear-afs"
             data-bs-toggle="tooltip" data-bs-title="Excluir todos os arquivos da pasta"
-            ${sneAfsData.length === 0 ? 'disabled' : ''}>
+            ${sneAfsAnalysis.length === 0 ? 'disabled' : ''}>
             <i class="material-symbols-outlined">delete</i>
         </button>`;
 
-    if (sneAfsData.length === 0) {
+    if (sneAfsAnalysis.length === 0) {
         container.innerHTML = buildFolderPathHTML(displayPath, deleteBtnAfs, refreshBtn) +
             alertHTML('info', 'info', 'Nenhuma AF encontrada. Use <strong>Criar AFs</strong> na aba Empenhos para gerar a estrutura.');
         setupFolderPathButtons(container);
@@ -929,7 +924,7 @@ function renderAFs() {
                     </tr>
                 </thead>`;
 
-    for (const af of sneAfsData) {
+    for (const af of sneAfsAnalysis) {
         const safeAfName = af.name.replace(/'/g, "\\'");
         const safeAfPath = af.path.replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
         const rowspan = Math.max(af.snes.length, 1);
@@ -962,11 +957,9 @@ function renderAFs() {
                 const safeSneNum = sne.name.replace(/'/g, "\\'");
                 const safeSnePath = sne.path.replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
 
-                const empenho = getEmpenhoForSne(af.name, sne.name);
+                const tombCell = buildTombCell(sne.empenho?.tombamento);
 
-                const tombCell = buildTombCell(empenho?.tombamento);
-
-                const statusCell = buildStatusCell(empenho?.cnpj);
+                const statusCell = buildAfStatusCell(sne.certidoes);
 
                 const filesHtml = sne.files.length > 0
                     ? sne.files.map(f => {
@@ -1094,12 +1087,12 @@ async function excluirTodosEmpenhos() {
 }
 
 async function excluirTodasAFs() {
-    if (sneAfsData.length === 0) return;
+    if (sneAfsAnalysis.length === 0) return;
 
     const confirmed = await showConfirmationModal({
         title: 'Excluir Todas as AFs',
         message: 'Tem certeza que deseja excluir <strong>TODAS</strong> as AFs da pasta?',
-        detail: `<i class="material-symbols-outlined me-1">warning</i> ${sneAfsData.length} AF(s) e todo o seu conteúdo serão excluídas permanentemente.`,
+        detail: `<i class="material-symbols-outlined me-1">warning</i> ${sneAfsAnalysis.length} AF(s) e todo o seu conteúdo serão excluídas permanentemente.`,
         confirmText: 'Excluir',
         confirmColor: 'btn-danger',
     });
@@ -1256,18 +1249,12 @@ async function executarCriarAFs() {
             source: 'SNE',
         });
 
-        const afsResp = await fetch('/api/sne/afs');
-        const afsData = await afsResp.json();
-        if (!afsData.error) {
-            sneAfsData = afsData.afs || [];
-            sneAfsFolderPath = afsData.folderPath || '';
-        }
         if (moveSnes) {
             await carregarEmpenhos();
         } else {
             renderEmpenhos();
         }
-        renderAFs();
+        carregarAFs();
     } catch (error) {
         showToast(`Erro: ${error.message}`, 'error');
     }
