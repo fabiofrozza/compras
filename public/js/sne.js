@@ -28,12 +28,12 @@ function inicializarSne() {
     });
 
     document.getElementById('tab-sne-empenhos')?.addEventListener('shown.bs.tab', () => {
-        if (!sneEmpenhosFolderPath) carregarEmpenhos();
+        if (sneEmpenhosFolderPath) renderEmpenhos(); else carregarEmpenhos();
     });
 
     document.getElementById('btn-atualizar-afs')?.addEventListener('click', carregarAFs);
     document.getElementById('tab-sne-afs')?.addEventListener('shown.bs.tab', () => {
-        if (sneAfsFolderPath) renderAFs(); else carregarAFs();
+        if (sneAfsFolderPath && sneEmpenhosFolderPath) renderAFs(); else carregarAFs();
     });
 }
 
@@ -798,8 +798,12 @@ async function carregarAFs() {
     container.innerHTML = customSpinnerHTML('Lendo estrutura de AFs...');
 
     try {
-        const response = await fetch('/api/sne/afs');
-        const data = await response.json();
+        const fetchEmpenhos = !sneEmpenhosFolderPath;
+        const requests = [fetch('/api/sne/afs')];
+        if (fetchEmpenhos) requests.push(fetch('/api/sne/empenhos/analisar'));
+
+        const [afsResp, empenhoResp] = await Promise.all(requests);
+        const data = await afsResp.json();
 
         if (data.error) {
             container.innerHTML = alertHTML('danger', 'error', data.error);
@@ -808,6 +812,15 @@ async function carregarAFs() {
 
         sneAfsData = data.afs || [];
         sneAfsFolderPath = data.folderPath || '';
+
+        if (empenhoResp) {
+            const empenhoData = await empenhoResp.json();
+            if (!empenhoData.error) {
+                sneEmpenhos = empenhoData.results || [];
+                sneEmpenhosFolderPath = empenhoData.folderPath || '';
+            }
+        }
+
         renderAFs();
     } catch (error) {
         container.innerHTML = alertHTML('danger', 'error', `Erro ao carregar AFs: ${error.message}`);
