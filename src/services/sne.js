@@ -145,7 +145,7 @@ function classifyDate(dateStr) {
 }
 
 function nearestDate(dates) {
-  return dates.reduce((a, b) => parseDate(a) <= parseDate(b) ? a : b);
+  return dates.reduce((dateA, dateB) => parseDate(dateA) <= parseDate(dateB) ? dateA : dateB);
 }
 
 const VALIDITY_ORDER = { VALIDA: 3, A_VENCER: 2, VENCIDA: 1, SEM_VALIDADE: 0 };
@@ -255,15 +255,15 @@ async function analyzeCertidao(filename, pdfParse) {
   };
 }
 
-function sortByCnpj(a, b) {
-  if (a.cnpj && b.cnpj) {
-    return a.cnpj !== b.cnpj
-      ? a.cnpj.localeCompare(b.cnpj)
-      : (a.type || '').localeCompare(b.type || '');
+function sortByCnpj(certA, certB) {
+  if (certA.cnpj && certB.cnpj) {
+    return certA.cnpj !== certB.cnpj
+      ? certA.cnpj.localeCompare(certB.cnpj)
+      : (certA.type || '').localeCompare(certB.type || '');
   }
-  if (a.cnpj) return -1;
-  if (b.cnpj) return 1;
-  return a.filename.localeCompare(b.filename);
+  if (certA.cnpj) return -1;
+  if (certB.cnpj) return 1;
+  return certA.filename.localeCompare(certB.filename);
 }
 
 async function listCertidoes() {
@@ -277,16 +277,16 @@ async function listCertidoes() {
 
   const entries = await fs.readdir(SNE_CERTIDOES);
   const files = entries
-    .filter(f => f.toLowerCase().endsWith('.pdf'))
-    .map(f => ({ name: f, type: detectType(f) }));
+    .filter(filename => filename.toLowerCase().endsWith('.pdf'))
+    .map(filename => ({ name: filename, type: detectType(filename) }));
 
-  files.sort((a, b) => {
-    const ca = (a.name.match(/\d{14}/) || [''])[0];
-    const cb = (b.name.match(/\d{14}/) || [''])[0];
-    if (ca && cb) return ca !== cb ? ca.localeCompare(cb) : a.name.localeCompare(b.name);
-    if (ca) return -1;
-    if (cb) return 1;
-    return a.name.localeCompare(b.name);
+  files.sort((fileA, fileB) => {
+    const cnpjA = (fileA.name.match(/\d{14}/) || [''])[0];
+    const cnpjB = (fileB.name.match(/\d{14}/) || [''])[0];
+    if (cnpjA && cnpjB) return cnpjA !== cnpjB ? cnpjA.localeCompare(cnpjB) : fileA.name.localeCompare(fileB.name);
+    if (cnpjA) return -1;
+    if (cnpjB) return 1;
+    return fileA.name.localeCompare(fileB.name);
   });
 
   return { files, folderPath: SNE_CERTIDOES, folderCreated: created };
@@ -331,11 +331,11 @@ async function renameCertidoes() {
 
   // Phase 1.5: deduplicate by (cnpj, type) — keep best validity, delete others
   const cnpjTypeGroups = new Map();
-  for (const a of analyses) {
-    if (!a.cnpj || !a.type || a.error) continue;
-    const key = `${a.cnpj}::${a.type}`;
+  for (const analysis of analyses) {
+    if (!analysis.cnpj || !analysis.type || analysis.error) continue;
+    const key = `${analysis.cnpj}::${analysis.type}`;
     const list = cnpjTypeGroups.get(key) || [];
-    list.push(a);
+    list.push(analysis);
     cnpjTypeGroups.set(key, list);
   }
 
@@ -343,114 +343,114 @@ async function renameCertidoes() {
   for (const group of cnpjTypeGroups.values()) {
     if (group.length < 2) continue;
 
-    const withMtime = await Promise.all(group.map(async a => {
+    const withMtime = await Promise.all(group.map(async analysis => {
       try {
-        const stat = await fs.stat(path.join(SNE_CERTIDOES, a.filename));
-        return { a, mtime: stat.mtime.getTime() };
+        const stat = await fs.stat(path.join(SNE_CERTIDOES, analysis.filename));
+        return { analysis, mtime: stat.mtime.getTime() };
       } catch {
-        return { a, mtime: 0 };
+        return { analysis, mtime: 0 };
       }
     }));
 
-    withMtime.sort((x, y) => {
-      const scoreDiff = (VALIDITY_ORDER[y.a.validity] ?? 0) - (VALIDITY_ORDER[x.a.validity] ?? 0);
+    withMtime.sort((itemA, itemB) => {
+      const scoreDiff = (VALIDITY_ORDER[itemB.analysis.validity] ?? 0) - (VALIDITY_ORDER[itemA.analysis.validity] ?? 0);
       if (scoreDiff !== 0) return scoreDiff;
-      const xDate = x.a.dates.length ? x.a.dates.reduce((a, b) => parseDate(a) >= parseDate(b) ? a : b) : null;
-      const yDate = y.a.dates.length ? y.a.dates.reduce((a, b) => parseDate(a) >= parseDate(b) ? a : b) : null;
-      if (xDate && yDate) {
-        const dateDiff = parseDate(yDate) - parseDate(xDate);
+      const latestDateA = itemA.analysis.dates.length ? itemA.analysis.dates.reduce((dateA, dateB) => parseDate(dateA) >= parseDate(dateB) ? dateA : dateB) : null;
+      const latestDateB = itemB.analysis.dates.length ? itemB.analysis.dates.reduce((dateA, dateB) => parseDate(dateA) >= parseDate(dateB) ? dateA : dateB) : null;
+      if (latestDateA && latestDateB) {
+        const dateDiff = parseDate(latestDateB) - parseDate(latestDateA);
         if (dateDiff !== 0) return dateDiff;
       }
-      return y.mtime - x.mtime;
+      return itemB.mtime - itemA.mtime;
     });
 
     const [, ...losers] = withMtime;
-    for (const { a } of losers) supersededFiles.add(a.filename);
+    for (const { analysis } of losers) supersededFiles.add(analysis.filename);
   }
 
   // Phase 2: group by target name (files with no newName go straight to results)
   const groups = new Map(); // targetName → analysis[]
   const results = [];
 
-  for (const a of analyses) {
-    if (supersededFiles.has(a.filename)) {
+  for (const analysis of analyses) {
+    if (supersededFiles.has(analysis.filename)) {
       try {
-        await fs.unlink(path.join(SNE_CERTIDOES, a.filename));
-        a.renamed = false;
-        a.deleted = true;
-        logger.info(`"${a.filename}" eliminado (${a.type} mais antiga/vencida para CNPJ ${a.cnpj})`, 'SNE');
+        await fs.unlink(path.join(SNE_CERTIDOES, analysis.filename));
+        analysis.renamed = false;
+        analysis.deleted = true;
+        logger.info(`"${analysis.filename}" eliminado (${analysis.type} mais antiga/vencida para CNPJ ${analysis.cnpj})`, 'SNE');
       } catch (e) {
-        a.renamed = false;
-        a.renameError = `Erro ao eliminar: ${e.message}`;
-        logger.warn(`Erro ao eliminar "${a.filename}": ${e.message}`, 'SNE');
+        analysis.renamed = false;
+        analysis.renameError = `Erro ao eliminar: ${e.message}`;
+        logger.warn(`Erro ao eliminar "${analysis.filename}": ${e.message}`, 'SNE');
       }
-      results.push(a);
+      results.push(analysis);
       continue;
     }
 
-    if (!a.newName) {
-      a.renamed = false;
-      a.renameSkipped = true;
-      results.push(a);
+    if (!analysis.newName) {
+      analysis.renamed = false;
+      analysis.renameSkipped = true;
+      results.push(analysis);
       continue;
     }
-    const list = groups.get(a.newName) || [];
-    list.push(a);
-    groups.set(a.newName, list);
+    const list = groups.get(analysis.newName) || [];
+    list.push(analysis);
+    groups.set(analysis.newName, list);
   }
 
   // Phase 3: resolve each group
   for (const [targetName, group] of groups) {
     if (group.length === 1) {
-      const a = group[0];
-      if (a.filename === targetName) {
-        a.renamed = false;
-        a.noChange = true;
+      const analysis = group[0];
+      if (analysis.filename === targetName) {
+        analysis.renamed = false;
+        analysis.noChange = true;
       } else {
         try {
-          await fs.rename(path.join(SNE_CERTIDOES, a.filename), path.join(SNE_CERTIDOES, targetName));
-          a.renamed = true;
+          await fs.rename(path.join(SNE_CERTIDOES, analysis.filename), path.join(SNE_CERTIDOES, targetName));
+          analysis.renamed = true;
         } catch (e) {
-          a.renamed = false;
-          a.renameError = e.message;
-          logger.warn(`Erro ao renomear "${a.filename}": ${e.message}`, 'SNE');
+          analysis.renamed = false;
+          analysis.renameError = e.message;
+          logger.warn(`Erro ao renomear "${analysis.filename}": ${e.message}`, 'SNE');
         }
       }
-      results.push(a);
+      results.push(analysis);
       continue;
     }
 
     // Conflict: multiple files resolve to the same target name
-    const withStats = await Promise.all(group.map(async a => {
+    const withStats = await Promise.all(group.map(async analysis => {
       try {
-        const stat = await fs.stat(path.join(SNE_CERTIDOES, a.filename));
-        return { a, mtime: stat.mtime.getTime() };
+        const stat = await fs.stat(path.join(SNE_CERTIDOES, analysis.filename));
+        return { analysis, mtime: stat.mtime.getTime() };
       } catch {
-        return { a, mtime: null };
+        return { analysis, mtime: null };
       }
     }));
 
-    const allHaveDates = withStats.every(e => e.mtime !== null);
-    const maxMtime = allHaveDates ? Math.max(...withStats.map(e => e.mtime)) : null;
-    const winners = allHaveDates ? withStats.filter(e => e.mtime === maxMtime) : [];
+    const allHaveDates = withStats.every(entry => entry.mtime !== null);
+    const maxMtime = allHaveDates ? Math.max(...withStats.map(entry => entry.mtime)) : null;
+    const winners = allHaveDates ? withStats.filter(entry => entry.mtime === maxMtime) : [];
     const canDetermine = allHaveDates && winners.length === 1;
 
     if (canDetermine) {
-      const winner = winners[0].a;
+      const winner = winners[0].analysis;
 
-      for (const { a } of withStats) {
-        if (a === winner) continue;
+      for (const { analysis } of withStats) {
+        if (analysis === winner) continue;
         try {
-          await fs.unlink(path.join(SNE_CERTIDOES, a.filename));
-          a.renamed = false;
-          a.deleted = true;
-          a.deletedKeptAs = targetName;
-          logger.info(`"${a.filename}" eliminado (mais antigo; mantido: "${targetName}")`, 'SNE');
+          await fs.unlink(path.join(SNE_CERTIDOES, analysis.filename));
+          analysis.renamed = false;
+          analysis.deleted = true;
+          analysis.deletedKeptAs = targetName;
+          logger.info(`"${analysis.filename}" eliminado (mais antigo; mantido: "${targetName}")`, 'SNE');
         } catch (e) {
-          a.renamed = false;
-          a.renameError = `Erro ao eliminar: ${e.message}`;
+          analysis.renamed = false;
+          analysis.renameError = `Erro ao eliminar: ${e.message}`;
         }
-        results.push(a);
+        results.push(analysis);
       }
 
       if (winner.filename === targetName) {
@@ -472,7 +472,7 @@ async function renameCertidoes() {
       const baseName = targetName.replace(/\.pdf$/i, '');
       let suffixCounter = 1;
 
-      for (const { a } of withStats) {
+      for (const { analysis } of withStats) {
         let dupName;
         do {
           dupName = `${baseName} - DUPLICADO ${suffixCounter}.pdf`;
@@ -480,17 +480,17 @@ async function renameCertidoes() {
         } while (await fileExists(path.join(SNE_CERTIDOES, dupName)));
 
         try {
-          await fs.rename(path.join(SNE_CERTIDOES, a.filename), path.join(SNE_CERTIDOES, dupName));
-          a.newName = dupName;
-          a.renamed = true;
-          a.conflictDuplicated = true;
+          await fs.rename(path.join(SNE_CERTIDOES, analysis.filename), path.join(SNE_CERTIDOES, dupName));
+          analysis.newName = dupName;
+          analysis.renamed = true;
+          analysis.conflictDuplicated = true;
         } catch (e) {
-          a.renamed = false;
-          a.renameError = e.message;
+          analysis.renamed = false;
+          analysis.renameError = e.message;
         }
-        results.push(a);
+        results.push(analysis);
       }
-      logger.warn(`Conflito sem resolução por data: ${group.map(a => `"${a.filename}"`).join(', ')} → renomeados como DUPLICADO`, 'SNE');
+      logger.warn(`Conflito sem resolução por data: ${group.map(analysis => `"${analysis.filename}"`).join(', ')} → renomeados como DUPLICADO`, 'SNE');
     }
   }
 
