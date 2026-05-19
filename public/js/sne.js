@@ -573,6 +573,25 @@ function navegarParaCertidoesDoCnpj(cnpj) {
     selecionarFornecedor(cnpj);
 }
 
+function scrollParaAF(afName) {
+    const group = [...document.querySelectorAll('.sne-af-group')].find(el => el.dataset.afName === afName);
+    if (group) group.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function navegarParaAF(afName) {
+    snePendingAfScroll = afName;
+    const tabEl = document.getElementById('tab-sne-afs');
+    if (!tabEl) return;
+    if (tabEl.getAttribute('aria-selected') === 'true') {
+        requestAnimationFrame(() => {
+            scrollParaAF(snePendingAfScroll);
+            snePendingAfScroll = null;
+        });
+    } else {
+        bootstrap.Tab.getOrCreateInstance(tabEl).show();
+    }
+}
+
 function getSupplierStatusByCnpj(cnpj) {
     if (!cnpj) return null;
     const group = sneGrouped.get(cnpj);
@@ -713,8 +732,13 @@ function renderEmpenhos() {
             const sneFolderName = `SNE ${r.sneNumber}`;
             const afData = sneAfsData.find(af => af.name === afFolderName);
             const sneExists = afData?.snes?.some(s => s.name === sneFolderName);
+            const safeAfFolderName = afFolderName.replace(/'/g, "\\'");
             pastaSneCell = sneExists
-                ? `<i class="material-symbols-outlined text-success" data-bs-toggle="tooltip" data-bs-title="Pasta ${sneFolderName} criada">folder</i>`
+                ? `<button class="btn btn-sm file-row-btn sne-status-link text-success"
+                        data-bs-toggle="tooltip" data-bs-title="Pasta ${sneFolderName} criada<br><em>Clique para exibir</em>"
+                        onclick="event.stopPropagation(); navegarParaAF('${safeAfFolderName}')">
+                        <i class="material-symbols-outlined">folder</i>
+                    </button>`
                 : `<i class="material-symbols-outlined text-muted" data-bs-toggle="tooltip" data-bs-title="Pasta SNE não criada">folder_off</i>`;
         }
 
@@ -790,6 +814,7 @@ async function excluirEmpenho(filename) {
 
 let sneAfsData = [];
 let sneAfsFolderPath = '';
+let snePendingAfScroll = null;
 
 async function carregarAFs() {
     const container = document.getElementById('sne-afs-container');
@@ -884,7 +909,7 @@ function renderAFs() {
                         </button>
                     </td>`;
 
-        html += `<tbody class="sne-af-group">`;
+        html += `<tbody class="sne-af-group" data-af-name="${af.name}">`;
 
         if (af.snes.length === 0) {
             html += `<tr>${afIconCell}${afNameCell}${afActionsCell}
@@ -949,6 +974,12 @@ function renderAFs() {
     setupFolderPathButtons(container);
     container.querySelector('.btn-refresh-afs')?.addEventListener('click', carregarAFs);
     initializeTooltips();
+
+    if (snePendingAfScroll) {
+        const afName = snePendingAfScroll;
+        snePendingAfScroll = null;
+        requestAnimationFrame(() => scrollParaAF(afName));
+    }
 }
 
 async function excluirAFFolder(afName) {
