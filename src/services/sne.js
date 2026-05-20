@@ -213,6 +213,12 @@ function analyzeCertidaoFromRaw(filename, rawText) {
     }
   }
 
+  let emissionDate = null;
+  if (type === 'Credenciamento') {
+    const em = text.match(/[Ee]mitido\s+em[:\s]+(\d{2}\/\d{2}\/\d{4})/i);
+    if (em) emissionDate = em[1];
+  }
+
   const warnings = [];
   if (!cnpj) warnings.push('CNPJ não encontrado');
   if (!company) warnings.push('Razão social não encontrada');
@@ -236,6 +242,7 @@ function analyzeCertidaoFromRaw(filename, rawText) {
     componentValidity: Object.keys(componentValidity).length > 0 ? componentValidity : undefined,
     validity: validity ? validity.status : (type === 'Credenciamento' ? 'SEM_VALIDADE' : null),
     validityLabel: validity ? validity.label : null,
+    emissionDate: emissionDate || undefined,
     impedido,
     warnings,
     error: null,

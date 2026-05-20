@@ -539,7 +539,7 @@ function getSituacaoLabel(r) {
     if (r.validity === 'VENCIDA') return 'Vencida';
     if (r.validity === 'A_VENCER') return r.validityLabel || 'A vencer';
     if (r.validity === 'VALIDA') return r.validityLabel || 'Válida';
-    if (r.validity === 'SEM_VALIDADE') return 'Credenciamento';
+    if (r.validity === 'SEM_VALIDADE') return r.emissionDate ? `Emitido em ${r.emissionDate}` : 'Credenciamento';
     return '—';
 }
 
@@ -557,7 +557,7 @@ function validityTooltip(r) {
     if (r.error) return r.error;
     if (r.impedido) return 'Impedimento de licitar detectado';
     if (r.validityLabel) return r.validityLabel;
-    if (r.validity === 'SEM_VALIDADE') return 'Credenciamento — sem verificação de validade';
+    if (r.validity === 'SEM_VALIDADE') return r.emissionDate ? `Credenciamento emitido em ${r.emissionDate}` : 'Credenciamento — sem verificação de validade';
     return 'Validade não encontrada';
 }
 
