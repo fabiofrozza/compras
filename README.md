@@ -29,6 +29,7 @@ Aplicação web local que permite execução de scripts para auxiliar meus coleg
 * **Importação** — geração de arquivos para importação e criação dos pedidos de compras, resumo das importações para controle dos processos e produção de relatórios gerenciais.
 * **Mapas** — geração de listas de itens para licitação com base nos mapas de licitação de processos anteriores.
 * **Power BI** — geração de arquivo de dados para atualização dos painéis do Power BI.
+* **SNEs** — organização das certidões negativas dos fornecedores e da documentação para emissão de notas de empenho.
 * **Instalação** — gerenciamento da instalação do R.
 
 ## Instalação e personalização
@@ -37,11 +38,7 @@ Aplicação web local que permite execução de scripts para auxiliar meus coleg
 
 1. Renomeie o arquivo `.env-MODELO` para `.env` e edite-o no Bloco de Notas, seguindo as instruções no seu interior.
 
-1. Substitua as seguintes imagens pelas da sua empresa:
-   * `public/img/company.png`
-   * `public/img/department.png`
-   * `scripts/_common/images/company.png`
-   * `scripts/_common/images/department.png`
+1. Substitua as imagens em `public/img/company.png` e `public/img/department.png` pelas da sua empresa.
 
 ## Uso
 

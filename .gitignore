@@ -13,6 +13,8 @@ postman/
 node_modules/
 !bin/**
 dist/
+bin/**/*.md
+__pycache__
 
 # docs
 doc/

@@ -1,4 +1,6 @@
 const fileViewMode = {}; // containerId -> 'table' | 'grid'
+const fileListData = {};
+const fileListSortState = {};
 
 const FILE_ICON_MAP = {
     doc: ['file-word', 'description'],
@@ -260,8 +262,52 @@ function refreshFileList(containerId, scriptName) {
     return loadFiles(containerId, scriptName, folder, selectable);
 }
 
+function getSortedFiles(files, sortState) {
+    if (!sortState?.column) return files;
+    return [...files].sort((a, b) => {
+        const va = sortState.column === 'name' ? a.name.toLowerCase() : a.modifiedDate;
+        const vb = sortState.column === 'name' ? b.name.toLowerCase() : b.modifiedDate;
+        const cmp = va < vb ? -1 : va > vb ? 1 : 0;
+        return sortState.direction === 'asc' ? cmp : -cmp;
+    });
+}
+
+function sortFileList(containerId, column) {
+    const current = fileListSortState[containerId] || { column: null, direction: 'asc' };
+    if (current.column === column) {
+        fileListSortState[containerId] = current.direction === 'asc'
+            ? { column, direction: 'desc' }
+            : { column: null, direction: 'asc' };
+    } else {
+        fileListSortState[containerId] = { column, direction: 'asc' };
+    }
+    renderFileListInner(containerId);
+}
+
+function buildFilesTableHeaderHTML(containerId) {
+    const filesList = document.getElementById(containerId);
+    if (!filesList) return '';
+    const labelsStr = filesList.dataset.columnLabels;
+    if (!labelsStr) return '';
+
+    const sortableStr = filesList.dataset.sortableColumns || '';
+    const sortableCols = new Set(sortableStr.split(',').map(s => s.trim()).filter(Boolean));
+    const [nameLabel = '', dateLabel = ''] = labelsStr.split('|');
+    const sortState = fileListSortState[containerId] || { column: null, direction: 'asc' };
+
+    const makeTh = (col, label) => {
+        if (!sortableCols.has(col)) return `<th>${label}</th>`;
+        const active = sortState.column === col;
+        const icon = active ? (sortState.direction === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more';
+        return `<th class="files-col-sortable${active ? ' sorted' : ''}" onclick="sortFileList('${containerId}', '${col}')">${label}<i class="material-symbols-outlined sort-icon">${icon}</i></th>`;
+    };
+
+    return `<thead><tr><th></th>${makeTh('name', nameLabel)}${makeTh('date', dateLabel)}<th></th></tr></thead>`;
+}
+
 function buildFilesTableHTML(files, containerId, scriptName, innerFolder, canDelete, selectable, folderPath) {
-    let html = '<div class="files-table-container"><table class="files-table"><tbody>';
+    const thead = buildFilesTableHeaderHTML(containerId);
+    let html = `<div class="files-table-container"><table class="files-table">${thead}<tbody>`;
 
     files.forEach((file, index) => {
         const modDate = new Date(file.modifiedDate).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -338,27 +384,84 @@ function buildFilesGridHTML(files, containerId, scriptName, innerFolder, canDele
     return html;
 }
 
+function renderFileListInner(containerId) {
+    const filesList = document.getElementById(containerId);
+    if (!filesList) return;
+
+    const cached = fileListData[containerId];
+    if (!cached) return;
+
+    const { data, scriptName, innerFolder, selectable } = cached;
+    const defaultView = filesList.dataset.gridView === 'true' ? 'grid' : (filesList.dataset.view || 'table');
+    const viewMode = fileViewMode[containerId] || defaultView;
+    filesList.classList.toggle('view-grid', viewMode === 'grid');
+
+    const hasFiles = data.files && data.files.length > 0;
+    const canDelete = data.canDelete;
+
+    const deleteBtn = canDelete ? `
+            <button data-bs-toggle="tooltip" data-bs-title="Excluir todos os arquivos da pasta" class="folder-path-btn text-danger btn-clear" data-container-id="${containerId}" data-folder-path="${data.folderPath}" data-script-name="${scriptName}" data-inner-folder="${innerFolder}" ${hasFiles ? '' : 'disabled'}>
+                <i class="material-symbols-outlined">delete</i>
+            </button>` : '';
+
+    const toggleViewBtn = hasFiles ? `
+            <button data-bs-toggle="tooltip" data-bs-title="Alternar visualização" class="folder-path-btn btn-toggle-view" data-container-id="${containerId}">
+                <i class="material-symbols-outlined">${viewMode === 'grid' ? 'table_rows' : 'grid_view'}</i>
+            </button>` : '';
+
+    const refreshBtn = `
+            <button data-bs-toggle="tooltip" data-bs-title="Atualizar lista de arquivos" class="folder-path-btn btn-refresh" data-container-id="${containerId}" data-script-name="${scriptName}">
+                <i class="material-symbols-outlined">refresh</i>
+            </button>`;
+
+    let filesHTML = buildFolderPathHTML(data.folderPath, deleteBtn, toggleViewBtn + refreshBtn);
+
+    if (!hasFiles) {
+        const emptyMsg = data.folderCreated
+            ? '<i class="material-symbols-outlined">create_new_folder</i> Pasta não encontrada e criada'
+            : '<i class="material-symbols-outlined">warning</i> Nenhum arquivo encontrado na pasta';
+        filesHTML += `<div class="alert alert-warning" role="alert">${emptyMsg}</div>`;
+        filesList.innerHTML = filesHTML;
+        setupFileListButtons(filesList);
+        initializeTooltips();
+        return;
+    }
+
+    const sortedFiles = getSortedFiles(data.files, fileListSortState[containerId]);
+
+    if (viewMode === 'grid') {
+        filesHTML += buildFilesGridHTML(sortedFiles, containerId, scriptName, innerFolder, canDelete, selectable, data.folderPath);
+    } else {
+        filesHTML += buildFilesTableHTML(sortedFiles, containerId, scriptName, innerFolder, canDelete, selectable, data.folderPath);
+    }
+
+    filesList.innerHTML = filesHTML;
+    setupFileListButtons(filesList);
+    initializeTooltips();
+}
+
 async function loadFiles(containerId, scriptName, innerFolder, selectable) {
     const filesList = document.getElementById(containerId);
     if (!filesList) return;
-    const extensions = filesList.dataset.extensions;
-    const nameContains = filesList.dataset.nameContains;
-    const sort = filesList.dataset.sort;
+
     const defaultView = filesList.dataset.gridView === 'true' ? 'grid' : (filesList.dataset.view || 'table');
     const viewMode = fileViewMode[containerId] || defaultView;
-
     filesList.classList.toggle('view-grid', viewMode === 'grid');
 
     try {
         filesList.innerHTML = customSpinnerHTML('Atualizando lista de arquivos...');
 
+        const extensions = filesList.dataset.extensions;
+        const nameContains = filesList.dataset.nameContains;
+        const sort = filesList.dataset.sort;
+
         let url = `/api/list-files/${scriptName}/${innerFolder}`;
-        let params = new URLSearchParams();
+        const params = new URLSearchParams();
         if (extensions) params.append('extensions', extensions);
         if (nameContains) params.append('nameContains', nameContains);
         if (sort) params.append('sort', sort);
 
-        let qs = params.toString();
+        const qs = params.toString();
         if (qs) url += `?${qs}`;
 
         const response = await fetch(url);
@@ -373,47 +476,8 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
             return;
         }
 
-        const hasFiles = data.files && data.files.length > 0;
-        const canDelete = data.canDelete;
-
-        const deleteBtn = canDelete ? `
-            <button data-bs-toggle="tooltip" data-bs-title="Excluir todos os arquivos da pasta" class="folder-path-btn text-danger btn-clear" data-container-id="${containerId}" data-folder-path="${data.folderPath}" data-script-name="${scriptName}" data-inner-folder="${innerFolder}" ${hasFiles ? '' : 'disabled'}>
-                <i class="material-symbols-outlined">delete</i>
-            </button>` : '';
-
-        const toggleViewBtn = hasFiles ? `
-            <button data-bs-toggle="tooltip" data-bs-title="Alternar visualização" class="folder-path-btn btn-toggle-view" data-container-id="${containerId}">
-                <i class="material-symbols-outlined">${viewMode === 'grid' ? 'table_rows' : 'grid_view'}</i>
-            </button>` : '';
-
-        const refreshBtn = `
-            <button data-bs-toggle="tooltip" data-bs-title="Atualizar lista de arquivos" class="folder-path-btn btn-refresh" data-container-id="${containerId}" data-script-name="${scriptName}">
-                <i class="material-symbols-outlined">refresh</i>
-            </button>`;
-
-        let filesHTML = buildFolderPathHTML(data.folderPath, deleteBtn, toggleViewBtn + refreshBtn);
-
-        if (!hasFiles) {
-            const emptyMsg = data.folderCreated
-                ? '<i class="material-symbols-outlined">create_new_folder</i> Pasta não encontrada e criada'
-                : '<i class="material-symbols-outlined">warning</i> Nenhum arquivo encontrado na pasta';
-            filesHTML += `<div class="alert alert-warning" role="alert">${emptyMsg}</div>`;
-            filesList.innerHTML = filesHTML;
-            setupFileListButtons(filesList);
-            initializeTooltips();
-            return;
-        }
-
-        if (viewMode === 'grid') {
-            filesHTML += buildFilesGridHTML(data.files, containerId, scriptName, innerFolder, canDelete, selectable, data.folderPath);
-        } else {
-            filesHTML += buildFilesTableHTML(data.files, containerId, scriptName, innerFolder, canDelete, selectable, data.folderPath);
-        }
-
-        filesList.innerHTML = filesHTML;
-
-        setupFileListButtons(filesList);
-        initializeTooltips();
+        fileListData[containerId] = { data, scriptName, innerFolder, selectable };
+        renderFileListInner(containerId);
 
     } catch (error) {
         console.error('Erro ao carregar arquivos:', error);

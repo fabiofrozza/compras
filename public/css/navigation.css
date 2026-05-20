@@ -480,22 +480,21 @@ APP LAUNCHER (Grid de Aplicativos)
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    padding: 14px 8px;
+    padding: 8px 4px;
     border: none;
-    background: transparent;
+    background: color-mix(in srgb, currentColor, transparent 90%);
     border-radius: 12px;
-    cursor: pointer;
     user-select: none;
     transition: all 300ms ease-in-out;
     color: var(--compras-text-primary);
 }
 
 .app-launcher-item:hover {
-    background: color-mix(in srgb, var(--compras-c-glass) 12%, transparent);
+    background: color-mix(in srgb, currentColor, transparent 100%);
 }
 
 .app-launcher-item.active {
-    background: color-mix(in srgb, var(--compras-c-glass) 18%, transparent);
+    background: color-mix(in srgb, currentColor, transparent 75%);
 }
 
 .app-launcher-icon {

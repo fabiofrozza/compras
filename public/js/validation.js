@@ -77,6 +77,12 @@ const BUTTON_REGISTRY = {
 
     // ── Fornecedores ──────────────────────────────────────────────────────────
 
+    'btn-analisar-certidoes': {
+        conditions: [
+            { type: 'server', label: serverMessage },
+        ],
+    },
+
     'btn-obter-dados-fornecedores': {
         conditions: [
             {

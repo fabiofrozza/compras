@@ -209,6 +209,8 @@ function prepareConsoleForExecution(scriptName) {
     summaryDescription.textContent = 'Aguarde o processamento da geração das atas.';
   } else if (scriptName === 'npm_update') {
     summaryDescription.textContent = 'Aguarde a atualização dos pacotes Node.js.';
+  } else if (scriptName === 'sne_analisar') {
+    summaryDescription.textContent = 'Aguarde a análise e renomeação das certidões.';
   } else {
     summaryDescription.textContent = 'Aguarde o término do processamento do script R.';
   }

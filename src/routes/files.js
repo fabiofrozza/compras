@@ -21,6 +21,7 @@ const {
   deleteSupplierFile,
   moveSupplierFiles,
 } = require('../services/fornecedores');
+const { listCertidoes, analyzeCertidoes, renameCertidoes, analyzeEmpenhos, criarAFs, listAFs, analyzeAFs, sincronizarCertidoesSne } = require('../services/sne');
 const { validateLink } = require('../services/spreadsheet');
 
 function registerFileRoutes(app, logger) {
@@ -331,6 +332,276 @@ function registerFileRoutes(app, logger) {
       res.json(result);
     } catch (error) {
       logger.error(`Erro ao mover arquivos: ${error.message}`, 'Fornecedores', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+  // =============================================
+  // SNE — Certidões
+  // =============================================
+
+  app.get('/api/sne/certidoes', async (_req, res) => {
+    try {
+      const result = await listCertidoes();
+      res.json(result);
+    } catch (error) {
+      logger.error(`Erro ao listar certidões: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/sne/certidoes/analisar', async (_req, res) => {
+    try {
+      const result = await analyzeCertidoes();
+      res.json(result);
+    } catch (error) {
+      logger.error(`Erro ao analisar certidões: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/sne/certidoes/renomear', async (_req, res) => {
+    try {
+      const result = await renameCertidoes();
+      res.json(result);
+    } catch (error) {
+      logger.error(`Erro ao renomear certidões: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // =============================================
+  // SNE — Empenhos
+  // =============================================
+
+  app.get('/api/sne/empenhos/analisar', async (_req, res) => {
+    try {
+      const result = await analyzeEmpenhos();
+      res.json(result);
+    } catch (error) {
+      logger.error(`Erro ao analisar empenhos: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/sne/empenhos/criar-afs', async (req, res) => {
+    try {
+      const { filenames, moveSnes } = req.body || {};
+      const result = await criarAFs(Array.isArray(filenames) ? filenames : null, moveSnes === true);
+      res.json(result);
+    } catch (error) {
+      logger.error(`Erro ao criar AFs: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.delete('/api/sne/empenhos', async (req, res) => {
+    try {
+      const { filenames, deleteAll } = req.body;
+
+      const { SNE_EMPENHOS } = require('../services/sne');
+      let deleted = 0;
+      const errors = [];
+
+      if (deleteAll) {
+        const entries = await fs.readdir(SNE_EMPENHOS);
+        for (const filename of entries) {
+          const filePath = path.join(SNE_EMPENHOS, filename);
+          try {
+            const stat = await fs.stat(filePath);
+            if (stat.isFile()) {
+              await fs.unlink(filePath);
+              deleted++;
+              logger.info(`Empenho excluído: "${filename}"`, 'SNE');
+            }
+          } catch (e) {
+            errors.push(`Erro ao excluir ${filename}: ${e.message}`);
+          }
+        }
+        const message = `${deleted} arquivo(s) excluído(s)`;
+        if (errors.length > 0) return res.status(207).json({ message, deleted, errors });
+        return res.json({ success: true, message, deleted });
+      }
+
+      if (!Array.isArray(filenames) || filenames.length === 0) {
+        return res.status(400).json({ error: 'Lista de arquivos não fornecida' });
+      }
+
+      for (const filename of filenames) {
+        if (typeof filename !== 'string' || filename.includes('/') || filename.includes('\\')) {
+          errors.push(`Nome inválido: ${filename}`);
+          continue;
+        }
+        const filePath = path.join(SNE_EMPENHOS, filename);
+        if (!isPathSafe(filePath, SNE_EMPENHOS)) {
+          errors.push(`Acesso negado: ${filename}`);
+          continue;
+        }
+        try {
+          await fs.unlink(filePath);
+          deleted++;
+          logger.info(`Empenho excluído: "${filename}"`, 'SNE');
+        } catch (e) {
+          errors.push(`Erro ao excluir ${filename}: ${e.message}`);
+        }
+      }
+
+      const message = `${deleted} arquivo(s) excluído(s)`;
+      if (errors.length > 0) {
+        return res.status(207).json({ message, deleted, errors });
+      }
+      res.json({ success: true, message, deleted });
+    } catch (error) {
+      logger.error(`Erro ao excluir empenhos: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/sne/afs', async (_req, res) => {
+    try {
+      const result = await listAFs();
+      res.json(result);
+    } catch (error) {
+      logger.error(`Erro ao listar AFs: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/sne/afs/analisar', async (_req, res) => {
+    try {
+      const result = await analyzeAFs();
+      res.json(result);
+    } catch (error) {
+      logger.error(`Erro ao analisar AFs: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/sne/afs/sincronizar-certidoes', async (req, res) => {
+    try {
+      const { afName, sneName, cnpj } = req.body;
+
+      if (!afName || !sneName || !cnpj) return res.status(400).json({ error: 'Parâmetros inválidos' });
+      if (typeof afName !== 'string' || afName.includes('..') || afName.includes('/') || afName.includes('\\'))
+        return res.status(403).json({ error: 'Acesso negado' });
+      if (typeof sneName !== 'string' || sneName.includes('..') || sneName.includes('/') || sneName.includes('\\'))
+        return res.status(403).json({ error: 'Acesso negado' });
+      if (!/^\d{14}$/.test(cnpj)) return res.status(400).json({ error: 'CNPJ inválido' });
+
+      const { SNE_AFS } = require('../services/sne');
+      const snePath = path.join(SNE_AFS, afName, sneName);
+      if (!isPathSafe(snePath, SNE_AFS)) return res.status(403).json({ error: 'Acesso negado' });
+
+      const result = await sincronizarCertidoesSne(afName, sneName, cnpj);
+      res.json(result);
+    } catch (error) {
+      logger.error(`Erro ao sincronizar certidões: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.delete('/api/sne/afs', async (req, res) => {
+    try {
+      const { afName, sneName, deleteAll } = req.body;
+
+      const { SNE_AFS } = require('../services/sne');
+
+      if (deleteAll) {
+        const entries = await fs.readdir(SNE_AFS, { withFileTypes: true });
+        let count = 0;
+        for (const entry of entries) {
+          if (entry.isDirectory()) {
+            await fs.rm(path.join(SNE_AFS, entry.name), { recursive: true, force: true });
+            count++;
+          }
+        }
+        logger.info(`${count} AF(s) excluída(s)`, 'SNE');
+        return res.json({ success: true, message: `${count} AF(s) excluída(s) com sucesso` });
+      }
+
+      if (!afName || typeof afName !== 'string' || afName.includes('/') || afName.includes('\\')) {
+        return res.status(400).json({ error: 'Nome de AF inválido' });
+      }
+
+      if (sneName !== undefined) {
+        if (typeof sneName !== 'string' || sneName.includes('/') || sneName.includes('\\')) {
+          return res.status(400).json({ error: 'Nome de SNE inválido' });
+        }
+        const snePath = path.join(SNE_AFS, afName, sneName);
+        if (!isPathSafe(snePath, SNE_AFS)) return res.status(403).json({ error: 'Acesso negado' });
+        await fs.rm(snePath, { recursive: true, force: true });
+        logger.info(`SNE excluída: "${afName}/${sneName}"`, 'SNE');
+        res.json({ success: true, message: `SNE "${sneName}" excluída` });
+      } else {
+        const afPath = path.join(SNE_AFS, afName);
+        if (!isPathSafe(afPath, SNE_AFS)) return res.status(403).json({ error: 'Acesso negado' });
+        await fs.rm(afPath, { recursive: true, force: true });
+        logger.info(`AF excluída: "${afName}"`, 'SNE');
+        res.json({ success: true, message: `AF "${afName}" excluída` });
+      }
+    } catch (error) {
+      logger.error(`Erro ao excluir AF/SNE: ${error.message}`, 'SNE', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.delete('/api/sne/certidoes', async (req, res) => {
+    try {
+      const { filenames, deleteAll } = req.body;
+
+      const { SNE_CERTIDOES } = require('../services/sne');
+      let deleted = 0;
+      const errors = [];
+
+      if (deleteAll) {
+        const entries = await fs.readdir(SNE_CERTIDOES);
+        for (const filename of entries) {
+          const filePath = path.join(SNE_CERTIDOES, filename);
+          try {
+            const stat = await fs.stat(filePath);
+            if (stat.isFile()) {
+              await fs.unlink(filePath);
+              deleted++;
+              logger.info(`Certidão excluída: "${filename}"`, 'SNE');
+            }
+          } catch (e) {
+            errors.push(`Erro ao excluir ${filename}: ${e.message}`);
+          }
+        }
+        const message = `${deleted} arquivo(s) excluído(s)`;
+        if (errors.length > 0) return res.status(207).json({ message, deleted, errors });
+        return res.json({ success: true, message, deleted });
+      }
+
+      if (!Array.isArray(filenames) || filenames.length === 0) {
+        return res.status(400).json({ error: 'Lista de arquivos não fornecida' });
+      }
+
+      for (const filename of filenames) {
+        if (typeof filename !== 'string' || filename.includes('/') || filename.includes('\\')) {
+          errors.push(`Nome inválido: ${filename}`);
+          continue;
+        }
+        const filePath = path.join(SNE_CERTIDOES, filename);
+        if (!isPathSafe(filePath, SNE_CERTIDOES)) {
+          errors.push(`Acesso negado: ${filename}`);
+          continue;
+        }
+        try {
+          await fs.unlink(filePath);
+          deleted++;
+          logger.info(`Certidão excluída: "${filename}"`, 'SNE');
+        } catch (e) {
+          errors.push(`Erro ao excluir ${filename}: ${e.message}`);
+        }
+      }
+
+      const message = `${deleted} arquivo(s) excluído(s)`;
+      if (errors.length > 0) {
+        return res.status(207).json({ message, deleted, errors });
+      }
+      res.json({ success: true, message, deleted });
+    } catch (error) {
+      logger.error(`Erro ao excluir certidões: ${error.message}`, 'SNE', error);
       res.status(500).json({ error: error.message });
     }
   });

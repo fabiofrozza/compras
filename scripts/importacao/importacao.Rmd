@@ -14,8 +14,8 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-<img class = "logo_company" src = "`r file.path(pasta$superior, '_common', 'images', 'company.png')`" />
-<img class = "logo_department" src = "`r file.path(pasta$superior, '_common', 'images', 'department.png')`" />
+<img class = "logo_company" src = "`r file.path(dirname(pasta$superior), 'public', 'img', 'company.png')`" />
+<img class = "logo_department" src = "`r file.path(dirname(pasta$superior), 'public', 'img', 'department.png')`" />
 
 ------------------------------------------------------------------------
 
@@ -464,7 +464,7 @@ cat("------------------------------------------------------------------------")
 ```
 
 :::: {.logo_e_data}
-<img src = "`r file.path(pasta$superior, '_common', 'images', 'department.png')`" />
+<img src = "`r file.path(dirname(pasta$superior), 'public', 'img', 'department.png')`" />
 
 ::: {}
 `r format(Sys.Date(), '%d %B %Y')`

@@ -251,15 +251,17 @@ async function carregarNpmPackages() {
             return;
         }
 
-        if (data.packages.length === 0) {
+        const updatable = data.packages.filter(pkg => compareVersions(pkg.wanted, pkg.current) > 0);
+
+        if (updatable.length === 0) {
             statusEl.innerHTML = '<span class="badge text-bg-success">Todos os pacotes estão atualizados</span>';
             listEl.innerHTML = '';
             return;
         }
 
-        statusEl.innerHTML = `<span class="badge text-bg-warning">${data.packages.length} pacote(s) com atualização disponível</span>`;
+        statusEl.innerHTML = `<span class="badge text-bg-warning">${updatable.length} pacote(s) com atualização disponível</span>`;
 
-        const rows = data.packages.map(pkg =>
+        const rows = updatable.map(pkg =>
             `<tr>
                 <td>${pkg.name}</td>
                 <td>${pkg.current}</td>
@@ -307,3 +309,13 @@ fetch('/api/app-config')
         }
     })
     .catch(() => { /* sem bloco npm em caso de falha */ });
+
+const _originalHandleScriptResult = window.handleScriptResult;
+window.handleScriptResult = function(result) {
+    _originalHandleScriptResult(result);
+    if (result.scriptName === 'npm_update' && result.status === 'success') {
+        _npmOutdated = false;
+        carregarInfoNpm();
+        carregarNpmPackages();
+    }
+};

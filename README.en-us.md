@@ -29,6 +29,7 @@ A local web application that runs scripts to assist my colleagues in activities 
 * **Importação** — generation of files for importing and creating purchase orders, summary of imports for process control, and production of management reports.
 * **Mapas** — generation of item lists for bidding based on bidding maps from previous processes.
 * **Power BI** — generation of a data file to update Power BI dashboards.
+* **SNEs** — organization of suppliers' certificates and documentation for issuing purchase orders.
 * **Instalação** — R installation management.
 
 ## Installation and customization
@@ -37,11 +38,7 @@ A local web application that runs scripts to assist my colleagues in activities 
 
 1. Rename the `.env-MODELO` file to `.env` and edit it in Notepad, following the instructions inside.
 
-1. Replace the following images with your company's:
-   * `public/img/company.png`
-   * `public/img/department.png`
-   * `scripts/_common/images/company.png`
-   * `scripts/_common/images/department.png`
+1. Replace the images at `public/img/company.png` and `public/img/department.png` with your company's.
 
 ## Usage
 

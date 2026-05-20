@@ -30,10 +30,8 @@
     "exceljs": "^4.4.0",
     "express": "^5.2.1",
     "jszip": "^3.10.1",
+    "pdf-parse": "^1.1.1",
     "ws": "^8.19.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
-  },
-  "devDependencies": {
-    "@vercel/ncc": "^0.38.4"
   }
 }

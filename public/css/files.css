@@ -4,7 +4,8 @@
 
 .files-list,
 .files-list-style,
-.fornecedores-grid-list {
+.fornecedores-grid-list,
+.sne-fornecedores-list {
     background-color: color-mix(in srgb, var(--compras-theme) 50%, white);
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;
@@ -128,6 +129,16 @@
 
 /* Files table */
 
+.sne-table-container {
+    max-height: 300px;
+    overflow-y: auto;
+
+    thead th {
+        position: sticky;
+        top: 0;
+    }
+}
+
 .files-table {
     width: 100%;
     border-collapse: collapse;
@@ -138,6 +149,16 @@
         padding: 2px;
         vertical-align: top;
         word-break: break-all;
+    }
+
+    thead th {
+        padding: 4px 6px;
+        font-size: 11px;
+        font-weight: 600;
+        background-color: var(--compras-contrast);
+        color: var(--compras-text-primary);
+        user-select: none;
+        white-space: nowrap;
     }
 
     tbody tr {
@@ -152,6 +173,25 @@
             background-color: color-mix(in srgb, var(--file-color) 50%, var(--compras-contrast));
             border-left: 4px solid var(--file-color);
         }
+    }
+}
+
+.files-col-sortable {
+    cursor: pointer;
+
+    &:hover {
+        background-color: color-mix(in srgb, var(--compras-text-primary) 25%, transparent) !important;
+    }
+
+    &.sorted {
+        background-color: var(--compras-text-primary) !important;
+        color: var(--compras-contrast) !important;
+    }
+
+    .sort-icon {
+        font-size: 14px;
+        vertical-align: middle;
+        margin-left: 2px;
     }
 }
 
@@ -229,6 +269,10 @@
     }
 
     &.status-pendente {
+        background-color: light-dark(
+            color-mix(in srgb, var(--compras-pending), white 85%),
+            color-mix(in srgb, var(--compras-pending), black 78%)
+        );
         .item-card-icon i,
         .item-card-status i {
             color: var(--compras-pending);
@@ -236,6 +280,10 @@
     }
 
     &.status-sucesso {
+        background-color: light-dark(
+            color-mix(in srgb, var(--compras-success), white 85%),
+            color-mix(in srgb, var(--compras-success), black 75%)
+        );
         .item-card-icon i,
         .item-card-status i {
             color: var(--compras-success);
@@ -243,6 +291,10 @@
     }
 
     &.status-parcial {
+        background-color: light-dark(
+            color-mix(in srgb, var(--compras-warning), white 85%),
+            color-mix(in srgb, var(--compras-warning), black 78%)
+        );
         .item-card-icon i,
         .item-card-status i {
             color: var(--compras-warning);
@@ -250,6 +302,10 @@
     }
 
     &.status-sem_saida {
+        background-color: light-dark(
+            color-mix(in srgb, var(--compras-error), white 85%),
+            color-mix(in srgb, var(--compras-error), black 75%)
+        );
         .item-card-icon i,
         .item-card-status i {
             color: var(--compras-error);
