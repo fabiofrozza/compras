@@ -8,6 +8,13 @@ const logger = new Logger({ minLevel: process.env.COMPRAS_LOGGER_MIN_LEVEL || 'd
 const SNE_CERTIDOES = path.join(SCRIPTS_PATH, 'sne', 'CERTIDOES');
 
 const VALIDITY_WARN_DAYS = parseInt(process.env.COMPRAS_SNE_VALIDITY_WARN_DAYS, 10) || 5;
+const COMPANY_NAME_MAX_LENGTH = parseInt(process.env.COMPRAS_SNE_COMPANY_NAME_MAX_LENGTH, 10) || 25;
+
+const FALLBACK_TRUNCATION_MARKER = '[...]';
+const _rawTruncationMarker = (process.env.COMPRAS_SNE_TRUNCATION_MARKER || '').trim();
+const TRUNCATION_MARKER = _rawTruncationMarker.length > 0 && _rawTruncationMarker.length <= 10
+  ? _rawTruncationMarker
+  : FALLBACK_TRUNCATION_MARKER;
 
 // Maps filename keywords (priority order) to canonical cert type names
 const TYPE_KEYWORDS = [
@@ -163,8 +170,8 @@ function analyzeCertidaoFromRaw(filename, rawText) {
   }
   const cnpj = extractCnpj(text);
   const rawCompany = extractCompanyName(rawText);
-  const company = rawCompany && rawCompany.length > 25
-    ? rawCompany.slice(0, 25).trimEnd() + '[...]'
+  const company = rawCompany && rawCompany.length > COMPANY_NAME_MAX_LENGTH
+    ? rawCompany.slice(0, COMPANY_NAME_MAX_LENGTH).trimEnd() + TRUNCATION_MARKER
     : rawCompany;
   const typeKey = type.toLowerCase();
   const checks = CERT_CHECKS[typeKey] || {};
