@@ -634,7 +634,7 @@ function buildAfStatusCell(certidoes, afName, sneName, cnpj) {
     if (!certidoes || certidoes.length === 0) {
         if (!cnpj) return '<span class="text-muted">—</span>';
         return `<button class="btn btn-sm file-row-btn sne-status-link text-muted"
-            data-bs-toggle="tooltip" data-bs-title="Sem certidões<br><em>Clique para atualizar certidões</em>"
+            data-bs-toggle="tooltip" data-bs-title="Sem certidões<br><em>Clique para atualizar as certidões desta SNE</em>"
             onclick="${syncOnClick}">
             <i class="material-symbols-outlined">refresh</i>
         </button>`;
@@ -644,7 +644,7 @@ function buildAfStatusCell(certidoes, afName, sneName, cnpj) {
     const { cssClass, icon, label } = EMPENHO_STATUS_MAP[supplierStatus];
 
     return `<button class="btn btn-sm file-row-btn sne-status-link ${cssClass}"
-        data-bs-toggle="tooltip" data-bs-title="${label}<br><em>Clique para atualizar certidões</em>"
+        data-bs-toggle="tooltip" data-bs-title="${label}<br><em>Clique para atualizar as certidões desta SNE</em>"
         onclick="${syncOnClick}">
         <i class="material-symbols-outlined">${icon}</i>
     </button>`;
@@ -726,10 +726,10 @@ async function carregarEmpenhos() {
 
 function getSneEmpenhoSortValue(r, column) {
     switch (column) {
-        case 'arquivo':    return r.filename.toLowerCase();
-        case 'sne':        return parseInt(r.sneNumber || '0', 10);
-        case 'af':         return r.af ? parseInt(r.af.year) * 1e6 + parseInt(r.af.number) : -1;
-        case 'cnpj':       return r.cnpj || '';
+        case 'arquivo': return r.filename.toLowerCase();
+        case 'sne': return parseInt(r.sneNumber || '0', 10);
+        case 'af': return r.af ? parseInt(r.af.year) * 1e6 + parseInt(r.af.number) : -1;
+        case 'cnpj': return r.cnpj || '';
         case 'fornecedor': return (r.company || '').toLowerCase();
         case 'tombamento': return r.tombamento ? 1 : 0;
         case 'certidoes': {
@@ -1068,8 +1068,8 @@ function renderAFs() {
                         ${sortTh('af', 'AF', '', 'colspan="2"')}
                         <th></th>
                         <th colspan="2">SNE</th>
-                        ${sortTh('tombamento', 'Tombamento', 'text-center')}
-                        ${sortTh('certidoes', 'Certidões', 'text-center')}
+                        <th class="text-center">Tombamento</th>
+                        <th class="text-center">Certidões</th>
                         <th>Arquivos</th>
                         <th></th>
                     </tr>
