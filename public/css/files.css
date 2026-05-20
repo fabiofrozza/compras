@@ -129,6 +129,16 @@
 
 /* Files table */
 
+.sne-table-container {
+    max-height: 300px;
+    overflow-y: auto;
+
+    thead th {
+        position: sticky;
+        top: 0;
+    }
+}
+
 .files-table {
     width: 100%;
     border-collapse: collapse;

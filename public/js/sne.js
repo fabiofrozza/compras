@@ -292,7 +292,7 @@ function renderCertidoesDoFornecedor(group) {
     }
 
     let html = `
-        <div class="files-table-container">
+        <div class="files-table-container sne-table-container">
             <table class="files-table">
                 <thead>
                     <tr>
@@ -805,7 +805,7 @@ function renderEmpenhos() {
 
     let html = buildFolderPathHTML(displayPath, deleteBtnEmpenhos, refreshBtn);
     html += `
-        <div class="files-table-container">
+        <div class="files-table-container sne-table-container">
             <table class="files-table sne-empenhos-table">
                 <thead>
                     <tr>
@@ -1061,7 +1061,7 @@ function renderAFs() {
 
     let html = buildFolderPathHTML(displayPath, deleteBtnAfs, refreshBtn);
     html += `
-        <div class="files-table-container">
+        <div class="files-table-container sne-table-container">
             <table class="files-table sne-afs-table">
                 <thead>
                     <tr>
