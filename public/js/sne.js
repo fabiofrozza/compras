@@ -10,9 +10,57 @@ let sneEmpenhosSortState = { column: null, direction: 'asc' };
 
 let sneInitialized = false;
 
+const sneSessionLogs = {};
+
+const SNE_LOG_C = {
+    section: 'color: #6ea8fe; font-weight: bold;',
+    success: 'color: #20c997;',
+    warning: 'color: #ffc107;',
+    error: 'color: #ff6b6b; font-weight: bold;',
+    muted: 'color: #adb5bd;',
+    info: 'color: inherit;',
+};
+const sneLogLine = (style, text) => `<span style="${style}">${text}\n</span>`;
+
 const VALIDITY_COVERAGE_ORDER = { 'VALIDA': 5, 'SEM_VALIDADE': 4, 'A_VENCER': 3, 'VENCIDA': 1 };
 // Mínimo de certidões individuais para cobrir um SICAF ausente ou vencido
 const MANDATORY_INDIVIDUAL = ['Receita Federal', 'FGTS', 'Trabalhista'];
+
+// ====== LOG DE SESSÃO ======
+
+function abrirConsoleSne(logKey) {
+    ensureConsoleDOM();
+    const logData = sneSessionLogs[logKey];
+    if (!logData) return;
+
+    ['finished-success', 'finished-warning', 'finished-error'].forEach(cls => consoleContainer.classList.remove(cls));
+    consoleContainer.classList.remove('running');
+    consoleOutput.innerHTML = logData.log;
+
+    if (logData.status === 'success') {
+        consoleSummary.className = 'summary-success';
+        summaryTitle.textContent = 'Execução concluída com sucesso';
+        consoleContainer.classList.add('finished-success');
+    } else if (logData.status === 'warning') {
+        consoleSummary.className = 'summary-warning';
+        summaryTitle.textContent = 'Execução concluída com alertas';
+        consoleContainer.classList.add('finished-warning');
+    } else {
+        consoleSummary.className = 'summary-error';
+        summaryTitle.textContent = 'Falha na execução';
+        consoleContainer.classList.add('finished-error');
+    }
+    summaryDescription.textContent = logData.message || '';
+
+    if (!hasEverRun) {
+        hasEverRun = true;
+        const btnReopen = document.getElementById('btn-reopen-console');
+        if (btnReopen) btnReopen.style.removeProperty('display');
+    }
+    // Delay to let the current click event finish propagating before showing,
+    // otherwise the document click handler in console.js immediately removes 'show'.
+    setTimeout(() => consoleContainer.classList.add('show'), 0);
+}
 
 // ====== INICIALIZAÇÃO ======
 
@@ -77,6 +125,39 @@ function carregarFornecedores(onDone) {
             resetCertidoesPanel();
         }
 
+        let certLog = '';
+        certLog += sneLogLine(SNE_LOG_C.section, '[SNE] Certidões carregadas');
+        certLog += sneLogLine(SNE_LOG_C.info, `[SNE] ${sneAnalysis.length} certidão(ões), ${sneGrouped.size} fornecedor(es)`);
+        certLog += sneLogLine(SNE_LOG_C.info, '');
+        const byStatus = {};
+        for (const [key, group] of sneGrouped) {
+            const st = computeSupplierStatus(group.certidoes);
+            byStatus[st] = (byStatus[st] || 0) + 1;
+            const icon = st === 'ok' ? '✓' : st === 'alerta' ? '⚠' : '✗';
+            const styleKey = st === 'ok' ? 'success' : st === 'alerta' ? 'warning' : 'error';
+            const displayName = group.company || (group.cnpj ? formatCnpj(group.cnpj) : key);
+            certLog += sneLogLine(SNE_LOG_C[styleKey], `  ${icon} ${displayName} — ${group.certidoes.length} certidão(ões)`);
+        }
+        certLog += sneLogLine(SNE_LOG_C.info, '');
+        const certSummaryParts = [];
+        if (byStatus.ok) certSummaryParts.push(`${byStatus.ok} OK`);
+        if (byStatus.alerta) certSummaryParts.push(`${byStatus.alerta} com alerta`);
+        if (byStatus.erro) certSummaryParts.push(`${byStatus.erro} com erro`);
+        if (byStatus.impedido) certSummaryParts.push(`${byStatus.impedido} impedido`);
+        certLog += sneLogLine(SNE_LOG_C.section, `[SNE] ${certSummaryParts.join(' · ') || 'Sem certidões'}`);
+        const certHasProblems = (byStatus.erro || 0) + (byStatus.impedido || 0) > 0;
+        const certHasAlerts = (byStatus.alerta || 0) > 0;
+        const certStatus = certHasProblems || certHasAlerts ? 'warning' : 'success';
+        const certMessage = `${sneGrouped.size} fornecedor(es), ${sneAnalysis.length} certidão(ões).`;
+        sneSessionLogs.certidoesLoad = { log: certLog, status: certStatus, message: certMessage };
+
+        addNotification({
+            message: 'Certidões carregadas. ' + certMessage,
+            type: certStatus,
+            source: 'SNE',
+            actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('certidoesLoad') }],
+        });
+
         if (typeof onDone === 'function') onDone();
     });
 
@@ -84,6 +165,14 @@ function carregarFornecedores(onDone) {
         finalizar();
         const d = JSON.parse(e.data);
         container.innerHTML = alertHTML('danger', 'error', d.error || 'Erro ao analisar certidões');
+        const message = d.error || 'Erro ao analisar certidões';
+        sneSessionLogs.certidoesLoad = { log: sneLogLine(SNE_LOG_C.error, message), status: 'error', message };
+        addNotification({
+            message,
+            type: 'error',
+            source: 'SNE',
+            actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('certidoesLoad') }],
+        });
     });
 
     es.onerror = () => {
@@ -452,14 +541,22 @@ async function analisarCertidoes() {
 
     if (!confirmed) return;
 
-    prepareConsoleForExecution('sne_analisar');
+    const btn = document.getElementById('btn-analisar-certidoes');
+    if (btn) btn.disabled = true;
 
     try {
         const response = await fetch('/api/sne/certidoes/renomear', { method: 'POST' });
         const data = await response.json();
 
         if (!response.ok) {
-            handleScriptResult({ scriptName: 'sne_analisar', status: 'error', message: data.error || 'Erro ao processar certidões.', log: '' });
+            const message = data.error || 'Erro ao processar certidões.';
+            sneSessionLogs.certidoes = { log: sneLogLine(SNE_LOG_C.error, message), status: 'error', message };
+            addNotification({
+                message,
+                type: 'error',
+                source: 'SNE',
+                actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('certidoes') }],
+            });
             return;
         }
 
@@ -469,20 +566,10 @@ async function analisarCertidoes() {
         const skipped = data.results.filter(r => r.renameSkipped).length;
         const noChange = data.results.filter(r => r.noChange).length;
 
-        const C = {
-            section: 'color: #6ea8fe; font-weight: bold;',
-            success: 'color: #20c997;',
-            warning: 'color: #ffc107;',
-            error: 'color: #ff6b6b; font-weight: bold;',
-            muted: 'color: #adb5bd;',
-            info: 'color: inherit;',
-        };
-        const line = (style, text) => `<span style="${style}">${text}\n</span>`;
-
         let log = '';
-        log += line(C.section, '[SNE] Análise e renomeação de certidões');
-        log += line(C.info, `[SNE] ${data.results.length} arquivo(s) na pasta CERTIDOES`);
-        log += line(C.info, '');
+        log += sneLogLine(SNE_LOG_C.section, '[SNE] Análise e renomeação de certidões');
+        log += sneLogLine(SNE_LOG_C.info, `[SNE] ${data.results.length} arquivo(s) na pasta CERTIDOES`);
+        log += sneLogLine(SNE_LOG_C.info, '');
 
         for (const r of data.results) {
             const typeLabel = r.type || 'Tipo desconhecido';
@@ -490,26 +577,26 @@ async function analisarCertidoes() {
             const whoStr = who ? ` — ${who}` : '';
 
             if (r.renamed && r.conflictDuplicated) {
-                log += line(C.warning, `  ⚠ Duplicata renomeada: "${r.filename}"`);
-                log += line(C.warning, `    → "${r.newName}"`);
+                log += sneLogLine(SNE_LOG_C.warning, `  ⚠ Duplicata renomeada: "${r.filename}"`);
+                log += sneLogLine(SNE_LOG_C.warning, `    → "${r.newName}"`);
             } else if (r.renamed) {
-                log += line(C.success, `  ✓ ${typeLabel}${whoStr}`);
-                log += line(C.muted, `    "${r.filename}"`);
-                log += line(C.muted, `    → "${r.newName}"`);
+                log += sneLogLine(SNE_LOG_C.success, `  ✓ ${typeLabel}${whoStr}`);
+                log += sneLogLine(SNE_LOG_C.muted, `    "${r.filename}"`);
+                log += sneLogLine(SNE_LOG_C.muted, `    → "${r.newName}"`);
             } else if (r.deleted) {
                 const kept = r.deletedKeptAs ? ` (mantido: "${r.deletedKeptAs}")` : '';
-                log += line(C.warning, `  ✗ Eliminado (duplicata)${kept}: "${r.filename}"`);
+                log += sneLogLine(SNE_LOG_C.warning, `  ✗ Eliminado (duplicata)${kept}: "${r.filename}"`);
             } else if (r.renameError) {
-                log += line(C.error, `  ✗ Erro: "${r.filename}": ${r.renameError}`);
+                log += sneLogLine(SNE_LOG_C.error, `  ✗ Erro: "${r.filename}": ${r.renameError}`);
             } else if (r.renameSkipped) {
                 const reason = r.error ? ` (${r.error})` : '';
-                log += line(C.muted, `  — Sem nome${reason}: "${r.filename}"`);
+                log += sneLogLine(SNE_LOG_C.muted, `  — Sem nome${reason}: "${r.filename}"`);
             } else if (r.noChange) {
-                log += line(C.muted, `  — Sem alteração: "${r.filename}"`);
+                log += sneLogLine(SNE_LOG_C.muted, `  — Sem alteração: "${r.filename}"`);
             }
         }
 
-        log += line(C.info, '');
+        log += sneLogLine(SNE_LOG_C.info, '');
 
         const summaryParts = [];
         if (renamed > 0) summaryParts.push(`${renamed} renomeado(s)`);
@@ -517,25 +604,35 @@ async function analisarCertidoes() {
         if (errors > 0) summaryParts.push(`${errors} com erro`);
         if (skipped > 0) summaryParts.push(`${skipped} sem nome`);
         if (noChange > 0) summaryParts.push(`${noChange} sem alteração`);
-        log += line(C.section, `[SNE] ${summaryParts.join(' · ')}`);
-
-        consoleOutput.innerHTML = log;
+        log += sneLogLine(SNE_LOG_C.section, `[SNE] ${summaryParts.join(' · ')}`);
 
         const parts = [`${renamed} renomeado(s)`];
         if (deleted > 0) parts.push(`${deleted} eliminado(s) por conflito`);
         if (errors + skipped > 0) parts.push(`${errors + skipped} com falha ou sem nome identificado`);
         const status = (errors + skipped) === 0 ? 'success' : 'warning';
-        handleScriptResult({ scriptName: 'sne_analisar', status, message: parts.join(', ') + '.', log: '' });
+        const message = parts.join(', ') + '.';
+
+        sneSessionLogs.certidoes = { log, status, message };
 
         addNotification({
-            message: 'Análise de certidões concluída. ' + parts.join(', ') + '.',
+            message: 'Análise de certidões concluída. ' + message,
             type: status === 'success' ? 'success' : 'warning',
             source: 'SNE',
+            actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('certidoes') }],
         });
 
         carregarFornecedores(() => { if (sneEmpenhosFolderPath) renderEmpenhos(); });
     } catch (error) {
-        handleScriptResult({ scriptName: 'sne_analisar', status: 'error', message: `Erro: ${error.message}`, log: '' });
+        const message = `Erro: ${error.message}`;
+        sneSessionLogs.certidoes = { log: sneLogLine(SNE_LOG_C.error, message), status: 'error', message };
+        addNotification({
+            message,
+            type: 'error',
+            source: 'SNE',
+            actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('certidoes') }],
+        });
+    } finally {
+        if (btn) btn.disabled = false;
     }
 }
 
@@ -769,13 +866,60 @@ function carregarEmpenhos() {
             .then(r => r.json())
             .then(afsData => { if (!afsData.error) sneAfsData = afsData.afs || []; })
             .catch(() => {})
-            .finally(() => renderEmpenhos());
+            .finally(() => {
+                renderEmpenhos();
+
+                const total = sneEmpenhos.length;
+                const erros = sneEmpenhos.filter(r => r.error).length;
+                const semAF = sneEmpenhos.filter(r => !r.error && !r.af).length;
+
+                let log = '';
+                log += sneLogLine(SNE_LOG_C.section, '[SNE] Empenhos carregados');
+                log += sneLogLine(SNE_LOG_C.info, `[SNE] ${total} arquivo(s) na pasta SNEs`);
+                log += sneLogLine(SNE_LOG_C.info, '');
+
+                for (const r of sneEmpenhos) {
+                    if (r.error) {
+                        log += sneLogLine(SNE_LOG_C.error, `  ✗ ${r.filename}: ${r.error}`);
+                    } else {
+                        const afStr = r.af ? `AF ${r.af.number}/${r.af.year}` : 'sem AF';
+                        const sneStr = r.sneNumber ? `SNE ${r.sneNumber}` : 'sem SNE';
+                        const companyStr = r.company ? ` — ${r.company}` : '';
+                        log += sneLogLine(SNE_LOG_C.success, `  ✓ ${r.filename} — ${sneStr}, ${afStr}${companyStr}`);
+                    }
+                }
+
+                log += sneLogLine(SNE_LOG_C.info, '');
+                const summaryParts = [`${total - erros} carregado(s)`];
+                if (erros > 0) summaryParts.push(`${erros} com erro`);
+                if (semAF > 0) summaryParts.push(`${semAF} sem AF`);
+                log += sneLogLine(SNE_LOG_C.section, `[SNE] ${summaryParts.join(' · ')}`);
+
+                const status = erros > 0 ? 'warning' : 'success';
+                const message = `${total} empenho(s) carregado(s)${erros > 0 ? `, ${erros} com erro` : ''}.`;
+                sneSessionLogs.empenhos = { log, status, message };
+
+                addNotification({
+                    message,
+                    type: status,
+                    source: 'SNE',
+                    actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('empenhos') }],
+                });
+            });
     });
 
     es.addEventListener('fail', (e) => {
         finalizar();
         const d = JSON.parse(e.data);
         container.innerHTML = alertHTML('danger', 'error', d.error || 'Erro ao analisar empenhos');
+        const message = d.error || 'Erro ao analisar empenhos';
+        sneSessionLogs.empenhos = { log: sneLogLine(SNE_LOG_C.error, message), status: 'error', message };
+        addNotification({
+            message,
+            type: 'error',
+            source: 'SNE',
+            actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('empenhos') }],
+        });
     });
 
     es.onerror = () => {
@@ -1045,12 +1189,45 @@ function carregarAFs() {
         sneAfsFolderPath = data.folderPath || '';
 
         renderAFs();
+
+        const total = sneAfsAnalysis.length;
+        const totalSnes = sneAfsAnalysis.reduce((s, af) => s + af.snes.length, 0);
+
+        let log = '';
+        log += sneLogLine(SNE_LOG_C.section, '[SNE] AFs carregadas');
+        log += sneLogLine(SNE_LOG_C.info, `[SNE] ${total} AF(s), ${totalSnes} SNE(s)`);
+        log += sneLogLine(SNE_LOG_C.info, '');
+
+        for (const af of sneAfsAnalysis) {
+            log += sneLogLine(SNE_LOG_C.success, `  ✓ ${af.name} — ${af.snes.length} SNE(s)`);
+        }
+
+        log += sneLogLine(SNE_LOG_C.info, '');
+        log += sneLogLine(SNE_LOG_C.section, `[SNE] ${total} AF(s) · ${totalSnes} SNE(s)`);
+
+        const message = `${total} AF(s) carregada(s), ${totalSnes} SNE(s).`;
+        sneSessionLogs.afs = { log, status: 'success', message };
+
+        addNotification({
+            message,
+            type: 'success',
+            source: 'SNE',
+            actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('afs') }],
+        });
     });
 
     es.addEventListener('fail', (e) => {
         finalizar();
         const d = JSON.parse(e.data);
         container.innerHTML = alertHTML('danger', 'error', d.error || 'Erro ao carregar AFs');
+        const message = d.error || 'Erro ao carregar AFs';
+        sneSessionLogs.afs = { log: sneLogLine(SNE_LOG_C.error, message), status: 'error', message };
+        addNotification({
+            message,
+            type: 'error',
+            source: 'SNE',
+            actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('afs') }],
+        });
     });
 
     es.onerror = () => {
@@ -1468,12 +1645,29 @@ async function executarCriarAFs() {
         const parts = [`${data.afs.length} AF(s)`, `${data.snes.length} SNE(s)`];
         if (data.errors?.length > 0) parts.push(`${data.errors.length} erro(s)`);
         const status = data.errors?.length > 0 ? 'warning' : 'success';
+
+        let log = '';
+        log += sneLogLine(SNE_LOG_C.section, '[SNE] Criação de estrutura de AFs');
+        log += sneLogLine(SNE_LOG_C.info, `[SNE] ${data.afs.length} AF(s), ${data.snes.length} SNE(s) criada(s)`);
+        if (data.errors?.length > 0) {
+            log += sneLogLine(SNE_LOG_C.info, '');
+            for (const err of data.errors) {
+                log += sneLogLine(SNE_LOG_C.error, `  ✗ ${typeof err === 'string' ? err : JSON.stringify(err)}`);
+            }
+        }
+        log += sneLogLine(SNE_LOG_C.info, '');
+        log += sneLogLine(status === 'warning' ? SNE_LOG_C.warning : SNE_LOG_C.success, `[SNE] ${parts.join(' · ')}`);
+
+        const notifMessage = `AFs criadas: ${parts.join(', ')}.`;
+        sneSessionLogs.criarAfs = { log, status, message: notifMessage };
+
         showToast(`Estrutura criada: ${parts.join(', ')}.`, status);
 
         addNotification({
-            message: `AFs criadas: ${parts.join(', ')}.`,
+            message: notifMessage,
             type: status,
             source: 'SNE',
+            actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('criarAfs') }],
         });
 
         if (moveSnes) {
