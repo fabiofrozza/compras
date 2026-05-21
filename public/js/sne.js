@@ -40,20 +40,25 @@ function inicializarSne() {
 
 // ====== CARREGAMENTO ======
 
-async function carregarFornecedores() {
+function carregarFornecedores(onDone) {
     const container = document.getElementById('sne-fornecedores-list');
     if (!container) return;
 
-    container.innerHTML = customSpinnerHTML('Lendo certidões...');
+    container.innerHTML = sneSpinnerHTML('Lendo certidões...', 'sne-certidoes-pb');
 
-    try {
-        const response = await fetch('/api/sne/certidoes/analisar');
-        const data = await response.json();
+    const es = new EventSource('/api/sne/certidoes/analisar');
+    let finalizado = false;
 
-        if (data.error) {
-            container.innerHTML = alertHTML('danger', 'error', data.error);
-            return;
-        }
+    const finalizar = () => { finalizado = true; es.close(); };
+
+    es.addEventListener('progress', (e) => {
+        const d = JSON.parse(e.data);
+        atualizarProgressoSne('sne-certidoes-pb', d.current, d.total, d.label);
+    });
+
+    es.addEventListener('done', (e) => {
+        finalizar();
+        const data = JSON.parse(e.data);
 
         sneAnalysis = data.results || [];
         sneFolderPath = data.folderPath || '';
@@ -66,9 +71,21 @@ async function carregarFornecedores() {
             sneSelectedCnpj = null;
             resetCertidoesPanel();
         }
-    } catch (error) {
-        container.innerHTML = alertHTML('danger', 'error', `Erro ao analisar certidões: ${error.message}`);
-    }
+
+        if (typeof onDone === 'function') onDone();
+    });
+
+    es.addEventListener('fail', (e) => {
+        finalizar();
+        const d = JSON.parse(e.data);
+        container.innerHTML = alertHTML('danger', 'error', d.error || 'Erro ao analisar certidões');
+    });
+
+    es.onerror = () => {
+        if (finalizado) return;
+        finalizar();
+        container.innerHTML = alertHTML('danger', 'error', 'Erro de conexão ao analisar certidões');
+    };
 }
 
 // ====== AGRUPAMENTO ======
@@ -511,8 +528,7 @@ async function analisarCertidoes() {
             source: 'SNE',
         });
 
-        await carregarFornecedores();
-        if (sneEmpenhosFolderPath) renderEmpenhos();
+        carregarFornecedores(() => { if (sneEmpenhosFolderPath) renderEmpenhos(); });
     } catch (error) {
         handleScriptResult({ scriptName: 'sne_analisar', status: 'error', message: `Erro: ${error.message}`, log: '' });
     }
@@ -565,6 +581,35 @@ function alertHTML(type, icon, message) {
     return `<div class="alert alert-${type}" role="alert">
         <i class="material-symbols-outlined">${icon}</i> ${message}
     </div>`;
+}
+
+// ====== PROGRESSO ======
+
+function atualizarProgressoSne(barId, current, total, label) {
+    const bar = document.getElementById(barId);
+    if (!bar) return;
+    const percentage = total > 0 ? (current / total) * 100 : 0;
+    bar.style.width = `${percentage}%`;
+    if (label) bar.innerText = label;
+    let popup = bar.querySelector('.progress-percent-popup');
+    if (!popup) {
+        popup = document.createElement('span');
+        popup.className = 'progress-percent-popup';
+        bar.appendChild(popup);
+    } else if (label) {
+        bar.appendChild(popup);
+    }
+    popup.textContent = `${Math.round(percentage)}%`;
+}
+
+function sneSpinnerHTML(message, barId) {
+    return customSpinnerHTML(message) + `
+        <div class="progress mx-2 mb-2" style="height: 16px; overflow: visible; position: relative;">
+            <div id="${barId}" class="progress-bar progress-bar-striped progress-bar-animated text-bg-info"
+                role="progressbar" style="width: 0%;">
+                <span class="progress-percent-popup">0%</span>
+            </div>
+        </div>`;
 }
 
 // ====== EMPENHOS ======
@@ -692,36 +737,47 @@ function getEmpenhoForSne(afName, sneName) {
         r.sneNumber === sneNum) || null;
 }
 
-async function carregarEmpenhos() {
+function carregarEmpenhos() {
     const container = document.getElementById('sne-empenhos-container');
     if (!container) return;
 
-    container.innerHTML = customSpinnerHTML('Lendo empenhos...');
+    container.innerHTML = sneSpinnerHTML('Lendo empenhos...', 'sne-empenhos-pb');
 
-    try {
-        const [empenhoResp, afsResp] = await Promise.all([
-            fetch('/api/sne/empenhos/analisar'),
-            fetch('/api/sne/afs'),
-        ]);
-        const data = await empenhoResp.json();
-        const afsData = await afsResp.json();
+    const es = new EventSource('/api/sne/empenhos/analisar');
+    let finalizado = false;
 
-        if (data.error) {
-            container.innerHTML = alertHTML('danger', 'error', data.error);
-            return;
-        }
+    const finalizar = () => { finalizado = true; es.close(); };
+
+    es.addEventListener('progress', (e) => {
+        const d = JSON.parse(e.data);
+        atualizarProgressoSne('sne-empenhos-pb', d.current, d.total, d.label);
+    });
+
+    es.addEventListener('done', (e) => {
+        finalizar();
+        const data = JSON.parse(e.data);
 
         sneEmpenhos = data.results || [];
         sneEmpenhosFolderPath = data.folderPath || '';
 
-        if (!afsData.error) {
-            sneAfsData = afsData.afs || [];
-        }
+        fetch('/api/sne/afs')
+            .then(r => r.json())
+            .then(afsData => { if (!afsData.error) sneAfsData = afsData.afs || []; })
+            .catch(() => {})
+            .finally(() => renderEmpenhos());
+    });
 
-        renderEmpenhos();
-    } catch (error) {
-        container.innerHTML = alertHTML('danger', 'error', `Erro ao analisar empenhos: ${error.message}`);
-    }
+    es.addEventListener('fail', (e) => {
+        finalizar();
+        const d = JSON.parse(e.data);
+        container.innerHTML = alertHTML('danger', 'error', d.error || 'Erro ao analisar empenhos');
+    });
+
+    es.onerror = () => {
+        if (finalizado) return;
+        finalizar();
+        container.innerHTML = alertHTML('danger', 'error', 'Erro de conexão ao analisar empenhos');
+    };
 }
 
 function getSneEmpenhoSortValue(r, column) {
@@ -960,28 +1016,43 @@ let sneAfsFolderPath = '';
 let sneAfsSortState = { column: null, direction: 'asc' };
 let snePendingAfScroll = null;
 
-async function carregarAFs() {
+function carregarAFs() {
     const container = document.getElementById('sne-afs-container');
     if (!container) return;
 
-    container.innerHTML = customSpinnerHTML('Analisando arquivos das AFs...');
+    container.innerHTML = sneSpinnerHTML('Analisando arquivos das AFs...', 'sne-afs-pb');
 
-    try {
-        const resp = await fetch('/api/sne/afs/analisar');
-        const data = await resp.json();
+    const es = new EventSource('/api/sne/afs/analisar');
+    let finalizado = false;
 
-        if (data.error) {
-            container.innerHTML = alertHTML('danger', 'error', data.error);
-            return;
-        }
+    const finalizar = () => { finalizado = true; es.close(); };
+
+    es.addEventListener('progress', (e) => {
+        const d = JSON.parse(e.data);
+        atualizarProgressoSne('sne-afs-pb', d.current, d.total, d.label);
+    });
+
+    es.addEventListener('done', (e) => {
+        finalizar();
+        const data = JSON.parse(e.data);
 
         sneAfsAnalysis = data.afs || [];
         sneAfsFolderPath = data.folderPath || '';
 
         renderAFs();
-    } catch (error) {
-        container.innerHTML = alertHTML('danger', 'error', `Erro ao carregar AFs: ${error.message}`);
-    }
+    });
+
+    es.addEventListener('fail', (e) => {
+        finalizar();
+        const d = JSON.parse(e.data);
+        container.innerHTML = alertHTML('danger', 'error', d.error || 'Erro ao carregar AFs');
+    });
+
+    es.onerror = () => {
+        if (finalizado) return;
+        finalizar();
+        container.innerHTML = alertHTML('danger', 'error', 'Erro de conexão ao carregar AFs');
+    };
 }
 
 function getSneAfSortValue(af, column) {
@@ -1401,7 +1472,7 @@ async function executarCriarAFs() {
         });
 
         if (moveSnes) {
-            await carregarEmpenhos();
+            carregarEmpenhos();
         } else {
             renderEmpenhos();
         }

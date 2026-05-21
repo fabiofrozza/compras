@@ -309,15 +309,17 @@ async function listCertidoes() {
   return { files, folderPath: SNE_CERTIDOES, folderCreated: created };
 }
 
-async function analyzeCertidoes() {
+async function analyzeCertidoes(onProgress) {
   // Use lib path to avoid test-file loading at module init (pdf-parse v1 quirk)
   const pdfParse = require('pdf-parse/lib/pdf-parse.js');
 
   const { files, folderPath } = await listCertidoes();
+  const total = files.length;
   const results = [];
 
-  for (const file of files) {
-    const result = await analyzeCertidao(file.name, pdfParse);
+  for (let i = 0; i < files.length; i++) {
+    if (onProgress) onProgress(i + 1, total, files[i].name);
+    const result = await analyzeCertidao(files[i].name, pdfParse);
     results.push(result);
   }
 
@@ -581,12 +583,15 @@ async function listEmpenhos() {
   return { files, folderPath: SNE_EMPENHOS, folderCreated: created };
 }
 
-async function analyzeEmpenhos() {
+async function analyzeEmpenhos(onProgress) {
   const pdfParse = require('pdf-parse/lib/pdf-parse.js');
   const { files, folderPath } = await listEmpenhos();
+  const total = files.length;
   const results = [];
 
-  for (const filename of files) {
+  for (let i = 0; i < files.length; i++) {
+    const filename = files[i];
+    if (onProgress) onProgress(i + 1, total, filename);
     const filePath = path.join(SNE_EMPENHOS, filename);
     try {
       const buffer = await fs.readFile(filePath);
@@ -729,7 +734,7 @@ async function analyzeSneFolder(snePath, pdfParse) {
   return { empenho, certidoes, files: allFiles };
 }
 
-async function analyzeAFs() {
+async function analyzeAFs(onProgress) {
   const pdfParse = require('pdf-parse/lib/pdf-parse.js');
 
   try {
@@ -745,8 +750,11 @@ async function analyzeAFs() {
     .map(e => e.name)
     .sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
 
+  const total = afFolders.length;
   const afs = [];
-  for (const afName of afFolders) {
+  for (let i = 0; i < afFolders.length; i++) {
+    const afName = afFolders[i];
+    if (onProgress) onProgress(i + 1, total, afName);
     const afPath = path.join(SNE_AFS, afName);
     const sneEntries = await fs.readdir(afPath, { withFileTypes: true });
     const sneFolders = sneEntries
