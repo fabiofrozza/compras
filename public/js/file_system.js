@@ -438,6 +438,9 @@ function renderFileListInner(containerId) {
         filesHTML += buildFilesTableHTML(sortedFiles, containerId, scriptName, innerFolder, canDelete, selectable, data.folderPath);
     }
 
+    const count = sortedFiles.length;
+    filesHTML += `<div class="files-status-bar">${count} ${count === 1 ? 'item' : 'itens'}</div>`;
+
     filesList.innerHTML = filesHTML;
     setupFileListButtons(filesList);
     initializeTooltips();
