@@ -332,6 +332,19 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     font-weight: 500;
 }
 
+.notification-source-link {
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.notification-source-link:hover {
+    background: rgba(128, 128, 128, 0.3);
+    color: var(--compras-text-primary);
+    text-decoration: underline;
+}
+
 .notification-dismiss {
     flex-shrink: 0;
     background: none;
