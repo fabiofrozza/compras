@@ -315,7 +315,7 @@ function executarObservatorio(button) {
             addNotification({
                 message: `Falha ao recuperar dados: ${msgErro}`,
                 type: 'error',
-                source: 'Observatório'
+                source: 'Power BI'
             });
         }
     };
@@ -359,7 +359,7 @@ function executarObservatorio(button) {
         addNotification({
             message: mensagem,
             type: 'success',
-            source: 'Observatório'
+            source: 'Power BI'
         });
 
         finalizar();
