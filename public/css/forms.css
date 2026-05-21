@@ -29,7 +29,7 @@
 .script-form h4 i {
     font-size: 1.25rem;
     vertical-align: top;
-    font-variation-settings: 'opsz' 48;
+    font-variation-settings: "opsz" 48;
 }
 
 .script-form h4 {
@@ -63,7 +63,7 @@
     gap: 6px;
 }
 
-.btn-tooltip-wrapper>button:disabled {
+.btn-tooltip-wrapper > button:disabled {
     pointer-events: none;
 }
 
@@ -72,7 +72,7 @@
     color: var(--compras-error);
     cursor: help;
     flex-shrink: 0;
-    font-variation-settings: 'FILL' 1;
+    font-variation-settings: "FILL" 1;
     pointer-events: auto;
 }
 
@@ -81,12 +81,10 @@
     white-space: pre-wrap;
 }
 
-
 .form-sub-container {
     position: relative;
     margin-bottom: 12px;
-    background-color:
-        color-mix(in srgb, var(--compras-theme) 50%, white);
+    background-color: color-mix(in srgb, var(--compras-theme) 50%, white);
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;
     padding: 12px;
@@ -159,7 +157,9 @@
     border-radius: 6px;
     cursor: pointer;
     background-color: Field;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease;
     margin-bottom: 0;
     flex-grow: 1;
     flex-basis: 0;
@@ -175,10 +175,12 @@
 }
 
 .option-card::after {
-    font-family: 'Material Symbols Outlined';
-    content: 'check';
+    font-family: "Material Symbols Outlined";
+    content: "check";
     color: white;
-    font-variation-settings: 'FILL' 1, 'wght' 900;
+    font-variation-settings:
+        "FILL" 1,
+        "wght" 900;
     padding-left: 1px;
     line-height: 1.2;
     position: absolute;
@@ -234,15 +236,15 @@
 
 .validation-msg {
     color: var(--bs-form-invalid-color);
-    font-size: .6em;
-    margin-top: .2rem;
+    font-size: 0.6em;
+    margin-top: 0.2rem;
     margin-left: 6px;
     display: none;
 }
 
 .validation-msg::before {
-    font-family: 'Material Symbols Outlined';
-    content: 'warning';
+    font-family: "Material Symbols Outlined";
+    content: "warning";
     vertical-align: text-top;
     margin-right: 2px;
 }
@@ -253,7 +255,7 @@
 
 .btn-sm .material-symbols-outlined {
     font-size: 16px;
-    font-variation-settings: 'opsz' 48;
+    font-variation-settings: "opsz" 48;
     vertical-align: sub;
 }
 
@@ -307,7 +309,7 @@
 }
 
 .sub-tabs .nav-link.has-validation-issue::after {
-    font-family: 'Material Symbols Outlined';
+    font-family: "Material Symbols Outlined";
     content: "emergency";
     font-size: 75%;
 }
@@ -355,7 +357,7 @@
     line-height: 1;
     padding: 4px;
     border-radius: 6px;
-    transition: all .25s ease;
+    transition: all 0.25s ease;
     color: var(--compras-text-primary);
     cursor: pointer;
 }
@@ -373,11 +375,11 @@
 .form-collapse-btn .material-symbols-outlined {
     font-size: 1.25rem;
     vertical-align: top;
-    font-variation-settings: 'opsz' 48;
+    font-variation-settings: "opsz" 48;
 }
 
 .form-collapse-btn .material-symbols-outlined::before {
-    content: 'keyboard_arrow_up';
+    content: "keyboard_arrow_up";
 }
 
 /* ==========================================================================
@@ -464,9 +466,8 @@
     width: 32px;
 }
 
-
 .form-collapse-btn.collapsed .material-symbols-outlined::before {
-    content: 'keyboard_arrow_down';
+    content: "keyboard_arrow_down";
 }
 
 /* Info bar e filtros da tabela Observatório */
@@ -492,7 +493,9 @@
 
 .obs-tool-btn .material-symbols-outlined {
     font-size: 1rem;
-    font-variation-settings: 'FILL' 1, 'wght' 400;
+    font-variation-settings:
+        "FILL" 1,
+        "wght" 400;
     vertical-align: middle;
 }
 
@@ -566,7 +569,9 @@
     max-width: 50%;
 }
 
-.dashboard-widget:not(.d-none):not(:has(~ .dashboard-widget:not(.d-none))):not(.dashboard-widget:not(.d-none) ~ .dashboard-widget),
+.dashboard-widget:not(.d-none):not(:has(~ .dashboard-widget:not(.d-none))):not(
+        .dashboard-widget:not(.d-none) ~ .dashboard-widget
+    ),
 .dashboard-widget.widget-full {
     flex: 1 1 100%;
     min-width: 100%;
@@ -612,7 +617,11 @@
 .badge {
     display: inline-flex;
     gap: 4px;
-    background-color: color-mix(in srgb, var(--compras-badge-background), white 25%);
+    background-color: color-mix(
+        in srgb,
+        var(--compras-badge-background),
+        white 25%
+    );
 }
 
 .badge i {
@@ -645,4 +654,12 @@
 .badge.blank {
     --compras-badge-background: gray;
     --compras-badge-icon: gray;
+}
+
+.form-select-options {
+    background-color: var(--bs-info);
+    border: 0px solid transparent;
+    background-position: right 0.5rem center;
+    padding-right: 2rem;
+    font-size: 75%;
 }
