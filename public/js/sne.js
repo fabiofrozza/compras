@@ -1669,7 +1669,7 @@ async function executarCriarAFs() {
         return;
     }
 
-    const scope = document.querySelector('input[name="sne-afs-scope"]:checked')?.value;
+    const scope = document.getElementById('sne-afs-scope')?.value;
 
     let filenames = null;
     let scopeDetail = '';
@@ -1692,7 +1692,7 @@ async function executarCriarAFs() {
         scopeDetail = `<br><i class="material-symbols-outlined me-1">checklist</i> Somente selecionadas: <strong>${filenames.length}</strong> de ${sneEmpenhos.length} empenho(s).`;
     }
 
-    const moveSnes = document.querySelector('input[name="sne-afs-action"]:checked')?.value === 'mover';
+    const moveSnes = document.getElementById('sne-afs-action')?.value === 'mover';
     const actionDetail = moveSnes
         ? `<br><i class="material-symbols-outlined me-1">drive_file_move</i> Os empenhos serão <strong>movidos</strong> para as pastas das AFs.`
         : '';

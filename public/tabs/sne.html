@@ -106,35 +106,21 @@
                                             id="btn-atualizar-empenhos">
                                             Atualizar
                                         </button>
-                                        <div class="btn-group btn-group-sm" role="group" aria-label="Escopo das AFs">
-                                            <input type="radio" class="btn-check" name="sne-afs-scope"
-                                                id="sne-afs-scope-todas" value="todas" checked>
-                                            <label class="btn btn-outline-secondary"
-                                                for="sne-afs-scope-todas">Todas</label>
-                                            <input type="radio" class="btn-check" name="sne-afs-scope"
-                                                id="sne-afs-scope-ok" value="ok">
-                                            <label class="btn btn-outline-secondary" for="sne-afs-scope-ok">Certidões
-                                                OK</label>
-                                            <input type="radio" class="btn-check" name="sne-afs-scope"
-                                                id="sne-afs-scope-selecionadas" value="selecionadas">
-                                            <label class="btn btn-outline-secondary"
-                                                for="sne-afs-scope-selecionadas">Selecionadas</label>
+                                        <div class="input-group input-group-sm w-auto">
+                                            <select class="form-select form-select-sm" id="sne-afs-scope">
+                                                <option value="todas">Todas</option>
+                                                <option value="ok">Certidões OK</option>
+                                                <option value="selecionadas">Selecionadas</option>
+                                            </select>
+                                            <select class="form-select form-select-sm" id="sne-afs-action">
+                                                <option value="manter">Manter SNEs</option>
+                                                <option value="mover">Mover SNEs</option>
+                                            </select>
+                                            <button type="button" class="btn btn-sm btn-primary text-nowrap"
+                                                id="btn-criar-afs">
+                                                Criar AFs
+                                            </button>
                                         </div>
-                                        <div class="btn-group btn-group-sm" role="group"
-                                            aria-label="Ação sobre os empenhos">
-                                            <input type="radio" class="btn-check" name="sne-afs-action"
-                                                id="sne-afs-action-manter" value="manter" checked>
-                                            <label class="btn btn-outline-secondary" for="sne-afs-action-manter">Manter
-                                                SNEs</label>
-                                            <input type="radio" class="btn-check" name="sne-afs-action"
-                                                id="sne-afs-action-mover" value="mover">
-                                            <label class="btn btn-outline-secondary" for="sne-afs-action-mover">Mover
-                                                SNEs</label>
-                                        </div>
-                                        <button type="button" class="btn btn-sm btn-primary text-nowrap"
-                                            id="btn-criar-afs">
-                                            Criar AFs
-                                        </button>
                                     </div>
                                 </div>
                             </div>
