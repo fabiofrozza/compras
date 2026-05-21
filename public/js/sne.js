@@ -197,6 +197,25 @@ function groupByCnpj(results) {
         group.certidoes.push(r);
     }
 
+    // Merge groups with CNPJ radical (8 digits) into matching full CNPJ groups (14 digits).
+    // Some certidões (e.g. Receita Estadual do RS) cover all establishments and use only the base CNPJ.
+    for (const [key, group] of [...grouped.entries()]) {
+        if (!group.cnpj || group.cnpj.length !== 8) continue;
+
+        const radical = group.cnpj;
+        const fullMatches = [...grouped.entries()].filter(
+            ([, g]) => g.cnpj?.length === 14 && g.cnpj.startsWith(radical)
+        );
+
+        if (fullMatches.length > 0) {
+            for (const [, fullGroup] of fullMatches) {
+                fullGroup.certidoes.push(...group.certidoes);
+                if (!fullGroup.company && group.company) fullGroup.company = group.company;
+            }
+            grouped.delete(key);
+        }
+    }
+
     return grouped;
 }
 
