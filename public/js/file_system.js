@@ -79,12 +79,12 @@ function setupFolderPathButtons(container) {
         btnOpen.addEventListener('click', (e) => {
             e.preventDefault();
             openFolder(btnOpen.dataset.folderPath);
-            showToast('Abrindo pasta. Verifique na barra de tarefas...', 'info', 5000);
         });
     }
 }
 
-async function openFolder(folderPath) {
+async function openFolder(folderPath, label = '') {
+    const message = `Abrindo pasta${label ? ' ' + label : ''}. Verifique na barra de tarefas...`;
     try {
         const response = await fetch('/api/open-folder', {
             method: 'POST',
@@ -97,13 +97,16 @@ async function openFolder(folderPath) {
         if (!response.ok) {
             console.error('Erro ao abrir pasta:', data.error);
             showToast(`Erro ao abrir pasta:\n\n${data.error}\n\nCaminho: ${folderPath}`, 'error', 10000);
+        } else {
+            showToast(message, 'info', 3000);
         }
     } catch (error) {
         showToast(`Erro ao abrir pasta:\n\n${error.message}\n\nCaminho: ${folderPath}\n\nVerifique o console para mais detalhes.`, 'error', 10000);
     }
 }
 
-async function openFile(filePath) {
+async function openFile(filePath, label = '') {
+    const message = `Abrindo arquivo${label ? ' ' + label : ''}. Verifique na barra de tarefas...`;
     try {
         const response = await fetch('/api/open-file', {
             method: 'POST',
@@ -117,7 +120,7 @@ async function openFile(filePath) {
             console.error('Erro ao abrir arquivo:', data.error);
             showToast(`Erro ao abrir arquivo:\n\n${data.error}\n\nCaminho: ${filePath}`, 'error', 10000);
         } else {
-            showToast('Abrindo arquivo...', 'info', 3000);
+            showToast(message, 'info', 3000);
         }
     } catch (error) {
         console.error('Erro ao abrir arquivo:', error);

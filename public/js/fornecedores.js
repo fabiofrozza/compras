@@ -31,8 +31,7 @@ function inicializarFornecedores() {
             removeTooltip(btn);
             const pregao = btn.closest('.item-card')?.dataset.pregao;
             if (pregao && pregoesDadosFolderPath) {
-                openFolder(pregoesDadosFolderPath + '\\' + pregao);
-                showToast(`Abrindo pasta ${pregao}. Verifique na barra de tarefas...`, 'info', 5000);
+                openFolder(pregoesDadosFolderPath + '\\' + pregao, pregao);
             }
         });
     }
