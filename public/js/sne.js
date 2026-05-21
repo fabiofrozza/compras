@@ -8,6 +8,8 @@ let sneEmpenhos = [];
 let sneEmpenhosFolderPath = '';
 let sneEmpenhosSortState = { column: null, direction: 'asc' };
 
+let sneInitialized = false;
+
 const VALIDITY_COVERAGE_ORDER = { 'VALIDA': 5, 'SEM_VALIDADE': 4, 'A_VENCER': 3, 'VENCIDA': 1 };
 // Mínimo de certidões individuais para cobrir um SICAF ausente ou vencido
 const MANDATORY_INDIVIDUAL = ['Receita Federal', 'FGTS', 'Trabalhista'];
@@ -15,6 +17,9 @@ const MANDATORY_INDIVIDUAL = ['Receita Federal', 'FGTS', 'Trabalhista'];
 // ====== INICIALIZAÇÃO ======
 
 function inicializarSne() {
+    if (sneInitialized) return;
+    sneInitialized = true;
+
     carregarFornecedores();
 
     document.getElementById('btn-analisar-certidoes')?.addEventListener('click', analisarCertidoes);
