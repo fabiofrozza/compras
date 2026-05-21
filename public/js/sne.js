@@ -808,7 +808,7 @@ function navegarParaCertidoesDoCnpj(cnpj) {
 }
 
 function scrollParaAF(afName) {
-    const group = [...document.querySelectorAll('.sne-af-group')].find(el => el.dataset.afName === afName);
+    const group = [...document.querySelectorAll('tr.sne-af-group')].find(el => el.dataset.afName === afName);
     if (group) group.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
@@ -1406,11 +1406,15 @@ function renderAFs() {
                     </tr>
                 </thead>`;
 
-    for (const af of sortedAfs) {
+    html += `<tbody>`;
+
+    for (let afIndex = 0; afIndex < sortedAfs.length; afIndex++) {
+        const af = sortedAfs[afIndex];
         const safeAfName = af.name.replace(/'/g, "\\'");
         const safeAfPath = af.path.replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
         const rowspan = Math.max(af.snes.length, 1);
         const rowspanAttr = rowspan > 1 ? ` rowspan="${rowspan}"` : '';
+        const firstRowClass = `sne-af-group${afIndex > 0 ? ' sne-af-separator' : ''}`;
 
         const afIconCell = `<td class="sne-af-cell"${rowspanAttr} ondblclick="openFolder('${safeAfPath}', '${safeAfName}')"><i class="material-symbols-outlined text-primary">folder</i></td>`;
         const afNameCell = `<td class="sne-af-cell fw-semibold"${rowspanAttr} ondblclick="openFolder('${safeAfPath}', '${safeAfName}')">${af.name}</td>`;
@@ -1427,10 +1431,8 @@ function renderAFs() {
                         </button>
                     </td>`;
 
-        html += `<tbody class="sne-af-group" data-af-name="${af.name}">`;
-
         if (af.snes.length === 0) {
-            html += `<tr>${afIconCell}${afNameCell}${afActionsCell}
+            html += `<tr class="${firstRowClass}" data-af-name="${af.name}">${afIconCell}${afNameCell}${afActionsCell}
                     <td colspan="6" class="text-muted fst-italic">Sem SNEs</td>
                 </tr>`;
         } else {
@@ -1458,8 +1460,12 @@ function renderAFs() {
                     }).join('')
                     : '<span class="text-muted fst-italic">Vazia</span>';
 
-                html += `<tr>`;
-                if (i === 0) html += afIconCell + afNameCell + afActionsCell;
+                if (i === 0) {
+                    html += `<tr class="${firstRowClass}" data-af-name="${af.name}">`;
+                    html += afIconCell + afNameCell + afActionsCell;
+                } else {
+                    html += `<tr>`;
+                }
                 html += `
                     <td ondblclick="openFolder('${safeSnePath}', '${safeSneNum}')"><i class="material-symbols-outlined text-muted">receipt_long</i></td>
                     <td class="text-nowrap" ondblclick="openFolder('${safeSnePath}', '${safeSneNum}')">${sne.name}</td>
@@ -1481,11 +1487,9 @@ function renderAFs() {
                 </tr>`;
             }
         }
-
-        html += `</tbody>`;
     }
 
-    html += `</table></div>`;
+    html += `</tbody></table></div>`;
     container.innerHTML = html;
     setupFolderPathButtons(container);
     setupRefreshAfsButton(container);
