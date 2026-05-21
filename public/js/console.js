@@ -140,6 +140,9 @@ function ensureConsoleDOM() {
   });
   consoleResizeObserver.observe(consoleContainer);
   window.addEventListener('resize', enforceConsoleConstraints);
+
+  consoleHeader.addEventListener('mousedown', onDragStart);
+  consoleHeader.addEventListener('touchstart', onDragStart, { passive: false });
 }
 
 async function showScriptRunningOverlay() {
@@ -215,8 +218,6 @@ function prepareConsoleForExecution(scriptName) {
     summaryDescription.textContent = 'Aguarde o término do processamento do script R.';
   }
 
-  consoleHeader.addEventListener('mousedown', onDragStart);
-  consoleHeader.addEventListener('touchstart', onDragStart, { passive: false });
 }
 
 function handleScriptResult(result) {
