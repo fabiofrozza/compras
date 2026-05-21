@@ -383,17 +383,15 @@ function selecionarFornecedor(key) {
     });
 
     const group = sneGrouped.get(key);
-    if (group) renderCertidoesDoFornecedor(group);
+    if (group) {
+        renderCertidoesDoFornecedor(group);
+        renderSnesDoFornecedor(group.cnpj);
+    }
 }
 
 function renderCertidoesDoFornecedor(group) {
     const container = document.getElementById('sne-certidoes-list');
-    const titulo = document.getElementById('sne-certidoes-titulo');
     if (!container) return;
-
-    if (titulo) {
-        titulo.textContent = group.company || (group.cnpj ? formatCnpj(group.cnpj) : 'Certidões');
-    }
 
     const results = group.certidoes;
 
@@ -454,13 +452,82 @@ function renderCertidoesDoFornecedor(group) {
 
 function resetCertidoesPanel() {
     const container = document.getElementById('sne-certidoes-list');
-    const titulo = document.getElementById('sne-certidoes-titulo');
     if (container) {
         container.innerHTML = `<div class="alert alert-info" role="alert">
             <i class="material-symbols-outlined">info</i> Selecione um fornecedor para ver as certidões
         </div>`;
     }
-    if (titulo) titulo.textContent = 'Certidões';
+    resetSnesPanel();
+}
+
+function resetSnesPanel() {
+    const container = document.getElementById('sne-snes-panel-list');
+    if (container) {
+        container.innerHTML = `<div class="alert alert-info" role="alert">
+            <i class="material-symbols-outlined">info</i> Selecione um fornecedor para ver as SNEs
+        </div>`;
+    }
+}
+
+function renderSnesDoFornecedor(cnpj) {
+    const container = document.getElementById('sne-snes-panel-list');
+    const titulo = document.getElementById('sne-snes-titulo');
+    if (!container) return;
+
+    if (!cnpj || cnpj === '__sem_cnpj__') {
+        container.innerHTML = `<div class="alert alert-warning"><i class="material-symbols-outlined">warning</i> CNPJ não identificado</div>`;
+        return;
+    }
+
+    if (sneEmpenhos.length === 0) {
+        container.innerHTML = `<div class="alert alert-info"><i class="material-symbols-outlined">info</i> Abra a aba <strong>Empenhos</strong> para carregar as SNEs</div>`;
+        return;
+    }
+
+    const snes = sneEmpenhos.filter(r => !r.error && r.cnpj === cnpj);
+
+    if (snes.length === 0) {
+        container.innerHTML = `<div class="alert alert-warning"><i class="material-symbols-outlined">warning</i> Nenhuma SNE encontrada para este fornecedor</div>`;
+        return;
+    }
+
+    let html = `
+        <div class="files-table-container sne-table-container">
+            <table class="files-table">
+                <thead>
+                    <tr>
+                        <th colspan="2">Arquivo</th>
+                        <th>SNE</th>
+                        <th>AF</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+    for (const r of snes) {
+        const safeFilePath = (sneEmpenhosFolderPath + '\\' + r.filename).replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
+        const sneNum = r.sneNumber || '—';
+        const afLabel = r.af ? `${r.af.number} / ${r.af.year}` : '—';
+
+        html += `
+            <tr ondblclick="openFile('${safeFilePath}')">
+                <td><i class="material-symbols-outlined text-muted">receipt_long</i></td>
+                <td class="text-break">${r.filename}</td>
+                <td class="text-nowrap">${sneNum}</td>
+                <td class="text-nowrap">${afLabel}</td>
+                <td class="table-btn-column">
+                    <button class="btn btn-sm text-primary file-row-btn"
+                        onclick="openFile('${safeFilePath}')"
+                        data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">
+                        <i class="material-symbols-outlined">open_in_new</i>
+                    </button>
+                </td>
+            </tr>`;
+    }
+
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+    initializeTooltips();
 }
 
 // ====== ABERTURA DE ARQUIVOS ======
@@ -878,6 +945,7 @@ function carregarEmpenhos() {
             .catch(() => {})
             .finally(() => {
                 renderEmpenhos();
+                if (sneSelectedCnpj) renderSnesDoFornecedor(sneGrouped.get(sneSelectedCnpj)?.cnpj);
 
                 const total = sneEmpenhos.length;
                 const erros = sneEmpenhos.filter(r => r.error).length;
