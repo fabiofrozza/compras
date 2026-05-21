@@ -1399,10 +1399,10 @@ function renderAFs() {
                         ${sortTh('af', 'AF', '', 'colspan="2"')}
                         <th></th>
                         <th colspan="2">SNE</th>
+                        <th></th>
                         <th class="text-center">Tombamento</th>
                         <th class="text-center">Certidões</th>
                         <th>Arquivos</th>
-                        <th></th>
                     </tr>
                 </thead>`;
 
@@ -1412,11 +1412,11 @@ function renderAFs() {
         const rowspan = Math.max(af.snes.length, 1);
         const rowspanAttr = rowspan > 1 ? ` rowspan="${rowspan}"` : '';
 
-        const afIconCell = `<td class="sne-af-cell"${rowspanAttr}><i class="material-symbols-outlined text-primary">folder</i></td>`;
-        const afNameCell = `<td class="sne-af-cell fw-semibold"${rowspanAttr}>${af.name}</td>`;
+        const afIconCell = `<td class="sne-af-cell"${rowspanAttr} ondblclick="openFolder('${safeAfPath}', '${safeAfName}')"><i class="material-symbols-outlined text-primary">folder</i></td>`;
+        const afNameCell = `<td class="sne-af-cell fw-semibold"${rowspanAttr} ondblclick="openFolder('${safeAfPath}', '${safeAfName}')">${af.name}</td>`;
         const afActionsCell = `<td class="sne-af-cell table-btn-column text-nowrap"${rowspanAttr}>
                         <button class="btn btn-sm text-primary file-row-btn"
-                            onclick="openFolder('${safeAfPath}')"
+                            onclick="openFolder('${safeAfPath}', '${safeAfName}')"
                             data-bs-toggle="tooltip" data-bs-title="Abrir pasta da AF">
                             <i class="material-symbols-outlined">folder_open</i>
                         </button>
@@ -1461,14 +1461,11 @@ function renderAFs() {
                 html += `<tr>`;
                 if (i === 0) html += afIconCell + afNameCell + afActionsCell;
                 html += `
-                    <td><i class="material-symbols-outlined text-muted">receipt_long</i></td>
-                    <td class="text-nowrap">${sne.name}</td>
-                    <td class="text-center">${tombCell}</td>
-                    <td class="text-center">${statusCell}</td>
-                    <td>${filesHtml}</td>
+                    <td ondblclick="openFolder('${safeSnePath}', '${safeSneNum}')"><i class="material-symbols-outlined text-muted">receipt_long</i></td>
+                    <td class="text-nowrap" ondblclick="openFolder('${safeSnePath}', '${safeSneNum}')">${sne.name}</td>
                     <td class="table-btn-column text-nowrap">
                         <button class="btn btn-sm text-primary file-row-btn"
-                            onclick="openFolder('${safeSnePath}')"
+                            onclick="openFolder('${safeSnePath}', '${safeSneNum}')"
                             data-bs-toggle="tooltip" data-bs-title="Abrir pasta da SNE">
                             <i class="material-symbols-outlined">folder_open</i>
                         </button>
@@ -1478,6 +1475,9 @@ function renderAFs() {
                             <i class="material-symbols-outlined">delete</i>
                         </button>
                     </td>
+                    <td class="text-center">${tombCell}</td>
+                    <td class="text-center">${statusCell}</td>
+                    <td>${filesHtml}</td>
                 </tr>`;
             }
         }
