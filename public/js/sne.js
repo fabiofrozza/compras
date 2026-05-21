@@ -1639,16 +1639,32 @@ async function executarCriarAFs() {
 
     if (!confirmed) return;
 
+    const afsTabEl = document.getElementById('tab-sne-afs');
+    if (afsTabEl) bootstrap.Tab.getOrCreateInstance(afsTabEl).show();
+
+    const afsContainer = document.getElementById('sne-afs-container');
+    if (afsContainer) afsContainer.innerHTML = sneSpinnerHTML('Criando estrutura de AFs...', 'sne-afs-criar-pb');
+
+    let fakeProgress = 0;
+    const progressInterval = setInterval(() => {
+        fakeProgress = Math.min(fakeProgress + Math.random() * 4 + 1, 90);
+        atualizarProgressoSne('sne-afs-criar-pb', fakeProgress, 100, 'Criando pastas...');
+    }, 400);
+
     try {
         const response = await fetch('/api/sne/empenhos/criar-afs', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...(filenames && { filenames }), moveSnes }),
         });
+        clearInterval(progressInterval);
+        atualizarProgressoSne('sne-afs-criar-pb', 100, 100, 'Concluído');
+
         const data = await response.json();
 
         if (!response.ok) {
             showToast(`Erro ao criar AFs: ${data.error}`, 'error');
+            carregarAFs();
             return;
         }
 
@@ -1687,6 +1703,8 @@ async function executarCriarAFs() {
         }
         carregarAFs();
     } catch (error) {
+        clearInterval(progressInterval);
         showToast(`Erro: ${error.message}`, 'error');
+        carregarAFs();
     }
 }
