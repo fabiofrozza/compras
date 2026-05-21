@@ -146,6 +146,12 @@ async function setHomeBackground(bgSource) {
         bgSource = appState.preferences.bgSource || 'random';
     }
 
+    if (bgSource === 'none') {
+        homePane.style.removeProperty('--home-bg-url');
+        homePane.classList.remove('home-bg-loaded');
+        return;
+    }
+
     const [localImages, bingImages] = await Promise.all([
         bgSource !== 'bing'
             ? fetch('/api/home-backgrounds').then(r => r.json()).then(d => d.images || []).catch(() => [])
@@ -228,7 +234,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const cfg = await fetch('/api/app-config').then(r => r.json());
         const refreshMs = (cfg.backgroundRefreshTime || 0) * 1000;
-        if (refreshMs > 0) setInterval(setHomeBackground, refreshMs);
+        loadAppState();
+        if (refreshMs > 0 && (appState.preferences.bgSource || 'random') !== 'none') {
+            setInterval(setHomeBackground, refreshMs);
+        }
     } catch (_) { }
 });
 
