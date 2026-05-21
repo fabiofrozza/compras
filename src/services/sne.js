@@ -75,10 +75,11 @@ const CERT_CHECKS = {
   estadual: {
     // Both patterns require a colon before the date, preventing false matches when PDF text
     // extraction outputs labels and values out of order (labels first, then values in a separate column).
+    // Day and month accept 1–2 digits; year accepts 2 or 4 digits (e.g. 9/4/26 or 09/04/2026).
     dates: [
-      { label: 'Estadual', pattern: /[Vv]álida?\s+até\s*:?\s*(\d{2}[\/.\-]\d{2}[\/.\-]\d{4})/i },
+      { label: 'Estadual', pattern: /[Vv]álida?\s+até\s*:?\s*(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2}(?:\d{2})?)/i },
       // Handles "Validade: DD/MM/YYYY" and "Validade (conforme Lei nº xxxx): DD/MM/YYYY"
-      { label: 'Estadual', pattern: /[Vv]alidade[^:]*:\s*(\d{2}[\/.\-]\d{2}[\/.\-]\d{4})/i },
+      { label: 'Estadual', pattern: /[Vv]alidade[^:]*:\s*(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2}(?:\d{2})?)/i },
     ],
   },
 };
@@ -99,10 +100,13 @@ function normalizeText(raw) {
 }
 
 function extractCnpj(text) {
-  // Matches formatted CNPJ: XX.XXX.XXX/XXXX-XX or digits-only variants
-  const match = text.match(/\d{2}[\.\s]?\d{3}[\.\s]?\d{3}[\.\s\/]?\d{4}[\.\s\-]?\d{2}/);
-  if (!match) return null;
-  return match[0].replace(/[.\-\/\s]/g, '');
+  // Full CNPJ: XX.XXX.XXX/XXXX-XX or digits-only variants
+  let match = text.match(/\d{2}[\.\s]?\d{3}[\.\s]?\d{3}[\.\s\/]?\d{4}[\.\s\-]?\d{2}/);
+  if (match) return match[0].replace(/[.\-\/\s]/g, '');
+  // Radical CNPJ (8 digits): XX.XXX.XXX/ — used by certidões that cover all company branches (e.g. Receita Estadual RS)
+  match = text.match(/\d{2}\.\d{3}\.\d{3}\//);
+  if (match) return match[0].replace(/[.\/]/g, '');
+  return null;
 }
 
 // Extracts company name from RAW (non-normalized) text so newlines act as natural field delimiters.
@@ -137,7 +141,8 @@ function extractCompanyName(rawText) {
 
 function parseDate(str) {
   const [d, m, y] = str.split(/[\/.\-]/).map(Number);
-  return new Date(y, m - 1, d);
+  const year = y < 100 ? 2000 + y : y;
+  return new Date(year, m - 1, d);
 }
 
 function classifyDate(dateStr) {
@@ -641,8 +646,8 @@ async function criarAFs(filenames = null, moveSnes = false) {
   const certidoesByCnpj = new Map();
   for (const f of certidoesEntries) {
     if (!f.toLowerCase().endsWith('.pdf')) continue;
-    // After renaming, filename starts with 14-digit CNPJ
-    const cnpjMatch = f.match(/^(\d{14})/);
+    // Filename starts with 14-digit CNPJ or 8-digit radical (for certidões covering all branches)
+    const cnpjMatch = f.match(/^(\d{14}|\d{8})/);
     if (!cnpjMatch) continue;
     const cnpj = cnpjMatch[1];
     const list = certidoesByCnpj.get(cnpj) || [];
@@ -680,7 +685,10 @@ async function criarAFs(filenames = null, moveSnes = false) {
         created.errors.push(`Erro ao ${moveSnes ? 'mover' : 'copiar'} SNE "${r.filename}": ${e.message}`);
       }
 
-      const certFiles = r.cnpj ? (certidoesByCnpj.get(r.cnpj) || []) : [];
+      const certFiles = r.cnpj ? [
+        ...(certidoesByCnpj.get(r.cnpj) || []),
+        ...(certidoesByCnpj.get(r.cnpj.slice(0, 8)) || []),
+      ] : [];
       for (const certFile of certFiles) {
         const src = path.join(SNE_CERTIDOES, certFile);
         const dst = path.join(snePath, certFile);
@@ -781,14 +789,17 @@ async function analyzeAFs(onProgress) {
 async function sincronizarCertidoesSne(afName, sneName, cnpj) {
   const snePath = path.join(SNE_AFS, afName, sneName);
 
+  const radical = cnpj.slice(0, 8);
+  const matchesCnpj = f => f.toLowerCase().endsWith('.pdf') && (f.startsWith(cnpj) || f.startsWith(radical));
+
   const sneEntries = await fs.readdir(snePath);
-  const stale = sneEntries.filter(f => f.toLowerCase().endsWith('.pdf') && f.startsWith(cnpj));
+  const stale = sneEntries.filter(matchesCnpj);
   for (const f of stale) {
     await fs.unlink(path.join(snePath, f));
   }
 
   const certdoesEntries = await fs.readdir(SNE_CERTIDOES).catch(() => []);
-  const fresh = certdoesEntries.filter(f => f.toLowerCase().endsWith('.pdf') && f.startsWith(cnpj));
+  const fresh = certdoesEntries.filter(matchesCnpj);
   for (const f of fresh) {
     await fs.copyFile(path.join(SNE_CERTIDOES, f), path.join(snePath, f));
   }
