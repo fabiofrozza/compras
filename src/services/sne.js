@@ -337,15 +337,17 @@ async function fileExists(filePath) {
   }
 }
 
-async function renameCertidoes() {
+async function renameCertidoes(onProgress) {
   const pdfParse = require('pdf-parse/lib/pdf-parse.js');
 
   const { files, folderPath } = await listCertidoes();
+  const total = files.length;
 
   // Phase 1: analyze all files
   const analyses = [];
-  for (const file of files) {
-    analyses.push(await analyzeCertidao(file.name, pdfParse));
+  for (let i = 0; i < files.length; i++) {
+    if (onProgress) onProgress(i + 1, total, files[i].name);
+    analyses.push(await analyzeCertidao(files[i].name, pdfParse));
   }
 
   // Phase 1.5: deduplicate by (cnpj, type) — keep best validity, delete others

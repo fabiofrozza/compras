@@ -542,23 +542,24 @@ async function analisarCertidoes() {
     if (!confirmed) return;
 
     const btn = document.getElementById('btn-analisar-certidoes');
+    const fornecedoresContainer = document.getElementById('sne-fornecedores-list');
     if (btn) btn.disabled = true;
+    if (fornecedoresContainer) {
+        fornecedoresContainer.innerHTML = sneSpinnerHTML('Verificando certidões...', 'sne-certidoes-verificar-pb');
+    }
 
-    try {
-        const response = await fetch('/api/sne/certidoes/renomear', { method: 'POST' });
-        const data = await response.json();
+    const es = new EventSource('/api/sne/certidoes/renomear');
+    let finalizado = false;
+    const finalizar = () => { finalizado = true; es.close(); if (btn) btn.disabled = false; };
 
-        if (!response.ok) {
-            const message = data.error || 'Erro ao processar certidões.';
-            sneSessionLogs.certidoes = { log: sneLogLine(SNE_LOG_C.error, message), status: 'error', message };
-            addNotification({
-                message,
-                type: 'error',
-                source: 'SNE',
-                actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('certidoes') }],
-            });
-            return;
-        }
+    es.addEventListener('progress', (e) => {
+        const d = JSON.parse(e.data);
+        atualizarProgressoSne('sne-certidoes-verificar-pb', d.current, d.total, d.label);
+    });
+
+    es.addEventListener('done', (e) => {
+        finalizar();
+        const data = JSON.parse(e.data);
 
         const renamed = data.results.filter(r => r.renamed).length;
         const deleted = data.results.filter(r => r.deleted).length;
@@ -622,8 +623,12 @@ async function analisarCertidoes() {
         });
 
         carregarFornecedores(() => { if (sneEmpenhosFolderPath) renderEmpenhos(); });
-    } catch (error) {
-        const message = `Erro: ${error.message}`;
+    });
+
+    es.addEventListener('fail', (e) => {
+        finalizar();
+        const d = JSON.parse(e.data);
+        const message = d.error || 'Erro ao processar certidões.';
         sneSessionLogs.certidoes = { log: sneLogLine(SNE_LOG_C.error, message), status: 'error', message };
         addNotification({
             message,
@@ -631,9 +636,14 @@ async function analisarCertidoes() {
             source: 'SNE',
             actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('certidoes') }],
         });
-    } finally {
-        if (btn) btn.disabled = false;
-    }
+        carregarFornecedores();
+    });
+
+    es.onerror = () => {
+        if (finalizado) return;
+        finalizar();
+        carregarFornecedores();
+    };
 }
 
 // ====== UTILITÁRIOS DE EXIBIÇÃO ======
