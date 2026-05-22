@@ -476,7 +476,7 @@ document.addEventListener('change', (e) => {
 function atualizarIndicadoresSubTabs(campo) {
     const tabContents = campo
         ? [campo.closest('.tab-content')].filter(Boolean)
-        : document.querySelectorAll('.sub-tabs + .sub-tabs-content .tab-content, .sub-tabs + .script-form .tab-content');
+        : document.querySelectorAll('.sub-tabs + .sub-tabs-content .tab-content, .sub-tabs + .panel .tab-content');
 
     tabContents.forEach(tabContent => {
         tabContent.querySelectorAll('.tab-pane').forEach(pane => {

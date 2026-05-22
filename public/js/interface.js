@@ -14,7 +14,7 @@ function customSpinnerHTML(message, color = 'primary') {
 // ====== CABEÇALHOS DE SCRIPT-FORM ======
 
 function initScriptFormHeaders(container) {
-    const headers = container.querySelectorAll('.script-form-header:not([data-initialized])');
+    const headers = container.querySelectorAll('.panel-header:not([data-initialized])');
     headers.forEach(h4 => {
         const icon = h4.dataset.comprasIcon;
         const title = h4.dataset.comprasTitle;
@@ -43,7 +43,7 @@ function initScriptFormHeaders(container) {
 
         // Container de botões
         const buttonsDiv = document.createElement('div');
-        buttonsDiv.className = 'script-form-header-buttons';
+        buttonsDiv.className = 'panel-header-buttons';
 
         // Botão de ajuda (se data-compras-help presente)
         if (helpText) {

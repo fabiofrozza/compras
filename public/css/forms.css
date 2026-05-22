@@ -2,43 +2,47 @@
    FORMS
    ========================================================================== */
 
-.script-form {
+.panel {
     background-color: color-mix(in srgb, var(--compras-theme) 75%, white);
-    padding: 16px;
     border-radius: 8px;
     margin-bottom: 24px;
+    overflow: hidden;
 }
 
-.script-form-header {
+.panel > *:not(h4):not([popover]) {
+    padding: 12px 16px 16px;
+}
+
+.panel-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: default;
 }
 
-.script-form h4,
+.panel h4,
 .sub-tabs .nav-link {
     font-size: 1em;
 }
 
-.script-form h4,
+.panel h4,
 .sub-tabs .nav-link.active {
     color: var(--compras-text-primary);
 }
 
-.script-form h4 i {
+.panel h4 i {
     font-size: 1.25rem;
     vertical-align: top;
     font-variation-settings: "opsz" 48;
 }
 
-.script-form h4 {
-    margin-bottom: 14px;
-    border-bottom: 1px solid var(--compras-text-primary);
-    padding-bottom: 8px;
+.panel h4 {
+    margin-bottom: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--compras-text-primary) 25%, transparent);
+    padding: 8px 8px 8px 16px;
 }
 
-.script-form-header-buttons {
+.panel-header-buttons {
     display: flex;
     align-items: center;
     gap: 2px;
