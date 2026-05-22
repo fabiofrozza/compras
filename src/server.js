@@ -20,6 +20,18 @@ const PORT = process.env.COMPRAS_PORT || 3000;
 app.use(express.json({ limit: '5mb' }));
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const ms = Date.now() - start;
+    const body = req.body && Object.keys(req.body).length
+      ? ' ' + JSON.stringify(req.body).slice(0, 150)
+      : '';
+    logger.debug(`${req.method} ${req.url}${body} → ${res.statusCode} (${ms}ms)`, 'HTTP');
+  });
+  next();
+});
+
 
 registerFileRoutes(app, logger);
 
@@ -184,6 +196,7 @@ const server = app.listen(PORT, async () => {
     ws.on('message', (message) => {
       try {
         const data = JSON.parse(message);
+        logger.debug(`↓ ${JSON.stringify(data).slice(0, 200)}`, 'WebSocket');
         if (data.action === 'execute-r-script' || data.action === 'execute-npm-update') {
           handleConsoleMessage(ws, data, logger, isPathSafe, logConsentEnabled);
         }
