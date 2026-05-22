@@ -85,52 +85,70 @@
             </li>
         </ul>
 
-        <div class="panel shadow-sm sub-tabs-content" id="importacaoTabsForm">
+        <div class="shadow-sm sub-tabs-content" id="importacaoTabsForm">
             <div class="tab-content" id="importacaoTabsContent">
 
                 <div class="tab-pane fade show active" id="content-arquivos-importacao" role="tabpanel">
                     <div class="row">
+                        <div class="form-buttons mb-3">
+                            <button type="button" class="btn btn-sm btn-primary btn-run" id="btn-importacao-arquivos"
+                                onclick="executarAcaoImportacao('gerar')" disabled>
+                                Gerar arquivos para importar
+                            </button>
+                        </div>
+
                         <div class="col-sm-6">
-                            <h4 class="panel-header" data-compras-icon="upload_file"
-                                data-compras-title="Arquivos para importar"></h4>
-                            <div id="importacao-arquivos-csv" class="files-list" data-folder="ARQUIVOS_IMPORTAR"
-                                data-extensions="csv" data-selectable="false"></div>
+                            <div class="panel shadow-sm">
+                                <h4 class="panel-header" data-compras-icon="upload_file"
+                                    data-compras-title="Arquivos para importar"></h4>
+                                <div class="collapse show" id="importacao-arquivos-csv-collapse">
+                                    <div id="importacao-arquivos-csv" class="files-list" data-folder="ARQUIVOS_IMPORTAR"
+                                        data-extensions="csv" data-selectable="false"></div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-sm-6">
-                            <h4 class="panel-header" data-compras-icon="edit_note"
-                                data-compras-title="Descrição de itens a ajustar"></h4>
-                            <div id="importacao-arquivos-xlsx" class="files-list" data-folder="ARQUIVOS_IMPORTAR"
-                                data-extensions="xlsx" data-selectable="false"></div>
+                            <div class="panel shadow-sm">
+                                <h4 class="panel-header" data-compras-icon="edit_note"
+                                    data-compras-title="Descrição de itens a ajustar"></h4>
+                                <div class="collapse show" id="importacao-arquivos-xlsx-collapse">
+                                    <div id="importacao-arquivos-xlsx" class="files-list"
+                                        data-folder="ARQUIVOS_IMPORTAR" data-extensions="xlsx" data-selectable="false">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-buttons mt-3">
-                        <button type="button" class="btn btn-sm btn-primary btn-run" id="btn-importacao-arquivos"
-                            onclick="executarAcaoImportacao('gerar')" disabled>
-                            Gerar arquivos para importar
-                        </button>
                     </div>
                 </div>
 
                 <div class="tab-pane fade" id="content-resumo-pedidos" role="tabpanel">
                     <div class="row">
-                        <div class="col-sm-6">
-                            <h4 class="panel-header" data-compras-icon="screenshot"
-                                data-compras-title="Prints das telas dos pedidos"></h4>
-                            <div id="importacao-resumos-pdf" class="files-list" data-folder="RESUMO_PEDIDOS"
-                                data-extensions="pdf" data-selectable="false"></div>
+                        <div class="form-buttons mb-3">
+                            <button type="button" class="btn btn-sm btn-primary btn-run" id="btn-importacao-resumo"
+                                onclick="executarAcaoImportacao('resumo')" disabled>
+                                Gerar resumo dos pedidos
+                            </button>
                         </div>
                         <div class="col-sm-6">
-                            <h4 class="panel-header" data-compras-icon="description"
-                                data-compras-title="Resumos gerados"></h4>
-                            <div id="importacao-resumos-xlsx" class="files-list" data-folder="RESUMO_PEDIDOS"
-                                data-extensions="xlsx" data-selectable="false"></div>
+                            <div class="panel shadow-sm">
+                                <h4 class="panel-header" data-compras-icon="screenshot"
+                                    data-compras-title="Prints das telas dos pedidos"></h4>
+                                <div class="collapse show" id="importacao-resumos-pdf-collapse">
+                                    <div id="importacao-resumos-pdf" class="files-list" data-folder="RESUMO_PEDIDOS"
+                                        data-extensions="pdf" data-selectable="false"></div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-buttons mt-3">
-                        <button type="button" class="btn btn-sm btn-primary btn-run" id="btn-importacao-resumo"
-                            onclick="executarAcaoImportacao('resumo')" disabled>
-                            Gerar resumo dos pedidos
-                        </button>
+                        <div class="col-sm-6">
+                            <div class="panel shadow-sm">
+                                <h4 class="panel-header" data-compras-icon="description"
+                                    data-compras-title="Resumos gerados"></h4>
+                                <div class="collapse show" id="importacao-resumos-xlsx-collapse">
+                                    <div id="importacao-resumos-xlsx" class="files-list" data-folder="RESUMO_PEDIDOS"
+                                        data-extensions="xlsx" data-selectable="false"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -146,106 +164,127 @@
                                 <option value="">-- Processos --</option>
                             </select>
                         </div>
+                        <div class="col-sm-6">
+                            <div class="form-buttons">
+                                <button type="button" class="btn btn-sm btn-primary btn-run"
+                                    id="btn-importacao-relatorio" onclick="executarAcaoImportacao('relatorio')"
+                                    disabled>
+                                    Gerar relatório gerencial
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-6">
-                            <h4 class="panel-header" data-compras-icon="table_chart"
-                                data-compras-title="Planilha auxiliar para DFD"></h4>
-                            <div id="importacao-relatorios-xlsx" class="files-list" data-folder="RELATORIOS"
-                                data-extensions="xlsx" data-selectable="false"></div>
+                            <div class="panel shadow-sm">
+                                <h4 class="panel-header" data-compras-icon="table_chart"
+                                    data-compras-title="Planilha auxiliar para DFD"></h4>
+                                <div class="collapse show" id="importacao-relatorios-xlsx-collapse">
+                                    <div id="importacao-relatorios-xlsx" class="files-list" data-folder="RELATORIOS"
+                                        data-extensions="xlsx" data-selectable="false"></div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-sm-6">
-                            <h4 class="panel-header" data-compras-icon="analytics"
-                                data-compras-title="Relatórios gerenciais"></h4>
-                            <div id="importacao-relatorios-pdf" class="files-list" data-folder="RELATORIOS"
-                                data-extensions="pdf" data-selectable="false"></div>
+                            <div class="panel shadow-sm">
+                                <h4 class="panel-header" data-compras-icon="analytics"
+                                    data-compras-title="Relatórios gerenciais"></h4>
+                                <div class="collapse show" id="importacao-relatorios-pdf-collapse">
+                                    <div id="importacao-relatorios-pdf" class="files-list" data-folder="RELATORIOS"
+                                        data-extensions="pdf" data-selectable="false"></div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-buttons mt-3">
-                        <button type="button" class="btn btn-sm btn-primary btn-run" id="btn-importacao-relatorio"
-                            onclick="executarAcaoImportacao('relatorio')" disabled>
-                            Gerar relatório gerencial
-                        </button>
                     </div>
                 </div>
 
                 <div class="tab-pane fade" id="content-configuracoes" role="tabpanel">
                     <!-- Form configurações -->
-                    <h4>Configurações</h4>
-                    <div class="form-sub-container" id="form-importacao-config">
-                        <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
-                            class="form-sub-btn" onclick="limparFormulario('form-importacao-config')">
-                            <i class="material-symbols-outlined">ink_eraser</i>
-                        </button>
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group">
-                                    <label for="importacao-val-min" class="form-label" data-bs-toggle="tooltip"
-                                        data-bs-title="Valor mínimo total do item para inclusão no processo">
-                                        Valor mínimo do item
-                                    </label>
-                                    <input type="number" class="form-control form-control-sm" id="importacao-val-min"
-                                        data-field="valor_minimo" data-validate-rule="numeric" min="1" required
-                                        data-validation-msg="Informe um valor mínimo válido.">
+                    <div class="panel shadow-sm">
+                        <h4 class="panel-header" data-compras-icon="settings" data-compras-title="Configurações"></h4>
+                        <div class="collapse show" id="form-importacao-config-collapse">
+                            <div class="form-sub-container" id="form-importacao-config">
+                                <button type="button" data-bs-toggle="tooltip" data-bs-title="Limpar todos os campos"
+                                    class="form-sub-btn" onclick="limparFormulario('form-importacao-config')">
+                                    <i class="material-symbols-outlined">ink_eraser</i>
+                                </button>
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label for="importacao-val-min" class="form-label" data-bs-toggle="tooltip"
+                                                data-bs-title="Valor mínimo total do item para inclusão no processo">
+                                                Valor mínimo do item
+                                            </label>
+                                            <input type="number" class="form-control form-control-sm"
+                                                id="importacao-val-min" data-field="valor_minimo"
+                                                data-validate-rule="numeric" min="1" required
+                                                data-validation-msg="Informe um valor mínimo válido.">
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label for="importacao-qtd-min" class="form-label" data-bs-toggle="tooltip"
+                                                data-bs-title="Quantidade mínima demandada do item para inclusão no processo">
+                                                Quantidade mínima do item
+                                            </label>
+                                            <input type="number" class="form-control form-control-sm"
+                                                id="importacao-qtd-min" data-field="qtd_minima"
+                                                data-validate-rule="numeric" min="1" required
+                                                data-validation-msg="Informe uma quantidade mínima válida.">
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label for="importacao-celula" class="form-label" data-bs-toggle="tooltip"
+                                                data-bs-title="Célula da LISTA FINAL onde inicia a área de inserção dos quantitativos pelas Unidades (ex: Q6)">
+                                                Célula inicial da inserção dos quantitativos
+                                            </label>
+                                            <input type="text" class="form-control form-control-sm"
+                                                id="importacao-celula" data-field="celula_inicial"
+                                                data-validate-rule="pattern" data-regex-pattern="^[A-Za-z]+[1-9][0-9]*$"
+                                                placeholder="Ex: Q6" required
+                                                data-validation-msg="Informe a célula no formato correto (ex: Q6).">
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group">
-                                    <label for="importacao-qtd-min" class="form-label" data-bs-toggle="tooltip"
-                                        data-bs-title="Quantidade mínima demandada do item para inclusão no processo">
-                                        Quantidade mínima do item
-                                    </label>
-                                    <input type="number" class="form-control form-control-sm" id="importacao-qtd-min"
-                                        data-field="qtd_minima" data-validate-rule="numeric" min="1" required
-                                        data-validation-msg="Informe uma quantidade mínima válida.">
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group">
-                                    <label for="importacao-celula" class="form-label" data-bs-toggle="tooltip"
-                                        data-bs-title="Célula da LISTA FINAL onde inicia a área de inserção dos quantitativos pelas Unidades (ex: Q6)">
-                                        Célula inicial da inserção dos quantitativos
-                                    </label>
-                                    <input type="text" class="form-control form-control-sm" id="importacao-celula"
-                                        data-field="celula_inicial" data-validate-rule="pattern"
-                                        data-regex-pattern="^[A-Za-z]+[1-9][0-9]*$" placeholder="Ex: Q6" required
-                                        data-validation-msg="Informe a célula no formato correto (ex: Q6).">
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group">
-                                    <label for="importacao-qtd-un" class="form-label" data-bs-toggle="tooltip"
-                                        data-bs-title="Quantidade de colunas de Unidades requerentes (incluindo ocultas)">
-                                        Quantidade de Unidades requerentes
-                                    </label>
-                                    <input type="number" class="form-control form-control-sm" id="importacao-qtd-un"
-                                        data-field="qtd_unidades" min="1" data-validate-rule="numeric" min="1" required
-                                        data-validation-msg="Informe a quantidade de unidades.">
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group">
-                                    <label for="importacao-aba-menu" class="form-label" data-bs-toggle="tooltip"
-                                        data-bs-title="Nome da aba Menu na planilha (apenas letras, números e espaços)">
-                                        Nome da Aba Menu
-                                    </label>
-                                    <input type="text" class="form-control form-control-sm" id="importacao-aba-menu"
-                                        data-field="aba_menu" placeholder="Ex: Menu" required
-                                        data-validation-msg="Informe o nome da aba Menu.">
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group">
-                                    <label for="importacao-aba-lista" class="form-label" data-bs-toggle="tooltip"
-                                        data-bs-title="Nome da aba LISTA FINAL na planilha (apenas letras, números e espaços)">
-                                        Nome da Aba LISTA FINAL
-                                    </label>
-                                    <input type="text" class="form-control form-control-sm" id="importacao-aba-lista"
-                                        data-field="aba_lista_final" placeholder="Ex: LISTA FINAL" value="LISTA FINAL"
-                                        required data-validation-msg="Informe o nome da aba LISTA FINAL.">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label for="importacao-qtd-un" class="form-label" data-bs-toggle="tooltip"
+                                                data-bs-title="Quantidade de colunas de Unidades requerentes (incluindo ocultas)">
+                                                Quantidade de Unidades requerentes
+                                            </label>
+                                            <input type="number" class="form-control form-control-sm"
+                                                id="importacao-qtd-un" data-field="qtd_unidades" min="1"
+                                                data-validate-rule="numeric" required
+                                                data-validation-msg="Informe a quantidade de unidades.">
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label for="importacao-aba-menu" class="form-label" data-bs-toggle="tooltip"
+                                                data-bs-title="Nome da aba Menu na planilha (apenas letras, números e espaços)">
+                                                Nome da Aba Menu
+                                            </label>
+                                            <input type="text" class="form-control form-control-sm"
+                                                id="importacao-aba-menu" data-field="aba_menu" placeholder="Ex: Menu"
+                                                required data-validation-msg="Informe o nome da aba Menu.">
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label for="importacao-aba-lista" class="form-label"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-title="Nome da aba LISTA FINAL na planilha (apenas letras, números e espaços)">
+                                                Nome da Aba LISTA FINAL
+                                            </label>
+                                            <input type="text" class="form-control form-control-sm"
+                                                id="importacao-aba-lista" data-field="aba_lista_final"
+                                                placeholder="Ex: LISTA FINAL" value="LISTA FINAL" required
+                                                data-validation-msg="Informe o nome da aba LISTA FINAL.">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -254,3 +293,4 @@
             </div>
         </div>
     </div>
+</div>
