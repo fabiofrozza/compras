@@ -563,7 +563,9 @@ document.addEventListener('click', (event) => {
   if (btn) {
     // Botões com onclick gerenciam sua própria execução (ex: importação, mailmerge);
     // isScriptRunning é verificado internamente pelo próprio runRScript.
-    if (btn.hasAttribute('onclick')) return;
+    // Checar a propriedade JS (.onclick) além do atributo HTML, pois onclick pode ser
+    // atribuído dinamicamente (btn.onclick = fn) sem criar o atributo.
+    if (btn.onclick || btn.hasAttribute('onclick')) return;
 
     // Bloqueia clique se há script em execução - apenas para botões sem onclick
     if (isScriptRunning) {
