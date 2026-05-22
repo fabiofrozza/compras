@@ -264,18 +264,31 @@
 }
 
 /* Estilos de Abas de Importação no Formulário */
+
+.sub-tabs-content,
+.sub-tabs .nav-link:hover,
+.sub-tabs .nav-link.active {
+    background-color: color-mix(in srgb, var(--compras-theme) 90%, var(--compras-text-primary));
+}
+
 .sub-tabs-content {
     padding: 0;
+    border-radius: 8px;
     border-top-left-radius: 0;
+    margin-bottom: 0px;
+    overflow: hidden;
 }
 
 .sub-tabs-content .tab-content {
     max-height: unset;
     overflow-y: unset;
+    padding: 0 !important;
 }
 
 .sub-tabs-content .tab-pane {
     min-height: unset;
+    padding-top: var(--compras-padding-main);
+    padding-bottom: 0px;
 }
 
 .sub-tabs {
@@ -294,12 +307,10 @@
 }
 
 .sub-tabs .nav-link:hover {
-    background-color: color-mix(in srgb, var(--compras-theme) 75%, white);
     color: var(--bs-primary);
 }
 
 .sub-tabs .nav-link.active {
-    background-color: color-mix(in srgb, var(--compras-theme) 75%, white);
     color: var(--bs-headings-color);
 }
 
