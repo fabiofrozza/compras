@@ -664,6 +664,6 @@
     background-color: var(--bs-info);
     border: 0px solid transparent;
     background-position: right 0.5rem center;
-    padding-right: 2rem;
-    font-size: 75%;
+    padding-right: 2rem !important;
+    font-size: 75% !important;
 }

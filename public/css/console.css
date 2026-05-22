@@ -232,6 +232,10 @@ body.dragging-console {
     position: relative;
     overflow: visible !important;
 }
+    
+.progress {
+    --bs-progress-bg: var(--compras-contrast);
+}
 
 .progress-bar {
     overflow: visible;
