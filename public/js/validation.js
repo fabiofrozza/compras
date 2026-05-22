@@ -181,6 +181,26 @@ const BUTTON_REGISTRY = {
         ],
     },
 
+    // ── SNE ───────────────────────────────────────────────────────────────────
+
+    'btn-atualizar-empenhos': {
+        conditions: [
+            { type: 'server', label: serverMessage },
+        ],
+    },
+
+    'btn-criar-afs': {
+        conditions: [
+            { type: 'server', label: serverMessage },
+        ],
+    },
+
+    'btn-atualizar-afs': {
+        conditions: [
+            { type: 'server', label: serverMessage },
+        ],
+    },
+
     // ── Instalação ────────────────────────────────────────────────────────────
 
     'btn-run-instalacao': {
@@ -401,7 +421,7 @@ function updateButtonTooltip(button, reasons) {
         warningIcon = document.createElement('i');
         warningIcon.className = 'material-symbols-outlined btn-unavailable-icon';
         warningIcon.textContent = 'cancel';
-        wrapper.insertBefore(warningIcon, button);
+        button.insertAdjacentElement('afterend', warningIcon);
     }
 
     warningIcon.setAttribute('data-bs-html', 'true');
