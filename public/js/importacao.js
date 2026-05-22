@@ -8,6 +8,7 @@ function inicializarImportacao() {
     if (document.getElementById('importacao-link')) {
         configurarValidacaoContinuaImportacao();
         validarLinkGoogle();
+        atualizarBotaoPrincipal('tab-arquivos-importacao');
         importacaoInicializado = true;
     }
 }
@@ -36,6 +37,39 @@ function configurarValidacaoContinuaImportacao() {
         configForm.addEventListener('input', () => { if (typeof evaluateAllButtons === 'function') evaluateAllButtons(); });
         configForm.addEventListener('change', () => { if (typeof evaluateAllButtons === 'function') evaluateAllButtons(); });
     }
+
+    document.getElementById('importacaoTabs')?.addEventListener('shown.bs.tab', event => {
+        atualizarBotaoPrincipal(event.target.id);
+        if (typeof evaluateAllButtons === 'function') evaluateAllButtons();
+    });
+}
+
+const IMPORTACAO_TAB_CONFIG = {
+    'tab-arquivos-importacao': { text: 'Gerar arquivos para importar', acao: 'gerar' },
+    'tab-resumo-pedidos':      { text: 'Gerar resumo dos pedidos',     acao: 'resumo' },
+    'tab-relatorio-gerencial': { text: 'Gerar relatório gerencial',    acao: 'relatorio' },
+};
+
+function atualizarBotaoPrincipal(activeTabId) {
+    const btn = document.getElementById('btn-importacao-principal');
+    const actionBar = document.getElementById('importacao-action-bar');
+    if (!btn || !actionBar) return;
+
+    const isRelatorio = activeTabId === 'tab-relatorio-gerencial';
+    const combo = document.getElementById('importacao-combo-spa');
+    const runGroup = document.getElementById('importacao-run-group');
+    combo?.classList.toggle('d-none', !isRelatorio);
+    runGroup?.classList.toggle('btn-solo', !isRelatorio);
+
+    const config = IMPORTACAO_TAB_CONFIG[activeTabId];
+    if (!config) {
+        actionBar.classList.add('d-none');
+        return;
+    }
+
+    actionBar.classList.remove('d-none');
+    btn.textContent = config.text;
+    btn.onclick = () => executarAcaoImportacao(config.acao);
 }
 
 function revalidarLinkGoogle() {
@@ -273,16 +307,7 @@ function exibirResultadoImportacao(data) {
 }
 
 function executarAcaoImportacao(abaDestino) {
-    // Mapeia aliases de abas: HTML usa 'gerar', form usa 'arquivos'
-    const btnIdMap = {
-        'gerar': 'btn-importacao-arquivos',
-        'resumo': 'btn-importacao-resumo',
-        'relatorio': 'btn-importacao-relatorio'
-    };
-
-    const botaoID = btnIdMap[abaDestino] || `btn-importacao-${abaDestino === 'importacao' ? 'arquivos' : abaDestino}`;
-    const btn = document.getElementById(botaoID);
-
+    const btn = document.getElementById('btn-importacao-principal');
     if (btn && btn.disabled) return;
 
     // Parâmetros enviados em ordem específica (o script R os lê posicionalmente)

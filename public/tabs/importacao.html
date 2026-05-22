@@ -39,6 +39,18 @@
                             manualmente</span>
                     </div>
                 </div>
+                <div class="form-buttons" id="importacao-action-bar">
+                    <div class="input-group input-group-sm w-auto btn-solo" id="importacao-run-group">
+                        <select class="form-select form-select-sm form-select-options d-none" id="importacao-combo-spa"
+                            data-field="processo_selecionado">
+                            <option value="">-- Processos --</option>
+                        </select>
+                        <button type="button" class="btn btn-sm btn-primary btn-run" id="btn-importacao-principal"
+                            disabled>
+                            Gerar arquivos para importar
+                        </button>
+                    </div>
+                </div>
             </div>
         </form>
     </div>
@@ -90,13 +102,6 @@
 
                 <div class="tab-pane fade show active" id="content-arquivos-importacao" role="tabpanel">
                     <div class="row">
-                        <div class="form-buttons mb-3">
-                            <button type="button" class="btn btn-sm btn-primary btn-run" id="btn-importacao-arquivos"
-                                onclick="executarAcaoImportacao('gerar')" disabled>
-                                Gerar arquivos para importar
-                            </button>
-                        </div>
-
                         <div class="col-sm-6">
                             <div class="panel shadow-sm">
                                 <h4 class="panel-header" data-compras-icon="upload_file"
@@ -123,12 +128,6 @@
 
                 <div class="tab-pane fade" id="content-resumo-pedidos" role="tabpanel">
                     <div class="row">
-                        <div class="form-buttons mb-3">
-                            <button type="button" class="btn btn-sm btn-primary btn-run" id="btn-importacao-resumo"
-                                onclick="executarAcaoImportacao('resumo')" disabled>
-                                Gerar resumo dos pedidos
-                            </button>
-                        </div>
                         <div class="col-sm-6">
                             <div class="panel shadow-sm">
                                 <h4 class="panel-header" data-compras-icon="screenshot"
@@ -153,27 +152,6 @@
                 </div>
 
                 <div class="tab-pane fade" id="content-relatorio-gerencial" role="tabpanel">
-                    <div class="row mb-3">
-                        <div class="col-sm-6">
-                            <label for="importacao-combo-spa" class="form-label" data-bs-toggle="tooltip"
-                                data-bs-title="Selecione o processo para geração do relatório (ou consolidado)">
-                                Processo SPA
-                            </label>
-                            <select class="form-select form-select-sm" id="importacao-combo-spa"
-                                data-field="processo_selecionado">
-                                <option value="">-- Processos --</option>
-                            </select>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-buttons">
-                                <button type="button" class="btn btn-sm btn-primary btn-run"
-                                    id="btn-importacao-relatorio" onclick="executarAcaoImportacao('relatorio')"
-                                    disabled>
-                                    Gerar relatório gerencial
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                     <div class="row">
                         <div class="col-sm-6">
                             <div class="panel shadow-sm">

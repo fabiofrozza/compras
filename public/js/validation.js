@@ -103,49 +103,32 @@ const BUTTON_REGISTRY = {
 
     // ── Importação ────────────────────────────────────────────────────────────
 
-    'btn-importacao-arquivos': {
+    'btn-importacao-principal': {
         conditions: [
             { type: 'custom', check: () => typeof importacaoLinkValido === 'undefined' || importacaoLinkValido, label: linkMessage },
             { type: 'form', formId: 'form-importacao-config', label: configuracaoMessage },
             {
                 type: 'custom',
                 check: () => {
+                    const activeTab = document.querySelector('#importacaoTabs .nav-link.active')?.id;
+                    if (activeTab === 'tab-relatorio-gerencial') return true;
                     const badge = document.getElementById('badge-processos');
                     return !badge || !badge.classList.contains('d-none');
                 },
                 label: processoMessage,
                 activeWhen: () => typeof importacaoLinkValido !== 'undefined' && importacaoLinkValido
             },
-            { type: 'r', label: rMessage },
-            { type: 'internet', label: internetMessage },
-            { type: 'server', label: serverMessage },
-        ],
-    },
-
-    'btn-importacao-resumo': {
-        conditions: [
-            { type: 'custom', check: () => typeof importacaoLinkValido === 'undefined' || importacaoLinkValido, label: linkMessage },
-            { type: 'form', formId: 'form-importacao-config', label: configuracaoMessage },
             {
                 type: 'custom',
                 check: () => {
-                    const badge = document.getElementById('badge-processos');
-                    return !badge || !badge.classList.contains('d-none');
+                    const activeTab = document.querySelector('#importacaoTabs .nav-link.active')?.id;
+                    if (activeTab !== 'tab-resumo-pedidos') return true;
+                    const container = document.getElementById('importacao-resumos-pdf');
+                    return !!container && container.querySelectorAll('tr[data-filepath], .item-card').length > 0;
                 },
-                label: processoMessage,
-                activeWhen: () => typeof importacaoLinkValido !== 'undefined' && importacaoLinkValido
+                label: 'Nenhum arquivo .pdf em "Prints das telas dos pedidos"',
+                activeWhen: () => document.querySelector('#importacaoTabs .nav-link.active')?.id === 'tab-resumo-pedidos'
             },
-            { type: 'folder-not-empty', containerId: 'importacao-resumos-pdf', label: 'Nenhum arquivo .pdf em "Prints das telas dos pedidos"' },
-            { type: 'r', label: rMessage },
-            { type: 'internet', label: internetMessage },
-            { type: 'server', label: serverMessage },
-        ],
-    },
-
-    'btn-importacao-relatorio': {
-        conditions: [
-            { type: 'custom', check: () => typeof importacaoLinkValido === 'undefined' || importacaoLinkValido, label: linkMessage },
-            { type: 'form', formId: 'form-importacao-config', label: configuracaoMessage },
             { type: 'r', label: rMessage },
             { type: 'internet', label: internetMessage },
             { type: 'server', label: serverMessage },

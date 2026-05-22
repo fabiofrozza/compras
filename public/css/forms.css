@@ -671,6 +671,11 @@
     --compras-badge-icon: gray;
 }
 
+.input-group.btn-solo > .btn {
+    border-radius: var(--bs-border-radius-sm) !important;
+    margin-left: 0 !important;
+}
+
 .form-select-options {
     background-color: var(--bs-info);
     border: 0px solid transparent;
