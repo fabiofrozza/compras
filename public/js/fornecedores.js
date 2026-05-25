@@ -605,7 +605,7 @@ async function limparPastaImportar() {
     if (!confirmed) return;
 
     try {
-        const response = await fetch('/api/clear-folder/fornecedores/PARA_IMPORTAR?extensions=.xlsx,.csv,.json', {
+        const response = await fetch('/api/clear-folder/fornecedores/para_importar?extensions=.xlsx,.csv,.json', {
             method: 'DELETE'
         });
         const data = await response.json();
