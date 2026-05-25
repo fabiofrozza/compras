@@ -11,8 +11,8 @@ postman/
 
 # dist, packages and dependencies
 node_modules/
-!bin/**
 dist/
+bin/node
 bin/**/*.md
 __pycache__
 
