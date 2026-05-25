@@ -408,6 +408,85 @@
 }
 
 /* ==========================================================================
+   LINUX WARNINGS
+   ========================================================================== */
+
+.linux-panel-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px 2px 4px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    background-color: #fff3cd;
+    color: #7c5a00;
+    border: 1px solid rgba(255, 193, 7, 0.45);
+    white-space: nowrap;
+}
+
+.linux-panel-badge .material-symbols-outlined {
+    font-size: 0.95rem;
+    vertical-align: middle;
+    font-variation-settings: "FILL" 1, "opsz" 20;
+    color: #e6a800;
+}
+
+.dark-mode .linux-panel-badge {
+    background-color: rgba(255, 193, 7, 0.12);
+    color: #ffd54f;
+    border-color: rgba(255, 193, 7, 0.3);
+}
+
+.dark-mode .linux-panel-badge .material-symbols-outlined {
+    color: #ffd54f;
+}
+
+.linux-panel-alert {
+    display: flex;
+    gap: 10px;
+    padding: 10px 12px;
+    margin-bottom: 4px;
+    background-color: #fff8e6;
+    border: 1px solid rgba(255, 193, 7, 0.5);
+    border-radius: 6px;
+    font-size: 0.82rem;
+    color: #6b4c00;
+    line-height: 1.5;
+}
+
+.linux-panel-alert code {
+    font-size: 0.8rem;
+    background-color: rgba(0, 0, 0, 0.07);
+    border-radius: 3px;
+    padding: 0 3px;
+    color: inherit;
+}
+
+.linux-alert-icon {
+    flex-shrink: 0;
+    font-size: 1.2rem;
+    font-variation-settings: "FILL" 1, "opsz" 20;
+    color: #e6a800;
+    margin-top: 1px;
+}
+
+.dark-mode .linux-panel-alert {
+    background-color: rgba(255, 193, 7, 0.08);
+    border-color: rgba(255, 193, 7, 0.25);
+    color: #ffd54f;
+}
+
+.dark-mode .linux-panel-alert code {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark-mode .linux-alert-icon {
+    color: #ffd54f;
+}
+
+/* ==========================================================================
    SNE TAB
    ========================================================================== */
 

@@ -291,6 +291,51 @@ async function carregarNpmPackages() {
     }
 }
 
+function injetarAvisosLinux(isDev) {
+    const alertas = [
+        {
+            panelId: 'r-info-panel',
+            alertText: 'No Linux, a detecção automática do R pode apresentar divergências. Caso o R não seja encontrado, verifique se o pacote <code>r-base</code> está instalado e se <code>Rscript</code> está no PATH do sistema.'
+        },
+        {
+            panelId: 'form-instalacao',
+            alertText: 'No Linux, a instalação de pacotes R frequentemente exige bibliotecas de sistema adicionais como <code>libcurl4-openssl-dev</code>, <code>libxml2-dev</code> e <code>libssl-dev</code>. Em caso de erros, instale as dependências via <code>apt</code>, <code>dnf</code> ou equivalente antes de tentar novamente.'
+        },
+        {
+            panelId: 'node-info-panel',
+            alertText: 'No Linux, esta aplicação utiliza o binário Node.js incluído na pasta <code>bin/</code>. A versão exibida pode divergir da instalação do sistema.'
+        }
+    ];
+
+    if (isDev) {
+        alertas.push({
+            panelId: 'npm-packages-panel',
+            alertText: 'No Linux, atualizações de pacotes npm podem exigir permissões adicionais dependendo da configuração do sistema.'
+        });
+    }
+
+    alertas.forEach(({ panelId, alertText }) => {
+        const panel = document.getElementById(panelId);
+        if (!panel) return;
+
+        const buttons = panel.querySelector('.panel-header-buttons');
+        if (buttons) {
+            const badge = document.createElement('span');
+            badge.className = 'linux-panel-badge';
+            badge.innerHTML = '<i class="material-symbols-outlined">warning</i>Linux';
+            buttons.prepend(badge);
+        }
+
+        const collapse = panel.querySelector('.collapse');
+        if (collapse) {
+            const alertEl = document.createElement('div');
+            alertEl.className = 'linux-panel-alert';
+            alertEl.innerHTML = `<i class="material-symbols-outlined linux-alert-icon">warning</i><div>${alertText}</div>`;
+            collapse.prepend(alertEl);
+        }
+    });
+}
+
 document.getElementById('r-info-loading').innerHTML = customSpinnerHTML('Verificando R...');
 document.getElementById('node-info-loading').innerHTML = customSpinnerHTML('Verificando Node.js...');
 document.getElementById('npm-version-loading').innerHTML = customSpinnerHTML('Verificando npm...');
@@ -306,6 +351,9 @@ fetch('/api/app-config')
             document.getElementById('npm-packages-panel')?.classList.remove('d-none');
             carregarInfoNpm();
             carregarNpmPackages();
+        }
+        if (cfg.platform === 'linux') {
+            injetarAvisosLinux(cfg.isDev);
         }
     })
     .catch(() => { /* sem bloco npm em caso de falha */ });
