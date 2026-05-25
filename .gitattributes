@@ -1,0 +1,6 @@
+# Normalize line endings to LF on checkout (text=auto)
+* text=auto
+
+# Windows scripts keep CRLF
+*.cmd text eol=crlf
+*.bat text eol=crlf
