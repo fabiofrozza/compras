@@ -105,6 +105,29 @@ async function getRScriptPath() {
         } catch { }
       }
     } catch { }
+  } else {
+    // Linux / macOS: which Rscript first, then common install paths
+    try {
+      const found = execSync('which Rscript', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+      if (found) {
+        await fs.access(found);
+        cachedRScriptPath = found;
+        return cachedRScriptPath;
+      }
+    } catch { }
+    const commonPaths = [
+      '/usr/bin/Rscript',
+      '/usr/local/bin/Rscript',
+      '/opt/homebrew/bin/Rscript',
+      '/opt/local/bin/Rscript',
+    ];
+    for (const p of commonPaths) {
+      try {
+        await fs.access(p);
+        cachedRScriptPath = p;
+        return cachedRScriptPath;
+      } catch { }
+    }
   }
   return null;
 }
