@@ -31,11 +31,15 @@ function mostrarProgressoObservatorio() {
     if (!container || !bar) return;
     container.classList.remove('d-none');
     bar.style.width = '0%';
-    bar.innerText = '';
-    const popup = document.createElement('span');
-    popup.className = 'progress-percent-popup';
+    bar.textContent = '';
+    let popup = container.querySelector(':scope > .progress-percent-popup');
+    if (!popup) {
+        popup = document.createElement('span');
+        popup.className = 'progress-percent-popup';
+        container.appendChild(popup);
+    }
     popup.textContent = '0%';
-    bar.appendChild(popup);
+    popup.style.left = '0%';
 }
 
 function atualizarProgressoObservatorio(current, total, label) {
@@ -43,16 +47,15 @@ function atualizarProgressoObservatorio(current, total, label) {
     if (!bar) return;
     const percentage = total > 0 ? (current / total) * 100 : 0;
     bar.style.width = `${percentage}%`;
-    if (label) bar.innerText = label;
-    let popup = bar.querySelector('.progress-percent-popup');
+    if (label) bar.textContent = label;
+    let popup = bar.parentElement?.querySelector(':scope > .progress-percent-popup');
     if (!popup) {
         popup = document.createElement('span');
         popup.className = 'progress-percent-popup';
-        bar.appendChild(popup);
-    } else if (label) {
-        bar.appendChild(popup); // re-append pois innerText remove filhos
+        (bar.parentElement || bar).appendChild(popup);
     }
     popup.textContent = `${Math.round(percentage)}%`;
+    popup.style.left = `${percentage}%`;
 }
 
 function esconderProgressoObservatorio() {

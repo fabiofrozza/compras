@@ -130,8 +130,8 @@
                                         </label>
                                         <input type="text" class="form-control form-control-sm" id="powerbi-pasta"
                                             data-field="pasta_powerbi" data-validate-rule="pattern"
-                                            data-regex-pattern=".+(?=\\)"
-                                            placeholder="Ex: G:\Google Drive\Base de Dados\POWERBI" required
+                                            data-regex-pattern="^([a-zA-Z]:[\\\/]|[~\/]).+"
+                                            placeholder="Ex: G:\Google Drive\POWERBI ou /home/usuario/POWERBI" required
                                             data-validation-msg="Informe um caminho de pasta válido.">
                                     </div>
                                 </div>
@@ -204,8 +204,8 @@
                                     <div id="powerbi-observatorio-progress-bar"
                                         class="progress-bar progress-bar-striped progress-bar-animated text-bg-info"
                                         role="progressbar" style="width: 0%;">
-                                        <span class="progress-percent-popup">0%</span>
                                     </div>
+                                    <span class="progress-percent-popup" style="left: 0%">0%</span>
                                 </div>
                                 <div id="powerbi-observatorio-status" class="small text-muted mt-2"></div>
                                 <div id="powerbi-observatorio-result" class="mt-2" hidden>

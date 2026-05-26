@@ -285,26 +285,29 @@ function updateProgressBar(data) {
       bar.setAttribute('role', 'progressbar');
       bar.style.width = '0%';
 
-      // Popup flutuante de percentual
+      container.appendChild(bar);
+
+      // Popup flutuante de percentual (irmão do bar, não filho)
       const popup = document.createElement('span');
       popup.className = 'progress-percent-popup';
       popup.textContent = '0%';
-      bar.appendChild(popup);
+      popup.style.left = '0%';
+      container.appendChild(popup);
 
-      container.appendChild(bar);
       textContainer.appendChild(container);
     }
   }
 
   if (!container || !bar) return;
 
-  // Garante que o popup existe (caso a barra tenha sido criada antes desta versão)
-  let popup = bar.querySelector('.progress-percent-popup');
+  // Garante que o popup existe (irmão do bar dentro do .progress)
+  let popup = container.querySelector(':scope > .progress-percent-popup');
   if (!popup) {
     popup = document.createElement('span');
     popup.className = 'progress-percent-popup';
     popup.textContent = '0%';
-    bar.appendChild(popup);
+    popup.style.left = '0%';
+    container.appendChild(popup);
   }
 
   if (data.action === 'start') {
@@ -314,19 +317,15 @@ function updateProgressBar(data) {
     bar.style.width = '0%';
     bar.setAttribute('aria-valuemax', data.max);
     popup.textContent = '0%';
-    if (data.label) {
-      bar.innerText = data.label;
-      bar.appendChild(popup); // re-append pois innerText remove filhos
-    }
+    popup.style.left = '0%';
+    if (data.label) bar.textContent = data.label;
   } else if (data.action === 'update') {
     const max = parseFloat(bar.getAttribute('aria-valuemax') || '100');
     const percentage = (data.value / max) * 100;
     bar.style.width = `${percentage}%`;
     popup.textContent = `${Math.round(percentage)}%`;
-    if (data.label) {
-      bar.innerText = data.label;
-      bar.appendChild(popup); // re-append pois innerText remove filhos
-    }
+    popup.style.left = `${percentage}%`;
+    if (data.label) bar.textContent = data.label;
   } else if (data.action === 'close') {
     const generationAtClose = _progressBarGeneration;
     setTimeout(() => {

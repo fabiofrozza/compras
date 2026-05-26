@@ -238,25 +238,24 @@ body.dragging-console {
 }
 
 .progress-bar {
-    overflow: visible;
-    position: relative;
+    overflow: hidden;
     border-radius: var(--bs-progress-border-radius) 0 0 var(--bs-progress-border-radius);
+    transition: none;
 }
 
 .progress-percent-popup {
     position: absolute;
-    right: -5px;
-    top: -21px;
+    bottom: calc(100% + 3px);
+    transform: translateX(-50%);
     background: var(--bs-primary, #0d6efd);
     color: #fff;
     font-size: 0.65rem;
     font-weight: 600;
-    padding: 2px;
+    padding: 2px 4px;
     border-radius: 2px;
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.2s ease;
     letter-spacing: 0.02em;
     line-height: 1.4;
     font-family: Consolas, 'Courier New', monospace;
@@ -266,12 +265,13 @@ body.dragging-console {
     content: '';
     position: absolute;
     top: 96%;
-    right: 1px;
+    left: 50%;
+    transform: translateX(-50%);
     border: 4px solid transparent;
     border-top-color: var(--bs-primary, #0d6efd);
 }
 
-.progress-bar-animated .progress-percent-popup {
+.progress-bar-animated ~ .progress-percent-popup {
     opacity: 1;
 }
 
