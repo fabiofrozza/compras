@@ -4,6 +4,7 @@ const XLSX = require('xlsx');
 const fs = require('fs').promises;
 const path = require('path');
 const JSZip = require('jszip');
+const { resolveFolderCaseInsensitive } = require('../utils/files');
 
 /**
  * Executa o processo de mailmerge para atas
@@ -30,7 +31,8 @@ async function executarMailmerge(params, logger) {
 
         // Definir caminhos
         const scriptsDir = path.join(__dirname, '..', '..', 'scripts', 'atas');
-        const caminhoTemplate = path.join(scriptsDir, 'ATAS_MODELOS', modeloAta);
+        const atasModelosDir = await resolveFolderCaseInsensitive(scriptsDir, 'atas_modelos');
+        const caminhoTemplate = path.join(atasModelosDir, modeloAta);
         const caminhoData = path.join(scriptsDir, 'dados_atas.xlsx');
 
         // Validar arquivo de dados
@@ -108,7 +110,7 @@ async function executarMailmerge(params, logger) {
         logger(`📝 Tipo de documento: ${extensaoTemplate}`, 'info');
 
         // Verificar se existem arquivos .xls de tabela na pasta SICAF
-        const pastaSicaf = path.join(scriptsDir, 'SICAF');
+        const pastaSicaf = await resolveFolderCaseInsensitive(scriptsDir, 'sicaf');
         let tabelasDisponiveis = false;
         try {
             const arquivosSicaf = await fs.readdir(pastaSicaf);
@@ -219,7 +221,9 @@ async function executarMailmerge(params, logger) {
                 razaoSocial = razaoSocial.replace(/[\\/:*?"<>|]/g, '');
 
                 const nomeArquivoSaida = `Ata ${numeroAta.toString().padStart(4, '0')} - ${razaoSocial}${extensaoTemplate}`;
-                const caminhoSaida = path.join(scriptsDir, 'ATAS_FINALIZADAS', nomeArquivoSaida);
+                const atasFinalizadasDir = await resolveFolderCaseInsensitive(scriptsDir, 'atas_finalizadas');
+                await fs.mkdir(atasFinalizadasDir, { recursive: true });
+                const caminhoSaida = path.join(atasFinalizadasDir, nomeArquivoSaida);
 
                 // Salvar arquivo
                 await fs.writeFile(caminhoSaida, documentoProcessado);

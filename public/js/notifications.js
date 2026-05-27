@@ -268,6 +268,12 @@ function updateNotificationBadge() {
     }
 }
 
+function findTabIdBySource(source) {
+    if (!source) return null;
+    const norm = source.toLowerCase().trim();
+    return TAB_LIST.find(tab => tab.id === norm || tab.label.toLowerCase() === norm)?.id || null;
+}
+
 /** Renderiza a lista de notificações no painel */
 function renderNotificationList() {
     const list = document.getElementById('notification-list');
@@ -295,6 +301,10 @@ function renderNotificationList() {
 
         const iconClass = notificationIcons[notif.type] || notificationIcons.info;
         const timeStr = notif.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const sourceTabId = findTabIdBySource(notif.source);
+        const sourceEl = sourceTabId
+            ? `<button class="notification-source notification-source-link" data-tab-id="${sourceTabId}">${notif.source}</button>`
+            : `<span class="notification-source">${notif.source}</span>`;
 
         item.innerHTML = `
             <div class="notification-icon"><i class="material-symbols-outlined">${iconClass}</i></div>
@@ -302,7 +312,7 @@ function renderNotificationList() {
                 <div class="notification-message">${notif.message}</div>
                 <div class="notification-meta">
                     <span class="notification-time"><i class="material-symbols-outlined me-1">schedule</i>${timeStr}</span>
-                    <span class="notification-source">${notif.source}</span>
+                    ${sourceEl}
                 </div>
             </div>
             <button class="notification-dismiss" aria-label="Dispensar" data-notif-id="${notif.id}">
@@ -374,6 +384,15 @@ document.addEventListener('click', (e) => {
     if (dismissBtn) {
         const id = parseInt(dismissBtn.dataset.notifId, 10);
         if (!isNaN(id)) dismissNotification(id);
+    }
+
+    const sourceLink = e.target.closest('.notification-source-link');
+    if (sourceLink) {
+        const tabBtn = document.getElementById(`${sourceLink.dataset.tabId}-tab`);
+        if (tabBtn) {
+            new bootstrap.Tab(tabBtn).show();
+            if (typeof closeAllPanels === 'function') closeAllPanels();
+        }
     }
 
     const actionBtn = e.target.closest('.btn');

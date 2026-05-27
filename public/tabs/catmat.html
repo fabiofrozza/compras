@@ -2,8 +2,8 @@
 <div class="row">
     <div class="col">
         <!-- Itens do TR -->
-        <div id="form-itens-tr" class="script-form shadow-sm">
-            <h4 class="script-form-header" data-compras-icon="shopping_basket" data-compras-title="Itens do TR"
+        <div id="form-itens-tr" class="panel shadow-sm">
+            <h4 class="panel-header" data-compras-icon="shopping_basket" data-compras-title="Itens do TR"
                 data-compras-help="Selecione o arquivo Excel obtido no Solar contendo os itens do Termo de Referência.">
             </h4>
             <div class="collapse show" id="catmat-itens-tr-collapse">
@@ -14,8 +14,8 @@
             </div>
         </div>
         <!-- Arquivos auxiliares -->
-        <div class="script-form shadow-sm">
-            <h4 class="script-form-header" data-compras-icon="folder" data-compras-title="Arquivos auxiliares"
+        <div class="panel shadow-sm">
+            <h4 class="panel-header" data-compras-icon="folder" data-compras-title="Arquivos auxiliares"
                 data-compras-help="
 Para a consulta local, são obrigatórios os seguintes arquivos (nomeados exatamente como mostrados a seguir).<br>
 <ul><li><strong>Lista CATMAT.xlsx</strong>: obtida do site oficial do Governo, contendo as colunas (a partir da linha 3) Código do Grupo, Nome do Grupo, Código da Classe, Nome da Classe, Código do PDM, Nome do PDM, Código do Item, Descrição do Item e Código NCM.
@@ -30,8 +30,8 @@ Para a consulta local, são obrigatórios os seguintes arquivos (nomeados exatam
     </div>
     <div class="col">
         <!-- Escolha para execução -->
-        <form id="form-catmat" class="script-form shadow-sm">
-            <h4 class="script-form-header" data-compras-icon="filter_alt" data-compras-title="Forma de consulta">
+        <form id="panel-catmat" class="panel shadow-sm">
+            <h4 class="panel-header" data-compras-icon="filter_alt" data-compras-title="Forma de consulta">
             </h4>
             <div class="collapse show" id="catmat-forma-consulta-collapse">
                 <div class="form-group">
@@ -61,7 +61,7 @@ Para a consulta local, são obrigatórios os seguintes arquivos (nomeados exatam
                     </div>
                 </div>
                 <div class="form-buttons">
-                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-form-itens-tr"
+                    <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap" id="btn-panel-itens-tr"
                         data-script-name="catmat">
                         Verificar margens de preferência
                     </button>
@@ -69,8 +69,8 @@ Para a consulta local, são obrigatórios os seguintes arquivos (nomeados exatam
             </div>
         </form>
         <!-- Listas processadas -->
-        <div class="script-form shadow-sm">
-            <h4 class="script-form-header" data-compras-icon="percent" data-compras-title="Margens de preferência">
+        <div class="panel shadow-sm">
+            <h4 class="panel-header" data-compras-icon="percent" data-compras-title="Margens de preferência">
             </h4>
             <div class="collapse show" id="catmat-margens-collapse">
                 <div id="catmat-arquivos-gerados" class="files-list" data-folder="arquivos_gerados"

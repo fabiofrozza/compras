@@ -22,15 +22,15 @@
             </li>
         </ul>
 
-        <div class="script-form shadow-sm sub-tabs-content">
+        <div class="shadow-sm sub-tabs-content">
             <div class="tab-content">
 
                 <div class="tab-pane fade show active" id="content-sne-certidoes" role="tabpanel">
                     <div class="row">
                         <div class="col-sm-6">
                             <!-- Quadro Fornecedores -->
-                            <div class="script-form shadow-sm">
-                                <h4 class="script-form-header" data-compras-icon="business"
+                            <div class="panel shadow-sm">
+                                <h4 class="panel-header" data-compras-icon="business"
                                     data-compras-title="Fornecedores"
                                     data-compras-help="Lista os fornecedores identificados nas certidões da pasta CERTIDOES. Clique em um fornecedor para visualizar suas certidões.
                                     <br><br>Use 'Verificar' para ler os PDFs, verificar validade e renomear os arquivos com CNPJ, razão social e status.">
@@ -58,15 +58,29 @@
 
                         <div class="col-sm-6">
                             <!-- Quadro Certidões do Fornecedor -->
-                            <div class="script-form shadow-sm">
-                                <h4 class="script-form-header" data-compras-icon="picture_as_pdf"
-                                    data-compras-title="Certidões" data-compras-title-id="sne-certidoes-titulo">
+                            <div class="panel shadow-sm">
+                                <h4 class="panel-header" data-compras-icon="picture_as_pdf"
+                                    data-compras-title="Certidões do fornecedor">
                                 </h4>
                                 <div class="collapse show" id="sne-certidoes-collapse">
                                     <div id="sne-certidoes-list" class="files-list-style">
                                         <div class="alert alert-info" role="alert">
                                             <i class="material-symbols-outlined">info</i> Selecione um fornecedor para
                                             ver as certidões
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Quadro SNEs do Fornecedor -->
+                            <div class="panel shadow-sm mt-3">
+                                <h4 class="panel-header" data-compras-icon="receipt_long"
+                                    data-compras-title="SNEs do fornecedor">
+                                </h4>
+                                <div class="collapse show" id="sne-snes-panel-collapse">
+                                    <div id="sne-snes-panel-list" class="files-list-style">
+                                        <div class="alert alert-info" role="alert">
+                                            <i class="material-symbols-outlined">info</i> Selecione um fornecedor para
+                                            ver as SNEs
                                         </div>
                                     </div>
                                 </div>
@@ -78,8 +92,8 @@
                 <div class="tab-pane fade" id="content-sne-empenhos" role="tabpanel">
                     <div class="row">
                         <div class="col-12">
-                            <div class="script-form shadow-sm">
-                                <h4 class="script-form-header" data-compras-icon="receipt_long"
+                            <div class="panel shadow-sm">
+                                <h4 class="panel-header" data-compras-icon="receipt_long"
                                     data-compras-title="SNEs"
                                     data-compras-help="Lista as Solicitações de Nota de Empenho (SNEs) encontradas na pasta SNEs.
                                     <br><br>Cada SNE é vinculada a uma Autorização de Fornecimento (AF) e a um fornecedor, identificados no conteúdo do PDF.
@@ -92,35 +106,21 @@
                                             id="btn-atualizar-empenhos">
                                             Atualizar
                                         </button>
-                                        <div class="btn-group btn-group-sm" role="group" aria-label="Escopo das AFs">
-                                            <input type="radio" class="btn-check" name="sne-afs-scope"
-                                                id="sne-afs-scope-todas" value="todas" checked>
-                                            <label class="btn btn-outline-secondary"
-                                                for="sne-afs-scope-todas">Todas</label>
-                                            <input type="radio" class="btn-check" name="sne-afs-scope"
-                                                id="sne-afs-scope-ok" value="ok">
-                                            <label class="btn btn-outline-secondary" for="sne-afs-scope-ok">Certidões
-                                                OK</label>
-                                            <input type="radio" class="btn-check" name="sne-afs-scope"
-                                                id="sne-afs-scope-selecionadas" value="selecionadas">
-                                            <label class="btn btn-outline-secondary"
-                                                for="sne-afs-scope-selecionadas">Selecionadas</label>
+                                        <div class="input-group input-group-sm w-auto">
+                                            <select class="form-select form-select-sm form-select-options" id="sne-afs-scope">
+                                                <option value="todas">Todas</option>
+                                                <option value="ok">Certidões OK</option>
+                                                <option value="selecionadas">Selecionadas</option>
+                                            </select>
+                                            <select class="form-select form-select-sm form-select-options" id="sne-afs-action">
+                                                <option value="manter">Manter SNEs</option>
+                                                <option value="mover">Mover SNEs</option>
+                                            </select>
+                                            <button type="button" class="btn btn-sm btn-primary text-nowrap"
+                                                id="btn-criar-afs">
+                                                Criar AFs
+                                            </button>
                                         </div>
-                                        <div class="btn-group btn-group-sm" role="group"
-                                            aria-label="Ação sobre os empenhos">
-                                            <input type="radio" class="btn-check" name="sne-afs-action"
-                                                id="sne-afs-action-manter" value="manter" checked>
-                                            <label class="btn btn-outline-secondary" for="sne-afs-action-manter">Manter
-                                                SNEs</label>
-                                            <input type="radio" class="btn-check" name="sne-afs-action"
-                                                id="sne-afs-action-mover" value="mover">
-                                            <label class="btn btn-outline-secondary" for="sne-afs-action-mover">Mover
-                                                SNEs</label>
-                                        </div>
-                                        <button type="button" class="btn btn-sm btn-primary text-nowrap"
-                                            id="btn-criar-afs">
-                                            Criar AFs
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -131,8 +131,8 @@
                 <div class="tab-pane fade" id="content-sne-afs" role="tabpanel">
                     <div class="row">
                         <div class="col-12">
-                            <div class="script-form shadow-sm">
-                                <h4 class="script-form-header" data-compras-icon="folder_open" data-compras-title="AFs"
+                            <div class="panel shadow-sm">
+                                <h4 class="panel-header" data-compras-icon="folder_open" data-compras-title="AFs"
                                     data-compras-help="Lista as Autorizações de Fornecimento (AFs) e respectivas SNEs na pasta AFs.
                                     <br><br>A estrutura é gerada pelo botão <strong>Criar AFs</strong> na aba Empenhos: cada AF recebe uma pasta com subpastas por SNE, contendo o empenho e as certidões do fornecedor.">
                                 </h4>

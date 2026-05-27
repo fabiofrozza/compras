@@ -31,8 +31,7 @@ function inicializarFornecedores() {
             removeTooltip(btn);
             const pregao = btn.closest('.item-card')?.dataset.pregao;
             if (pregao && pregoesDadosFolderPath) {
-                openFolder(pregoesDadosFolderPath + '\\' + pregao);
-                showToast(`Abrindo pasta ${pregao}. Verifique na barra de tarefas...`, 'info', 5000);
+                openFolder(pregoesDadosFolderPath + '\\' + pregao, pregao);
             }
         });
     }
@@ -511,7 +510,8 @@ async function carregarImportar() {
 
             html += `
                 <tr class="importar-row" data-pregao="${file.pregao}"
-                    onclick="selecionarImportar('${file.pregao}')">
+                    onclick="selecionarImportar('${file.pregao}')"
+                    ondblclick="openFile('${safeFilePath}')">
                     <td><span class="file-icon"><i class="material-symbols-outlined ${iconColor}">table_chart</i></span></td>
                     <td>${file.name}</td>
                     <td class="${erroClass}">${erroText}</td>
@@ -606,7 +606,7 @@ async function limparPastaImportar() {
     if (!confirmed) return;
 
     try {
-        const response = await fetch('/api/clear-folder/fornecedores/PARA_IMPORTAR?extensions=.xlsx,.csv,.json', {
+        const response = await fetch('/api/clear-folder/fornecedores/para_importar?extensions=.xlsx,.csv,.json', {
             method: 'DELETE'
         });
         const data = await response.json();

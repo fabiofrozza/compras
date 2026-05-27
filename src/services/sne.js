@@ -75,10 +75,11 @@ const CERT_CHECKS = {
   estadual: {
     // Both patterns require a colon before the date, preventing false matches when PDF text
     // extraction outputs labels and values out of order (labels first, then values in a separate column).
+    // Day and month accept 1–2 digits; year accepts 2 or 4 digits (e.g. 9/4/26 or 09/04/2026).
     dates: [
-      { label: 'Estadual', pattern: /[Vv]álida?\s+até\s*:?\s*(\d{2}[\/.\-]\d{2}[\/.\-]\d{4})/i },
+      { label: 'Estadual', pattern: /[Vv]álida?\s+até\s*:?\s*(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2}(?:\d{2})?)/i },
       // Handles "Validade: DD/MM/YYYY" and "Validade (conforme Lei nº xxxx): DD/MM/YYYY"
-      { label: 'Estadual', pattern: /[Vv]alidade[^:]*:\s*(\d{2}[\/.\-]\d{2}[\/.\-]\d{4})/i },
+      { label: 'Estadual', pattern: /[Vv]alidade[^:]*:\s*(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2}(?:\d{2})?)/i },
     ],
   },
 };
@@ -99,10 +100,13 @@ function normalizeText(raw) {
 }
 
 function extractCnpj(text) {
-  // Matches formatted CNPJ: XX.XXX.XXX/XXXX-XX or digits-only variants
-  const match = text.match(/\d{2}[\.\s]?\d{3}[\.\s]?\d{3}[\.\s\/]?\d{4}[\.\s\-]?\d{2}/);
-  if (!match) return null;
-  return match[0].replace(/[.\-\/\s]/g, '');
+  // Full CNPJ: XX.XXX.XXX/XXXX-XX or digits-only variants
+  let match = text.match(/\d{2}[\.\s]?\d{3}[\.\s]?\d{3}[\.\s\/]?\d{4}[\.\s\-]?\d{2}/);
+  if (match) return match[0].replace(/[.\-\/\s]/g, '');
+  // Radical CNPJ (8 digits): XX.XXX.XXX/ — used by certidões that cover all company branches (e.g. Receita Estadual RS)
+  match = text.match(/\d{2}\.\d{3}\.\d{3}\//);
+  if (match) return match[0].replace(/[.\/]/g, '');
+  return null;
 }
 
 // Extracts company name from RAW (non-normalized) text so newlines act as natural field delimiters.
@@ -137,7 +141,8 @@ function extractCompanyName(rawText) {
 
 function parseDate(str) {
   const [d, m, y] = str.split(/[\/.\-]/).map(Number);
-  return new Date(y, m - 1, d);
+  const year = y < 100 ? 2000 + y : y;
+  return new Date(year, m - 1, d);
 }
 
 function classifyDate(dateStr) {
@@ -309,21 +314,23 @@ async function listCertidoes() {
   return { files, folderPath: SNE_CERTIDOES, folderCreated: created };
 }
 
-async function analyzeCertidoes() {
+async function analyzeCertidoes(onProgress) {
   // Use lib path to avoid test-file loading at module init (pdf-parse v1 quirk)
   const pdfParse = require('pdf-parse/lib/pdf-parse.js');
 
   const { files, folderPath } = await listCertidoes();
+  const total = files.length;
   const results = [];
 
-  for (const file of files) {
-    const result = await analyzeCertidao(file.name, pdfParse);
-    results.push(result);
+  for (let i = 0; i < files.length; i++) {
+    if (onProgress) onProgress(i + 1, total, files[i].name);
+    const result = await analyzeCertidao(files[i].name, pdfParse);
+    results.push({ ...result, fullPath: path.join(SNE_CERTIDOES, result.filename).replace(/\\/g, '/') });
   }
 
   results.sort(sortByCnpj);
   logger.info(`Análise de ${results.length} certidão(ões) concluída`, 'SNE');
-  return { results, folderPath };
+  return { results, folderPath: folderPath.replace(/\\/g, '/') };
 }
 
 async function fileExists(filePath) {
@@ -335,15 +342,17 @@ async function fileExists(filePath) {
   }
 }
 
-async function renameCertidoes() {
+async function renameCertidoes(onProgress) {
   const pdfParse = require('pdf-parse/lib/pdf-parse.js');
 
   const { files, folderPath } = await listCertidoes();
+  const total = files.length;
 
   // Phase 1: analyze all files
   const analyses = [];
-  for (const file of files) {
-    analyses.push(await analyzeCertidao(file.name, pdfParse));
+  for (let i = 0; i < files.length; i++) {
+    if (onProgress) onProgress(i + 1, total, files[i].name);
+    analyses.push(await analyzeCertidao(files[i].name, pdfParse));
   }
 
   // Phase 1.5: deduplicate by (cnpj, type) — keep best validity, delete others
@@ -581,12 +590,15 @@ async function listEmpenhos() {
   return { files, folderPath: SNE_EMPENHOS, folderCreated: created };
 }
 
-async function analyzeEmpenhos() {
+async function analyzeEmpenhos(onProgress) {
   const pdfParse = require('pdf-parse/lib/pdf-parse.js');
   const { files, folderPath } = await listEmpenhos();
+  const total = files.length;
   const results = [];
 
-  for (const filename of files) {
+  for (let i = 0; i < files.length; i++) {
+    const filename = files[i];
+    if (onProgress) onProgress(i + 1, total, filename);
     const filePath = path.join(SNE_EMPENHOS, filename);
     try {
       const buffer = await fs.readFile(filePath);
@@ -596,7 +608,7 @@ async function analyzeEmpenhos() {
         rawText = pdfData.text || '';
       } catch (e) {
         logger.warn(`Erro ao parsear PDF "${filename}": ${e.message}`, 'SNE');
-        results.push({ filename, error: 'Erro ao ler PDF' });
+        results.push({ filename, error: 'Erro ao ler PDF', fullPath: path.join(SNE_EMPENHOS, filename).replace(/\\/g, '/') });
         continue;
       }
 
@@ -606,10 +618,10 @@ async function analyzeEmpenhos() {
       const { company, cnpj } = extractCredorFromText(rawText);
       const tombamento = /tombamento/i.test(text);
 
-      results.push({ filename, sneNumber, af, company, cnpj, tombamento, error: null });
+      results.push({ filename, sneNumber, af, company, cnpj, tombamento, error: null, fullPath: path.join(SNE_EMPENHOS, filename).replace(/\\/g, '/') });
     } catch (e) {
       logger.error(`Erro ao processar "${filename}": ${e.message}`, 'SNE');
-      results.push({ filename, error: e.message });
+      results.push({ filename, error: e.message, fullPath: path.join(SNE_EMPENHOS, filename).replace(/\\/g, '/') });
     }
   }
 
@@ -621,7 +633,7 @@ async function analyzeEmpenhos() {
   });
 
   logger.info(`Análise de ${results.length} empenho(s) concluída`, 'SNE');
-  return { results, folderPath };
+  return { results, folderPath: folderPath.replace(/\\/g, '/') };
 }
 
 async function criarAFs(filenames = null, moveSnes = false) {
@@ -634,8 +646,8 @@ async function criarAFs(filenames = null, moveSnes = false) {
   const certidoesByCnpj = new Map();
   for (const f of certidoesEntries) {
     if (!f.toLowerCase().endsWith('.pdf')) continue;
-    // After renaming, filename starts with 14-digit CNPJ
-    const cnpjMatch = f.match(/^(\d{14})/);
+    // Filename starts with 14-digit CNPJ or 8-digit radical (for certidões covering all branches)
+    const cnpjMatch = f.match(/^(\d{14}|\d{8})/);
     if (!cnpjMatch) continue;
     const cnpj = cnpjMatch[1];
     const list = certidoesByCnpj.get(cnpj) || [];
@@ -673,7 +685,10 @@ async function criarAFs(filenames = null, moveSnes = false) {
         created.errors.push(`Erro ao ${moveSnes ? 'mover' : 'copiar'} SNE "${r.filename}": ${e.message}`);
       }
 
-      const certFiles = r.cnpj ? (certidoesByCnpj.get(r.cnpj) || []) : [];
+      const certFiles = r.cnpj ? [
+        ...(certidoesByCnpj.get(r.cnpj) || []),
+        ...(certidoesByCnpj.get(r.cnpj.slice(0, 8)) || []),
+      ] : [];
       for (const certFile of certFiles) {
         const src = path.join(SNE_CERTIDOES, certFile);
         const dst = path.join(snePath, certFile);
@@ -729,14 +744,14 @@ async function analyzeSneFolder(snePath, pdfParse) {
   return { empenho, certidoes, files: allFiles };
 }
 
-async function analyzeAFs() {
+async function analyzeAFs(onProgress) {
   const pdfParse = require('pdf-parse/lib/pdf-parse.js');
 
   try {
     await fs.access(SNE_AFS);
   } catch {
     await fs.mkdir(SNE_AFS, { recursive: true });
-    return { afs: [], folderPath: SNE_AFS };
+    return { afs: [], folderPath: SNE_AFS.replace(/\\/g, '/') };
   }
 
   const afEntries = await fs.readdir(SNE_AFS, { withFileTypes: true });
@@ -745,8 +760,11 @@ async function analyzeAFs() {
     .map(e => e.name)
     .sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
 
+  const total = afFolders.length;
   const afs = [];
-  for (const afName of afFolders) {
+  for (let i = 0; i < afFolders.length; i++) {
+    const afName = afFolders[i];
+    if (onProgress) onProgress(i + 1, total, afName);
     const afPath = path.join(SNE_AFS, afName);
     const sneEntries = await fs.readdir(afPath, { withFileTypes: true });
     const sneFolders = sneEntries
@@ -758,27 +776,32 @@ async function analyzeAFs() {
     for (const sneName of sneFolders) {
       const snePath = path.join(afPath, sneName);
       const { empenho, certidoes, files } = await analyzeSneFolder(snePath, pdfParse);
-      snes.push({ name: sneName, path: snePath, files, empenho, certidoes });
+      const snePathNorm = snePath.replace(/\\/g, '/');
+      const filesWithPaths = files.map(f => ({ name: f, fullPath: snePathNorm + '/' + f }));
+      snes.push({ name: sneName, path: snePathNorm, files: filesWithPaths, empenho, certidoes });
     }
 
-    afs.push({ name: afName, path: afPath, snes });
+    afs.push({ name: afName, path: afPath.replace(/\\/g, '/'), snes });
   }
 
   logger.info(`AFs analisadas: ${afs.length} AF(s)`, 'SNE');
-  return { afs, folderPath: SNE_AFS };
+  return { afs, folderPath: SNE_AFS.replace(/\\/g, '/') };
 }
 
 async function sincronizarCertidoesSne(afName, sneName, cnpj) {
   const snePath = path.join(SNE_AFS, afName, sneName);
 
+  const radical = cnpj.slice(0, 8);
+  const matchesCnpj = f => f.toLowerCase().endsWith('.pdf') && (f.startsWith(cnpj) || f.startsWith(radical));
+
   const sneEntries = await fs.readdir(snePath);
-  const stale = sneEntries.filter(f => f.toLowerCase().endsWith('.pdf') && f.startsWith(cnpj));
+  const stale = sneEntries.filter(matchesCnpj);
   for (const f of stale) {
     await fs.unlink(path.join(snePath, f));
   }
 
   const certdoesEntries = await fs.readdir(SNE_CERTIDOES).catch(() => []);
-  const fresh = certdoesEntries.filter(f => f.toLowerCase().endsWith('.pdf') && f.startsWith(cnpj));
+  const fresh = certdoesEntries.filter(matchesCnpj);
   for (const f of fresh) {
     await fs.copyFile(path.join(SNE_CERTIDOES, f), path.join(snePath, f));
   }
@@ -792,7 +815,7 @@ async function listAFs() {
     await fs.access(SNE_AFS);
   } catch {
     await fs.mkdir(SNE_AFS, { recursive: true });
-    return { afs: [], folderPath: SNE_AFS };
+    return { afs: [], folderPath: SNE_AFS.replace(/\\/g, '/') };
   }
 
   const afEntries = await fs.readdir(SNE_AFS, { withFileTypes: true });
@@ -814,18 +837,19 @@ async function listAFs() {
     for (const sneName of sneFolders) {
       const snePath = path.join(afPath, sneName);
       const fileEntries = await fs.readdir(snePath, { withFileTypes: true });
+      const snePathNorm = snePath.replace(/\\/g, '/');
       const files = fileEntries
         .filter(e => e.isFile())
-        .map(e => e.name)
-        .sort((a, b) => a.localeCompare(b));
-      snes.push({ name: sneName, path: snePath, files });
+        .map(e => ({ name: e.name, fullPath: snePathNorm + '/' + e.name }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      snes.push({ name: sneName, path: snePathNorm, files });
     }
 
-    afs.push({ name: afName, path: afPath, snes });
+    afs.push({ name: afName, path: afPath.replace(/\\/g, '/'), snes });
   }
 
   logger.info(`AFs listadas: ${afs.length} AF(s)`, 'SNE');
-  return { afs, folderPath: SNE_AFS };
+  return { afs, folderPath: SNE_AFS.replace(/\\/g, '/') };
 }
 
 module.exports = {

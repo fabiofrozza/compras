@@ -332,6 +332,19 @@ CENTRAL DE NOTIFICAÇÕES (Painel no Header)
     font-weight: 500;
 }
 
+.notification-source-link {
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.notification-source-link:hover {
+    background: rgba(128, 128, 128, 0.3);
+    color: var(--compras-text-primary);
+    text-decoration: underline;
+}
+
 .notification-dismiss {
     flex-shrink: 0;
     background: none;
@@ -481,7 +494,7 @@ Tooltips, Popovers e Modal pop-up
     color: white;
 }
 
-[popover].form-help-popover {
+[popover].panel-help-popover {
     position: absolute;
     position-area: left bottom;
     max-width: 500px;
@@ -494,7 +507,7 @@ Tooltips, Popovers e Modal pop-up
     background-color: var(--compras-contrast);
 }
 
-[popover].form-help-popover::before {
+[popover].panel-help-popover::before {
     font-family: 'Material Symbols Outlined';
     content: 'help';
     font-variation-settings: 'FILL' 1, 'wght' 700;

@@ -727,3 +727,26 @@ utils_verificar_script <- function(scripts_permitidos, script_padrao) {
 
   script_a_executar
 }
+
+utils_erro_http_msg <- function(e, msg_padrao) {
+  # Retorna mensagem específica para erros HTTP conhecidos ou msg_padrao
+
+  http_msgs <- list(
+    "400" = "Requisição inválida (HTTP 400). Verifique o link e os parâmetros informados.",
+    "401" = "Acesso não autorizado (HTTP 401). A planilha pode exigir autenticação.",
+    "403" = "Sem permissão de acesso (HTTP 403). Verifique se a planilha está compartilhada com leitura pública.",
+    "404" = "Planilha ou aba não encontrada (HTTP 404). Verifique o link e o nome da aba informados.",
+    "429" = "Limite de requisições atingido (HTTP 429). Aguarde alguns instantes e tente novamente.",
+    "500" = "Erro interno do servidor do Google (HTTP 500). Tente novamente em alguns instantes.",
+    "503" = "Serviço do Google indisponível (HTTP 503). Tente novamente em alguns instantes."
+  )
+
+  for (codigo in names(http_msgs)) {
+    classe_httr2 <- paste0("httr2_http_", codigo)
+    if (inherits(e, classe_httr2) || grepl(paste0("\\b", codigo, "\\b"), conditionMessage(e))) {
+      return(http_msgs[[codigo]])
+    }
+  }
+
+  msg_padrao
+}

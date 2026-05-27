@@ -72,12 +72,30 @@ function openInInterface(targetPath, isFile = false) {
   }
 }
 
+async function resolveFolderCaseInsensitive(parentDir, folderName) {
+  const exact = path.join(parentDir, folderName);
+  try {
+    await fs.access(exact);
+    return exact;
+  } catch {
+    try {
+      const entries = await fs.readdir(parentDir);
+      const match = entries.find(e => e.toLowerCase() === folderName.toLowerCase());
+      if (match) return path.join(parentDir, match);
+    } catch {
+      // parentDir doesn't exist yet
+    }
+    return exact;
+  }
+}
+
 async function resolveScriptFolder(res, scriptName, innerFolder, context) {
   let mappedFolder = innerFolder;
   if (innerFolder === 'RAIZ') {
     mappedFolder = '.';
   }
-  const folderPath = path.join(SCRIPTS_PATH, scriptName, mappedFolder);
+  const scriptDir = path.join(SCRIPTS_PATH, scriptName);
+  let folderPath = path.join(scriptDir, mappedFolder);
 
   if (!isPathSafe(folderPath, SCRIPTS_PATH)) {
     res.status(403).json({ error: 'Acesso negado: fora do diretório permitido' });
@@ -88,6 +106,19 @@ async function resolveScriptFolder(res, scriptName, innerFolder, context) {
   try {
     await fs.access(folderPath);
   } catch {
+    if (mappedFolder !== '.') {
+      try {
+        const entries = await fs.readdir(scriptDir);
+        const match = entries.find(e => e.toLowerCase() === mappedFolder.toLowerCase());
+        if (match) {
+          folderPath = path.join(scriptDir, match);
+          logger.debug(`Pasta encontrada com capitalização diferente: ${match}`, context);
+          return { folderPath, created: false };
+        }
+      } catch {
+        // scriptDir não existe ainda; será criado pelo mkdir abaixo
+      }
+    }
     await fs.mkdir(folderPath, { recursive: true });
     logger.debug(`Pasta criada: ${folderPath}`, context);
     created = true;
@@ -160,6 +191,7 @@ module.exports = {
   isProtectedFile,
   matchFilePattern,
   openInInterface,
+  resolveFolderCaseInsensitive,
   resolveScriptFolder,
   parseFilters,
   filePassesFilter,

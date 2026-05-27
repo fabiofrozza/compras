@@ -15,15 +15,15 @@
         </li>
     </ul>
 
-    <div class="script-form shadow-sm sub-tabs-content">
+    <div class="shadow-sm sub-tabs-content">
         <div class="tab-content">
 
             <div class="tab-pane fade show active" id="content-powerbi-dados" role="tabpanel">
                 <div class="row row-cols-1">
                     <div class="col-sm-12">
                         <!-- Formulário de seleção do painel -->
-                        <form id="form-powerbi-panel" class="script-form shadow-sm">
-                            <h4 class="script-form-header" data-compras-icon="show_chart"
+                        <form id="panel-powerbi" class="panel shadow-sm">
+                            <h4 class="panel-header" data-compras-icon="show_chart"
                                 data-compras-title="Painel do Observatório">
                             </h4>
                             <div class="collapse show" id="powerbi-painel-collapse">
@@ -110,8 +110,8 @@
                     </div>
                     <div class="col-sm-6">
                         <!-- Pasta da base de dados -->
-                        <form id="form-powerbi-path" class="script-form shadow-sm">
-                            <h4 class="script-form-header" data-compras-icon="table_chart"
+                        <form id="panel-powerbi-path" class="panel shadow-sm">
+                            <h4 class="panel-header" data-compras-icon="table_chart"
                                 data-compras-title="Base de dados"
                                 data-compras-help="Informe o caminho completo da pasta raiz da base de dados do Power BI. Essa pasta deve conter as subpastas <em>Mapa de licitações</em> e <em>Execução AF Empenho</em>. Os arquivos gerados serão salvos nessa mesma pasta.">
                             </h4>
@@ -120,7 +120,7 @@
                                 <div class="form-sub-container">
                                     <button type="button" data-bs-toggle="tooltip"
                                         data-bs-title="Limpar todos os campos" class="form-sub-btn"
-                                        onclick="limparFormulario('form-powerbi-path')">
+                                        onclick="limparFormulario('panel-powerbi-path')">
                                         <i class="material-symbols-outlined">ink_eraser</i>
                                     </button>
                                     <div class="form-group" style="margin-bottom: 0">
@@ -130,8 +130,8 @@
                                         </label>
                                         <input type="text" class="form-control form-control-sm" id="powerbi-pasta"
                                             data-field="pasta_powerbi" data-validate-rule="pattern"
-                                            data-regex-pattern=".+(?=\\)"
-                                            placeholder="Ex: G:\Google Drive\Base de Dados\POWERBI" required
+                                            data-regex-pattern="^([a-zA-Z]:[\\\/]|[~\/]).+"
+                                            placeholder="Ex: G:\Google Drive\POWERBI ou /home/usuario/POWERBI" required
                                             data-validation-msg="Informe um caminho de pasta válido.">
                                     </div>
                                 </div>
@@ -141,8 +141,8 @@
 
                     <div class="col-sm-6">
                         <!-- Formulário de manutenção -->
-                        <form id="form-powerbi-manutencao" class="script-form shadow-sm">
-                            <h4 class="script-form-header" data-compras-icon="build" data-compras-title="Manutenção"
+                        <form id="panel-powerbi-manutencao" class="panel shadow-sm">
+                            <h4 class="panel-header" data-compras-icon="build" data-compras-title="Manutenção"
                                 data-compras-help="Renomeia os arquivos das pastas <em>Mapa de licitações</em> e <em>Execução AF Empenho</em> conforme o padrão <code>TIPO - ANO - ETAPA - PROCESSO - PREGÃO</code>. Os arquivos já são renomeados ao gerar os dados para o Observatório, mas esta opção apenas renomeia sem gerar dados.">
                             </h4>
                             <div class="collapse show" id="powerbi-manutencao-collapse">
@@ -179,8 +179,8 @@
                 <div class="row row-cols-1">
                     <div class="col-sm-12">
                         <!-- Observatório a partir da Planilha de Controle -->
-                        <form id="form-powerbi-observatorio" class="script-form shadow-sm">
-                            <h4 class="script-form-header" data-compras-icon="visibility"
+                        <form id="panel-powerbi-observatorio" class="panel shadow-sm">
+                            <h4 class="panel-header" data-compras-icon="visibility"
                                 data-compras-title="Observatório - Status"
                                 data-compras-help="Verifica se os processos listados na Planilha de Controle possuem arquivos correspondentes nas pastas <em>Mapa de licitações</em> (Observatório - Licitação) e <em>Execução AF Empenho</em> (Observatório - Execução) da base de dados. Após a verificação, use o botão <strong>Problemas</strong> para filtrar apenas processos com pendências (se houver).">
                             </h4>
@@ -199,12 +199,13 @@
                                         <i class="material-symbols-outlined">download</i> Baixar CSV
                                     </button>
                                 </div>
-                                <div id="powerbi-observatorio-progress-container" class="progress mt-2 d-none"
-                                    style="height: 16px; overflow: visible; position: relative;">
-                                    <div id="powerbi-observatorio-progress-bar"
-                                        class="progress-bar progress-bar-striped progress-bar-animated text-bg-info"
-                                        role="progressbar" style="width: 0%;">
-                                        <span class="progress-percent-popup">0%</span>
+                                <div id="powerbi-observatorio-progress-container" class="progress-outer mt-2 d-none">
+                                    <span class="progress-percent-popup" style="left: 0%">0%</span>
+                                    <div class="progress" style="height: 16px;">
+                                        <div id="powerbi-observatorio-progress-bar"
+                                            class="progress-bar progress-bar-striped progress-bar-animated text-bg-info"
+                                            role="progressbar" style="width: 0%;">
+                                        </div>
                                     </div>
                                 </div>
                                 <div id="powerbi-observatorio-status" class="small text-muted mt-2"></div>

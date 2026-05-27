@@ -14,7 +14,7 @@ function customSpinnerHTML(message, color = 'primary') {
 // ====== CABEÇALHOS DE SCRIPT-FORM ======
 
 function initScriptFormHeaders(container) {
-    const headers = container.querySelectorAll('.script-form-header:not([data-initialized])');
+    const headers = container.querySelectorAll('.panel-header:not([data-initialized])');
     headers.forEach(h4 => {
         const icon = h4.dataset.comprasIcon;
         const title = h4.dataset.comprasTitle;
@@ -43,7 +43,7 @@ function initScriptFormHeaders(container) {
 
         // Container de botões
         const buttonsDiv = document.createElement('div');
-        buttonsDiv.className = 'script-form-header-buttons';
+        buttonsDiv.className = 'panel-header-buttons';
 
         // Botão de ajuda (se data-compras-help presente)
         if (helpText) {
@@ -54,7 +54,7 @@ function initScriptFormHeaders(container) {
 
             const helpBtn = document.createElement('button');
             helpBtn.type = 'button';
-            helpBtn.className = 'form-header-help';
+            helpBtn.className = 'panel-header-help';
             helpBtn.setAttribute('popovertarget', helpId);
             helpBtn.style.setProperty('anchor-name', anchorName);
             helpBtn.innerHTML = '<i class="material-symbols-outlined">help</i>';
@@ -63,7 +63,7 @@ function initScriptFormHeaders(container) {
             const popoverDiv = document.createElement('div');
             popoverDiv.setAttribute('popover', '');
             popoverDiv.id = helpId;
-            popoverDiv.className = 'form-help-popover';
+            popoverDiv.className = 'panel-help-popover';
             popoverDiv.style.setProperty('position-anchor', anchorName);
             popoverDiv.innerHTML = helpText;
             h4.after(popoverDiv);
@@ -73,7 +73,7 @@ function initScriptFormHeaders(container) {
         if (collapseId) {
             const collapseBtn = document.createElement('button');
             collapseBtn.type = 'button';
-            collapseBtn.className = 'form-collapse-btn';
+            collapseBtn.className = 'panel-collapse-btn';
             collapseBtn.setAttribute('data-bs-toggle', 'collapse');
             collapseBtn.setAttribute('data-bs-target', `#${collapseId}`);
             collapseBtn.setAttribute('aria-expanded', 'true');
@@ -144,6 +144,12 @@ async function setHomeBackground(bgSource) {
     if (bgSource === undefined) {
         loadAppState();
         bgSource = appState.preferences.bgSource || 'random';
+    }
+
+    if (bgSource === 'none') {
+        homePane.style.removeProperty('--home-bg-url');
+        homePane.classList.remove('home-bg-loaded');
+        return;
     }
 
     const [localImages, bingImages] = await Promise.all([
@@ -228,7 +234,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const cfg = await fetch('/api/app-config').then(r => r.json());
         const refreshMs = (cfg.backgroundRefreshTime || 0) * 1000;
-        if (refreshMs > 0) setInterval(setHomeBackground, refreshMs);
+        loadAppState();
+        if (refreshMs > 0 && (appState.preferences.bgSource || 'random') !== 'none') {
+            setInterval(setHomeBackground, refreshMs);
+        }
     } catch (_) { }
 });
 
@@ -364,9 +373,21 @@ async function buildHelpPanel() {
     if (!body) return;
 
     let cfg = {};
+    let repoLabel = 'Repositório Github';
+    const REPO_URL = 'https://github.com/fabiofrozza/compras';
+
     try {
-        const res = await fetch('/api/app-config');
-        cfg = await res.json();
+        const [cfgRes, releaseRes] = await Promise.all([
+            fetch('/api/app-config'),
+            fetch('https://api.github.com/repos/fabiofrozza/compras/releases/latest'),
+        ]);
+        cfg = await cfgRes.json();
+        if (releaseRes.ok) {
+            const release = await releaseRes.json();
+            const year = release.published_at?.slice(0, 4);
+            const tag = release.tag_name;
+            if (year && tag) repoLabel = `© ${tag} • ${year}`;
+        }
     } catch (err) {
         console.error('Erro ao buscar configurações:', err);
     }
@@ -376,9 +397,9 @@ async function buildHelpPanel() {
         { icon: 'store', label: cfg.departmentName || 'Site do Departamento', url: cfg.departmentSite || '#' },
         { icon: 'article', label: 'Manual do Departamento', url: cfg.manualSite || '#' },
         { separator: true },
-        { icon: 'code', label: 'Repositório', url: 'https://github.com/fabiofrozza/compras' },
-        { separator: true },
         { icon: 'build', label: 'Instalação', tabId: 'instalacao' },
+        { separator: true },
+        { icon: 'code', label: repoLabel, url: REPO_URL },
     ];
 
     const ul = document.createElement('ul');

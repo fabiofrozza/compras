@@ -105,9 +105,12 @@ main_dados_filtrar <- function(lista_final) {
       },
       error = function(e) {
         log_erro(
-          paste(
-            "Erro ao acessar Planilha de Controle. Verifique se há permissão",
-            "para leitura e se o link está correto."
+          utils_erro_http_msg(
+            e,
+            paste(
+              "Erro ao acessar Planilha de Controle. Verifique se há permissão",
+              "para leitura e se o link está correto."
+            )
           ),
           e
         )
@@ -1080,6 +1083,13 @@ main_lista_final_obter <- function() {
 }
 
 main_lista_final_baixar <- function(importacao) {
+  if (is.na(importacao$qtde_unidades) || importacao$qtde_unidades < 1) {
+    log_erro(
+      "Quantidade de Unidades inválida ou não informada. Verifique as configurações. Encerrando...",
+      finalizar = TRUE
+    )
+  }
+
   gs4_deauth()
 
   tryCatch(
@@ -1099,7 +1109,10 @@ main_lista_final_baixar <- function(importacao) {
     },
     error = function(e) {
       log_erro(
-        "Erro ao acessar planilha de inserção de demandas. Verifique o link informado. Encerrando...",
+        utils_erro_http_msg(
+          e,
+          "Erro ao acessar planilha de inserção de demandas. Verifique o link informado. Encerrando..."
+        ),
         e,
         finalizar = TRUE
       )
@@ -1191,7 +1204,10 @@ main_lista_final_info <- function(importacao) {
     },
     error = function(e) {
       log_erro(
-        "Erro ao acessar as informações da lista (ano, etapa e grupo). Verifique a aba Menu da LISTA FINAL. Encerrando...",
+        utils_erro_http_msg(
+          e,
+          "Erro ao acessar as informações da lista (ano, etapa e grupo). Verifique a aba Menu da LISTA FINAL. Encerrando..."
+        ),
         e,
         finalizar = TRUE
       )
@@ -1915,7 +1931,7 @@ main_ambiente <- function(script_a_executar) {
   # MANTIDO PARA REFERÊNCIA: DEPRECATED
   # importacao$processo_para_relatorio <- config_json("processo", opcao = "get")
 
-  importacao$processo_para_relatorio <- commandArgs(trailingOnly = TRUE)[9]
+  importacao$processo_para_relatorio <- commandArgs(trailingOnly = TRUE)[3]
   importacao$consolidado <-
     if (script_a_executar != "relatorio" ||
       importacao$processo_para_relatorio == "todos" ||
@@ -1933,15 +1949,15 @@ main_ambiente <- function(script_a_executar) {
 
       r_config <- list(
         link_planilha = commandArgs(trailingOnly = TRUE)[2],
-        valor_minimo = commandArgs(trailingOnly = TRUE)[3],
-        qtde_minima = commandArgs(trailingOnly = TRUE)[4],
-        celula_inicial = commandArgs(trailingOnly = TRUE)[5],
-        unidades = commandArgs(trailingOnly = TRUE)[6],
-        aba_menu = commandArgs(trailingOnly = TRUE)[7],
-        aba_lista_final = commandArgs(trailingOnly = TRUE)[8]
+        valor_minimo = commandArgs(trailingOnly = TRUE)[4],
+        qtde_minima = commandArgs(trailingOnly = TRUE)[5],
+        celula_inicial = commandArgs(trailingOnly = TRUE)[6],
+        unidades = commandArgs(trailingOnly = TRUE)[7],
+        aba_menu = commandArgs(trailingOnly = TRUE)[8],
+        aba_lista_final = commandArgs(trailingOnly = TRUE)[9]
       )
 
-      celula_inicial <- trimws(r_config$celula)
+      celula_inicial <- trimws(r_config$celula_inicial)
 
       importacao$url_planilha <- r_config$link_planilha
       importacao$valor_minimo <- as.numeric(r_config$valor_minimo)

@@ -8,13 +8,66 @@ let sneEmpenhos = [];
 let sneEmpenhosFolderPath = '';
 let sneEmpenhosSortState = { column: null, direction: 'asc' };
 
+let sneInitialized = false;
+
+const sneSessionLogs = {};
+
+const SNE_LOG_C = {
+    section: 'color: #6ea8fe; font-weight: bold;',
+    success: 'color: #20c997;',
+    warning: 'color: #ffc107;',
+    error: 'color: #ff6b6b; font-weight: bold;',
+    muted: 'color: #adb5bd;',
+    info: 'color: inherit;',
+};
+const sneLogLine = (style, text) => `<span style="${style}">${text}\n</span>`;
+
 const VALIDITY_COVERAGE_ORDER = { 'VALIDA': 5, 'SEM_VALIDADE': 4, 'A_VENCER': 3, 'VENCIDA': 1 };
 // Mínimo de certidões individuais para cobrir um SICAF ausente ou vencido
 const MANDATORY_INDIVIDUAL = ['Receita Federal', 'FGTS', 'Trabalhista'];
 
+// ====== LOG DE SESSÃO ======
+
+function abrirConsoleSne(logKey) {
+    ensureConsoleDOM();
+    const logData = sneSessionLogs[logKey];
+    if (!logData) return;
+
+    ['finished-success', 'finished-warning', 'finished-error'].forEach(cls => consoleContainer.classList.remove(cls));
+    consoleContainer.classList.remove('running');
+    consoleOutput.innerHTML = logData.log;
+
+    if (logData.status === 'success') {
+        consoleSummary.className = 'summary-success';
+        summaryTitle.textContent = 'Execução concluída com sucesso';
+        consoleContainer.classList.add('finished-success');
+    } else if (logData.status === 'warning') {
+        consoleSummary.className = 'summary-warning';
+        summaryTitle.textContent = 'Execução concluída com alertas';
+        consoleContainer.classList.add('finished-warning');
+    } else {
+        consoleSummary.className = 'summary-error';
+        summaryTitle.textContent = 'Falha na execução';
+        consoleContainer.classList.add('finished-error');
+    }
+    summaryDescription.textContent = logData.message || '';
+
+    if (!hasEverRun) {
+        hasEverRun = true;
+        const btnReopen = document.getElementById('btn-reopen-console');
+        if (btnReopen) btnReopen.style.removeProperty('display');
+    }
+    // Delay to let the current click event finish propagating before showing,
+    // otherwise the document click handler in console.js immediately removes 'show'.
+    setTimeout(() => consoleContainer.classList.add('show'), 0);
+}
+
 // ====== INICIALIZAÇÃO ======
 
 function inicializarSne() {
+    if (sneInitialized) return;
+    sneInitialized = true;
+
     carregarFornecedores();
 
     document.getElementById('btn-analisar-certidoes')?.addEventListener('click', analisarCertidoes);
@@ -40,20 +93,25 @@ function inicializarSne() {
 
 // ====== CARREGAMENTO ======
 
-async function carregarFornecedores() {
+function carregarFornecedores(onDone) {
     const container = document.getElementById('sne-fornecedores-list');
     if (!container) return;
 
-    container.innerHTML = customSpinnerHTML('Lendo certidões...');
+    container.innerHTML = sneSpinnerHTML('Lendo certidões...', 'sne-certidoes-pb');
 
-    try {
-        const response = await fetch('/api/sne/certidoes/analisar');
-        const data = await response.json();
+    const es = new EventSource('/api/sne/certidoes/analisar');
+    let finalizado = false;
 
-        if (data.error) {
-            container.innerHTML = alertHTML('danger', 'error', data.error);
-            return;
-        }
+    const finalizar = () => { finalizado = true; es.close(); };
+
+    es.addEventListener('progress', (e) => {
+        const d = JSON.parse(e.data);
+        atualizarProgressoSne('sne-certidoes-pb', d.current, d.total, d.label);
+    });
+
+    es.addEventListener('done', (e) => {
+        finalizar();
+        const data = JSON.parse(e.data);
 
         sneAnalysis = data.results || [];
         sneFolderPath = data.folderPath || '';
@@ -66,9 +124,62 @@ async function carregarFornecedores() {
             sneSelectedCnpj = null;
             resetCertidoesPanel();
         }
-    } catch (error) {
-        container.innerHTML = alertHTML('danger', 'error', `Erro ao analisar certidões: ${error.message}`);
-    }
+
+        let certLog = '';
+        certLog += sneLogLine(SNE_LOG_C.section, '[SNE] Certidões carregadas');
+        certLog += sneLogLine(SNE_LOG_C.info, `[SNE] ${sneAnalysis.length} certidão(ões), ${sneGrouped.size} fornecedor(es)`);
+        certLog += sneLogLine(SNE_LOG_C.info, '');
+        const byStatus = {};
+        for (const [key, group] of sneGrouped) {
+            const st = computeSupplierStatus(group.certidoes);
+            byStatus[st] = (byStatus[st] || 0) + 1;
+            const icon = st === 'ok' ? '✓' : st === 'alerta' ? '⚠' : '✗';
+            const styleKey = st === 'ok' ? 'success' : st === 'alerta' ? 'warning' : 'error';
+            const displayName = group.company || (group.cnpj ? formatCnpj(group.cnpj) : key);
+            certLog += sneLogLine(SNE_LOG_C[styleKey], `  ${icon} ${displayName} — ${group.certidoes.length} certidão(ões)`);
+        }
+        certLog += sneLogLine(SNE_LOG_C.info, '');
+        const certSummaryParts = [];
+        if (byStatus.ok) certSummaryParts.push(`${byStatus.ok} OK`);
+        if (byStatus.alerta) certSummaryParts.push(`${byStatus.alerta} com alerta`);
+        if (byStatus.erro) certSummaryParts.push(`${byStatus.erro} com erro`);
+        if (byStatus.impedido) certSummaryParts.push(`${byStatus.impedido} impedido`);
+        certLog += sneLogLine(SNE_LOG_C.section, `[SNE] ${certSummaryParts.join(' · ') || 'Sem certidões'}`);
+        const certHasProblems = (byStatus.erro || 0) + (byStatus.impedido || 0) > 0;
+        const certHasAlerts = (byStatus.alerta || 0) > 0;
+        const certStatus = certHasProblems || certHasAlerts ? 'warning' : 'success';
+        const certMessage = `${sneGrouped.size} fornecedor(es), ${sneAnalysis.length} certidão(ões).`;
+        sneSessionLogs.certidoesLoad = { log: certLog, status: certStatus, message: certMessage };
+
+        addNotification({
+            message: 'Certidões carregadas. ' + certMessage,
+            type: certStatus,
+            source: 'SNE',
+            actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('certidoesLoad') }],
+        });
+
+        if (typeof onDone === 'function') onDone();
+    });
+
+    es.addEventListener('fail', (e) => {
+        finalizar();
+        const d = JSON.parse(e.data);
+        container.innerHTML = alertHTML('danger', 'error', d.error || 'Erro ao analisar certidões');
+        const message = d.error || 'Erro ao analisar certidões';
+        sneSessionLogs.certidoesLoad = { log: sneLogLine(SNE_LOG_C.error, message), status: 'error', message };
+        addNotification({
+            message,
+            type: 'error',
+            source: 'SNE',
+            actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('certidoesLoad') }],
+        });
+    });
+
+    es.onerror = () => {
+        if (finalizado) return;
+        finalizar();
+        container.innerHTML = alertHTML('danger', 'error', 'Erro de conexão ao analisar certidões');
+    };
 }
 
 // ====== AGRUPAMENTO ======
@@ -84,6 +195,25 @@ function groupByCnpj(results) {
         const group = grouped.get(key);
         if (!group.company && r.company) group.company = r.company;
         group.certidoes.push(r);
+    }
+
+    // Merge groups with CNPJ radical (8 digits) into matching full CNPJ groups (14 digits).
+    // Some certidões (e.g. Receita Estadual do RS) cover all establishments and use only the base CNPJ.
+    for (const [key, group] of [...grouped.entries()]) {
+        if (!group.cnpj || group.cnpj.length !== 8) continue;
+
+        const radical = group.cnpj;
+        const fullMatches = [...grouped.entries()].filter(
+            ([, g]) => g.cnpj?.length === 14 && g.cnpj.startsWith(radical)
+        );
+
+        if (fullMatches.length > 0) {
+            for (const [, fullGroup] of fullMatches) {
+                fullGroup.certidoes.push(...group.certidoes);
+                if (!fullGroup.company && group.company) fullGroup.company = group.company;
+            }
+            grouped.delete(key);
+        }
     }
 
     return grouped;
@@ -160,7 +290,7 @@ function renderFornecedores() {
     const container = document.getElementById('sne-fornecedores-list');
     if (!container) return;
 
-    const displayPath = sneFolderPath.replace(/\\/g, '/');
+    const displayPath = sneFolderPath;
 
     const refreshBtn = `
         <button class="folder-path-btn btn-refresh-fornecedores"
@@ -272,17 +402,15 @@ function selecionarFornecedor(key) {
     });
 
     const group = sneGrouped.get(key);
-    if (group) renderCertidoesDoFornecedor(group);
+    if (group) {
+        renderCertidoesDoFornecedor(group);
+        renderSnesDoFornecedor(group.cnpj);
+    }
 }
 
 function renderCertidoesDoFornecedor(group) {
     const container = document.getElementById('sne-certidoes-list');
-    const titulo = document.getElementById('sne-certidoes-titulo');
     if (!container) return;
-
-    if (titulo) {
-        titulo.textContent = group.company || (group.cnpj ? formatCnpj(group.cnpj) : 'Certidões');
-    }
 
     const results = group.certidoes;
 
@@ -311,7 +439,7 @@ function renderCertidoesDoFornecedor(group) {
         const warnings = r.warnings?.length > 0
             ? `<br><small class="text-warning">${r.warnings.join('; ')}</small>`
             : '';
-        const safeFilePath = (sneFolderPath + '\\' + r.filename).replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
+        const safeFilePath = r.fullPath.replace(/"/g, '&quot;');
         const safeFilename = r.filename.replace(/'/g, "\\'");
 
         html += `
@@ -343,13 +471,82 @@ function renderCertidoesDoFornecedor(group) {
 
 function resetCertidoesPanel() {
     const container = document.getElementById('sne-certidoes-list');
-    const titulo = document.getElementById('sne-certidoes-titulo');
     if (container) {
         container.innerHTML = `<div class="alert alert-info" role="alert">
             <i class="material-symbols-outlined">info</i> Selecione um fornecedor para ver as certidões
         </div>`;
     }
-    if (titulo) titulo.textContent = 'Certidões';
+    resetSnesPanel();
+}
+
+function resetSnesPanel() {
+    const container = document.getElementById('sne-snes-panel-list');
+    if (container) {
+        container.innerHTML = `<div class="alert alert-info" role="alert">
+            <i class="material-symbols-outlined">info</i> Selecione um fornecedor para ver as SNEs
+        </div>`;
+    }
+}
+
+function renderSnesDoFornecedor(cnpj) {
+    const container = document.getElementById('sne-snes-panel-list');
+    const titulo = document.getElementById('sne-snes-titulo');
+    if (!container) return;
+
+    if (!cnpj || cnpj === '__sem_cnpj__') {
+        container.innerHTML = `<div class="alert alert-warning"><i class="material-symbols-outlined">warning</i> CNPJ não identificado</div>`;
+        return;
+    }
+
+    if (sneEmpenhos.length === 0) {
+        container.innerHTML = `<div class="alert alert-info"><i class="material-symbols-outlined">info</i> Abra a aba <strong>Empenhos</strong> para carregar as SNEs</div>`;
+        return;
+    }
+
+    const snes = sneEmpenhos.filter(r => !r.error && r.cnpj === cnpj);
+
+    if (snes.length === 0) {
+        container.innerHTML = `<div class="alert alert-warning"><i class="material-symbols-outlined">warning</i> Nenhuma SNE encontrada para este fornecedor</div>`;
+        return;
+    }
+
+    let html = `
+        <div class="files-table-container sne-table-container">
+            <table class="files-table">
+                <thead>
+                    <tr>
+                        <th colspan="2">Arquivo</th>
+                        <th>SNE</th>
+                        <th>AF</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+    for (const r of snes) {
+        const safeFilePath = r.fullPath.replace(/"/g, '&quot;');
+        const sneNum = r.sneNumber || '—';
+        const afLabel = r.af ? `${r.af.number} / ${r.af.year}` : '—';
+
+        html += `
+            <tr ondblclick="openFile('${safeFilePath}')">
+                <td><i class="material-symbols-outlined text-muted">receipt_long</i></td>
+                <td class="text-break">${r.filename}</td>
+                <td class="text-nowrap">${sneNum}</td>
+                <td class="text-nowrap">${afLabel}</td>
+                <td class="table-btn-column">
+                    <button class="btn btn-sm text-primary file-row-btn"
+                        onclick="openFile('${safeFilePath}')"
+                        data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">
+                        <i class="material-symbols-outlined">open_in_new</i>
+                    </button>
+                </td>
+            </tr>`;
+    }
+
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+    initializeTooltips();
 }
 
 // ====== ABERTURA DE ARQUIVOS ======
@@ -357,7 +554,7 @@ function resetCertidoesPanel() {
 function openFornecedorFiles(key) {
     const group = sneGrouped.get(key);
     if (!group) return;
-    group.certidoes.forEach(c => openFile(sneFolderPath + '\\' + c.filename));
+    group.certidoes.forEach(c => openFile(c.fullPath));
 }
 
 // ====== EXCLUSÃO ======
@@ -430,16 +627,25 @@ async function analisarCertidoes() {
 
     if (!confirmed) return;
 
-    prepareConsoleForExecution('sne_analisar');
+    const btn = document.getElementById('btn-analisar-certidoes');
+    const fornecedoresContainer = document.getElementById('sne-fornecedores-list');
+    if (btn) btn.disabled = true;
+    if (fornecedoresContainer) {
+        fornecedoresContainer.innerHTML = sneSpinnerHTML('Verificando certidões...', 'sne-certidoes-verificar-pb');
+    }
 
-    try {
-        const response = await fetch('/api/sne/certidoes/renomear', { method: 'POST' });
-        const data = await response.json();
+    const es = new EventSource('/api/sne/certidoes/renomear');
+    let finalizado = false;
+    const finalizar = () => { finalizado = true; es.close(); if (btn) btn.disabled = false; };
 
-        if (!response.ok) {
-            handleScriptResult({ scriptName: 'sne_analisar', status: 'error', message: data.error || 'Erro ao processar certidões.', log: '' });
-            return;
-        }
+    es.addEventListener('progress', (e) => {
+        const d = JSON.parse(e.data);
+        atualizarProgressoSne('sne-certidoes-verificar-pb', d.current, d.total, d.label);
+    });
+
+    es.addEventListener('done', (e) => {
+        finalizar();
+        const data = JSON.parse(e.data);
 
         const renamed = data.results.filter(r => r.renamed).length;
         const deleted = data.results.filter(r => r.deleted).length;
@@ -447,20 +653,10 @@ async function analisarCertidoes() {
         const skipped = data.results.filter(r => r.renameSkipped).length;
         const noChange = data.results.filter(r => r.noChange).length;
 
-        const C = {
-            section: 'color: #6ea8fe; font-weight: bold;',
-            success: 'color: #20c997;',
-            warning: 'color: #ffc107;',
-            error: 'color: #ff6b6b; font-weight: bold;',
-            muted: 'color: #adb5bd;',
-            info: 'color: inherit;',
-        };
-        const line = (style, text) => `<span style="${style}">${text}\n</span>`;
-
         let log = '';
-        log += line(C.section, '[SNE] Análise e renomeação de certidões');
-        log += line(C.info, `[SNE] ${data.results.length} arquivo(s) na pasta CERTIDOES`);
-        log += line(C.info, '');
+        log += sneLogLine(SNE_LOG_C.section, '[SNE] Análise e renomeação de certidões');
+        log += sneLogLine(SNE_LOG_C.info, `[SNE] ${data.results.length} arquivo(s) na pasta CERTIDOES`);
+        log += sneLogLine(SNE_LOG_C.info, '');
 
         for (const r of data.results) {
             const typeLabel = r.type || 'Tipo desconhecido';
@@ -468,26 +664,26 @@ async function analisarCertidoes() {
             const whoStr = who ? ` — ${who}` : '';
 
             if (r.renamed && r.conflictDuplicated) {
-                log += line(C.warning, `  ⚠ Duplicata renomeada: "${r.filename}"`);
-                log += line(C.warning, `    → "${r.newName}"`);
+                log += sneLogLine(SNE_LOG_C.warning, `  ⚠ Duplicata renomeada: "${r.filename}"`);
+                log += sneLogLine(SNE_LOG_C.warning, `    → "${r.newName}"`);
             } else if (r.renamed) {
-                log += line(C.success, `  ✓ ${typeLabel}${whoStr}`);
-                log += line(C.muted, `    "${r.filename}"`);
-                log += line(C.muted, `    → "${r.newName}"`);
+                log += sneLogLine(SNE_LOG_C.success, `  ✓ ${typeLabel}${whoStr}`);
+                log += sneLogLine(SNE_LOG_C.muted, `    "${r.filename}"`);
+                log += sneLogLine(SNE_LOG_C.muted, `    → "${r.newName}"`);
             } else if (r.deleted) {
                 const kept = r.deletedKeptAs ? ` (mantido: "${r.deletedKeptAs}")` : '';
-                log += line(C.warning, `  ✗ Eliminado (duplicata)${kept}: "${r.filename}"`);
+                log += sneLogLine(SNE_LOG_C.warning, `  ✗ Eliminado (duplicata)${kept}: "${r.filename}"`);
             } else if (r.renameError) {
-                log += line(C.error, `  ✗ Erro: "${r.filename}": ${r.renameError}`);
+                log += sneLogLine(SNE_LOG_C.error, `  ✗ Erro: "${r.filename}": ${r.renameError}`);
             } else if (r.renameSkipped) {
                 const reason = r.error ? ` (${r.error})` : '';
-                log += line(C.muted, `  — Sem nome${reason}: "${r.filename}"`);
+                log += sneLogLine(SNE_LOG_C.muted, `  — Sem nome${reason}: "${r.filename}"`);
             } else if (r.noChange) {
-                log += line(C.muted, `  — Sem alteração: "${r.filename}"`);
+                log += sneLogLine(SNE_LOG_C.muted, `  — Sem alteração: "${r.filename}"`);
             }
         }
 
-        log += line(C.info, '');
+        log += sneLogLine(SNE_LOG_C.info, '');
 
         const summaryParts = [];
         if (renamed > 0) summaryParts.push(`${renamed} renomeado(s)`);
@@ -495,27 +691,45 @@ async function analisarCertidoes() {
         if (errors > 0) summaryParts.push(`${errors} com erro`);
         if (skipped > 0) summaryParts.push(`${skipped} sem nome`);
         if (noChange > 0) summaryParts.push(`${noChange} sem alteração`);
-        log += line(C.section, `[SNE] ${summaryParts.join(' · ')}`);
-
-        consoleOutput.innerHTML = log;
+        log += sneLogLine(SNE_LOG_C.section, `[SNE] ${summaryParts.join(' · ')}`);
 
         const parts = [`${renamed} renomeado(s)`];
         if (deleted > 0) parts.push(`${deleted} eliminado(s) por conflito`);
         if (errors + skipped > 0) parts.push(`${errors + skipped} com falha ou sem nome identificado`);
         const status = (errors + skipped) === 0 ? 'success' : 'warning';
-        handleScriptResult({ scriptName: 'sne_analisar', status, message: parts.join(', ') + '.', log: '' });
+        const message = parts.join(', ') + '.';
+
+        sneSessionLogs.certidoes = { log, status, message };
 
         addNotification({
-            message: 'Análise de certidões concluída. ' + parts.join(', ') + '.',
+            message: 'Análise de certidões concluída. ' + message,
             type: status === 'success' ? 'success' : 'warning',
             source: 'SNE',
+            actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('certidoes') }],
         });
 
-        await carregarFornecedores();
-        if (sneEmpenhosFolderPath) renderEmpenhos();
-    } catch (error) {
-        handleScriptResult({ scriptName: 'sne_analisar', status: 'error', message: `Erro: ${error.message}`, log: '' });
-    }
+        carregarFornecedores(() => { if (sneEmpenhosFolderPath) renderEmpenhos(); });
+    });
+
+    es.addEventListener('fail', (e) => {
+        finalizar();
+        const d = JSON.parse(e.data);
+        const message = d.error || 'Erro ao processar certidões.';
+        sneSessionLogs.certidoes = { log: sneLogLine(SNE_LOG_C.error, message), status: 'error', message };
+        addNotification({
+            message,
+            type: 'error',
+            source: 'SNE',
+            actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('certidoes') }],
+        });
+        carregarFornecedores();
+    });
+
+    es.onerror = () => {
+        if (finalizado) return;
+        finalizar();
+        carregarFornecedores();
+    };
 }
 
 // ====== UTILITÁRIOS DE EXIBIÇÃO ======
@@ -567,6 +781,29 @@ function alertHTML(type, icon, message) {
     </div>`;
 }
 
+// ====== PROGRESSO ======
+
+function atualizarProgressoSne(barId, current, total, label) {
+    const bar = document.getElementById(barId);
+    if (!bar) return;
+    const outer = bar.closest('.progress-outer');
+    if (!outer) return;
+    const percentage = total > 0 ? (current / total) * 100 : 0;
+    setProgressPercent(outer, percentage, label);
+}
+
+function sneSpinnerHTML(message, barId) {
+    return customSpinnerHTML(message) + `
+        <div class="progress-outer mx-2 mb-2">
+            <span class="progress-percent-popup" style="left: 0%">0%</span>
+            <div class="progress" style="height: 16px;">
+                <div id="${barId}" class="progress-bar progress-bar-striped progress-bar-animated text-bg-info"
+                    role="progressbar" style="width: 0%;">
+                </div>
+            </div>
+        </div>`;
+}
+
 // ====== EMPENHOS ======
 
 const EMPENHO_STATUS_MAP = {
@@ -584,7 +821,7 @@ function navegarParaCertidoesDoCnpj(cnpj) {
 }
 
 function scrollParaAF(afName) {
-    const group = [...document.querySelectorAll('.sne-af-group')].find(el => el.dataset.afName === afName);
+    const group = [...document.querySelectorAll('tr.sne-af-group')].find(el => el.dataset.afName === afName);
     if (group) group.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
@@ -692,36 +929,95 @@ function getEmpenhoForSne(afName, sneName) {
         r.sneNumber === sneNum) || null;
 }
 
-async function carregarEmpenhos() {
+function carregarEmpenhos() {
     const container = document.getElementById('sne-empenhos-container');
     if (!container) return;
 
-    container.innerHTML = customSpinnerHTML('Lendo empenhos...');
+    container.innerHTML = sneSpinnerHTML('Lendo empenhos...', 'sne-empenhos-pb');
 
-    try {
-        const [empenhoResp, afsResp] = await Promise.all([
-            fetch('/api/sne/empenhos/analisar'),
-            fetch('/api/sne/afs'),
-        ]);
-        const data = await empenhoResp.json();
-        const afsData = await afsResp.json();
+    const es = new EventSource('/api/sne/empenhos/analisar');
+    let finalizado = false;
 
-        if (data.error) {
-            container.innerHTML = alertHTML('danger', 'error', data.error);
-            return;
-        }
+    const finalizar = () => { finalizado = true; es.close(); };
+
+    es.addEventListener('progress', (e) => {
+        const d = JSON.parse(e.data);
+        atualizarProgressoSne('sne-empenhos-pb', d.current, d.total, d.label);
+    });
+
+    es.addEventListener('done', (e) => {
+        finalizar();
+        const data = JSON.parse(e.data);
 
         sneEmpenhos = data.results || [];
         sneEmpenhosFolderPath = data.folderPath || '';
 
-        if (!afsData.error) {
-            sneAfsData = afsData.afs || [];
-        }
+        fetch('/api/sne/afs')
+            .then(r => r.json())
+            .then(afsData => { if (!afsData.error) sneAfsData = afsData.afs || []; })
+            .catch(() => {})
+            .finally(() => {
+                renderEmpenhos();
+                if (sneSelectedCnpj) renderSnesDoFornecedor(sneGrouped.get(sneSelectedCnpj)?.cnpj);
 
-        renderEmpenhos();
-    } catch (error) {
-        container.innerHTML = alertHTML('danger', 'error', `Erro ao analisar empenhos: ${error.message}`);
-    }
+                const total = sneEmpenhos.length;
+                const erros = sneEmpenhos.filter(r => r.error).length;
+                const semAF = sneEmpenhos.filter(r => !r.error && !r.af).length;
+
+                let log = '';
+                log += sneLogLine(SNE_LOG_C.section, '[SNE] Empenhos carregados');
+                log += sneLogLine(SNE_LOG_C.info, `[SNE] ${total} arquivo(s) na pasta SNEs`);
+                log += sneLogLine(SNE_LOG_C.info, '');
+
+                for (const r of sneEmpenhos) {
+                    if (r.error) {
+                        log += sneLogLine(SNE_LOG_C.error, `  ✗ ${r.filename}: ${r.error}`);
+                    } else {
+                        const afStr = r.af ? `AF ${r.af.number}/${r.af.year}` : 'sem AF';
+                        const sneStr = r.sneNumber ? `SNE ${r.sneNumber}` : 'sem SNE';
+                        const companyStr = r.company ? ` — ${r.company}` : '';
+                        log += sneLogLine(SNE_LOG_C.success, `  ✓ ${r.filename} — ${sneStr}, ${afStr}${companyStr}`);
+                    }
+                }
+
+                log += sneLogLine(SNE_LOG_C.info, '');
+                const summaryParts = [`${total - erros} carregado(s)`];
+                if (erros > 0) summaryParts.push(`${erros} com erro`);
+                if (semAF > 0) summaryParts.push(`${semAF} sem AF`);
+                log += sneLogLine(SNE_LOG_C.section, `[SNE] ${summaryParts.join(' · ')}`);
+
+                const status = erros > 0 ? 'warning' : 'success';
+                const message = `${total} empenho(s) carregado(s)${erros > 0 ? `, ${erros} com erro` : ''}.`;
+                sneSessionLogs.empenhos = { log, status, message };
+
+                addNotification({
+                    message,
+                    type: status,
+                    source: 'SNE',
+                    actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('empenhos') }],
+                });
+            });
+    });
+
+    es.addEventListener('fail', (e) => {
+        finalizar();
+        const d = JSON.parse(e.data);
+        container.innerHTML = alertHTML('danger', 'error', d.error || 'Erro ao analisar empenhos');
+        const message = d.error || 'Erro ao analisar empenhos';
+        sneSessionLogs.empenhos = { log: sneLogLine(SNE_LOG_C.error, message), status: 'error', message };
+        addNotification({
+            message,
+            type: 'error',
+            source: 'SNE',
+            actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('empenhos') }],
+        });
+    });
+
+    es.onerror = () => {
+        if (finalizado) return;
+        finalizar();
+        container.innerHTML = alertHTML('danger', 'error', 'Erro de conexão ao analisar empenhos');
+    };
 }
 
 function getSneEmpenhoSortValue(r, column) {
@@ -761,7 +1057,7 @@ function renderEmpenhos() {
     const container = document.getElementById('sne-empenhos-container');
     if (!container) return;
 
-    const displayPath = sneEmpenhosFolderPath.replace(/\\/g, '/');
+    const displayPath = sneEmpenhosFolderPath;
 
     const refreshBtn = `
         <button class="folder-path-btn btn-refresh-empenhos"
@@ -827,7 +1123,7 @@ function renderEmpenhos() {
 
     for (const r of sortedEmpenhos) {
         const safeFilename = r.filename.replace(/'/g, "\\'");
-        const safeFilePath = (sneEmpenhosFolderPath + '\\' + r.filename).replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
+        const safeFilePath = r.fullPath.replace(/"/g, '&quot;');
 
         if (r.error) {
             html += `
@@ -960,28 +1256,76 @@ let sneAfsFolderPath = '';
 let sneAfsSortState = { column: null, direction: 'asc' };
 let snePendingAfScroll = null;
 
-async function carregarAFs() {
+function carregarAFs() {
     const container = document.getElementById('sne-afs-container');
     if (!container) return;
 
-    container.innerHTML = customSpinnerHTML('Analisando arquivos das AFs...');
+    container.innerHTML = sneSpinnerHTML('Analisando arquivos das AFs...', 'sne-afs-pb');
 
-    try {
-        const resp = await fetch('/api/sne/afs/analisar');
-        const data = await resp.json();
+    const es = new EventSource('/api/sne/afs/analisar');
+    let finalizado = false;
 
-        if (data.error) {
-            container.innerHTML = alertHTML('danger', 'error', data.error);
-            return;
-        }
+    const finalizar = () => { finalizado = true; es.close(); };
+
+    es.addEventListener('progress', (e) => {
+        const d = JSON.parse(e.data);
+        atualizarProgressoSne('sne-afs-pb', d.current, d.total, d.label);
+    });
+
+    es.addEventListener('done', (e) => {
+        finalizar();
+        const data = JSON.parse(e.data);
 
         sneAfsAnalysis = data.afs || [];
         sneAfsFolderPath = data.folderPath || '';
 
         renderAFs();
-    } catch (error) {
-        container.innerHTML = alertHTML('danger', 'error', `Erro ao carregar AFs: ${error.message}`);
-    }
+
+        const total = sneAfsAnalysis.length;
+        const totalSnes = sneAfsAnalysis.reduce((s, af) => s + af.snes.length, 0);
+
+        let log = '';
+        log += sneLogLine(SNE_LOG_C.section, '[SNE] AFs carregadas');
+        log += sneLogLine(SNE_LOG_C.info, `[SNE] ${total} AF(s), ${totalSnes} SNE(s)`);
+        log += sneLogLine(SNE_LOG_C.info, '');
+
+        for (const af of sneAfsAnalysis) {
+            log += sneLogLine(SNE_LOG_C.success, `  ✓ ${af.name} — ${af.snes.length} SNE(s)`);
+        }
+
+        log += sneLogLine(SNE_LOG_C.info, '');
+        log += sneLogLine(SNE_LOG_C.section, `[SNE] ${total} AF(s) · ${totalSnes} SNE(s)`);
+
+        const message = `${total} AF(s) carregada(s), ${totalSnes} SNE(s).`;
+        sneSessionLogs.afs = { log, status: 'success', message };
+
+        addNotification({
+            message,
+            type: 'success',
+            source: 'SNE',
+            actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('afs') }],
+        });
+    });
+
+    es.addEventListener('fail', (e) => {
+        finalizar();
+        const d = JSON.parse(e.data);
+        container.innerHTML = alertHTML('danger', 'error', d.error || 'Erro ao carregar AFs');
+        const message = d.error || 'Erro ao carregar AFs';
+        sneSessionLogs.afs = { log: sneLogLine(SNE_LOG_C.error, message), status: 'error', message };
+        addNotification({
+            message,
+            type: 'error',
+            source: 'SNE',
+            actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('afs') }],
+        });
+    });
+
+    es.onerror = () => {
+        if (finalizado) return;
+        finalizar();
+        container.innerHTML = alertHTML('danger', 'error', 'Erro de conexão ao carregar AFs');
+    };
 }
 
 function getSneAfSortValue(af, column) {
@@ -1021,7 +1365,7 @@ function renderAFs() {
     const container = document.getElementById('sne-afs-container');
     if (!container) return;
 
-    const displayPath = sneAfsFolderPath.replace(/\\/g, '/');
+    const displayPath = sneAfsFolderPath;
     const refreshBtn = `
         <button class="folder-path-btn btn-refresh-afs"
             data-bs-toggle="tooltip" data-bs-title="Atualizar lista">
@@ -1068,24 +1412,28 @@ function renderAFs() {
                         ${sortTh('af', 'AF', '', 'colspan="2"')}
                         <th></th>
                         <th colspan="2">SNE</th>
+                        <th></th>
                         <th class="text-center">Tombamento</th>
                         <th class="text-center">Certidões</th>
                         <th>Arquivos</th>
-                        <th></th>
                     </tr>
                 </thead>`;
 
-    for (const af of sortedAfs) {
+    html += `<tbody>`;
+
+    for (let afIndex = 0; afIndex < sortedAfs.length; afIndex++) {
+        const af = sortedAfs[afIndex];
         const safeAfName = af.name.replace(/'/g, "\\'");
-        const safeAfPath = af.path.replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
+        const safeAfPath = af.path.replace(/"/g, '&quot;');
         const rowspan = Math.max(af.snes.length, 1);
         const rowspanAttr = rowspan > 1 ? ` rowspan="${rowspan}"` : '';
+        const firstRowClass = `sne-af-group${afIndex > 0 ? ' sne-af-separator' : ''}`;
 
-        const afIconCell = `<td class="sne-af-cell"${rowspanAttr}><i class="material-symbols-outlined text-primary">folder</i></td>`;
-        const afNameCell = `<td class="sne-af-cell fw-semibold"${rowspanAttr}>${af.name}</td>`;
+        const afIconCell = `<td class="sne-af-cell"${rowspanAttr} ondblclick="openFolder('${safeAfPath}', '${safeAfName}')"><i class="material-symbols-outlined text-primary">folder</i></td>`;
+        const afNameCell = `<td class="sne-af-cell fw-semibold"${rowspanAttr} ondblclick="openFolder('${safeAfPath}', '${safeAfName}')">${af.name}</td>`;
         const afActionsCell = `<td class="sne-af-cell table-btn-column text-nowrap"${rowspanAttr}>
                         <button class="btn btn-sm text-primary file-row-btn"
-                            onclick="openFolder('${safeAfPath}')"
+                            onclick="openFolder('${safeAfPath}', '${safeAfName}')"
                             data-bs-toggle="tooltip" data-bs-title="Abrir pasta da AF">
                             <i class="material-symbols-outlined">folder_open</i>
                         </button>
@@ -1096,17 +1444,15 @@ function renderAFs() {
                         </button>
                     </td>`;
 
-        html += `<tbody class="sne-af-group" data-af-name="${af.name}">`;
-
         if (af.snes.length === 0) {
-            html += `<tr>${afIconCell}${afNameCell}${afActionsCell}
+            html += `<tr class="${firstRowClass}" data-af-name="${af.name}">${afIconCell}${afNameCell}${afActionsCell}
                     <td colspan="6" class="text-muted fst-italic">Sem SNEs</td>
                 </tr>`;
         } else {
             for (let i = 0; i < af.snes.length; i++) {
                 const sne = af.snes[i];
                 const safeSneNum = sne.name.replace(/'/g, "\\'");
-                const safeSnePath = sne.path.replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
+                const safeSnePath = sne.path.replace(/"/g, '&quot;');
 
                 const tombCell = buildTombCell(sne.empenho?.tombamento);
 
@@ -1114,10 +1460,10 @@ function renderAFs() {
 
                 const filesHtml = sne.files.length > 0
                     ? sne.files.map(f => {
-                        const safeFilePath = (sne.path + '\\' + f).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                        const safeFilePath = f.fullPath.replace(/'/g, "\\'");
                         return `<div class="sne-file-item" ondblclick="openFile('${safeFilePath}')">
                                 <i class="material-symbols-outlined text-muted">description</i>
-                                <span>${f}</span>
+                                <span>${f.name}</span>
                                 <button class="btn btn-sm text-primary file-row-btn"
                                     onclick="openFile('${safeFilePath}')"
                                     data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">
@@ -1127,17 +1473,18 @@ function renderAFs() {
                     }).join('')
                     : '<span class="text-muted fst-italic">Vazia</span>';
 
-                html += `<tr>`;
-                if (i === 0) html += afIconCell + afNameCell + afActionsCell;
+                if (i === 0) {
+                    html += `<tr class="${firstRowClass}" data-af-name="${af.name}">`;
+                    html += afIconCell + afNameCell + afActionsCell;
+                } else {
+                    html += `<tr>`;
+                }
                 html += `
-                    <td><i class="material-symbols-outlined text-muted">receipt_long</i></td>
-                    <td class="text-nowrap">${sne.name}</td>
-                    <td class="text-center">${tombCell}</td>
-                    <td class="text-center">${statusCell}</td>
-                    <td>${filesHtml}</td>
+                    <td ondblclick="openFolder('${safeSnePath}', '${safeSneNum}')"><i class="material-symbols-outlined text-muted">receipt_long</i></td>
+                    <td class="text-nowrap" ondblclick="openFolder('${safeSnePath}', '${safeSneNum}')">${sne.name}</td>
                     <td class="table-btn-column text-nowrap">
                         <button class="btn btn-sm text-primary file-row-btn"
-                            onclick="openFolder('${safeSnePath}')"
+                            onclick="openFolder('${safeSnePath}', '${safeSneNum}')"
                             data-bs-toggle="tooltip" data-bs-title="Abrir pasta da SNE">
                             <i class="material-symbols-outlined">folder_open</i>
                         </button>
@@ -1147,14 +1494,15 @@ function renderAFs() {
                             <i class="material-symbols-outlined">delete</i>
                         </button>
                     </td>
+                    <td class="text-center">${tombCell}</td>
+                    <td class="text-center">${statusCell}</td>
+                    <td>${filesHtml}</td>
                 </tr>`;
             }
         }
-
-        html += `</tbody>`;
     }
 
-    html += `</table></div>`;
+    html += `</tbody></table></div>`;
     container.innerHTML = html;
     setupFolderPathButtons(container);
     setupRefreshAfsButton(container);
@@ -1338,7 +1686,7 @@ async function executarCriarAFs() {
         return;
     }
 
-    const scope = document.querySelector('input[name="sne-afs-scope"]:checked')?.value;
+    const scope = document.getElementById('sne-afs-scope')?.value;
 
     let filenames = null;
     let scopeDetail = '';
@@ -1361,7 +1709,7 @@ async function executarCriarAFs() {
         scopeDetail = `<br><i class="material-symbols-outlined me-1">checklist</i> Somente selecionadas: <strong>${filenames.length}</strong> de ${sneEmpenhos.length} empenho(s).`;
     }
 
-    const moveSnes = document.querySelector('input[name="sne-afs-action"]:checked')?.value === 'mover';
+    const moveSnes = document.getElementById('sne-afs-action')?.value === 'mover';
     const actionDetail = moveSnes
         ? `<br><i class="material-symbols-outlined me-1">drive_file_move</i> Os empenhos serão <strong>movidos</strong> para as pastas das AFs.`
         : '';
@@ -1376,37 +1724,72 @@ async function executarCriarAFs() {
 
     if (!confirmed) return;
 
+    const afsTabEl = document.getElementById('tab-sne-afs');
+    if (afsTabEl) bootstrap.Tab.getOrCreateInstance(afsTabEl).show();
+
+    const afsContainer = document.getElementById('sne-afs-container');
+    if (afsContainer) afsContainer.innerHTML = sneSpinnerHTML('Criando estrutura de AFs...', 'sne-afs-criar-pb');
+
+    let fakeProgress = 0;
+    const progressInterval = setInterval(() => {
+        fakeProgress = Math.min(fakeProgress + Math.random() * 4 + 1, 90);
+        atualizarProgressoSne('sne-afs-criar-pb', fakeProgress, 100, 'Criando pastas...');
+    }, 400);
+
     try {
         const response = await fetch('/api/sne/empenhos/criar-afs', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...(filenames && { filenames }), moveSnes }),
         });
+        clearInterval(progressInterval);
+        atualizarProgressoSne('sne-afs-criar-pb', 100, 100, 'Concluído');
+
         const data = await response.json();
 
         if (!response.ok) {
             showToast(`Erro ao criar AFs: ${data.error}`, 'error');
+            carregarAFs();
             return;
         }
 
         const parts = [`${data.afs.length} AF(s)`, `${data.snes.length} SNE(s)`];
         if (data.errors?.length > 0) parts.push(`${data.errors.length} erro(s)`);
         const status = data.errors?.length > 0 ? 'warning' : 'success';
+
+        let log = '';
+        log += sneLogLine(SNE_LOG_C.section, '[SNE] Criação de estrutura de AFs');
+        log += sneLogLine(SNE_LOG_C.info, `[SNE] ${data.afs.length} AF(s), ${data.snes.length} SNE(s) criada(s)`);
+        if (data.errors?.length > 0) {
+            log += sneLogLine(SNE_LOG_C.info, '');
+            for (const err of data.errors) {
+                log += sneLogLine(SNE_LOG_C.error, `  ✗ ${typeof err === 'string' ? err : JSON.stringify(err)}`);
+            }
+        }
+        log += sneLogLine(SNE_LOG_C.info, '');
+        log += sneLogLine(status === 'warning' ? SNE_LOG_C.warning : SNE_LOG_C.success, `[SNE] ${parts.join(' · ')}`);
+
+        const notifMessage = `AFs criadas: ${parts.join(', ')}.`;
+        sneSessionLogs.criarAfs = { log, status, message: notifMessage };
+
         showToast(`Estrutura criada: ${parts.join(', ')}.`, status);
 
         addNotification({
-            message: `AFs criadas: ${parts.join(', ')}.`,
+            message: notifMessage,
             type: status,
             source: 'SNE',
+            actions: [{ label: 'Ver log', callback: () => abrirConsoleSne('criarAfs') }],
         });
 
         if (moveSnes) {
-            await carregarEmpenhos();
+            carregarEmpenhos();
         } else {
             renderEmpenhos();
         }
         carregarAFs();
     } catch (error) {
+        clearInterval(progressInterval);
         showToast(`Erro: ${error.message}`, 'error');
+        carregarAFs();
     }
 }

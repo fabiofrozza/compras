@@ -1,5 +1,53 @@
 let _rDownloadUrl = '';
 
+async function carregarInfoProjeto() {
+    const loading = document.getElementById('projeto-info-loading');
+    const content = document.getElementById('projeto-info-content');
+    if (!content) return;
+
+    loading.classList.remove('d-none');
+    content.classList.add('d-none');
+
+    const titleEl = document.getElementById('projeto-info-title');
+    const dateEl = document.getElementById('projeto-info-date');
+    const countEl = document.getElementById('projeto-info-count');
+    const link = document.getElementById('projeto-info-link');
+    const REPO_URL = 'https://github.com/fabiofrozza/compras';
+
+    try {
+        const [latestRes, countRes] = await Promise.all([
+            fetch('https://api.github.com/repos/fabiofrozza/compras/releases/latest'),
+            fetch('https://api.github.com/repos/fabiofrozza/compras/releases?per_page=1'),
+        ]);
+
+        loading.classList.add('d-none');
+        content.classList.remove('d-none');
+
+        if (!latestRes.ok) throw new Error();
+
+        const release = await latestRes.json();
+        titleEl.textContent = release.name || release.tag_name || 'Repositório Github';
+        dateEl.textContent = release.published_at
+            ? new Date(release.published_at).toLocaleDateString('pt-BR')
+            : '-';
+        link.href = release.html_url || REPO_URL;
+        link.classList.remove('d-none');
+
+        // Conta o total de releases parseando o número da última página do header Link
+        if (countRes.ok) {
+            const linkHeader = countRes.headers.get('Link') || '';
+            const match = linkHeader.match(/[?&]page=(\d+)>;\s*rel="last"/);
+            countEl.textContent = match ? match[1] : '1';
+        }
+    } catch {
+        loading.classList.add('d-none');
+        content.classList.remove('d-none');
+        titleEl.textContent = 'Repositório Github';
+        link.href = REPO_URL;
+        link.classList.remove('d-none');
+    }
+}
+
 function executarInstalacao(modo) {
     runRScript('instalacao', { modo });
 }
@@ -291,11 +339,64 @@ async function carregarNpmPackages() {
     }
 }
 
+function injetarAvisosLinux(isDev) {
+    const alertas = [
+        {
+            panelId: 'r-info-panel',
+            alertText: 'No Linux, a detecção automática do R pode apresentar divergências. Caso o R não seja encontrado, verifique se o pacote <code>r-base</code> está instalado e se <code>Rscript</code> está no PATH do sistema.'
+        },
+        {
+            panelId: 'panel-instalacao',
+            alertText: 'No Linux, a instalação de pacotes R frequentemente exige bibliotecas de sistema adicionais como <code>libcurl4-openssl-dev</code>, <code>libxml2-dev</code> e <code>libssl-dev</code>. Em caso de erros, instale as dependências via <code>apt</code>, <code>dnf</code> ou equivalente antes de tentar novamente.'
+        },
+        {
+            panelId: 'node-info-panel',
+            alertText: 'No Linux, esta aplicação utiliza o binário Node.js incluído na pasta <code>bin/</code>. A versão exibida pode divergir da instalação do sistema.'
+        }
+    ];
+
+    if (isDev) {
+        alertas.push({
+            panelId: 'npm-packages-panel',
+            alertText: 'No Linux, atualizações de pacotes npm podem exigir permissões adicionais dependendo da configuração do sistema.'
+        });
+    }
+
+    alertas.forEach(({ panelId, alertText }) => {
+        const panel = document.getElementById(panelId);
+        if (!panel) return;
+
+        const buttons = panel.querySelector('.panel-header-buttons');
+        if (!buttons) return;
+
+        const popoverId = `linux-warning-${panelId}`;
+        const anchorName = `--${popoverId}`;
+
+        const badge = document.createElement('button');
+        badge.type = 'button';
+        badge.className = 'linux-panel-badge';
+        badge.setAttribute('popovertarget', popoverId);
+        badge.style.setProperty('anchor-name', anchorName);
+        badge.innerHTML = '<i class="material-symbols-outlined">warning</i>Linux';
+        buttons.prepend(badge);
+
+        const popover = document.createElement('div');
+        popover.setAttribute('popover', '');
+        popover.id = popoverId;
+        popover.className = 'panel-help-popover linux-panel-popover';
+        popover.style.setProperty('position-anchor', anchorName);
+        popover.innerHTML = alertText;
+        panel.after(popover);
+    });
+}
+
+document.getElementById('projeto-info-loading').innerHTML = customSpinnerHTML('Verificando...');
 document.getElementById('r-info-loading').innerHTML = customSpinnerHTML('Verificando R...');
 document.getElementById('node-info-loading').innerHTML = customSpinnerHTML('Verificando Node.js...');
 document.getElementById('npm-version-loading').innerHTML = customSpinnerHTML('Verificando npm...');
 document.getElementById('npm-packages-loading').innerHTML = customSpinnerHTML('Verificando pacotes...');
 
+carregarInfoProjeto();
 carregarInfoR();
 carregarInfoNode();
 
@@ -306,6 +407,9 @@ fetch('/api/app-config')
             document.getElementById('npm-packages-panel')?.classList.remove('d-none');
             carregarInfoNpm();
             carregarNpmPackages();
+        }
+        if (cfg.platform === 'linux') {
+            injetarAvisosLinux(cfg.isDev);
         }
     })
     .catch(() => { /* sem bloco npm em caso de falha */ });

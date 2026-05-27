@@ -2,48 +2,6 @@
    FORMS
    ========================================================================== */
 
-.script-form {
-    background-color: color-mix(in srgb, var(--compras-theme) 75%, white);
-    padding: 16px;
-    border-radius: 8px;
-    margin-bottom: 24px;
-}
-
-.script-form-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: default;
-}
-
-.script-form h4,
-.sub-tabs .nav-link {
-    font-size: 1em;
-}
-
-.script-form h4,
-.sub-tabs .nav-link.active {
-    color: var(--compras-text-primary);
-}
-
-.script-form h4 i {
-    font-size: 1.25rem;
-    vertical-align: top;
-    font-variation-settings: 'opsz' 48;
-}
-
-.script-form h4 {
-    margin-bottom: 14px;
-    border-bottom: 1px solid var(--compras-text-primary);
-    padding-bottom: 8px;
-}
-
-.script-form-header-buttons {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-}
-
 .form-group {
     margin-bottom: 12px;
     display: flex;
@@ -59,21 +17,31 @@
 
 .btn-tooltip-wrapper {
     display: inline-flex;
-    align-items: center;
-    gap: 6px;
+    position: relative;
 }
 
-.btn-tooltip-wrapper>button:disabled {
+.form-select-options:not(.d-none) + .btn-tooltip-wrapper .btn {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+}
+
+.btn-tooltip-wrapper > button:disabled {
     pointer-events: none;
 }
 
 .btn-unavailable-icon {
-    font-size: 1.1rem;
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    font-size: 1rem;
     color: var(--compras-error);
     cursor: help;
-    flex-shrink: 0;
-    font-variation-settings: 'FILL' 1;
+    font-variation-settings: "FILL" 1;
     pointer-events: auto;
+    line-height: 1;
+    z-index: 3;
+    border-radius: 50%;
+    background-color: var(--compras-contrast);
 }
 
 .tooltip-disabled-btn .tooltip-inner {
@@ -81,12 +49,10 @@
     white-space: pre-wrap;
 }
 
-
 .form-sub-container {
     position: relative;
     margin-bottom: 12px;
-    background-color:
-        color-mix(in srgb, var(--compras-theme) 50%, white);
+    background-color: color-mix(in srgb, var(--compras-theme) 50%, white);
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;
     padding: 12px;
@@ -101,7 +67,7 @@
 }
 
 /* Grid de formulários */
-.form-info-pregao-grid {
+.info-pregao-grid {
     display: grid;
     grid-template-areas:
         "grid-1 grid-5"
@@ -159,7 +125,9 @@
     border-radius: 6px;
     cursor: pointer;
     background-color: Field;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease;
     margin-bottom: 0;
     flex-grow: 1;
     flex-basis: 0;
@@ -175,10 +143,12 @@
 }
 
 .option-card::after {
-    font-family: 'Material Symbols Outlined';
-    content: 'check';
+    font-family: "Material Symbols Outlined";
+    content: "check";
     color: white;
-    font-variation-settings: 'FILL' 1, 'wght' 900;
+    font-variation-settings:
+        "FILL" 1,
+        "wght" 900;
     padding-left: 1px;
     line-height: 1.2;
     position: absolute;
@@ -234,15 +204,15 @@
 
 .validation-msg {
     color: var(--bs-form-invalid-color);
-    font-size: .6em;
-    margin-top: .2rem;
+    font-size: 0.6em;
+    margin-top: 0.2rem;
     margin-left: 6px;
     display: none;
 }
 
 .validation-msg::before {
-    font-family: 'Material Symbols Outlined';
-    content: 'warning';
+    font-family: "Material Symbols Outlined";
+    content: "warning";
     vertical-align: text-top;
     margin-right: 2px;
 }
@@ -253,23 +223,36 @@
 
 .btn-sm .material-symbols-outlined {
     font-size: 16px;
-    font-variation-settings: 'opsz' 48;
+    font-variation-settings: "opsz" 48;
     vertical-align: sub;
 }
 
 /* Estilos de Abas de Importação no Formulário */
+
+.sub-tabs-content,
+.sub-tabs .nav-link:hover,
+.sub-tabs .nav-link.active {
+    background-color: color-mix(in srgb, var(--compras-theme) 90%, var(--compras-text-primary));
+}
+
 .sub-tabs-content {
     padding: 0;
+    border-radius: 8px;
     border-top-left-radius: 0;
+    margin-bottom: 0px;
+    overflow: hidden;
 }
 
 .sub-tabs-content .tab-content {
     max-height: unset;
     overflow-y: unset;
+    padding: 0 !important;
 }
 
 .sub-tabs-content .tab-pane {
     min-height: unset;
+    padding-top: var(--compras-padding-main);
+    padding-bottom: 0px;
 }
 
 .sub-tabs {
@@ -288,12 +271,10 @@
 }
 
 .sub-tabs .nav-link:hover {
-    background-color: color-mix(in srgb, var(--compras-theme) 75%, white);
     color: var(--bs-primary);
 }
 
 .sub-tabs .nav-link.active {
-    background-color: color-mix(in srgb, var(--compras-theme) 75%, white);
     color: var(--bs-headings-color);
 }
 
@@ -307,7 +288,7 @@
 }
 
 .sub-tabs .nav-link.has-validation-issue::after {
-    font-family: 'Material Symbols Outlined';
+    font-family: "Material Symbols Outlined";
     content: "emergency";
     font-size: 75%;
 }
@@ -347,37 +328,64 @@
     cursor: default;
 }
 
-/* Botão de ajuda no cabeçalho de formulários */
-.form-header-help,
-.form-collapse-btn {
-    background: none;
-    border: none;
-    line-height: 1;
-    padding: 4px;
-    border-radius: 6px;
-    transition: all .25s ease;
-    color: var(--compras-text-primary);
+/* ==========================================================================
+   LINUX WARNINGS
+   ========================================================================== */
+
+.linux-panel-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px 2px 4px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    background-color: #fff3cd;
+    color: #7c5a00;
+    border: 1px solid rgba(255, 193, 7, 0.45);
+    white-space: nowrap;
     cursor: pointer;
+    line-height: 1;
+    font-family: inherit;
 }
 
-.form-header-help:hover,
-.form-collapse-btn:hover {
-    background-color: rgba(128, 128, 128, 0.15);
-}
-
-.form-header-help .material-symbols-outlined {
-    font-size: 1rem;
+.linux-panel-badge .material-symbols-outlined {
+    font-size: 0.95rem;
     vertical-align: middle;
+    font-variation-settings: "FILL" 1, "opsz" 20;
+    color: #e6a800;
 }
 
-.form-collapse-btn .material-symbols-outlined {
-    font-size: 1.25rem;
-    vertical-align: top;
-    font-variation-settings: 'opsz' 48;
+.dark-mode .linux-panel-badge {
+    background-color: rgba(255, 193, 7, 0.12);
+    color: #ffd54f;
+    border-color: rgba(255, 193, 7, 0.3);
 }
 
-.form-collapse-btn .material-symbols-outlined::before {
-    content: 'keyboard_arrow_up';
+.dark-mode .linux-panel-badge .material-symbols-outlined {
+    color: #ffd54f;
+}
+
+[popover].linux-panel-popover::before {
+    content: 'warning';
+    color: #e6a800;
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'opsz' 20;
+}
+
+[popover].linux-panel-popover code {
+    font-size: 0.8rem;
+    background-color: rgba(0, 0, 0, 0.07);
+    border-radius: 3px;
+    padding: 0 3px;
+}
+
+.dark-mode [popover].linux-panel-popover::before {
+    color: #ffd54f;
+}
+
+.dark-mode [popover].linux-panel-popover code {
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
 /* ==========================================================================
@@ -425,7 +433,7 @@
     padding-top: 6px;
 }
 
-.sne-afs-table tbody.sne-af-group:not(:first-child) tr:first-child td {
+.sne-afs-table tr.sne-af-separator td {
     border-top: 1px solid var(--bs-border-color);
 }
 
@@ -464,11 +472,6 @@
     width: 32px;
 }
 
-
-.form-collapse-btn.collapsed .material-symbols-outlined::before {
-    content: 'keyboard_arrow_down';
-}
-
 /* Info bar e filtros da tabela Observatório */
 .obs-tool-btn {
     background: none;
@@ -492,7 +495,9 @@
 
 .obs-tool-btn .material-symbols-outlined {
     font-size: 1rem;
-    font-variation-settings: 'FILL' 1, 'wght' 400;
+    font-variation-settings:
+        "FILL" 1,
+        "wght" 400;
     vertical-align: middle;
 }
 
@@ -566,11 +571,18 @@
     max-width: 50%;
 }
 
-.dashboard-widget:not(.d-none):not(:has(~ .dashboard-widget:not(.d-none))):not(.dashboard-widget:not(.d-none) ~ .dashboard-widget),
+.dashboard-widget:not(.d-none):not(:has(~ .dashboard-widget:not(.d-none))):not(
+        .dashboard-widget:not(.d-none) ~ .dashboard-widget
+    ),
 .dashboard-widget.widget-full {
     flex: 1 1 100%;
     min-width: 100%;
     max-width: 100%;
+}
+
+.dashboard-widget.widget-third {
+    flex: 1 1 0;
+    max-width: calc(33.33% - 7px);
 }
 
 .widget-icon {
@@ -612,7 +624,11 @@
 .badge {
     display: inline-flex;
     gap: 4px;
-    background-color: color-mix(in srgb, var(--compras-badge-background), white 25%);
+    background-color: color-mix(
+        in srgb,
+        var(--compras-badge-background),
+        white 25%
+    );
 }
 
 .badge i {
@@ -645,4 +661,17 @@
 .badge.blank {
     --compras-badge-background: gray;
     --compras-badge-icon: gray;
+}
+
+.input-group.btn-solo > .btn {
+    border-radius: var(--bs-border-radius-sm) !important;
+    margin-left: 0 !important;
+}
+
+.form-select-options {
+    background-color: var(--bs-info);
+    border: 0px solid transparent;
+    background-position: right 0.5rem center;
+    padding-right: 2rem !important;
+    font-size: 75% !important;
 }

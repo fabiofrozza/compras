@@ -350,23 +350,35 @@ function registerFileRoutes(app, logger) {
   });
 
   app.get('/api/sne/certidoes/analisar', async (_req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+    const send = (event, payload) => res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
     try {
-      const result = await analyzeCertidoes();
-      res.json(result);
+      const result = await analyzeCertidoes((current, total, label) => send('progress', { current, total, label }));
+      send('done', result);
     } catch (error) {
       logger.error(`Erro ao analisar certidões: ${error.message}`, 'SNE', error);
-      res.status(500).json({ error: error.message });
+      send('fail', { error: error.message });
     }
+    res.end();
   });
 
-  app.post('/api/sne/certidoes/renomear', async (_req, res) => {
+  app.get('/api/sne/certidoes/renomear', async (_req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+    const send = (event, payload) => res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
     try {
-      const result = await renameCertidoes();
-      res.json(result);
+      const result = await renameCertidoes((current, total, label) => send('progress', { current, total, label }));
+      send('done', result);
     } catch (error) {
       logger.error(`Erro ao renomear certidões: ${error.message}`, 'SNE', error);
-      res.status(500).json({ error: error.message });
+      send('fail', { error: error.message });
     }
+    res.end();
   });
 
   // =============================================
@@ -374,13 +386,19 @@ function registerFileRoutes(app, logger) {
   // =============================================
 
   app.get('/api/sne/empenhos/analisar', async (_req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+    const send = (event, payload) => res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
     try {
-      const result = await analyzeEmpenhos();
-      res.json(result);
+      const result = await analyzeEmpenhos((current, total, label) => send('progress', { current, total, label }));
+      send('done', result);
     } catch (error) {
       logger.error(`Erro ao analisar empenhos: ${error.message}`, 'SNE', error);
-      res.status(500).json({ error: error.message });
+      send('fail', { error: error.message });
     }
+    res.end();
   });
 
   app.post('/api/sne/empenhos/criar-afs', async (req, res) => {
@@ -467,13 +485,19 @@ function registerFileRoutes(app, logger) {
   });
 
   app.get('/api/sne/afs/analisar', async (_req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+    const send = (event, payload) => res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
     try {
-      const result = await analyzeAFs();
-      res.json(result);
+      const result = await analyzeAFs((current, total, label) => send('progress', { current, total, label }));
+      send('done', result);
     } catch (error) {
       logger.error(`Erro ao analisar AFs: ${error.message}`, 'SNE', error);
-      res.status(500).json({ error: error.message });
+      send('fail', { error: error.message });
     }
+    res.end();
   });
 
   app.post('/api/sne/afs/sincronizar-certidoes', async (req, res) => {
