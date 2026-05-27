@@ -3,6 +3,92 @@
    ========================================================================== */
 
 /* ==========================================================================
+   PANEL
+   ========================================================================== */
+
+.panel {
+    background-color: color-mix(in srgb, var(--compras-theme) 75%, white);
+    border-radius: 8px;
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+.panel > *:not(h4):not([popover]) {
+    padding: 12px 16px 16px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: default;
+}
+
+.panel h4,
+.sub-tabs .nav-link {
+    font-size: 1em;
+}
+
+.panel h4,
+.sub-tabs .nav-link.active {
+    color: var(--compras-text-primary);
+}
+
+.panel h4 i {
+    font-size: 1.25rem;
+    vertical-align: top;
+    font-variation-settings: "opsz" 48;
+}
+
+.panel h4 {
+    margin-bottom: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--compras-text-primary) 25%, transparent);
+    padding: 8px 8px 8px 16px;
+}
+
+.panel-header-buttons {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.panel-header-help,
+.panel-collapse-btn {
+    background: none;
+    border: none;
+    line-height: 1;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.25s ease;
+    color: var(--compras-text-primary);
+    cursor: pointer;
+}
+
+.panel-header-help:hover,
+.panel-collapse-btn:hover {
+    background-color: rgba(128, 128, 128, 0.15);
+}
+
+.panel-header-help .material-symbols-outlined {
+    font-size: 1rem;
+    vertical-align: middle;
+}
+
+.panel-collapse-btn .material-symbols-outlined {
+    font-size: 1.25rem;
+    vertical-align: top;
+    font-variation-settings: "opsz" 48;
+}
+
+.panel-collapse-btn .material-symbols-outlined::before {
+    content: "keyboard_arrow_up";
+}
+
+.panel-collapse-btn.collapsed .material-symbols-outlined::before {
+    content: "keyboard_arrow_down";
+}
+
+/* ==========================================================================
    PROGRESS BAR
    ========================================================================== */
 
