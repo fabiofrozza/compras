@@ -510,7 +510,8 @@ async function carregarImportar() {
 
             html += `
                 <tr class="importar-row" data-pregao="${file.pregao}"
-                    onclick="selecionarImportar('${file.pregao}')">
+                    onclick="selecionarImportar('${file.pregao}')"
+                    ondblclick="openFile('${safeFilePath}')">
                     <td><span class="file-icon"><i class="material-symbols-outlined ${iconColor}">table_chart</i></span></td>
                     <td>${file.name}</td>
                     <td class="${erroClass}">${erroText}</td>
