@@ -335,7 +335,7 @@ function injetarAvisosLinux(isDev) {
         const popover = document.createElement('div');
         popover.setAttribute('popover', '');
         popover.id = popoverId;
-        popover.className = 'form-help-popover linux-panel-popover';
+        popover.className = 'panel-help-popover linux-panel-popover';
         popover.style.setProperty('position-anchor', anchorName);
         popover.innerHTML = alertText;
         panel.after(popover);

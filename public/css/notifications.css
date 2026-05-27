@@ -494,7 +494,7 @@ Tooltips, Popovers e Modal pop-up
     color: white;
 }
 
-[popover].form-help-popover {
+[popover].panel-help-popover {
     position: absolute;
     position-area: left bottom;
     max-width: 500px;
@@ -507,7 +507,7 @@ Tooltips, Popovers e Modal pop-up
     background-color: var(--compras-contrast);
 }
 
-[popover].form-help-popover::before {
+[popover].panel-help-popover::before {
     font-family: 'Material Symbols Outlined';
     content: 'help';
     font-variation-settings: 'FILL' 1, 'wght' 700;

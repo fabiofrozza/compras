@@ -374,9 +374,9 @@
     cursor: default;
 }
 
-/* Botão de ajuda no cabeçalho de formulários */
-.form-header-help,
-.form-collapse-btn {
+/* Botões no cabeçalho do panel */
+.panel-header-help,
+.panel-collapse-btn {
     background: none;
     border: none;
     line-height: 1;
@@ -387,23 +387,23 @@
     cursor: pointer;
 }
 
-.form-header-help:hover,
-.form-collapse-btn:hover {
+.panel-header-help:hover,
+.panel-collapse-btn:hover {
     background-color: rgba(128, 128, 128, 0.15);
 }
 
-.form-header-help .material-symbols-outlined {
+.panel-header-help .material-symbols-outlined {
     font-size: 1rem;
     vertical-align: middle;
 }
 
-.form-collapse-btn .material-symbols-outlined {
+.panel-collapse-btn .material-symbols-outlined {
     font-size: 1.25rem;
     vertical-align: top;
     font-variation-settings: "opsz" 48;
 }
 
-.form-collapse-btn .material-symbols-outlined::before {
+.panel-collapse-btn .material-symbols-outlined::before {
     content: "keyboard_arrow_up";
 }
 
@@ -551,7 +551,7 @@
     width: 32px;
 }
 
-.form-collapse-btn.collapsed .material-symbols-outlined::before {
+.panel-collapse-btn.collapsed .material-symbols-outlined::before {
     content: "keyboard_arrow_down";
 }
 

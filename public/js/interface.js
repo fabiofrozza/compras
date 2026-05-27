@@ -54,7 +54,7 @@ function initScriptFormHeaders(container) {
 
             const helpBtn = document.createElement('button');
             helpBtn.type = 'button';
-            helpBtn.className = 'form-header-help';
+            helpBtn.className = 'panel-header-help';
             helpBtn.setAttribute('popovertarget', helpId);
             helpBtn.style.setProperty('anchor-name', anchorName);
             helpBtn.innerHTML = '<i class="material-symbols-outlined">help</i>';
@@ -63,7 +63,7 @@ function initScriptFormHeaders(container) {
             const popoverDiv = document.createElement('div');
             popoverDiv.setAttribute('popover', '');
             popoverDiv.id = helpId;
-            popoverDiv.className = 'form-help-popover';
+            popoverDiv.className = 'panel-help-popover';
             popoverDiv.style.setProperty('position-anchor', anchorName);
             popoverDiv.innerHTML = helpText;
             h4.after(popoverDiv);
@@ -73,7 +73,7 @@ function initScriptFormHeaders(container) {
         if (collapseId) {
             const collapseBtn = document.createElement('button');
             collapseBtn.type = 'button';
-            collapseBtn.className = 'form-collapse-btn';
+            collapseBtn.className = 'panel-collapse-btn';
             collapseBtn.setAttribute('data-bs-toggle', 'collapse');
             collapseBtn.setAttribute('data-bs-target', `#${collapseId}`);
             collapseBtn.setAttribute('aria-expanded', 'true');
