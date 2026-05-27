@@ -580,6 +580,11 @@
     max-width: 100%;
 }
 
+.dashboard-widget.widget-third {
+    flex: 1 1 0;
+    max-width: calc(33.33% - 7px);
+}
+
 .widget-icon {
     display: flex;
     align-items: flex-start;

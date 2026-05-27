@@ -373,9 +373,21 @@ async function buildHelpPanel() {
     if (!body) return;
 
     let cfg = {};
+    let repoLabel = 'Repositório Github';
+    const REPO_URL = 'https://github.com/fabiofrozza/compras';
+
     try {
-        const res = await fetch('/api/app-config');
-        cfg = await res.json();
+        const [cfgRes, releaseRes] = await Promise.all([
+            fetch('/api/app-config'),
+            fetch('https://api.github.com/repos/fabiofrozza/compras/releases/latest'),
+        ]);
+        cfg = await cfgRes.json();
+        if (releaseRes.ok) {
+            const release = await releaseRes.json();
+            const year = release.published_at?.slice(0, 4);
+            const tag = release.tag_name;
+            if (year && tag) repoLabel = `© ${tag} • ${year}`;
+        }
     } catch (err) {
         console.error('Erro ao buscar configurações:', err);
     }
@@ -385,9 +397,9 @@ async function buildHelpPanel() {
         { icon: 'store', label: cfg.departmentName || 'Site do Departamento', url: cfg.departmentSite || '#' },
         { icon: 'article', label: 'Manual do Departamento', url: cfg.manualSite || '#' },
         { separator: true },
-        { icon: 'code', label: 'Repositório', url: 'https://github.com/fabiofrozza/compras' },
-        { separator: true },
         { icon: 'build', label: 'Instalação', tabId: 'instalacao' },
+        { separator: true },
+        { icon: 'code', label: repoLabel, url: REPO_URL },
     ];
 
     const ul = document.createElement('ul');

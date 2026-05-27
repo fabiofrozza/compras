@@ -1,5 +1,53 @@
 let _rDownloadUrl = '';
 
+async function carregarInfoProjeto() {
+    const loading = document.getElementById('projeto-info-loading');
+    const content = document.getElementById('projeto-info-content');
+    if (!content) return;
+
+    loading.classList.remove('d-none');
+    content.classList.add('d-none');
+
+    const titleEl = document.getElementById('projeto-info-title');
+    const dateEl = document.getElementById('projeto-info-date');
+    const countEl = document.getElementById('projeto-info-count');
+    const link = document.getElementById('projeto-info-link');
+    const REPO_URL = 'https://github.com/fabiofrozza/compras';
+
+    try {
+        const [latestRes, countRes] = await Promise.all([
+            fetch('https://api.github.com/repos/fabiofrozza/compras/releases/latest'),
+            fetch('https://api.github.com/repos/fabiofrozza/compras/releases?per_page=1'),
+        ]);
+
+        loading.classList.add('d-none');
+        content.classList.remove('d-none');
+
+        if (!latestRes.ok) throw new Error();
+
+        const release = await latestRes.json();
+        titleEl.textContent = release.name || release.tag_name || 'Repositório Github';
+        dateEl.textContent = release.published_at
+            ? new Date(release.published_at).toLocaleDateString('pt-BR')
+            : '-';
+        link.href = release.html_url || REPO_URL;
+        link.classList.remove('d-none');
+
+        // Conta o total de releases parseando o número da última página do header Link
+        if (countRes.ok) {
+            const linkHeader = countRes.headers.get('Link') || '';
+            const match = linkHeader.match(/[?&]page=(\d+)>;\s*rel="last"/);
+            countEl.textContent = match ? match[1] : '1';
+        }
+    } catch {
+        loading.classList.add('d-none');
+        content.classList.remove('d-none');
+        titleEl.textContent = 'Repositório Github';
+        link.href = REPO_URL;
+        link.classList.remove('d-none');
+    }
+}
+
 function executarInstalacao(modo) {
     runRScript('instalacao', { modo });
 }
@@ -342,11 +390,13 @@ function injetarAvisosLinux(isDev) {
     });
 }
 
+document.getElementById('projeto-info-loading').innerHTML = customSpinnerHTML('Verificando...');
 document.getElementById('r-info-loading').innerHTML = customSpinnerHTML('Verificando R...');
 document.getElementById('node-info-loading').innerHTML = customSpinnerHTML('Verificando Node.js...');
 document.getElementById('npm-version-loading').innerHTML = customSpinnerHTML('Verificando npm...');
 document.getElementById('npm-packages-loading').innerHTML = customSpinnerHTML('Verificando pacotes...');
 
+carregarInfoProjeto();
 carregarInfoR();
 carregarInfoNode();
 
