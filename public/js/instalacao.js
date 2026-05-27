@@ -298,7 +298,7 @@ function injetarAvisosLinux(isDev) {
             alertText: 'No Linux, a detecção automática do R pode apresentar divergências. Caso o R não seja encontrado, verifique se o pacote <code>r-base</code> está instalado e se <code>Rscript</code> está no PATH do sistema.'
         },
         {
-            panelId: 'form-instalacao',
+            panelId: 'panel-instalacao',
             alertText: 'No Linux, a instalação de pacotes R frequentemente exige bibliotecas de sistema adicionais como <code>libcurl4-openssl-dev</code>, <code>libxml2-dev</code> e <code>libssl-dev</code>. Em caso de erros, instale as dependências via <code>apt</code>, <code>dnf</code> ou equivalente antes de tentar novamente.'
         },
         {

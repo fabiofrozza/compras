@@ -170,7 +170,7 @@ function setupAtasListeners() {
 }
 
 function executarMailmergeAtas() {
-    const btnGerar = document.getElementById('btn-form-atas-modelos');
+    const btnGerar = document.getElementById('btn-panel-atas-modelos');
 
     if (btnGerar && btnGerar.disabled) {
         return;

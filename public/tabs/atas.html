@@ -23,7 +23,7 @@
                     <div class="row">
                         <div class="col">
                             <!-- Formulário com Informações do Pregão -->
-                            <form id="form-info-pregao" class="panel shadow-sm">
+                            <form id="panel-info-pregao" class="panel shadow-sm">
                                 <h4 class="panel-header" data-compras-icon="gavel"
                                     data-compras-title="Informações do Pregão" data-compras-help="Preencha os dados do pregão conforme o Diário Oficial da União (DOU) e o Termo de Referência:<br>
                                     <ul>
@@ -35,11 +35,11 @@
                                     </ul>">
                                 </h4>
 
-                                <div class="collapse show" id="form-info-pregao-collapse">
-                                    <div class="form-sub-container form-info-pregao-grid">
+                                <div class="collapse show" id="panel-info-pregao-collapse">
+                                    <div class="form-sub-container info-pregao-grid">
                                         <button type="button" data-bs-toggle="tooltip"
                                             data-bs-title="Limpar todos os campos" class="form-sub-btn"
-                                            onclick="limparFormulario('form-info-pregao')">
+                                            onclick="limparFormulario('panel-info-pregao')">
                                             <i class="material-symbols-outlined">ink_eraser</i>
                                         </button>
                                         <div class="form-group grid-1">
@@ -123,7 +123,7 @@
                                     </div>
                                     <div class="form-buttons">
                                         <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"
-                                            id="btn-form-info-pregao" data-script-name="atas">
+                                            id="btn-panel-info-pregao" data-script-name="atas">
                                             Obter dados dos SICAF
                                         </button>
                                     </div>
@@ -192,7 +192,7 @@
                     <div class="row">
                         <div class="col">
                             <!-- Modelos de Ata -->
-                            <div id="form-atas-modelos" class="panel shadow-sm">
+                            <div id="panel-atas-modelos" class="panel shadow-sm">
                                 <h4 class="panel-header" data-compras-icon="text_snippet"
                                     data-compras-title="Modelos de Ata"
                                     data-compras-help="Selecione o modelo de ata em formato <em>.docx</em> a ser utilizado. 
@@ -230,7 +230,7 @@
                                     <!-- Botão Gerar Atas -->
                                     <div class="form-buttons">
                                         <button type="button" class="btn btn-sm btn-primary btn-run text-nowrap"
-                                            id="btn-form-atas-modelos" onclick="executarMailmergeAtas()" disabled>
+                                            id="btn-panel-atas-modelos" onclick="executarMailmergeAtas()" disabled>
                                             Gerar Atas
                                         </button>
                                     </div>

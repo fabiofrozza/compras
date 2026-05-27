@@ -314,7 +314,7 @@ function executarAcaoImportacao(abaDestino) {
     const paramsOrdenados = {};
     paramsOrdenados['argumento_aba'] = abaDestino;
 
-    document.querySelectorAll('#form-importacao-link [data-field], #form-importacao-config [data-field]').forEach(campo => {
+    document.querySelectorAll('#panel-importacao-link [data-field], #form-importacao-config [data-field]').forEach(campo => {
         paramsOrdenados[campo.dataset.field] = campo.value;
     });
 

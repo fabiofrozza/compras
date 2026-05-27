@@ -67,7 +67,7 @@
 }
 
 /* Grid de formulários */
-.form-info-pregao-grid {
+.info-pregao-grid {
     display: grid;
     grid-template-areas:
         "grid-1 grid-5"

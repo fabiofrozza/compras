@@ -27,16 +27,16 @@ const BUTTON_REGISTRY = {
 
     // ── Atas ──────────────────────────────────────────────────────────────────
 
-    'btn-form-info-pregao': {
+    'btn-panel-info-pregao': {
         conditions: [
-            { type: 'form', formId: 'form-info-pregao', label: 'Preencha as informações do pregão' },
+            { type: 'form', formId: 'panel-info-pregao', label: 'Preencha as informações do pregão' },
             { type: 'folder-not-empty', containerId: 'atas-relatorios-sicaf', label: 'Coloque os relatórios de credenciamento do SICAF na pasta' },
             { type: 'r', label: rMessage },
             { type: 'server', label: serverMessage },
         ],
     },
 
-    'btn-form-atas-modelos': {
+    'btn-panel-atas-modelos': {
         conditions: [
             { type: 'custom', check: () => typeof atasData !== 'undefined' && atasData.dadosDisponiveis, label: 'Dados não disponíveis. Execute "Obter dados dos SICAF" primeiro' },
             { type: 'file-selected', containerId: 'atas-modelos', label: 'Selecione um modelo de ata' },
@@ -46,7 +46,7 @@ const BUTTON_REGISTRY = {
 
     // ── CATMAT ────────────────────────────────────────────────────────────────
 
-    'btn-form-itens-tr': {
+    'btn-panel-itens-tr': {
         conditions: [
             { type: 'file-selected', containerId: 'catmat-lista-itens-tr', label: 'Selecione um arquivo em "Itens do TR"' },
             {
@@ -149,7 +149,7 @@ const BUTTON_REGISTRY = {
 
     'btn-run-powerbi-panel': {
         conditions: [
-            { type: 'form', formId: 'form-powerbi-path', label: powerbiMessage },
+            { type: 'form', formId: 'panel-powerbi-path', label: powerbiMessage },
             { type: 'r', label: rMessage },
             {
                 type: 'internet',
@@ -157,7 +157,7 @@ const BUTTON_REGISTRY = {
                 // Necessita internet para todos os modos exceto 'licitacao' e 'execucao'
                 activeWhen: () => {
                     if (typeof POWERBI_OPCOES_INTERNET === 'undefined') return true;
-                    const sel = document.querySelector('#form-powerbi-panel input[name="powerbi-tipo"]:checked');
+                    const sel = document.querySelector('#panel-powerbi input[name="powerbi-tipo"]:checked');
                     return !sel || POWERBI_OPCOES_INTERNET.includes(sel.value);
                 },
             },
@@ -167,7 +167,7 @@ const BUTTON_REGISTRY = {
 
     'btn-run-powerbi-maintenance': {
         conditions: [
-            { type: 'form', formId: 'form-powerbi-path', label: powerbiMessage },
+            { type: 'form', formId: 'panel-powerbi-path', label: powerbiMessage },
             { type: 'r', label: rMessage },
             { type: 'server', label: serverMessage },
         ],
@@ -175,7 +175,7 @@ const BUTTON_REGISTRY = {
 
     'btn-run-powerbi-observatorio': {
         conditions: [
-            { type: 'form', formId: 'form-powerbi-path', label: powerbiMessage },
+            { type: 'form', formId: 'panel-powerbi-path', label: powerbiMessage },
             { type: 'internet', label: internetMessage },
             { type: 'server', label: serverMessage },
         ],
