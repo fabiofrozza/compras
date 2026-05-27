@@ -41,6 +41,7 @@ function loadStylesheet(href) {
 function loadScriptTabAssets() {
     return Promise.all([
         loadScript('js/file_system.js'),
+        loadStylesheet('css/widgets.css'),
         loadStylesheet('css/forms.css'),
         loadStylesheet('css/files.css'),
         loadStylesheet('css/console.css'),

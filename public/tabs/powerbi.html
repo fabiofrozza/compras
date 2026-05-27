@@ -199,13 +199,14 @@
                                         <i class="material-symbols-outlined">download</i> Baixar CSV
                                     </button>
                                 </div>
-                                <div id="powerbi-observatorio-progress-container" class="progress mt-2 d-none"
-                                    style="height: 16px; overflow: visible; position: relative;">
-                                    <div id="powerbi-observatorio-progress-bar"
-                                        class="progress-bar progress-bar-striped progress-bar-animated text-bg-info"
-                                        role="progressbar" style="width: 0%;">
-                                    </div>
+                                <div id="powerbi-observatorio-progress-container" class="progress-outer mt-2 d-none">
                                     <span class="progress-percent-popup" style="left: 0%">0%</span>
+                                    <div class="progress" style="height: 16px;">
+                                        <div id="powerbi-observatorio-progress-bar"
+                                            class="progress-bar progress-bar-striped progress-bar-animated text-bg-info"
+                                            role="progressbar" style="width: 0%;">
+                                        </div>
+                                    </div>
                                 </div>
                                 <div id="powerbi-observatorio-status" class="small text-muted mt-2"></div>
                                 <div id="powerbi-observatorio-result" class="mt-2" hidden>

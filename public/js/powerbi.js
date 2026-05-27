@@ -27,35 +27,16 @@ let observatorioOrdenacao = { coluna: null, direcao: 'asc' };
 
 function mostrarProgressoObservatorio() {
     const container = document.getElementById('powerbi-observatorio-progress-container');
-    const bar = document.getElementById('powerbi-observatorio-progress-bar');
-    if (!container || !bar) return;
+    if (!container) return;
     container.classList.remove('d-none');
-    bar.style.width = '0%';
-    bar.textContent = '';
-    let popup = container.querySelector(':scope > .progress-percent-popup');
-    if (!popup) {
-        popup = document.createElement('span');
-        popup.className = 'progress-percent-popup';
-        container.appendChild(popup);
-    }
-    popup.textContent = '0%';
-    popup.style.left = '0%';
+    setProgressPercent(container, 0, '');
 }
 
 function atualizarProgressoObservatorio(current, total, label) {
-    const bar = document.getElementById('powerbi-observatorio-progress-bar');
-    if (!bar) return;
+    const container = document.getElementById('powerbi-observatorio-progress-container');
+    if (!container) return;
     const percentage = total > 0 ? (current / total) * 100 : 0;
-    bar.style.width = `${percentage}%`;
-    if (label) bar.textContent = label;
-    let popup = bar.parentElement?.querySelector(':scope > .progress-percent-popup');
-    if (!popup) {
-        popup = document.createElement('span');
-        popup.className = 'progress-percent-popup';
-        (bar.parentElement || bar).appendChild(popup);
-    }
-    popup.textContent = `${Math.round(percentage)}%`;
-    popup.style.left = `${percentage}%`;
+    setProgressPercent(container, percentage, label);
 }
 
 function esconderProgressoObservatorio() {

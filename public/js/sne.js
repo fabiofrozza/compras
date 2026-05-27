@@ -786,26 +786,21 @@ function alertHTML(type, icon, message) {
 function atualizarProgressoSne(barId, current, total, label) {
     const bar = document.getElementById(barId);
     if (!bar) return;
+    const outer = bar.closest('.progress-outer');
+    if (!outer) return;
     const percentage = total > 0 ? (current / total) * 100 : 0;
-    bar.style.width = `${percentage}%`;
-    if (label) bar.textContent = label;
-    let popup = bar.parentElement?.querySelector(':scope > .progress-percent-popup');
-    if (!popup) {
-        popup = document.createElement('span');
-        popup.className = 'progress-percent-popup';
-        (bar.parentElement || bar).appendChild(popup);
-    }
-    popup.textContent = `${Math.round(percentage)}%`;
-    popup.style.left = `${percentage}%`;
+    setProgressPercent(outer, percentage, label);
 }
 
 function sneSpinnerHTML(message, barId) {
     return customSpinnerHTML(message) + `
-        <div class="progress mx-2 mb-2" style="height: 16px; overflow: visible; position: relative;">
-            <div id="${barId}" class="progress-bar progress-bar-striped progress-bar-animated text-bg-info"
-                role="progressbar" style="width: 0%;">
-            </div>
+        <div class="progress-outer mx-2 mb-2">
             <span class="progress-percent-popup" style="left: 0%">0%</span>
+            <div class="progress" style="height: 16px;">
+                <div id="${barId}" class="progress-bar progress-bar-striped progress-bar-animated text-bg-info"
+                    role="progressbar" style="width: 0%;">
+                </div>
+            </div>
         </div>`;
 }
 
