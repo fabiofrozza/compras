@@ -439,7 +439,7 @@ function renderCertidoesDoFornecedor(group) {
         const warnings = r.warnings?.length > 0
             ? `<br><small class="text-warning">${r.warnings.join('; ')}</small>`
             : '';
-        const safeFilePath = (sneFolderPath + '\\' + r.filename).replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
+        const safeFilePath = (sneFolderPath + '/' + r.filename).replace(/"/g, '&quot;');
         const safeFilename = r.filename.replace(/'/g, "\\'");
 
         html += `
@@ -524,7 +524,7 @@ function renderSnesDoFornecedor(cnpj) {
                 <tbody>`;
 
     for (const r of snes) {
-        const safeFilePath = (sneEmpenhosFolderPath + '\\' + r.filename).replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
+        const safeFilePath = (sneEmpenhosFolderPath + '/' + r.filename).replace(/"/g, '&quot;');
         const sneNum = r.sneNumber || '—';
         const afLabel = r.af ? `${r.af.number} / ${r.af.year}` : '—';
 
@@ -554,7 +554,7 @@ function renderSnesDoFornecedor(cnpj) {
 function openFornecedorFiles(key) {
     const group = sneGrouped.get(key);
     if (!group) return;
-    group.certidoes.forEach(c => openFile(sneFolderPath + '\\' + c.filename));
+    group.certidoes.forEach(c => openFile(sneFolderPath + '/' + c.filename));
 }
 
 // ====== EXCLUSÃO ======
@@ -1128,7 +1128,7 @@ function renderEmpenhos() {
 
     for (const r of sortedEmpenhos) {
         const safeFilename = r.filename.replace(/'/g, "\\'");
-        const safeFilePath = (sneEmpenhosFolderPath + '\\' + r.filename).replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
+        const safeFilePath = (sneEmpenhosFolderPath + '/' + r.filename).replace(/"/g, '&quot;');
 
         if (r.error) {
             html += `
@@ -1465,7 +1465,7 @@ function renderAFs() {
 
                 const filesHtml = sne.files.length > 0
                     ? sne.files.map(f => {
-                        const safeFilePath = (sne.path + '\\' + f).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                        const safeFilePath = (sne.path + '/' + f).replace(/'/g, "\\'");
                         return `<div class="sne-file-item" ondblclick="openFile('${safeFilePath}')">
                                 <i class="material-symbols-outlined text-muted">description</i>
                                 <span>${f}</span>
