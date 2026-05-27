@@ -290,7 +290,7 @@ function renderFornecedores() {
     const container = document.getElementById('sne-fornecedores-list');
     if (!container) return;
 
-    const displayPath = sneFolderPath.replace(/\\/g, '/');
+    const displayPath = sneFolderPath;
 
     const refreshBtn = `
         <button class="folder-path-btn btn-refresh-fornecedores"
@@ -439,7 +439,7 @@ function renderCertidoesDoFornecedor(group) {
         const warnings = r.warnings?.length > 0
             ? `<br><small class="text-warning">${r.warnings.join('; ')}</small>`
             : '';
-        const safeFilePath = (sneFolderPath + '/' + r.filename).replace(/"/g, '&quot;');
+        const safeFilePath = r.fullPath.replace(/"/g, '&quot;');
         const safeFilename = r.filename.replace(/'/g, "\\'");
 
         html += `
@@ -524,7 +524,7 @@ function renderSnesDoFornecedor(cnpj) {
                 <tbody>`;
 
     for (const r of snes) {
-        const safeFilePath = (sneEmpenhosFolderPath + '/' + r.filename).replace(/"/g, '&quot;');
+        const safeFilePath = r.fullPath.replace(/"/g, '&quot;');
         const sneNum = r.sneNumber || '—';
         const afLabel = r.af ? `${r.af.number} / ${r.af.year}` : '—';
 
@@ -554,7 +554,7 @@ function renderSnesDoFornecedor(cnpj) {
 function openFornecedorFiles(key) {
     const group = sneGrouped.get(key);
     if (!group) return;
-    group.certidoes.forEach(c => openFile(sneFolderPath + '/' + c.filename));
+    group.certidoes.forEach(c => openFile(c.fullPath));
 }
 
 // ====== EXCLUSÃO ======
@@ -1057,7 +1057,7 @@ function renderEmpenhos() {
     const container = document.getElementById('sne-empenhos-container');
     if (!container) return;
 
-    const displayPath = sneEmpenhosFolderPath.replace(/\\/g, '/');
+    const displayPath = sneEmpenhosFolderPath;
 
     const refreshBtn = `
         <button class="folder-path-btn btn-refresh-empenhos"
@@ -1123,7 +1123,7 @@ function renderEmpenhos() {
 
     for (const r of sortedEmpenhos) {
         const safeFilename = r.filename.replace(/'/g, "\\'");
-        const safeFilePath = (sneEmpenhosFolderPath + '/' + r.filename).replace(/"/g, '&quot;');
+        const safeFilePath = r.fullPath.replace(/"/g, '&quot;');
 
         if (r.error) {
             html += `
@@ -1365,7 +1365,7 @@ function renderAFs() {
     const container = document.getElementById('sne-afs-container');
     if (!container) return;
 
-    const displayPath = sneAfsFolderPath.replace(/\\/g, '/');
+    const displayPath = sneAfsFolderPath;
     const refreshBtn = `
         <button class="folder-path-btn btn-refresh-afs"
             data-bs-toggle="tooltip" data-bs-title="Atualizar lista">
@@ -1424,7 +1424,7 @@ function renderAFs() {
     for (let afIndex = 0; afIndex < sortedAfs.length; afIndex++) {
         const af = sortedAfs[afIndex];
         const safeAfName = af.name.replace(/'/g, "\\'");
-        const safeAfPath = af.path.replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
+        const safeAfPath = af.path.replace(/"/g, '&quot;');
         const rowspan = Math.max(af.snes.length, 1);
         const rowspanAttr = rowspan > 1 ? ` rowspan="${rowspan}"` : '';
         const firstRowClass = `sne-af-group${afIndex > 0 ? ' sne-af-separator' : ''}`;
@@ -1452,7 +1452,7 @@ function renderAFs() {
             for (let i = 0; i < af.snes.length; i++) {
                 const sne = af.snes[i];
                 const safeSneNum = sne.name.replace(/'/g, "\\'");
-                const safeSnePath = sne.path.replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
+                const safeSnePath = sne.path.replace(/"/g, '&quot;');
 
                 const tombCell = buildTombCell(sne.empenho?.tombamento);
 
@@ -1460,10 +1460,10 @@ function renderAFs() {
 
                 const filesHtml = sne.files.length > 0
                     ? sne.files.map(f => {
-                        const safeFilePath = (sne.path + '/' + f).replace(/'/g, "\\'");
+                        const safeFilePath = f.fullPath.replace(/'/g, "\\'");
                         return `<div class="sne-file-item" ondblclick="openFile('${safeFilePath}')">
                                 <i class="material-symbols-outlined text-muted">description</i>
-                                <span>${f}</span>
+                                <span>${f.name}</span>
                                 <button class="btn btn-sm text-primary file-row-btn"
                                     onclick="openFile('${safeFilePath}')"
                                     data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">

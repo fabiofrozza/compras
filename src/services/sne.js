@@ -325,12 +325,12 @@ async function analyzeCertidoes(onProgress) {
   for (let i = 0; i < files.length; i++) {
     if (onProgress) onProgress(i + 1, total, files[i].name);
     const result = await analyzeCertidao(files[i].name, pdfParse);
-    results.push(result);
+    results.push({ ...result, fullPath: path.join(SNE_CERTIDOES, result.filename).replace(/\\/g, '/') });
   }
 
   results.sort(sortByCnpj);
   logger.info(`Análise de ${results.length} certidão(ões) concluída`, 'SNE');
-  return { results, folderPath };
+  return { results, folderPath: folderPath.replace(/\\/g, '/') };
 }
 
 async function fileExists(filePath) {
@@ -608,7 +608,7 @@ async function analyzeEmpenhos(onProgress) {
         rawText = pdfData.text || '';
       } catch (e) {
         logger.warn(`Erro ao parsear PDF "${filename}": ${e.message}`, 'SNE');
-        results.push({ filename, error: 'Erro ao ler PDF' });
+        results.push({ filename, error: 'Erro ao ler PDF', fullPath: path.join(SNE_EMPENHOS, filename).replace(/\\/g, '/') });
         continue;
       }
 
@@ -618,10 +618,10 @@ async function analyzeEmpenhos(onProgress) {
       const { company, cnpj } = extractCredorFromText(rawText);
       const tombamento = /tombamento/i.test(text);
 
-      results.push({ filename, sneNumber, af, company, cnpj, tombamento, error: null });
+      results.push({ filename, sneNumber, af, company, cnpj, tombamento, error: null, fullPath: path.join(SNE_EMPENHOS, filename).replace(/\\/g, '/') });
     } catch (e) {
       logger.error(`Erro ao processar "${filename}": ${e.message}`, 'SNE');
-      results.push({ filename, error: e.message });
+      results.push({ filename, error: e.message, fullPath: path.join(SNE_EMPENHOS, filename).replace(/\\/g, '/') });
     }
   }
 
@@ -633,7 +633,7 @@ async function analyzeEmpenhos(onProgress) {
   });
 
   logger.info(`Análise de ${results.length} empenho(s) concluída`, 'SNE');
-  return { results, folderPath };
+  return { results, folderPath: folderPath.replace(/\\/g, '/') };
 }
 
 async function criarAFs(filenames = null, moveSnes = false) {
@@ -751,7 +751,7 @@ async function analyzeAFs(onProgress) {
     await fs.access(SNE_AFS);
   } catch {
     await fs.mkdir(SNE_AFS, { recursive: true });
-    return { afs: [], folderPath: SNE_AFS };
+    return { afs: [], folderPath: SNE_AFS.replace(/\\/g, '/') };
   }
 
   const afEntries = await fs.readdir(SNE_AFS, { withFileTypes: true });
@@ -776,14 +776,16 @@ async function analyzeAFs(onProgress) {
     for (const sneName of sneFolders) {
       const snePath = path.join(afPath, sneName);
       const { empenho, certidoes, files } = await analyzeSneFolder(snePath, pdfParse);
-      snes.push({ name: sneName, path: snePath, files, empenho, certidoes });
+      const snePathNorm = snePath.replace(/\\/g, '/');
+      const filesWithPaths = files.map(f => ({ name: f, fullPath: snePathNorm + '/' + f }));
+      snes.push({ name: sneName, path: snePathNorm, files: filesWithPaths, empenho, certidoes });
     }
 
-    afs.push({ name: afName, path: afPath, snes });
+    afs.push({ name: afName, path: afPath.replace(/\\/g, '/'), snes });
   }
 
   logger.info(`AFs analisadas: ${afs.length} AF(s)`, 'SNE');
-  return { afs, folderPath: SNE_AFS };
+  return { afs, folderPath: SNE_AFS.replace(/\\/g, '/') };
 }
 
 async function sincronizarCertidoesSne(afName, sneName, cnpj) {
@@ -813,7 +815,7 @@ async function listAFs() {
     await fs.access(SNE_AFS);
   } catch {
     await fs.mkdir(SNE_AFS, { recursive: true });
-    return { afs: [], folderPath: SNE_AFS };
+    return { afs: [], folderPath: SNE_AFS.replace(/\\/g, '/') };
   }
 
   const afEntries = await fs.readdir(SNE_AFS, { withFileTypes: true });
@@ -835,18 +837,19 @@ async function listAFs() {
     for (const sneName of sneFolders) {
       const snePath = path.join(afPath, sneName);
       const fileEntries = await fs.readdir(snePath, { withFileTypes: true });
+      const snePathNorm = snePath.replace(/\\/g, '/');
       const files = fileEntries
         .filter(e => e.isFile())
-        .map(e => e.name)
-        .sort((a, b) => a.localeCompare(b));
-      snes.push({ name: sneName, path: snePath, files });
+        .map(e => ({ name: e.name, fullPath: snePathNorm + '/' + e.name }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      snes.push({ name: sneName, path: snePathNorm, files });
     }
 
-    afs.push({ name: afName, path: afPath, snes });
+    afs.push({ name: afName, path: afPath.replace(/\\/g, '/'), snes });
   }
 
   logger.info(`AFs listadas: ${afs.length} AF(s)`, 'SNE');
-  return { afs, folderPath: SNE_AFS };
+  return { afs, folderPath: SNE_AFS.replace(/\\/g, '/') };
 }
 
 module.exports = {
