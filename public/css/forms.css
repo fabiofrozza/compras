@@ -424,6 +424,9 @@
     color: #7c5a00;
     border: 1px solid rgba(255, 193, 7, 0.45);
     white-space: nowrap;
+    cursor: pointer;
+    line-height: 1;
+    font-family: inherit;
 }
 
 .linux-panel-badge .material-symbols-outlined {
@@ -443,47 +446,25 @@
     color: #ffd54f;
 }
 
-.linux-panel-alert {
-    display: flex;
-    gap: 10px;
-    padding: 10px 12px;
-    margin-bottom: 4px;
-    background-color: #fff8e6;
-    border: 1px solid rgba(255, 193, 7, 0.5);
-    border-radius: 6px;
-    font-size: 0.82rem;
-    color: #6b4c00;
-    line-height: 1.5;
+[popover].linux-panel-popover::before {
+    content: 'warning';
+    color: #e6a800;
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'opsz' 20;
 }
 
-.linux-panel-alert code {
+[popover].linux-panel-popover code {
     font-size: 0.8rem;
     background-color: rgba(0, 0, 0, 0.07);
     border-radius: 3px;
     padding: 0 3px;
-    color: inherit;
 }
 
-.linux-alert-icon {
-    flex-shrink: 0;
-    font-size: 1.2rem;
-    font-variation-settings: "FILL" 1, "opsz" 20;
-    color: #e6a800;
-    margin-top: 1px;
-}
-
-.dark-mode .linux-panel-alert {
-    background-color: rgba(255, 193, 7, 0.08);
-    border-color: rgba(255, 193, 7, 0.25);
+.dark-mode [popover].linux-panel-popover::before {
     color: #ffd54f;
 }
 
-.dark-mode .linux-panel-alert code {
+.dark-mode [popover].linux-panel-popover code {
     background-color: rgba(255, 255, 255, 0.08);
-}
-
-.dark-mode .linux-alert-icon {
-    color: #ffd54f;
 }
 
 /* ==========================================================================

@@ -319,20 +319,26 @@ function injetarAvisosLinux(isDev) {
         if (!panel) return;
 
         const buttons = panel.querySelector('.panel-header-buttons');
-        if (buttons) {
-            const badge = document.createElement('span');
-            badge.className = 'linux-panel-badge';
-            badge.innerHTML = '<i class="material-symbols-outlined">warning</i>Linux';
-            buttons.prepend(badge);
-        }
+        if (!buttons) return;
 
-        const collapse = panel.querySelector('.collapse');
-        if (collapse) {
-            const alertEl = document.createElement('div');
-            alertEl.className = 'linux-panel-alert';
-            alertEl.innerHTML = `<i class="material-symbols-outlined linux-alert-icon">warning</i><div>${alertText}</div>`;
-            collapse.prepend(alertEl);
-        }
+        const popoverId = `linux-warning-${panelId}`;
+        const anchorName = `--${popoverId}`;
+
+        const badge = document.createElement('button');
+        badge.type = 'button';
+        badge.className = 'linux-panel-badge';
+        badge.setAttribute('popovertarget', popoverId);
+        badge.style.setProperty('anchor-name', anchorName);
+        badge.innerHTML = '<i class="material-symbols-outlined">warning</i>Linux';
+        buttons.prepend(badge);
+
+        const popover = document.createElement('div');
+        popover.setAttribute('popover', '');
+        popover.id = popoverId;
+        popover.className = 'form-help-popover linux-panel-popover';
+        popover.style.setProperty('position-anchor', anchorName);
+        popover.innerHTML = alertText;
+        panel.after(popover);
     });
 }
 
