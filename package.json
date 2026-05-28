@@ -1,6 +1,6 @@
 {
   "name": "compras-web",
-  "version": "2.0.0",
+  "version": "2.3.1",
   "description": "Some scripts to help my colleagues with activities related to public procurement / Alguns scripts para auxiliar meus colegas nas atividades relacionadas a compras públicas",
   "main": "src/server.js",
   "scripts": {
