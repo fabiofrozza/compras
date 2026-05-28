@@ -36,13 +36,21 @@ Aplicação web local que permite execução de scripts para auxiliar meus coleg
 
 1. [Baixe o conteúdo deste repositório](https://github.com/fabiofrozza/compras/archive/refs/heads/main.zip) e extraia na pasta desejada.
 
-1. Renomeie o arquivo `.env-MODELO` para `.env` e edite-o no Bloco de Notas, seguindo as instruções no seu interior.
+1. Renomeie o arquivo `.env-MODELO` para `.env` e edite-o no Bloco de Notas (Windows) ou equivalente (Linux), seguindo as instruções no seu interior.
 
 1. Substitua as imagens em `public/img/company.png` e `public/img/department.png` pelas da sua empresa.
 
+1. **Somente no Linux:** baixe o executável do Node.js (v20 LTS ou superior) para Linux em [nodejs.org](https://nodejs.org/pt/download) e salve-o como `bin/node`. Em seguida, conceda permissão de execução ao iniciador e ao binário:
+   ```bash
+   chmod +x start-linux.sh bin/node
+   ```
+
 ## Uso
 
-Execute o arquivo `start.cmd`. O servidor será iniciado e o navegador abrirá automaticamente em `http://localhost:3000`.
+- **Windows:** execute o arquivo `start.cmd`.
+- **Linux:** execute `./start-linux.sh` no terminal.
+
+O servidor será iniciado e o navegador abrirá automaticamente em `http://localhost:3000`.
 
 A interface apresenta abas para cada funcionalidade. Basta preencher os campos necessários e acompanhar a execução dos scripts em tempo real pelo console integrado.
 
