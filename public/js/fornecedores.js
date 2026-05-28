@@ -31,7 +31,7 @@ function inicializarFornecedores() {
             removeTooltip(btn);
             const pregao = btn.closest('.item-card')?.dataset.pregao;
             if (pregao && pregoesDadosFolderPath) {
-                openFolder(pregoesDadosFolderPath + '\\' + pregao, pregao);
+                openPath(pregoesDadosFolderPath + '\\' + pregao, pregao);
             }
         });
     }
@@ -245,12 +245,12 @@ async function carregarConteudoPasta(pregao) {
             const safeFilePath = file.fullPath.replace(/\\/g, '\\\\').replace(/"/g, '&quot;');
 
             html += `
-                <tr ondblclick="openFile('${safeFilePath}')">
+                <tr ondblclick="openPath('${safeFilePath}')">
                     <td><span class="file-icon"><i class="material-symbols-outlined ${iconColor}">table_chart</i></span></td>
                     <td>${file.name}</td>
                     <td class="${erroClass}">${erroText}</td>
                     <td class="table-btn-column text-nowrap">
-                        <button class="btn btn-sm text-primary file-row-btn" onclick="event.stopPropagation(); openFile('${safeFilePath}')"
+                        <button class="btn btn-sm text-primary file-row-btn" onclick="event.stopPropagation(); openPath('${safeFilePath}')"
                             data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">
                             <i class="material-symbols-outlined">open_in_new</i>
                         </button>
@@ -511,13 +511,13 @@ async function carregarImportar() {
             html += `
                 <tr class="importar-row" data-pregao="${file.pregao}"
                     onclick="selecionarImportar('${file.pregao}')"
-                    ondblclick="openFile('${safeFilePath}')">
+                    ondblclick="openPath('${safeFilePath}')">
                     <td><span class="file-icon"><i class="material-symbols-outlined ${iconColor}">table_chart</i></span></td>
                     <td>${file.name}</td>
                     <td class="${erroClass}">${erroText}</td>
                     <td class="table-btn-column text-nowrap">
                         ${file.hasConferencia ? `
-                        <button class="btn btn-sm text-primary file-row-btn" onclick="event.stopPropagation(); openFile('${safeConfPath}')"
+                        <button class="btn btn-sm text-primary file-row-btn" onclick="event.stopPropagation(); openPath('${safeConfPath}')"
                             data-bs-toggle="tooltip" data-bs-title="Abrir arquivo de conferência">
                             <i class="material-symbols-outlined">open_in_new</i>
                         </button>` : ''}

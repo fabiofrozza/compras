@@ -78,53 +78,30 @@ function setupFolderPathButtons(container) {
     if (btnOpen) {
         btnOpen.addEventListener('click', (e) => {
             e.preventDefault();
-            openFolder(btnOpen.dataset.folderPath);
+            openPath(btnOpen.dataset.folderPath);
         });
     }
 }
 
-async function openFolder(folderPath, label = '') {
-    const message = `Abrindo pasta${label ? ' ' + label : ''}. Verifique na barra de tarefas...`;
+async function openPath(path, label = '') {
     try {
-        const response = await fetch('/api/open-folder', {
+        const response = await fetch('/api/files/open', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ folderPath: folderPath })
+            body: JSON.stringify({ path })
         });
 
         const data = await response.json();
+        const type = data.type === 'arquivo' ? 'arquivo' : 'pasta';
 
         if (!response.ok) {
-            console.error('Erro ao abrir pasta:', data.error);
-            showToast(`Erro ao abrir pasta:\n\n${data.error}\n\nCaminho: ${folderPath}`, 'error', 10000);
+            showToast(`Erro ao abrir ${type}:\n\n${data.error}\n\nCaminho: ${path}`, 'error', 10000);
         } else {
-            showToast(message, 'info', 3000);
+            const labelStr = label ? ' ' + label : '';
+            showToast(`Abrindo ${type}${labelStr}. Verifique na barra de tarefas...`, 'info', 3000);
         }
     } catch (error) {
-        showToast(`Erro ao abrir pasta:\n\n${error.message}\n\nCaminho: ${folderPath}\n\nVerifique o console para mais detalhes.`, 'error', 10000);
-    }
-}
-
-async function openFile(filePath, label = '') {
-    const message = `Abrindo arquivo${label ? ' ' + label : ''}. Verifique na barra de tarefas...`;
-    try {
-        const response = await fetch('/api/open-file', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filePath: filePath })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            console.error('Erro ao abrir arquivo:', data.error);
-            showToast(`Erro ao abrir arquivo:\n\n${data.error}\n\nCaminho: ${filePath}`, 'error', 10000);
-        } else {
-            showToast(message, 'info', 3000);
-        }
-    } catch (error) {
-        console.error('Erro ao abrir arquivo:', error);
-        showToast(`Erro ao abrir arquivo:\n\n${error.message}\n\nCaminho: ${filePath}\n\nVerifique o console para mais detalhes.`, 'error', 10000);
+        showToast(`Erro ao abrir:\n\n${error.message}\n\nCaminho: ${path}\n\nVerifique o console para mais detalhes.`, 'error', 10000);
     }
 }
 
@@ -322,13 +299,13 @@ function buildFilesTableHTML(files, containerId, scriptName, innerFolder, canDel
         const isSelected = selectedFiles[containerId] === file.name ? 'selected' : '';
 
         if (selectable) {
-            html += `<tr class="selectable ${isSelected}" id="${fileId}" data-filepath="${fileFullPath}" onclick='selectFile("${containerId}", "${file.name}", "${fileId}")' ondblclick='openFile(this.dataset.filepath)'>`;
+            html += `<tr class="selectable ${isSelected}" id="${fileId}" data-filepath="${fileFullPath}" onclick='selectFile("${containerId}", "${file.name}", "${fileId}")' ondblclick='openPath(this.dataset.filepath)'>`;
         } else {
-            html += `<tr data-filepath="${fileFullPath}" ondblclick='openFile(this.dataset.filepath)'>`;
+            html += `<tr data-filepath="${fileFullPath}" ondblclick='openPath(this.dataset.filepath)'>`;
         }
 
         let rowButtons = `
-            <button class="btn btn-sm text-primary file-row-btn" onclick="event.stopPropagation(); openFile(this.closest('tr').dataset.filepath)"
+            <button class="btn btn-sm text-primary file-row-btn" onclick="event.stopPropagation(); openPath(this.closest('tr').dataset.filepath)"
                 data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">
                 <i class="material-symbols-outlined">open_in_new</i>
             </button>`;
@@ -361,7 +338,7 @@ function buildFilesGridHTML(files, containerId, scriptName, innerFolder, canDele
         const selectableClass = selectable ? ' item-selectable' : '';
         const onclickAttr = selectable
             ? `onclick='selectFile("${containerId}", "${file.name}", "${fileId}")'`
-            : `onclick='openFile(this.dataset.filepath)'`;
+            : `onclick='openPath(this.dataset.filepath)'`;
 
         const deleteBtn = (canDelete && !file.isDirectory) ? `
             <button class="item-card-delete btn btn-sm text-danger file-row-btn"
@@ -375,7 +352,7 @@ function buildFilesGridHTML(files, containerId, scriptName, innerFolder, canDele
                 <div class="item-card-icon">${icon}</div>
                 <div class="item-card-name">${file.name}</div>
                 <button class="item-card-open btn btn-sm text-primary file-row-btn"
-                    onclick="event.stopPropagation(); openFile(this.closest('.item-card').dataset.filepath)"
+                    onclick="event.stopPropagation(); openPath(this.closest('.item-card').dataset.filepath)"
                     data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">
                     <i class="material-symbols-outlined">open_in_new</i>
                 </button>
@@ -461,7 +438,7 @@ async function loadFiles(containerId, scriptName, innerFolder, selectable) {
         const nameContains = filesList.dataset.nameContains;
         const sort = filesList.dataset.sort;
 
-        let url = `/api/list-files/${scriptName}/${innerFolder}`;
+        let url = `/api/files/${scriptName}/${innerFolder}`;
         const params = new URLSearchParams();
         if (extensions) params.append('extensions', extensions);
         if (nameContains) params.append('nameContains', nameContains);

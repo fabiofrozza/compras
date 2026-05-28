@@ -25,75 +25,41 @@ const { listCertidoes, analyzeCertidoes, renameCertidoes, analyzeEmpenhos, criar
 const { validateLink } = require('../services/spreadsheet');
 
 function registerFileRoutes(app, logger) {
-  app.post('/api/open-folder', async (req, res) => {
+  app.post('/api/files/open', async (req, res) => {
     try {
-      const { folderPath } = req.body;
+      const { path } = req.body;
 
-      if (!folderPath) {
-        logger.warn('Solicitação para abrir pasta sem caminho', 'API');
-        return res.status(400).json({ error: 'Caminho da pasta não fornecido' });
+      if (!path) {
+        logger.warn('Solicitação para abrir sem caminho', 'API');
+        return res.status(400).json({ error: 'Caminho não fornecido' });
       }
 
+      let stats;
       try {
-        await fs.access(folderPath);
+        stats = await fs.stat(path);
       } catch {
-        logger.warn(`Pasta não encontrada: ${folderPath}`, 'API');
-        return res.status(404).json({ error: `Pasta não encontrada: ${folderPath}` });
+        logger.warn(`Caminho não encontrado: ${path}`, 'API');
+        return res.status(404).json({ error: `Caminho não encontrado: ${path}` });
       }
 
-      if (!isPathSafe(folderPath, SCRIPTS_PATH)) {
+      if (!isPathSafe(path, SCRIPTS_PATH)) {
         return res.status(403).json({ error: 'Acesso negado: fora do diretório permitido' });
       }
 
+      const isFile = stats.isFile();
+      const type = isFile ? 'arquivo' : 'pasta';
+
       try {
-        openInInterface(folderPath);
-        logger.debug(`Pasta aberta: ${folderPath}`, 'API');
+        openInInterface(path, isFile);
+        logger.debug(`${type} aberto: ${path}`, 'API');
       } catch (spawnError) {
-        logger.error(`Erro ao abrir pasta: ${spawnError.message}`, 'API', spawnError);
-        return res.status(500).json({ error: `Erro ao abrir pasta: ${spawnError.message}` });
+        logger.error(`Erro ao abrir ${type}: ${spawnError.message}`, 'API', spawnError);
+        return res.status(500).json({ error: `Erro ao abrir ${type}: ${spawnError.message}` });
       }
 
-      res.json({ success: true, message: 'Pasta aberta' });
+      res.json({ success: true, type });
     } catch (error) {
-      logger.error(`Erro geral ao abrir pasta: ${error.message}`, 'API', error);
-      res.status(500).json({ error: `Erro: ${error.message}` });
-    }
-  });
-
-  app.post('/api/open-file', async (req, res) => {
-    try {
-      const { filePath } = req.body;
-
-      if (!filePath) {
-        logger.warn('Solicitação para abrir arquivo sem caminho', 'API');
-        return res.status(400).json({ error: 'Caminho do arquivo não fornecido' });
-      }
-
-      try {
-        const stats = await fs.stat(filePath);
-        if (!stats.isFile()) {
-          return res.status(400).json({ error: `O caminho fornecido não é um arquivo: ${filePath}` });
-        }
-      } catch {
-        logger.warn(`Arquivo não encontrado: ${filePath}`, 'API');
-        return res.status(404).json({ error: `Arquivo não encontrado: ${filePath}` });
-      }
-
-      if (!isPathSafe(filePath, SCRIPTS_PATH)) {
-        return res.status(403).json({ error: 'Acesso negado: fora do diretório permitido' });
-      }
-
-      try {
-        openInInterface(filePath, true);
-        logger.debug(`Arquivo aberto: ${filePath}`, 'API');
-      } catch (spawnError) {
-        logger.error(`Erro ao abrir arquivo: ${spawnError.message}`, 'API', spawnError);
-        return res.status(500).json({ error: `Erro ao abrir arquivo: ${spawnError.message}` });
-      }
-
-      res.json({ success: true, message: 'Arquivo aberto' });
-    } catch (error) {
-      logger.error(`Erro geral ao abrir arquivo: ${error.message}`, 'API', error);
+      logger.error(`Erro geral ao abrir: ${error.message}`, 'API', error);
       res.status(500).json({ error: `Erro: ${error.message}` });
     }
   });
@@ -131,7 +97,7 @@ function registerFileRoutes(app, logger) {
     }
   });
 
-  app.get('/api/list-files/:scriptName/:innerFolder', async (req, res) => {
+  app.get('/api/files/:scriptName/:innerFolder', async (req, res) => {
     try {
       const { scriptName, innerFolder } = req.params;
       const { extensions, nameContains, sort } = req.query;

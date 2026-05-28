@@ -443,7 +443,7 @@ function renderCertidoesDoFornecedor(group) {
         const safeFilename = r.filename.replace(/'/g, "\\'");
 
         html += `
-            <tr ondblclick="openFile('${safeFilePath}')">
+            <tr ondblclick="openPath('${safeFilePath}')">
                 <td><i class="material-symbols-outlined ${cssClass}" data-bs-toggle="tooltip"
                     data-bs-title="${validityTooltip(r)}">${icon}</i></td>
                 <td class="text-break">${r.filename}${warnings}</td>
@@ -451,7 +451,7 @@ function renderCertidoesDoFornecedor(group) {
                 <td class="${cssClass}">${getSituacaoLabel(r)}</td>
                 <td class="table-btn-column text-nowrap">
                     <button class="btn btn-sm text-primary file-row-btn"
-                        onclick="openFile('${safeFilePath}')"
+                        onclick="openPath('${safeFilePath}')"
                         data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">
                         <i class="material-symbols-outlined">open_in_new</i>
                     </button>
@@ -529,14 +529,14 @@ function renderSnesDoFornecedor(cnpj) {
         const afLabel = r.af ? `${r.af.number} / ${r.af.year}` : '—';
 
         html += `
-            <tr ondblclick="openFile('${safeFilePath}')">
+            <tr ondblclick="openPath('${safeFilePath}')">
                 <td><i class="material-symbols-outlined text-muted">receipt_long</i></td>
                 <td class="text-break">${r.filename}</td>
                 <td class="text-nowrap">${sneNum}</td>
                 <td class="text-nowrap">${afLabel}</td>
                 <td class="table-btn-column">
                     <button class="btn btn-sm text-primary file-row-btn"
-                        onclick="openFile('${safeFilePath}')"
+                        onclick="openPath('${safeFilePath}')"
                         data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">
                         <i class="material-symbols-outlined">open_in_new</i>
                     </button>
@@ -554,7 +554,7 @@ function renderSnesDoFornecedor(cnpj) {
 function openFornecedorFiles(key) {
     const group = sneGrouped.get(key);
     if (!group) return;
-    group.certidoes.forEach(c => openFile(c.fullPath));
+    group.certidoes.forEach(c => openPath(c.fullPath));
 }
 
 // ====== EXCLUSÃO ======
@@ -1168,7 +1168,7 @@ function renderEmpenhos() {
 
         const safeFilenameAttr = r.filename.replace(/"/g, '&quot;');
         html += `
-            <tr ondblclick="openFile('${safeFilePath}')">
+            <tr ondblclick="openPath('${safeFilePath}')">
                 <td class="sne-select-col text-center" ondblclick="event.stopPropagation()">
                     <input type="checkbox" class="form-check-input sne-row-check" data-filename="${safeFilenameAttr}">
                 </td>
@@ -1183,7 +1183,7 @@ function renderEmpenhos() {
                 <td class="text-center">${pastaSneCell}</td>
                 <td class="table-btn-column text-nowrap">
                     <button class="btn btn-sm text-primary file-row-btn"
-                        onclick="openFile('${safeFilePath}')"
+                        onclick="openPath('${safeFilePath}')"
                         data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">
                         <i class="material-symbols-outlined">open_in_new</i>
                     </button>
@@ -1429,11 +1429,11 @@ function renderAFs() {
         const rowspanAttr = rowspan > 1 ? ` rowspan="${rowspan}"` : '';
         const firstRowClass = `sne-af-group${afIndex > 0 ? ' sne-af-separator' : ''}`;
 
-        const afIconCell = `<td class="sne-af-cell"${rowspanAttr} ondblclick="openFolder('${safeAfPath}', '${safeAfName}')"><i class="material-symbols-outlined text-primary">folder</i></td>`;
-        const afNameCell = `<td class="sne-af-cell fw-semibold"${rowspanAttr} ondblclick="openFolder('${safeAfPath}', '${safeAfName}')">${af.name}</td>`;
+        const afIconCell = `<td class="sne-af-cell"${rowspanAttr} ondblclick="openPath('${safeAfPath}', '${safeAfName}')"><i class="material-symbols-outlined text-primary">folder</i></td>`;
+        const afNameCell = `<td class="sne-af-cell fw-semibold"${rowspanAttr} ondblclick="openPath('${safeAfPath}', '${safeAfName}')">${af.name}</td>`;
         const afActionsCell = `<td class="sne-af-cell table-btn-column text-nowrap"${rowspanAttr}>
                         <button class="btn btn-sm text-primary file-row-btn"
-                            onclick="openFolder('${safeAfPath}', '${safeAfName}')"
+                            onclick="openPath('${safeAfPath}', '${safeAfName}')"
                             data-bs-toggle="tooltip" data-bs-title="Abrir pasta da AF">
                             <i class="material-symbols-outlined">folder_open</i>
                         </button>
@@ -1461,11 +1461,11 @@ function renderAFs() {
                 const filesHtml = sne.files.length > 0
                     ? sne.files.map(f => {
                         const safeFilePath = f.fullPath.replace(/'/g, "\\'");
-                        return `<div class="sne-file-item" ondblclick="openFile('${safeFilePath}')">
+                        return `<div class="sne-file-item" ondblclick="openPath('${safeFilePath}')">
                                 <i class="material-symbols-outlined text-muted">description</i>
                                 <span>${f.name}</span>
                                 <button class="btn btn-sm text-primary file-row-btn"
-                                    onclick="openFile('${safeFilePath}')"
+                                    onclick="openPath('${safeFilePath}')"
                                     data-bs-toggle="tooltip" data-bs-title="Abrir arquivo">
                                     <i class="material-symbols-outlined">open_in_new</i>
                                 </button>
@@ -1480,11 +1480,11 @@ function renderAFs() {
                     html += `<tr>`;
                 }
                 html += `
-                    <td ondblclick="openFolder('${safeSnePath}', '${safeSneNum}')"><i class="material-symbols-outlined text-muted">receipt_long</i></td>
-                    <td class="text-nowrap" ondblclick="openFolder('${safeSnePath}', '${safeSneNum}')">${sne.name}</td>
+                    <td ondblclick="openPath('${safeSnePath}', '${safeSneNum}')"><i class="material-symbols-outlined text-muted">receipt_long</i></td>
+                    <td class="text-nowrap" ondblclick="openPath('${safeSnePath}', '${safeSneNum}')">${sne.name}</td>
                     <td class="table-btn-column text-nowrap">
                         <button class="btn btn-sm text-primary file-row-btn"
-                            onclick="openFolder('${safeSnePath}', '${safeSneNum}')"
+                            onclick="openPath('${safeSnePath}', '${safeSneNum}')"
                             data-bs-toggle="tooltip" data-bs-title="Abrir pasta da SNE">
                             <i class="material-symbols-outlined">folder_open</i>
                         </button>
