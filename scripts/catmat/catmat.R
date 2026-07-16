@@ -130,12 +130,10 @@ catmat_obter_margens <- function() {
     }
   )
 
-
   margens <- planilha_margens %>%
     filter(!is.na(NCM)) %>%
     mutate(
-      NCM = gsub(".", "", NCM, fixed = TRUE),
-      NCM = gsub(",", "", NCM, fixed = TRUE),
+      NCM = gsub("\\D", "", NCM),
       NCMvalido = str_sub(NCM, 1, 2) == str_sub(Descrição, 1, 2)
     )
 
@@ -165,9 +163,41 @@ catmat_aplicar_margens <- function(resultados) {
   margens <- catmat_obter_margens()
 
   colunas_adicionais <- names(margens)[-1]
+  margens <- margens %>%
+    mutate(
+      NCM = as.character(NCM),
+      NCM_len = nchar(NCM)
+    )
+
+  obter_margem_para_ncm <- function(ncm) {
+    if (is.null(ncm) || is.na(ncm)) {
+      return(setNames(as.list(rep(NA, length(colunas_adicionais))), colunas_adicionais))
+    }
+
+    ncm_limpo <- gsub("\\D", "", as.character(ncm))
+    if (ncm_limpo == "") {
+      return(setNames(as.list(rep(NA, length(colunas_adicionais))), colunas_adicionais))
+    }
+
+    selecao <- margens %>%
+      filter(NCM == ncm_limpo | startsWith(ncm_limpo, NCM))
+
+    if (nrow(selecao) == 0L) {
+      return(setNames(as.list(rep(NA, length(colunas_adicionais))), colunas_adicionais))
+    }
+
+    selecao <- selecao %>%
+      arrange(desc(NCM_len))
+
+    as.list(selecao[1, colunas_adicionais, drop = FALSE])
+  }
+
+  margens_aplicadas <- lapply(resultados$NCM, obter_margem_para_ncm)
+  margens_aplicadas <- bind_rows(margens_aplicadas)
 
   resultados_final <- resultados %>%
-    left_join(margens, by = "NCM") %>%
+    mutate(NCM = as.character(NCM)) %>%
+    bind_cols(margens_aplicadas) %>%
     relocate(all_of(colunas_adicionais), .after = NCM)
 
   resultados_final
