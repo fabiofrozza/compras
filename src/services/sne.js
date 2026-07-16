@@ -616,7 +616,7 @@ async function analyzeEmpenhos(onProgress) {
       const sneNumber = extractSneNumber(text);
       const af = extractAfInfo(text);
       const { company, cnpj } = extractCredorFromText(rawText);
-      const tombamento = /tombamento/i.test(text);
+      const tombamento = /449052/i.test(text);
 
       results.push({ filename, sneNumber, af, company, cnpj, tombamento, error: null, fullPath: path.join(SNE_EMPENHOS, filename).replace(/\\/g, '/') });
     } catch (e) {
@@ -734,7 +734,7 @@ async function analyzeSneFolder(snePath, pdfParse) {
     if (sneNumber && !empenho) {
       const af = extractAfInfo(text);
       const { company, cnpj } = extractCredorFromText(rawText);
-      const tombamento = /tombamento/i.test(text);
+      const tombamento = /449052/i.test(text);
       empenho = { filename, sneNumber, af, company, cnpj, tombamento, error: null };
     } else {
       certidoes.push(analyzeCertidaoFromRaw(filename, rawText));
