@@ -43,9 +43,6 @@ body {
     /* Toasts */
     --compras-toast-alpha: 25%;
     --compras-toast-border-left: 6px;
-
-    /* Themes */
-    color-scheme: light dark;
 }
 
 body {
@@ -55,14 +52,6 @@ body {
     --compras-theme: light-dark(var(--compras-blue-light), var(--compras-blue-dark));
     --compras-text-primary: light-dark(var(--compras-blue-dark), floralwhite);
     --compras-contrast: light-dark(floralwhite, var(--compras-blue-dark));
-}
-
-[data-theme="light"] {
-    color-scheme: light;
-}
-
-[data-theme="dark"] {
-    color-scheme: dark;
 }
 
 @property --compras-icon-fill {
