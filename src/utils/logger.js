@@ -16,6 +16,8 @@ class Logger {
         };
         this.fileStream = null;
         this.logDir = null;
+        this.buffer = [];
+        this.maxBuffer = parseInt(process.env.COMPRAS_LOG_BUFFER_SIZE, 10) || 1000;
 
         if (options.logDir) {
             this._initFileLogging(options.logDir);
@@ -41,6 +43,17 @@ class Logger {
             const logPath = path.join(logDir, logName);
             this.fileStream = fs.createWriteStream(logPath, { flags: 'a', encoding: 'utf8' });
 
+            // flush any buffered messages collected before file logging was enabled
+            try {
+                if (this.buffer && this.buffer.length) {
+                    for (const item of this.buffer) {
+                        this.fileStream.write(item.formatted + '\n');
+                        if (item.extra) this.fileStream.write(item.extra + '\n');
+                    }
+                    this.buffer = [];
+                }
+            } catch (e) { /* ignore flush errors */ }
+
             this._pruneOldLogs(logDir);
         } catch (err) {
             console.error('Failed to initialize file logging:', err.message);
@@ -61,7 +74,13 @@ class Logger {
     }
 
     _writeToFile(formatted, extra) {
-        if (!this.fileStream) return;
+        if (!this.fileStream) {
+            try {
+                this.buffer.push({ formatted, extra });
+                if (this.buffer.length > this.maxBuffer) this.buffer.shift();
+            } catch (e) { /* ignore buffer failures */ }
+            return;
+        }
         this.fileStream.write(formatted + '\n');
         if (extra) this.fileStream.write(extra + '\n');
     }
@@ -72,21 +91,21 @@ class Logger {
 
     formatMessage(level, message, context = '') {
         const timestamp = this.showTimestamp
-            ? new Date().toLocaleTimeString('pt-BR')
+            ? new Date().toLocaleString('pt-BR', {year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hour12: false, minute:'2-digit', second:'2-digit'}) 
             : '';
 
         const levelSymbols = {
-            debug: '[debug]',
-            info:  '[info ]',
-            warn:  '[warn ]',
-            error: '[error]'
+            debug: 'debug',
+            info:  'info ',
+            warn:  'warn ',
+            error: 'error'
         };
 
         const prefix = levelSymbols[level] || '○';
         const ctxStr = context ? ` [${context}]` : '';
-        const timeStr = timestamp ? ` ${timestamp}` : '';
+        const timeStr = timestamp ? timestamp : '';
 
-        return `${timeStr} ${prefix}${ctxStr} ${message}`;
+        return `[${timeStr}] [${prefix}]${ctxStr} ${message}`;
     }
 
     debug(message, context = '') {
