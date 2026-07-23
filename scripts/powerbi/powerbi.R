@@ -458,7 +458,7 @@ power_bi_renomear <- function(script_a_executar) {
 
   log_secao("OBTENDO LISTA DE MAPAS DE LICITAÇÕES")
 
-  mapas <- obter_arquivos("Mapa de Licitações")
+  mapas <- obter_arquivos(Sys.getenv("COMPRAS_OBSERVATORIO_PASTA_MAPAS"))
 
   log_secao("OBTENDO INFORMAÇÃO DOS MAPAS")
 
@@ -473,7 +473,7 @@ power_bi_renomear <- function(script_a_executar) {
   if (script_a_executar != "licitacao") {
     log_secao("OBTENDO LISTA DE RELATÓRIOS DE EXECUÇÃO")
 
-    relatorios <- obter_arquivos("Execução AF Empenho")
+    relatorios <- obter_arquivos(Sys.getenv("COMPRAS_OBSERVATORIO_PASTA_EXECUCAO"))
 
     log_secao("OBTENDO INFORMAÇÕES DOS RELATÓRIOS")
 
