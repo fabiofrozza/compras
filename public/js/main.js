@@ -205,4 +205,19 @@ window.addEventListener('load', async () => {
     if (!navigator.onLine) handleInternetOffline();
     await loadConfig();
     await initPreferencesPage();
+
+    if (!navigator.userAgent.toLowerCase().includes('firefox') && !navigator.userAgent.toLowerCase().includes('chrome')) {
+        const confirmed = await showConfirmationModal({
+            title: 'Navegadores recomendados',
+            message: 
+                `Este navegador está sendo utilizado pois ele está definido como padrão no seu sistema.
+                <br>
+                É recomendado utilizar o <strong>Firefox</strong> ou <strong>Chrome</strong> para melhor compatibilidade.`,
+            detail: '<i class="material-symbols-outlined me-1">info</i> Para alterar o navegador padrão, use a opção "Aplicativos Padrão" nas configurações do Windows.',
+            confirmText: 'OK',
+            confirmColor: 'btn-primary',
+            icon: 'info',
+            cancelBtn: false
+        });
+    }
 });
