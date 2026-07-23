@@ -9,9 +9,16 @@ const { registerConsoleRoutes, handleConsoleMessage, checkRAvailable } = require
 const { registerFileRoutes } = require('./routes/files');
 const { isPathSafe, openInInterface } = require('./utils/files');
 
-let logConsentEnabled = true; // null/true = salvar logs (permissivo por padrão); false = opt-out
+// logConsentEnabled: null = undecided, true = allow file logging, false = opt-out
+const defaultConsent = process.env.COMPRAS_LOG_DEFAULT_CONSENT === 'true';
+let logConsentEnabled = defaultConsent ? true : null;
 
 const logger = new Logger({ minLevel: process.env.COMPRAS_LOGGER_MIN_LEVEL || 'debug' });
+
+// Only enable file logging at startup if environment explicitly allows it
+if (defaultConsent) {
+  logger.enableFileLogging(path.join(__dirname, '..', process.env.COMPRAS_LOG_DIR || 'logs'));
+}
 
 const app = express();
 const PORT = process.env.COMPRAS_PORT || 3000;
