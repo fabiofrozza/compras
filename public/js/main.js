@@ -206,7 +206,7 @@ window.addEventListener('load', async () => {
     await loadConfig();
     await initPreferencesPage();
 
-    if (!navigator.userAgent.toLowerCase().includes('firefox') && !navigator.userAgent.toLowerCase().includes('chrome')) {
+    if (navigator.userAgent.toLowerCase().includes('edg')) {
         const confirmed = await showConfirmationModal({
             title: 'Navegadores recomendados',
             message: 
