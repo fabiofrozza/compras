@@ -152,17 +152,25 @@ async function setHomeBackground(bgSource) {
         return;
     }
 
-    const [localImages, bingImages] = await Promise.all([
-        bgSource !== 'bing'
+    let chicagoCollection = "Essentials";
+    let chicagoStyles = ["Impressionism", "Cubism", "Surrealism", "Futurism", "Dadaism"];
+    let chicagoQuantity = 5;
+
+    const [localImages, bingImages, chicagoImages] = await Promise.all([
+        bgSource === 'local' || bgSource === 'random'
             ? fetch('/api/home-backgrounds').then(r => r.json()).then(d => d.images || []).catch(() => [])
             : Promise.resolve([]),
-        bgSource !== 'local'
+        bgSource === 'bing' || bgSource === 'random'
             ? fetch('https://peapix.com/bing/feed?country=br').then(r => r.json()).then(d => Array.isArray(d) ? d : []).catch(() => [])
-            : Promise.resolve([])
+            : Promise.resolve([]),
+        bgSource === 'chicago' || bgSource === 'random'
+            ? apiChicagoArtInstitute(chicagoCollection, chicagoStyles, chicagoQuantity).then(d => d || []).catch(() => [])
+            : Promise.resolve([]),
     ]);
 
     const hasLocal = localImages.length > 0;
     const hasBing = bingImages.length > 0;
+    const hasChicago = chicagoImages.length > 0;
 
     let imageUrl, creditHref, creditTooltip;
 
@@ -176,15 +184,23 @@ async function setHomeBackground(bgSource) {
         return { imageUrl: item.fullUrl, creditHref: item.pageUrl, creditTooltip: `${item.title} - ${item.copyright}` };
     };
 
-    if (bgSource === 'local' || (bgSource === 'random' && !hasBing)) {
+    const pickChicago = () => {
+        const item = chicagoImages[Math.floor(Math.random() * chicagoImages.length)];
+        return { imageUrl: item.imageUrl, creditHref: item.creditHref, creditTooltip: item.creditTooltip };
+    };
+
+    if (bgSource === 'local' || (bgSource === 'random' && !hasBing && !hasChicago)) {
         if (!hasLocal) return;
         ({ imageUrl, creditHref, creditTooltip } = pickLocal());
-    } else if (bgSource === 'bing' || (bgSource === 'random' && !hasLocal)) {
+    } else if (bgSource === 'bing' || (bgSource === 'random' && !hasLocal && !hasChicago)) {
         if (!hasBing) return;
         ({ imageUrl, creditHref, creditTooltip } = pickBing());
+    } else if (bgSource === 'chicago' || (bgSource === 'random' && !hasLocal && !hasBing)) {
+        if (!hasChicago) return;
+        ({ imageUrl, creditHref, creditTooltip } = pickChicago());
     } else {
-        // random com ambas as fontes disponíveis
-        ({ imageUrl, creditHref, creditTooltip } = Math.random() < 0.5 ? pickBing() : pickLocal());
+        // random com as fontes disponíveis
+        ({ imageUrl, creditHref, creditTooltip } = Math.random() < 0.33 ? pickBing() : Math.random() < 0.66 ? pickChicago() : pickLocal());
     }
 
     // Pré-carregar a imagem antes de aplicar
@@ -217,6 +233,52 @@ async function setHomeBackground(bgSource) {
         }
     };
     img.src = imageUrl;
+}
+
+async function apiChicagoArtInstitute(categoria, estilos, quantidade = 5) {
+  // 1. Busca todas as obras que batem no filtro (só os campos essenciais, sem imagem pesada)
+  const response = await fetch("https://api.artic.edu/api/v1/artworks/search", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: {
+        bool: {
+          must: [
+            { match: { category_titles: categoria } },
+            {
+              bool: {
+                should: estilos.map(estilo => ({ match: { style_titles: estilo } })),
+                minimum_should_match: 1
+              }
+            }
+          ]
+        }
+      },
+      limit: 100, // pega um lote maior pra sortear em cima
+      fields: ["id", "title", "artist_title", "image_id"]
+    })
+  });
+
+  const data = await response.json();
+  const todasObras = data.data;
+
+  // 2. Embaralha (algoritmo Fisher-Yates)
+  const embaralhadas = [...todasObras];
+  for (let i = embaralhadas.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [embaralhadas[i], embaralhadas[j]] = [embaralhadas[j], embaralhadas[i]];
+  }
+
+  // 3. Pega só a quantidade pedida
+  const resultado = embaralhadas.slice(0, quantidade);
+
+  const imagens = resultado.map(({ id, title, artist_title, image_id }) => ({
+    imageUrl: `${data.config.iiif_url}/${image_id}/full/843,/0/default.jpg`,
+    creditHref: `https://www.artic.edu/artworks/${id}`,
+    creditTooltip: `${title} by ${artist_title} from Chicago Art Institute`
+  }));
+
+  return imagens;
 }
 
 // ====== FILTRO SVG ALEATÓRIO (Liquid Glass) ======
