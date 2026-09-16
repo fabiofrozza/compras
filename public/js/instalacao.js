@@ -11,7 +11,6 @@ async function carregarInfoProjeto() {
     const titleEl = document.getElementById('projeto-info-title');
     const dateEl = document.getElementById('projeto-info-date');
     const countEl = document.getElementById('projeto-info-count');
-    const link = document.getElementById('projeto-info-link');
     const REPO_URL = 'https://github.com/fabiofrozza/compras';
 
     try {
@@ -27,11 +26,10 @@ async function carregarInfoProjeto() {
 
         const release = await latestRes.json();
         titleEl.textContent = release.name || release.tag_name || 'Repositório Github';
+        titleEl.href = release.html_url || REPO_URL;
         dateEl.textContent = release.published_at
             ? new Date(release.published_at).toLocaleDateString('pt-BR')
             : '-';
-        link.href = release.html_url || REPO_URL;
-        link.classList.remove('d-none');
 
         // Conta o total de releases parseando o número da última página do header Link
         if (countRes.ok) {
@@ -43,8 +41,7 @@ async function carregarInfoProjeto() {
         loading.classList.add('d-none');
         content.classList.remove('d-none');
         titleEl.textContent = 'Repositório Github';
-        link.href = REPO_URL;
-        link.classList.remove('d-none');
+        titleEl.href = REPO_URL;
     }
 }
 

@@ -424,7 +424,8 @@ function showConfirmationModal({
     detail = null,
     confirmText = 'Confirmar',
     confirmColor = 'btn-danger',
-    icon = 'warning'
+    icon = 'warning',
+    cancelBtn = true,
 } = {}) {
     return new Promise((resolve) => {
         const modalId = 'genericConfirmModal';
@@ -449,7 +450,7 @@ function showConfirmationModal({
                             ${confirmColor === 'btn-danger' ? '<p class="text-danger mb-0 fw-bold">Esta ação não pode ser desfeita!</p>' : ''}
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            ${cancelBtn ? `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>` : ''}
                             <button type="button" class="btn ${confirmColor}" id="${modalId}-btn">${confirmText}</button>
                         </div>
                     </div>

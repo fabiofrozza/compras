@@ -36,13 +36,21 @@ A local web application that runs scripts to assist my colleagues in activities 
 
 1. [Download the content of this repository](https://github.com/fabiofrozza/compras/archive/refs/heads/main.zip) and extract it to the desired folder.
 
-1. Rename the `.env-MODELO` file to `.env` and edit it in Notepad, following the instructions inside.
+1. Rename the `.env-MODELO` file to `.env` and edit it in Notepad (Windows) or equivalent (Linux), following the instructions inside.
 
 1. Replace the images at `public/img/company.png` and `public/img/department.png` with your company's.
 
+1. **Linux only:** download the Node.js executable (v20 LTS or higher) for Linux from [nodejs.org](https://nodejs.org/en/download) and save it as `bin/node`. Then grant execute permissions to the launcher and the binary:
+   ```bash
+   chmod +x start-linux.sh bin/node
+   ```
+
 ## Usage
 
-Run the `start.cmd` file. The server will start and the browser will automatically open at `http://localhost:3000`.
+- **Windows:** run the `start.cmd` file.
+- **Linux:** run `./start-linux.sh` in the terminal.
+
+The server will start and the browser will automatically open at `http://localhost:3000`.
 
 The interface has tabs for each feature. Simply fill in the required fields and follow the script execution in real time through the integrated console.
 

@@ -19,7 +19,7 @@ async function setLogConsent(value) {
 
 function _applyConsentUI(consent) {
     const toggle = document.getElementById('logConsent');
-    if (toggle) toggle.checked = consent !== false;
+    if (toggle) toggle.checked = consent === true;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -27,12 +27,15 @@ document.addEventListener('DOMContentLoaded', () => {
     _applyConsentUI(consent);
 
     // Sincroniza o estado com o servidor (que não persiste entre reinicializações).
-    // null = ainda sem decisão = permissivo = habilita arquivo de log.
-    fetch('/api/log-consent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ consent: consent !== false })
-    }).catch(() => { /* servidor pode estar iniciando */ });
+    // Somente sincroniza com o servidor se houver decisão explícita (true/false).
+    // null = ainda sem decisão = NÃO habilita logs automaticamente (opt-in).
+    if (consent === true || consent === false) {
+        fetch('/api/log-consent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ consent: consent })
+        }).catch(() => { /* servidor pode estar iniciando */ });
+    }
 
     // Se ainda não houve decisão, solicita via painel de notificações.
     // O usuário pode ignorar e será solicitado novamente na próxima sessão.
